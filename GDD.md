@@ -2,30 +2,45 @@
 
 ## 1. Core Concept
 
-A survival horror game set in a shifting corn maze. The player enters expecting a fun Halloween attraction but quickly realizes the maze is alive, reshaping itself, and filled with disturbing objects and doppelgänger encounters. Blends two inspirations: the **Creepy Maze** system (procedural shifting maze with pickups and jumpscares) and **Forgotten in the Woods** (branching narrative, sanity, inventory, and the Watcher).
+A survival horror game set in a shifting corn maze at **"Jeri's Happy Funtime Harvest Cornmaze Experience!"** The player enters expecting a fun Halloween attraction but quickly realizes the maze is alive, reshaping itself, and filled with disturbing objects, whispers, and doppelgänger encounters. 
 
-**New Feature:** The game pulls **system date/time** and integrates it into replayability: each run is logged as a prior “subject.” On a new run, the maze contains echoes of the previous attempt—notes, corpses, whispers, or artifacts left behind. The meta-backstory: subjects are being **harvested for experiments**, and every failed run is another lost soul feeding the maze.
+**Inspirations:**
+- **Creepy Maze System:** Procedural shifting maze with pickups and jumpscares
+- **Forgotten in the Woods:** Branching narrative, sanity mechanics, and the Watcher entity
+
+**Unique Feature - The Harvest System:** The game pulls **system date/time** and **death location** to integrate into replayability. Each run is logged as a prior "subject." On subsequent runs, the maze contains echoes of previous attempts—notes, corpses, whispers, or artifacts left behind. 
+
+**Meta-Backstory:** Subjects are being **harvested for experiments** orchestrated by **Dr. Amundsen** (appears as "A", "Amundsen", or "Dr. Amundsen" in documentation). Every failed run becomes another lost soul feeding the maze's memory.
 
 ## 2. Key Features
 
-* **Shifting Maze:** 20×20 grid; procedural generation with distortion zones. Maze can change passively over time or triggered by certain events.
-* **Fog of War & Light:** Limited vision; current cell and open neighbors are revealed. In 3D this becomes view-cone lighting and fog volumes.
-* **Weird Things (Pickups):** Objects scattered in the maze (doll, music box, mirror, symbols, pocket watch). Each triggers narrative messages and effects:
+### Core Mechanics
+* **🌪️ Shifting Maze:** 100×100 grid with procedural generation and distortion zones. Maze actively reshapes over time or when triggered by events
+* **🔦 Limited Vision:** First-person perspective with fog volumes and dynamic lighting that obscures distant areas
+* **🎭 Weird Things (Pickups):** Mysterious objects scattered throughout (doll, music box, mirror, symbols, pocket watch, notes)
+  - Trigger narrative messages and visual effects
+  - Cause screen/light flickers
+  - Create local maze distortions
+  - Temporarily lift fog of war
+  - Can activate Stalker pursuit
 
-  * Flicker screen/lights
-  * Local maze distortion
-  * Fog temporarily lifts
-  * Visual distortion
-  * Stalker entity begins pursuit
-* **Sanity System:** Drops with encounters, rises in safe zones. Lower sanity increases Watcher appearances and maze hostility.
-* **The Watcher:** Appears randomly, more frequently as sanity drops. Non-corporeal stalker that causes visual/audio effects.
-* **Exit + Jumpscare:** Exit door has a pre-trigger that fires a final jumpscare before the real ending.
-* **Replayability / Harvest System:** Each run is stamped with date/time. On next run, the game spawns evidence of your prior attempt:
+### Psychological Systems
+* **🧠 Sanity System:** Gradually drops during encounters and over time. Lower sanity increases:
+  - Watcher appearance frequency
+  - Maze hostility and shift rate
+  - Visual/audio distortions
+* **👁️ The Watcher:** Non-corporeal entity that appears more frequently as sanity decreases
+  - Causes visual/audio disturbances
+  - Slowly pursues the player
+  - Cannot be defeated, only avoided
 
-  * Corpse or scarecrow effigy labeled with your last run’s timestamp.
-  * A note written in your handwriting (auto-generated from prior pickup messages).
-  * Items dropped by the “previous you” may appear, distorted.
-  * Sanity whispers may reference choices from the last attempt.
+### Horror Elements
+* **🚪 False Exit:** The "escape" door triggers a final jumpscare - there is no true escape
+* **⚱️ Harvest System:** Each run is timestamped and logged. Subsequent runs contain echoes:
+  - Corpse/scarecrow effigy with previous run's timestamp
+  - Auto-generated notes in "your handwriting" from prior attempts
+  - Distorted items dropped by the "previous you"
+  - Sanity whispers referencing past choices and deaths
 
 ## 3. Gameplay Loop
 
@@ -41,13 +56,11 @@ A survival horror game set in a shifting corn maze. The player enters expecting 
 * **Backstory:** Project Harvest is a clandestine experiment, harvesting subjects trapped in shifting mazes. The Weird Things are fragments of past test runs, psychological conditioning props, or instruments of identity manipulation.
 * **Environmental Storytelling:** Notes, Weird Things, and run echoes hint at **experiments in duplication, consciousness, and identity fragmentation**.
 * **Branching Encounters (from Forgotten in the Woods):**
-
-  * Cemetery → Scarecrow Crossroads (grave + shovel analogue)
-  * Frozen Lake → Irrigation Pond (reflection doppelgänger)
-  * Cabin → Staff Trailer (encounter with your double)
-  * Church → Equipment Shed (Watcher/false priest analog)
+  * Scarecrow Crossroads
+  * Equipment Shed
+  * Open clearance
   * Caves/Bunker → Service Tunnel and Exit Gate
-* **Doppelgänger Theme:** Encounters with doubles escalate toward the bunker/exit, where the final decision is made.
+* **Stalker Theme:** Encounters with stalker escalate toward the exit, where the final decision is made.
 
 ## 5. Level & Systems Mapping
 
@@ -74,14 +87,27 @@ A survival horror game set in a shifting corn maze. The player enters expecting 
 
 ## 7. Visual & Audio Design
 
-* **Corn Maze Aesthetic:** Foggy night, flickering carnival lights, scarecrows.
-* **UI Layers:**
+### Aesthetic Direction
+**🌅 Time Progression:** Late afternoon rapidly descending into foggy evening/night
+**🎆 Atmosphere:** Flickering carnival lights, weathered scarecrows, corn stalks swaying unnaturally
+**🎪 Tone:** Deceptive cheerfulness corrupted into organic horror
 
-  * HUD counter (“Weird Findings”)
-  * Message overlay (short stingers)
-  * Jumpscare overlay (full screen SVG/texture + GAME OVER)
-* **Audio:** Ambient low drones, whispers on events, randomized jumpscare sting, distortions when sanity drops.
-* **Replayability Audio Beat:** Whispers may call the player by date/time of last run (“Subject logged: October 5, 2025. Outcome: consumed.”).
+### User Interface
+- **HUD Elements:** "Weird Findings" counter, sanity indicator, flashlight battery
+- **Message System:** Short narrative stingers with typewriter effect
+- **Jumpscare Overlay:** Full-screen effects with "SUBJECT TERMINATED" messaging
+- **Inventory Display:** Minimal, context-sensitive item showing
+
+### Audio Design
+**🎵 Ambient Layers:**
+- Low-frequency drones and corn rustling
+- Distant carnival music (distorted)
+- Whispers that increase with story progression
+
+**🔊 Dynamic Audio:**
+- Randomized jumpscare stings
+- Sanity-based audio distortions
+- Harvest system callbacks: "Subject logged: [date]. Outcome: [death type]"
 
 ## 8. Entities
 
@@ -91,22 +117,78 @@ A survival horror game set in a shifting corn maze. The player enters expecting 
 * **Weird Things:** 5 archetypes with effects.
 * **Run Echoes:** Ghosts, corpses, or effigies representing prior attempts.
 
-## 9. Puzzle Mapping
+## 9. Entity Design
 
-* Scarecrow Crossroads: Rope puzzle (Key A)
-* Irrigation Pond: Reflection scare + battery cache
-* Equipment Shed: Breaker puzzle (Notebook)
-* Staff Trailer: Doppelgänger whisper (Code fragment)
-* Shrine of Husks: Face-doll order puzzle (Key B)
-* Silo Alley: Breaker lure puzzle (Key C)
-* Exit Gate: Requires 3 keys + correct code
+### Primary Antagonists
 
-## 10. Ending Variations
+**🕴️ Dr. Amundsen (The Architect)**
+- **Purpose:** Unseen mastermind orchestrating Project Harvest
+- **Presence:** Notes, PA announcements, surveillance systems
+- **Symbolism:** Human cruelty disguised as scientific progress
 
-* Correct exit code: Escape, but hints of lingering doubles.
-* Wrong code: Maze shift + gas, respawn with memory fragments (loop mechanic).
-* Stalker catch: Game over (jumpscare overlay).
-* Run echoes: Regardless of outcome, your attempt is logged and becomes part of the maze for future players.
+**🌾 The Stalker (The Harvester)**
+- **Purpose:** Apex predator representing inevitable consumption
+- **Behavior:** Hunt-and-chase entity activated after collecting enough Weird Things
+- **Mechanics:** Cannot be defeated, only temporarily evaded
+
+**👁️ The Watcher** 
+- **Purpose:** Half-formed duplicate from failed experiments
+- **Behavior:** Flickers at vision's edge, triggers sanity loss
+- **Mechanics:** Appears more frequently as sanity decreases
+
+### Environmental Entities
+
+**🎭 Effigies (Failed Subjects)**
+- **Purpose:** Corpses of past subjects displayed as warnings
+- **Behavior:** Whisper and twitch at low sanity levels
+- **Mechanics:** Environmental storytelling that echoes prior player runs
+
+**🗣️ The Choir (Whisperers)**
+- **Purpose:** Psychic remnants of harvested subjects
+- **Behavior:** Audio-only entities that drain sanity over time
+- **Mechanics:** Provide misleading hints about exits and solutions
+
+**🤖 Overseer Eyes**
+- **Purpose:** Bio-organic surveillance tied to Dr. Amundsen's systems
+- **Behavior:** Scan and track player movement
+- **Mechanics:** Detection accelerates maze shifts and increases difficulty
+
+### Supporting Entities
+
+**🌽 Caretakers (Corn Hands)**
+- **Purpose:** Biomechanical "farmhands" that corral subjects
+- **Behavior:** Briefly slow and restrain the player
+- **Mechanics:** Create opportunities for Stalker to close distance
+
+**👻 Residual Subjects (Ghost-Runners)** 
+- **Purpose:** Shadows of past participants echoing through time
+- **Behavior:** Fleeting silhouettes that can be followed
+- **Mechanics:** May lead to lore/items but waste sanity and time
+
+**🚪 The False Exit**
+- **Purpose:** The maze weaponizing hope itself
+- **Behavior:** Appears as salvation but triggers harvest sequence
+- **Mechanics:** Final jumpscare before revealing no true escape exists
+
+## 10. Ending Variations (No True Escape)
+
+Every ending reinforces the "harvest" theme - player survival is temporary or hollow.
+
+### Death States
+- **💀 Consumed:** Stalker or Watcher overwhelms you → logged as "consumed"
+- **⚗️ Harvested:** Reach the escape gate → harvested at the moment of apparent freedom
+- **🌫️ Fragmented:** Sanity reaches zero → consciousness dissolves into maze whispers
+- **🎭 Exchanged:** Doppelgänger replaces you → "successful" escape but you become the trapped version
+
+### Meta-Progression
+**📊 Experiment Log:** Regardless of outcome, each run is archived with:
+- Timestamp and duration
+- Cause of termination
+- Weird Things collected
+- Sanity level at death
+- Death location coordinates
+
+**🔄 Legacy System:** Future runs reference your previous "cause of death" through whispers, notes, and environmental storytelling
 
 ## 11. Technical Plan
 
@@ -118,24 +200,54 @@ A survival horror game set in a shifting corn maze. The player enters expecting 
   * On run end, save JSON with timestamp + summary.
   * On new run, GameDirector queries log and spawns echo props.
 
-## 12. Balancing Knobs
+## 12. Balancing Parameters
 
-* Weird Things: 5–10 per run.
-* Maze shift interval: 30 → 15 seconds.
-* Watcher chance per minute: sanity 100/70/40/20 = 0.1/0.2/0.35/0.5.
-* Sanity loss: 5–40 depending on event.
-* Replay echoes: max 1–3 echoes per run; oldest run pruned.
+### Core Mechanics
+- **Weird Things:** 5–10 spawned per run
+- **Maze Shifts:** 30s initial interval → 15s when stalker activates
+- **Sanity Decay:** 1 point per 30 seconds baseline + event triggers
 
-## 13. Content Checklist (Minimum for Sept 30)
+### Probability Tables
+**Watcher Spawn Rates (per minute):**
+- 100-80 Sanity: 10% chance
+- 79-50 Sanity: 25% chance  
+- 49-20 Sanity: 40% chance
+- 19-0 Sanity: 60% chance
 
-* [ ] 10 maze chunks (3D)
-* [ ] 3–5 Weird Thing props + effects
-* [ ] Sanity + HUD
-* [ ] Inventory UI
-* [ ] Watcher prefab
-* [ ] Exit Gate + jumpscare overlay
-* [ ] At least 2 landmark puzzles (Scarecrow, Pond)
-* [ ] Replay system logging run timestamp and spawning at least one echo in next playthrough
+**Sanity Loss Events:**
+- Weird Thing pickup: 5-15 points
+- Watcher encounter: 10-25 points
+- Maze shift witness: 5 points
+- Stalker proximity: 20-40 points
+
+### Harvest System
+- **Echo Limit:** Maximum 3 echoes per run
+- **Log Retention:** Oldest runs pruned after 10 entries
+- **Echo Spawn Rate:** 80% chance per eligible prior death
+
+## 13. MVP Checklist (Target: September 30)
+
+### Essential Systems
+- [ ] **Maze Generation:** 10+ modular 3D chunks with procedural assembly
+- [ ] **Player Systems:** FPS controller with flashlight and grid-based logic
+- [ ] **Weird Things:** 3-5 interactive props with narrative effects
+- [ ] **Sanity System:** HUD display with visual feedback and decay mechanics
+- [ ] **Entity AI:** Watcher spawning and basic stalking behavior
+
+### Horror Elements
+- [ ] **Exit Sequence:** False escape door with jumpscare trigger
+- [ ] **Audio System:** Ambient sounds, whispers, and jumpscare stings
+- [ ] **Visual Effects:** Screen distortions, lighting changes, fog manipulation
+
+### Harvest Features
+- [ ] **Run Logging:** Timestamp and death data persistence
+- [ ] **Echo System:** Spawn at least one prior-run artifact per new game
+- [ ] **Meta Narrative:** Whispers referencing previous attempts
+
+### Polish Elements
+- [ ] **UI Polish:** Clean HUD, message overlays, inventory display
+- [ ] **Performance:** Stable 60fps with 100x100 maze grid
+- [ ] **Content:** 2+ landmark areas (Scarecrow Crossroads, Equipment Shed)
 
 ---
 
