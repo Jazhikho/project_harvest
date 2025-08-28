@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creepy Maze Debug</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        #debug-output {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: white;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        
+        .module-test {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Creepy Maze Debug</h1>
+    <div>
+        <button id="test-utils">Test utils.js</button>
+        <button id="test-player">Test player.js</button>
+        <button id="test-renderer">Test renderer.js</button>
+        <button id="test-mazeGenerator">Test mazeGenerator.js</button>
+        <button id="test-weirdThings">Test weirdThings.js</button>
+        <button id="test-gameLogic">Test gameLogic.js</button>
+        <button id="test-all">Test All</button>
+    </div>
+    
+    <div id="debug-output"></div>
+    
+    <script>
+        // Global error handler
+        window.onerror = function(message, source, lineno, colno, error) {
+            logError("Global error: " + message + " at " + source + ":" + lineno);
+            return true;
+        };
+        
+        // Log functions
+        function logMessage(msg, className) {
+            const output = document.getElementById('debug-output');
+            const entry = document.createElement('div');
+            entry.className = className || 'info';
+            entry.innerText = msg;
+            output.appendChild(entry);
+            console.log(msg);
+        }
+        
+        function logSuccess(msg) {
+            logMessage(msg, 'success');
+        }
+        
+        function logError(msg) {
+            logMessage(msg, 'error');
+        }
+        
+        function logInfo(msg) {
+            logMessage(msg, 'info');
+        }
+        
+        // Test function for a single module
+        async function testModule(modulePath, testName) {
+            const moduleDiv = document.createElement('div');
+            moduleDiv.className = 'module-test';
+            moduleDiv.innerHTML = `<h3>Testing ${testName}</h3>`;
+            document.getElementById('debug-output').appendChild(moduleDiv);
+            
+            try {
+                logInfo(`Loading module: ${modulePath}...`);
+                const startTime = performance.now();
+                const module = await import(modulePath);
+                const endTime = performance.now();
+                
+                logSuccess(`Successfully loaded ${testName} in ${(endTime - startTime).toFixed(2)}ms`);
+                
+                // Display exported items
+                const exports = Object.keys(module);
+                logInfo(`Exports: ${exports.join(', ') || 'None'}`);
+                
+                return true;
+            } catch (error) {
+                logError(`Failed to load ${testName}: ${error.message}`);
+                console.error(error);
+                
+                if (error.stack) {
+                    const stackDiv = document.createElement('details');
+                    stackDiv.innerHTML = `<summary>Stack trace</summary><pre>${error.stack}</pre>`;
+                    moduleDiv.appendChild(stackDiv);
+                }
+                
+                return false;
+            }
+        }
+        
+        // Setup button event listeners
+        document.getElementById('test-utils').addEventListener('click', () => testModule('./js/utils.js', 'utils.js'));
+        document.getElementById('test-player').addEventListener('click', () => testModule('./js/player.js', 'player.js'));
+        document.getElementById('test-renderer').addEventListener('click', () => testModule('./js/renderer.js', 'renderer.js'));
+        document.getElementById('test-mazeGenerator').addEventListener('click', () => testModule('./js/mazeGenerator.js', 'mazeGenerator.js'));
+        document.getElementById('test-weirdThings').addEventListener('click', () => testModule('./js/weirdThings.js', 'weirdThings.js'));
+        document.getElementById('test-gameLogic').addEventListener('click', () => testModule('./js/gameLogic.js', 'gameLogic.js'));
+        
+        document.getElementById('test-all').addEventListener('click', async () => {
+            logInfo('Testing all modules...');
+            const results = await Promise.all([
+                testModule('./js/utils.js', 'utils.js'),
+                testModule('./js/player.js', 'player.js'),
+                testModule('./js/renderer.js', 'renderer.js'),
+                testModule('./js/mazeGenerator.js', 'mazeGenerator.js'),
+                testModule('./js/weirdThings.js', 'weirdThings.js'),
+                testModule('./js/gameLogic.js', 'gameLogic.js')
+            ]);
+            
+            const allSuccess = results.every(result => result);
+            
+            if (allSuccess) {
+                logSuccess('All modules loaded successfully!');
+            } else {
+                logError('Some modules failed to load.');
+            }
+        });
+        
+        // Initial log
+        logInfo('Debug page loaded. Click buttons to test modules.');
+    </script>
+</body>
+</html> 

@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgotten in the Woods</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            width: 800px;
+            max-width: 95vw;
+            background-color: #111;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            position: relative;
+        }
+        
+        .scene-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #000;
+        }
+        
+        .scene-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            filter: contrast(1.1) brightness(0.9) grayscale(0.3);
+            transition: filter 0.5s ease;
+        }
+        
+        .watcher {
+            position: absolute;
+            width: 60px;
+            height: 150px;
+            background-image: url('/api/placeholder/60/150');
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+            pointer-events: none;
+            filter: brightness(0.5) contrast(1.5);
+        }
+        
+        .narrative {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-align: justify;
+            height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.5);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+        
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .choice-btn {
+            padding: 12px 15px;
+            background-color: #222;
+            color: #ddd;
+            border: 1px solid #444;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 16px;
+        }
+        
+        .choice-btn:hover {
+            background-color: #333;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #777;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        .snow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        .snow-particle {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 28px;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+        
+        .breathing {
+            animation: breathe 4s infinite ease-in-out;
+        }
+        
+        @keyframes breathe {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(1.02); 
+                opacity: 1;
+            }
+        }
+        
+        .flicker {
+            animation: flicker 8s infinite;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            3% { opacity: 0.8; }
+            6% { opacity: 1; }
+            9% { opacity: 0.6; }
+            11% { opacity: 1; }
+            14% { opacity: 0.8; }
+            20% { opacity: 1; }
+            60% { opacity: 1; }
+            62% { opacity: 0.2; }
+            64% { opacity: 1; }
+            90% { opacity: 1; }
+            92% { opacity: 0.1; }
+            94% { opacity: 0.9; }
+            96% { opacity: 1; }
+            98% { opacity: 0.3; }
+            99% { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .sanity-meter {
+            width: 100%;
+            height: 6px;
+            background-color: #333;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .sanity-fill {
+            height: 100%;
+            background-color: #596680;
+            width: 100%;
+            transition: width 1s ease;
+        }
+
+        .inventory {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            min-height: 40px;
+        }
+
+        .inventory-item {
+            background-color: #222;
+            padding: 5px 10px;
+            border-radius: 3px;
+            border: 1px solid #444;
+            font-size: 14px;
+            display: inline-block;
+        }
+        
+        /* Audio control styling */
+        .audio-control {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.5);
+            border: 1px solid #444;
+            color: #ddd;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="header flicker">FORGOTTEN IN THE WOODS</h1>
+        
+        <button id="audioControl" class="audio-control">Sound: OFF</button>
+        
+        <div class="scene-container">
+            <img id="sceneImage" class="scene-image breathing" src="/api/placeholder/800/400" alt="Game scene">
+            <div class="vignette"></div>
+            <div id="watcher" class="watcher"></div>
+            <div class="snow" id="snow"></div>
+        </div>
+        
+        <div class="narrative fade-in" id="narrative"></div>
+        
+        <div class="sanity-meter">
+            <div class="sanity-fill" id="sanityFill"></div>
+        </div>
+        
+        <div class="inventory" id="inventory"></div>
+        
+        <div class="choices" id="choices"></div>
+        
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            currentLocation: 'start',
+            inventory: [],
+            visitedLocations: [],
+            sanity: 100,
+            watcherSeen: 0,
+            gameOver: false,
+            audioEnabled: false,
+            audioElements: {},
+        };
+
+        // DOM elements
+        const narrativeElement = document.getElementById('narrative');
+        const choicesElement = document.getElementById('choices');
+        const sceneImageElement = document.getElementById('sceneImage');
+        const statusElement = document.getElementById('status');
+        const watcherElement = document.getElementById('watcher');
+        const sanityFillElement = document.getElementById('sanityFill');
+        const inventoryElement = document.getElementById('inventory');
+        const audioControlElement = document.getElementById('audioControl');
+        
+        // Snow effect
+        const snowContainer = document.getElementById('snow');
+        
+        // Create snow particles
+        function createSnow() {
+            snowContainer.innerHTML = '';
+            const particleCount = 100;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('snow-particle');
+                
+                // Random size between 1 and 3px
+                const size = Math.random() * 2 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random starting positions
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Random falling animation
+                const duration = Math.random() * 10 + 5;
+                const delay = Math.random() * 10;
+                
+                particle.style.animation = `fall ${duration}s linear ${delay}s infinite`;
+                
+                snowContainer.appendChild(particle);
+            }
+            
+            // Add the keyframes for falling snow
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fall {
+                    from { transform: translateY(-10px); }
+                    to { transform: translateY(410px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Audio management
+        function setupAudio() {
+            // Ambient sounds
+            gameState.audioElements.ambient = new Audio();
+            gameState.audioElements.ambient.loop = true;
+            gameState.audioElements.ambient.volume = 0.3;
+            
+            // Add click sound
+            gameState.audioElements.click = new Audio();
+            gameState.audioElements.click.volume = 0.2;
+            
+            // Add watcher sound
+            gameState.audioElements.watcher = new Audio();
+            gameState.audioElements.watcher.volume = 0.4;
+            
+            // Toggle audio
+            audioControlElement.addEventListener('click', () => {
+                gameState.audioEnabled = !gameState.audioEnabled;
+                audioControlElement.textContent = `Sound: ${gameState.audioEnabled ? 'ON' : 'OFF'}`;
+                
+                if (gameState.audioEnabled) {
+                    playAmbientSound();
+                } else {
+                    stopAllSounds();
+                }
+            });
+        }
+        
+        function playAmbientSound() {
+            if (gameState.audioEnabled && gameState.audioElements.ambient) {
+                gameState.audioElements.ambient.play().catch(() => {
+                    // Suppress autoplay errors
+                });
+            }
+        }
+        
+        function playClickSound() {
+            if (gameState.audioEnabled && gameState.audioElements.click) {
+                gameState.audioElements.click.currentTime = 0;
+                gameState.audioElements.click.play().catch(() => {
+                    // Suppress autoplay errors
+                });
+            }
+        }
+        
+        function stopAllSounds() {
+            Object.values(gameState.audioElements).forEach(audio => {
+                if (audio) audio.pause();
+            });
+        }
+        
+        // The watcher effect - randomly makes the figure appear and disappear
+        function maybeShowWatcher() {
+            // Only show the watcher sometimes (20% chance by default)
+            // Increase chance as sanity goes down
+            const watcherChance = 0.1 + (0.3 * (1 - gameState.sanity / 100));
+            
+            if (!gameState.gameOver && Math.random() < watcherChance) {
+                // Position the watcher randomly in the scene but not in the center
+                let leftPos;
+                if (Math.random() > 0.5) {
+                    leftPos = Math.random() * 20 + 5; // Left side
+                } else {
+                    leftPos = Math.random() * 20 + 75; // Right side
+                }
+                
+                const topPos = Math.random() * 50 + 20;
+                
+                watcherElement.style.left = `${leftPos}%`;
+                watcherElement.style.top = `${topPos}%`;
+                watcherElement.style.opacity = '0.6';
+                
+                // Play watcher sound if enabled
+                if (gameState.audioEnabled && gameState.audioElements.watcher) {
+                    gameState.audioElements.watcher.play().catch(() => {
+                        // Suppress autoplay errors
+                    });
+                }
+                
+                // Decrease sanity when the watcher appears
+                gameState.watcherSeen++;
+                decreaseSanity(5);
+                
+                // Make watcher disappear after a few seconds
+                setTimeout(() => {
+                    watcherElement.style.opacity = '0';
+                }, 2000 + Math.random() * 2000); // 2-4 seconds
+            }
+        }
+        
+        // Update the sanity meter display
+        function updateSanityMeter() {
+            sanityFillElement.style.width = `${gameState.sanity}%`;
+            
+            // Change color based on sanity level
+            if (gameState.sanity > 70) {
+                sanityFillElement.style.backgroundColor = '#596680';
+            } else if (gameState.sanity > 40) {
+                sanityFillElement.style.backgroundColor = '#605080';
+            } else if (gameState.sanity > 20) {
+                sanityFillElement.style.backgroundColor = '#804f60';
+            } else {
+                sanityFillElement.style.backgroundColor = '#803636';
+            }
+            
+            // If sanity reaches 0, trigger game over
+            if (gameState.sanity <= 0 && !gameState.gameOver) {
+                gameState.gameOver = true;
+                goToLocation('lost_sanity');
+            }
+        }
+        
+        // Decrease sanity
+        function decreaseSanity(amount) {
+            gameState.sanity = Math.max(0, gameState.sanity - amount);
+            updateSanityMeter();
+        }
+        
+        // Increase sanity
+        function increaseSanity(amount) {
+            gameState.sanity = Math.min(100, gameState.sanity + amount);
+            updateSanityMeter();
+        }
+        
+        // Update inventory display
+        function updateInventory() {
+            inventoryElement.innerHTML = '';
+            gameState.inventory.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('inventory-item');
+                itemElement.textContent = item;
+                inventoryElement.appendChild(itemElement);
+            });
+        }
+        
+        // Add an item to inventory
+        function addToInventory(item) {
+            if (!gameState.inventory.includes(item)) {
+                gameState.inventory.push(item);
+                updateInventory();
+                return true;
+            }
+            return false;
+        }
+        
+        // Remove an item from inventory
+        function removeFromInventory(item) {
+            const index = gameState.inventory.indexOf(item);
+            if (index !== -1) {
+                gameState.inventory.splice(index, 1);
+                updateInventory();
+                return true;
+            }
+            return false;
+        }
+        
+        // Check if player has an item
+        function hasItem(item) {
+            return gameState.inventory.includes(item);
+        }
+        
+        // Game locations and content
+        const gameLocations = {
+            start: {
+                image: '/api/placeholder/800/400',
+                narrative: "Your eyes snap open. Cold. That's the first sensation that hits you—bone-chilling cold seeping through your clothes. Snow falls gently around you as you sit up. Trees stretch in every direction, their bare branches reaching toward a gray sky. <br><br>You have no memory of how you got here. Your name, your past—all a blank slate. The only certainty is the forest surrounding you and the strange feeling you're being watched.",
+                choices: [
+                    { text: "Try to remember something, anything about yourself", nextLocation: "memory_attempt" },
+                    { text: "Look around for any signs of civilization", nextLocation: "look_around" },
+                    { text: "Check your pockets for anything useful", nextLocation: "check_pockets" }
+                ]
+            },
+            
+            memory_attempt: {
+                image: '/api/placeholder/800/400',
+                narrative: "You close your eyes, concentrating hard. Fragments flash through your mind—a warm room, laughter, the sound of keys jingling. But nothing concrete forms. It's like your memories are trapped behind a wall of fog.<br><br>As you strain to remember, a sharp pain lances through your head. Something doesn't want you to remember. The harder you push, the more it hurts.<br><br>Opening your eyes again, you notice something troubling—the light has dimmed slightly. You shouldn't linger in one place too long.",
+                choices: [
+                    { text: "Look around for any signs of civilization", nextLocation: "look_around" },
+                    { text: "Check your pockets for anything useful", nextLocation: "check_pockets" }
+                ],
+                onEnter: () => decreaseSanity(5)
+            },
+            
+            check_pockets: {
+                image: '/api/placeholder/800/400',
+                narrative: "Patting down your clothes, you find a few items. In your coat pocket is a small flashlight—functional but with weak batteries. There's also a folded piece of paper with a hastily scrawled note:<br><br>\"DON'T TRUST WHAT YOU SEE IN THE WOODS. FIND THE BUNKER.\"<br><br>The handwriting looks like your own, but you have no recollection of writing it. In your back pocket, you find a compass with a cracked face, the needle spinning erratically.",
+                choices: [
+                    { text: "Look around for any signs of civilization", nextLocation: "look_around" }
+                ],
+                onEnter: () => {
+                    addToInventory("Flashlight");
+                    addToInventory("Mysterious Note");
+                    addToInventory("Broken Compass");
+                }
+            },
+            
+            look_around: {
+                image: '/api/placeholder/800/400',
+                narrative: "Standing up makes you realize how stiff and cold your body is. How long have you been out here? The forest seems endless in all directions, but you notice a few distinct paths:<br><br>To the north, the trees thin out slightly, suggesting a clearing or opening. To the east, smoke rises faintly above the treeline—perhaps a cabin? To the west, there's a rocky outcropping that might provide shelter. To the south, the forest grows denser and darker.",
+                choices: [
+                    { text: "Head north toward the clearing", nextLocation: "frozen_lake" },
+                    { text: "Go east toward the smoke", nextLocation: "cabin_approach" },
+                    { text: "Travel west to the rocky outcropping", nextLocation: "cave_entrance" },
+                    { text: "Venture south into the deeper woods", nextLocation: "deep_woods" }
+                ]
+            },
+            
+            deep_woods: {
+                image: '/api/placeholder/800/400',
+                narrative: "The forest grows denser as you walk south. The trees press closer, their shadows lengthening despite no apparent change in the sun's position. Snow crunches under your feet, and your breath clouds in front of you.<br><br>The strange feeling of being watched intensifies. Several times you spin around, certain someone is following you, but the forest is empty—or appears to be.<br><br>After what feels like an hour of walking, you come across something unexpected: a small, abandoned cemetery. Ancient headstones jut from the snow like broken teeth. Some graves appear freshly disturbed.",
+                choices: [
+                    { text: "Investigate the cemetery", nextLocation: "cemetery" },
+                    { text: "This feels wrong, turn back", nextLocation: "look_around" }
+                ],
+                onEnter: () => decreaseSanity(10)
+            },
+            
+            cemetery: {
+                image: '/api/placeholder/800/400',
+                narrative: "The cemetery is small and old, enclosed by a rusted iron fence bent and broken in places. As you step through the gate, you notice the dates on the headstones—many from the early 1900s, but some appear much more recent.<br><br>One grave in particular catches your eye. The earth has been recently disturbed, and the headstone reads simply \"VISITOR\" with no dates. A shovel leans against the stone.<br><br>As you approach the strange grave, you hear what sounds like scratching coming from beneath the soil.",
+                choices: [
+                    { text: "Take the shovel but leave the grave alone", nextLocation: "take_shovel" },
+                    { text: "Use the shovel to investigate the scratching sound", nextLocation: "dig_grave" },
+                    { text: "This is too unsettling, leave immediately", nextLocation: "deep_woods" }
+                ],
+                onEnter: () => decreaseSanity(15)
+            },
+            
+            take_shovel: {
+                image: '/api/placeholder/800/400',
+                narrative: "You carefully pick up the shovel, trying not to disturb the grave. The tool is solid and could be useful for clearing paths or defending yourself.<br><br>As you turn to leave, the scratching grows louder, more desperate. For a moment, you think you hear your name being called from beneath the earth—but that's impossible. You don't even know your own name.<br><br>The wind picks up suddenly, howling through the cemetery and making the trees bend and moan. It's time to leave this place.",
+                choices: [
+                    { text: "Return to the forest crossroads", nextLocation: "look_around" }
+                ],
+                onEnter: () => {
+                    addToInventory("Shovel");
+                    decreaseSanity(5);
+                }
+            },
+            
+            dig_grave: {
+                image: '/api/placeholder/800/400',
+                narrative: "Against your better judgment, you begin to dig. The soil is surprisingly soft despite the cold. The scratching gets louder as you go deeper, spurring you on.<br><br>After a few minutes of digging, your shovel hits something solid. It's not a coffin, but a metal hatch, like the entrance to a bunker or tunnel. The scratching is coming from inside.<br><br>There's a handle on the hatch, but no obvious lock or keyhole. Something tells you that whatever is inside wants to get out.",
+                choices: [
+                    { text: "Open the hatch", nextLocation: "open_hatch" },
+                    { text: "Fill in the grave and leave with the shovel", nextLocation: "take_shovel" }
+                ],
+                onEnter: () => {
+                    decreaseSanity(20);
+                    addToInventory("Shovel");
+                }
+            },
+            
+            open_hatch: {
+                image: '/api/placeholder/800/400',
+                narrative: "You grip the cold metal handle and pull. The hatch resists at first, then opens with a rush of stale air. A ladder descends into darkness.<br><br>Before you can decide whether to climb down, a hand shoots out of the opening—pale, dirty, with long fingers. It grabs your ankle with surprising strength. You try to pull away, but a second hand emerges, then a head.<br><br>The face that looks up at you is your own, but wrong—eyes too wide, smile too broad, features subtly distorted. \"Finally,\" it says in a voice like grinding stones. \"My turn outside.\"<br><br>You break free and scramble away, heart pounding. The thing pulls itself out of the hatch and stands. Your doppelgänger watches you with hungry eyes.",
+                choices: [
+                    { text: "Run as fast as you can back to the forest crossroads", nextLocation: "doppelganger_escape" }
+                ],
+                onEnter: () => decreaseSanity(40)
+            },
+            
+            doppelganger_escape: {
+                image: '/api/placeholder/800/400',
+                narrative: "You run in blind panic, not looking back. The sound of footsteps follows—not pursuing, but walking at a steady, unhurried pace. Somehow that's more terrifying than if it were chasing you.<br><br>When you finally reach the forest crossroads, you double over, gasping for breath. Looking back the way you came, you see nothing but shadows and trees. But the feeling of being watched is stronger than ever.<br><br>You won't be going back to the cemetery. Some paths should remain untaken.",
+                choices: [
+                    { text: "Head north toward the clearing", nextLocation: "frozen_lake" },
+                    { text: "Go east toward the smoke", nextLocation: "cabin_approach" },
+                    { text: "Travel west to the rocky outcropping", nextLocation: "cave_entrance" }
+                ]
+            },
+            
+            frozen_lake: {
+                image: '/api/placeholder/800/400',
+                narrative: "The trees thin out as you approach a large clearing. Before you stretches a frozen lake, its surface glistening under the gray sky. The ice looks solid but has an unnatural blueish tint.<br><br>At the center of the lake, something dark is visible beneath the ice—too large to be a fish, too small to be a boat. It's difficult to make out details from the shore.<br><br>On the far side of the lake, you can make out what appears to be some kind of church or chapel, its steeple rising above the treeline.",
+                choices: [
+                    { text: "Walk onto the ice to investigate the dark shape", nextLocation: "on_frozen_lake" },
+                    { text: "Stay on shore and walk around the lake toward the church", nextLocation: "lake_shore" },
+                    { text: "This place feels dangerous, return to the crossroads", nextLocation: "look_around" }
+                ]
+            },
+            
+            on_frozen_lake: {
+                image: '/api/placeholder/800/400',
+                narrative: "You step carefully onto the ice, testing it with each step. It creaks but holds your weight. As you move toward the center, the dark shape becomes clearer—it's a human figure, frozen in the ice.<br><br>Getting closer, your breath catches. The figure is wearing clothes identical to yours, with your same build and height. The face is turned away, pressed against the underside of the ice as if trying to break through.<br><br>Suddenly, the figure moves—just a twitch at first, then more desperately, pushing against the ice from below. You hear muffled sounds coming from beneath your feet.",
+                choices: [
+                    { text: "Use the shovel to break the ice", condition: () => hasItem("Shovel"), nextLocation: "break_ice" },
+                    { text: "Kneel down and try to see the figure's face", nextLocation: "ice_face" },
+                    { text: "Back away slowly toward the shore", nextLocation: "frozen_lake" }
+                ],
+                onEnter: () => decreaseSanity(15)
+            },
+            
+            ice_face: {
+                image: '/api/placeholder/800/400',
+                narrative: "You kneel on the cold ice and lean down, trying to see the trapped figure's face. As if sensing your presence, it slowly turns its head.<br><br>The face looking up at you from beneath the ice is your own, eyes wide with terror, mouth open in a silent scream. It pounds on the ice with increasing desperation.<br><br>As you stare in horror, a crack forms in the ice between you and your submerged twin. The crack spreads quickly, and before you can move, the surface gives way.",
+                choices: [
+                    { text: "Fall into the freezing water", nextLocation: "ice_death" }
+                ],
+                onEnter: () => decreaseSanity(30)
+            },
+            
+            ice_death: {
+                image: '/api/placeholder/800/400',
+                narrative: "The shock of the freezing water steals your breath. You thrash wildly, trying to grab the edge of the ice, but it breaks away in your hands. The weight of your clothes pulls you down.<br><br>As you sink, you see the other you—the one who was trapped—swimming upward, past you, toward the hole in the ice. Your places have been exchanged.<br><br>The last thing you see as consciousness fades is your own face looking down at you from above the water, watching impassively as you drown.",
+                choices: [
+                    { text: "Restart the game", nextLocation: "start" }
+                ],
+                onEnter: () => {
+                    gameState.gameOver = true;
+                    gameState.inventory = [];
+                    gameState.sanity = 100;
+                    gameState.watcherSeen = 0;
+                    gameState.visitedLocations = [];
+                }
+            },
+            
+            break_ice: {
+                image: '/api/placeholder/800/400',
+                narrative: "Using the shovel, you begin to chip away at the ice. The figure below becomes more frantic, pushing upward as you work. The ice is thicker than you expected, but your desperation lends you strength.<br><br>Finally, you break through. Cold water gushes from the hole. A hand shoots up—pale and blue-tinged from the cold. You grab it and pull hard, helping the person escape their frigid prison.<br><br>The figure collapses on the ice, gasping and shivering. It's a young woman, not your doppelgänger as you'd feared. Her lips are blue, her wet clothes already stiffening with ice.<br><br>\"Thank you,\" she whispers through chattering teeth. \"I thought... I thought I'd die down there. Something pushed me in... something wearing my face.\"",
+                choices: [
+                    { text: "Help her to the shore and ask about the church across the lake", nextLocation: "rescued_stranger" },
+                    { text: "Ask her if she knows anything about the bunker mentioned in your note", condition: () => hasItem("Mysterious Note"), nextLocation: "stranger_bunker_info" }
+                ],
+                onEnter: () => increaseSanity(10)
+            },
+            
+            rescued_stranger: {
+                image: '/api/placeholder/800/400',
+                narrative: "You help the woman to shore. She introduces herself as Maya, a researcher who came to these woods to study local legends about doppelgängers. She's been trapped here for days, experiencing the same memory loss and disorientation as you.<br><br>\"The church isn't safe,\" she warns, following your gaze across the lake. \"I went there looking for shelter. The priest... he's not what he seems. He knew things about me no stranger should know.\"<br><br>She pauses, shivering. \"But there might be supplies there we could use. Dry clothes at least.\"",
+                choices: [
+                    { text: "Suggest you both go to the church despite the risk", nextLocation: "approach_church" },
+                    { text: "Ask her if she knows anything about the bunker mentioned in your note", condition: () => hasItem("Mysterious Note"), nextLocation: "stranger_bunker_info" },
+                    { text: "Suggest returning to the forest crossroads to explore other options", nextLocation: "look_around_maya" }
+                ],
+                onEnter: () => addToInventory("Maya's Trust")
+            },
+            
+            stranger_bunker_info: {
+                image: '/api/placeholder/800/400',
+                narrative: "You show Maya the mysterious note about the bunker. Her eyes widen in recognition.<br><br>\"The military bunker,\" she whispers. \"That's where I was trying to go when... when I encountered my double. The locals say it was abandoned in the 60s after some kind of experiment went wrong. But it's supposed to be a safe haven from the... phenomena in these woods.\"<br><br>She points west, toward the rocky outcropping. \"The entrance is hidden in the caves that way. But we'll need a code to get in. I found part of it in the church—4-8-something-something. The rest should be in the cabin to the east where researchers used to stay.\"",
+                choices: [
+                    { text: "Suggest going to the church to find the first part of the code", nextLocation: "approach_church" },
+                    { text: "Suggest checking the cabin for the rest of the code", nextLocation: "cabin_approach_maya" },
+                    { text: "Head directly to the caves to look for the bunker", nextLocation: "cave_entrance_maya" }
+                ]
+            },
+            
+            look_around_maya: {
+                image: '/api/placeholder/800/400',
+                narrative: "With Maya following close behind, you return to the forest crossroads. She seems nervous, constantly looking over her shoulder.<br><br>\"We shouldn't stay in one place too long,\" she advises. \"They're drawn to stillness. As long as we keep moving, we might stay ahead of them.\"<br><br>You ask who 'they' are, but she just shakes her head. \"I'm not sure they're a 'who' at all.\"",
+                choices: [
+                    { text: "Go east toward the cabin", nextLocation: "cabin_approach_maya" },
+                    { text: "Travel west to the rocky outcropping and caves", nextLocation: "cave_entrance_maya" },
+                    { text: "Venture south into the deeper woods", nextLocation: "deep_woods_maya" }
+                ]
+            },
+            
+            lake_shore: {
+                image: '/api/placeholder/800/400',
+                narrative: "You decide to stay on solid ground, following the shoreline toward the distant church. The walk takes longer than expected—the lake is larger than it first appeared.<br><br>As you walk, you notice strange formations in the snow along the shore—perfect circles where the snow has melted away, revealing bare ground beneath. In the center of each circle is a single footprint—yours, based on the size and tread pattern.<br><br>The closer you get to the church, the more unsettled you feel. The building is old, its white paint peeling to reveal dark wood beneath. A crooked cross tops the steeple, and the stained glass windows are intact but obscured from within, as if something dark presses against them.",
+                choices: [
+                    { text: "Enter the church", nextLocation: "enter_church" },
+                    { text: "Circle around the church looking for another entrance", nextLocation: "church_exterior" },
+                    { text: "This place feels wrong, return to the lake's edge", nextLocation: "frozen_lake" }
+                ],
+                onEnter: () => decreaseSanity(10)
+            },
+            
+            enter_church: {
+                image: '/api/placeholder/800/400',
+                narrative: "The church door creaks open at your touch. Inside, it's surprisingly warm—a blessed relief from the cold. Candles flicker in wall sconces, casting long shadows across rows of empty pews. At the front stands a simple altar, behind it a large wooden cross.<br><br>A figure in clerical attire stands with their back to you, arranging something on the altar. They speak without turning.<br><br>\"Welcome, seeker. I've been expecting you.\" The voice is gentle but unsettling. \"Everyone finds their way here eventually. The lost, the forgotten, those who can't remember who they are.\"<br><br>The priest finally turns, revealing a face obscured by shadow despite the candlelight.",
+                choices: [
+                    { text: "Ask about the bunker mentioned in your note", condition: () => hasItem("Mysterious Note"), nextLocation: "priest_bunker_info" },
+                    { text: "Ask who you are and what this place is", nextLocation: "priest_questions" },
+                    { text: "This doesn't feel right—leave immediately", nextLocation: "church_exterior" }
+                ],
+                onEnter: () => decreaseSanity(15)
+            },
+            
+            priest_bunker_info: {
+                image: '/api/placeholder/800/400',
+                narrative: "You mention the bunker from your note. The priest's posture stiffens almost imperceptibly.<br><br>\"The bunker is a false sanctuary,\" they say, voice hardening. \"Those who seek it find only deeper darkness.\" They step toward you, moving into the light.<br><br>The priest's face becomes visible—it's your face, but serene, beatific, with an unnatural stillness. \"Stay here instead. In my church, with me. We can be whole again.\"<br><br>As they speak, you notice a small notebook on the altar. On its open page are four numbers: 4-8-1-5.",
+                choices: [
+                    { text: "Grab the notebook and run", nextLocation: "church_escape" },
+                    { text: "Confront the false priest", nextLocation: "confront_priest" },
+                    { text: "Pretend to agree while looking for an escape", nextLocation: "false_agreement" }
+                ],
+                onEnter: () => decreaseSanity(20)
+            },
+            
+            church_escape: {
+                image: '/api/placeholder/800/400',
+                narrative: "You lunge forward and snatch the notebook. The priest's hand shoots out, unnaturally fast, but misses you by inches.<br><br>\"YOU CANNOT ESCAPE YOURSELF!\" they roar, voice no longer gentle but distorted and multi-toned, as if several voices speak at once.<br><br>You sprint for the door, the air in the church growing hot and thick, making it hard to breathe. Behind you, the candles flare, and the priest's shadow on the wall grows, distorts, sprouts limbs that shouldn't exist.<br><br>You burst through the door into the blessed cold, clutching the notebook. Inside is not just the code—4-8-1-5—but pages of notes about the \"duality experiments\" at the military bunker and warnings about \"personality fragmentation\" in test subjects.",
+                choices: [
+                    { text: "Return to the forest crossroads with this new information", nextLocation: "look_around" }
+                ],
+                onEnter: () => {
+                    addToInventory("Church Notebook");
+                    decreaseSanity(10);
+                }
+            },
+            
+            church_exterior: {
+                image: '/api/placeholder/800/400',
+                narrative: "You circle the church, keeping your distance. The back reveals a small cemetery similar to the one in the deep woods, but smaller and better maintained. A cellar door leads under the church, secured with a heavy padlock.<br><br>The windows are all too high to see through properly, but through one, you catch glimpses of movement inside—a figure pacing, sometimes multiplying into two identical silhouettes before merging back into one.<br><br>Behind the church is a small shed. Its door hangs open, revealing gardening tools and a key hanging on a hook.",
+                choices: [
+                    { text: "Take the key and try it on the cellar door", nextLocation: "church_cellar" },
+                    { text: "Enter the church through the front door", nextLocation: "enter_church" },
+                    { text: "Leave this place and return to the lake shore", nextLocation: "frozen_lake" }
+                ]
+            },
+            
+            church_cellar: {
+                image: '/api/placeholder/800/400',
+                narrative: "The key fits the padlock perfectly. The cellar doors creak as you pull them open, revealing stone steps descending into darkness. The air wafting up is surprisingly warm and smells of candle wax and something metallic, like blood.<br><br>Using your flashlight, you cautiously descend. The cellar is larger than expected, with arched stone ceilings. It's set up like a laboratory—tables with straps, medical equipment, journals filled with observations. This is no church basement; it's a research facility disguised as one.<br><br>On a central table is a file labeled \"PROJECT DOPPELGANGER\" and a notebook with a sequence of numbers circled: 4-8-1-5.",
+                choices: [
+                    { text: "Take the notebook and research files", nextLocation: "take_research" },
+                    { text: "Leave immediately before anyone comes", nextLocation: "church_exterior" }
+                ],
+                onEnter: () => decreaseSanity(15),
+                condition: () => hasItem("Flashlight")
+            },
+            
+            take_research: {
+                image: '/api/placeholder/800/400',
+                narrative: "You grab the notebook and flip through the research files. The documents detail experiments conducted in the 1960s on \"identity fracturing and duplication\"—creating duplicates of test subjects using a combination of drugs, hypnosis, and some kind of device.<br><br>The notes describe how subjects would experience memory loss, then encounter duplicates of themselves that would try to \"reintegrate\"—often violently. The bunker was supposedly built as a safe room where the original personalities could \"reset\" and reject the duplicates.<br><br>As you read, footsteps sound on the cellar stairs. Someone's coming down.",
+                choices: [
+                    { text: "Hide under the table", nextLocation: "cellar_hide" },
+                    { text: "Look for another way out", nextLocation: "cellar_escape" },
+                    { text: "Prepare to confront whoever is coming", nextLocation: "cellar_confront" }
+                ],
+                onEnter: () => {
+                    addToInventory("Research Files");
+                    addToInventory("Bunker Code (4-8-1-5)");
+                }
+            },
+            
+            cellar_hide: {
+                image: '/api/placeholder/800/400',
+                narrative: "You duck under the large central table, pulling a hanging cloth over to conceal yourself. Through a gap, you see two pairs of identical shoes descend the stairs—the priest, accompanied by someone else with the same gait.<br><br>\"The original is growing stronger,\" says one voice. \"If they find the bunker, we could lose everything.\"<br><br>\"Then we won't let them,\" replies an identical voice. \"The others are already in place. No matter which path they take, they'll meet themselves.\"<br><br>They move around the room, collecting items. One passes so close to your hiding spot that you hold your breath. Finally, they ascend the stairs again, leaving you alone.",
+                choices: [
+                    { text: "Wait a few minutes, then leave", nextLocation: "church_exterior_escape" }
+                ],
+                onEnter: () => decreaseSanity(10)
+            },
+            
+            church_exterior_escape: {
+                image: '/api/placeholder/800/400',
+                narrative: "You emerge from the church cellar into the fading light. Whatever time of day it was when you arrived, it's now late afternoon, the shadows lengthening. The air feels different—heavier, expectant, like the forest itself is holding its breath.<br><br>Armed with the knowledge from the research files and the bunker code, you have a clear goal now: find the military bunker and end whatever experiment has trapped you here.<br><br>The path around the lake back to the forest crossroads stretches before you. You need to reach the caves to the west where the bunker entrance supposedly waits.",
+                choices: [
+                    { text: "Return to the forest crossroads", nextLocation: "look_around" }
+                ]
+            },
+            
+            cabin_approach: {
+                image: '/api/placeholder/800/400',
+                narrative: "Following the smoke rising above the trees, you make your way east. The forest gradually thins, revealing a small, weathered cabin in a clearing. Smoke curls from its chimney, suggesting someone might be home.<br><br>The cabin looks old but well-maintained. A stack of firewood leans against one wall, and curtains hang in the windows. A dim light glows from within. There's something familiar about this place, though you can't place why.<br><br>As you approach, you notice fresh footprints in the snow leading to and from the cabin door—footprints that match your own boots exactly.",
+                choices: [
+                    { text: "Knock on the door", nextLocation: "knock_cabin" },
+                    { text: "Look through the window first", nextLocation: "cabin_window" },
+                    { text: "Circle around back", nextLocation: "cabin_rear" }
+                ]
+            },
+            
+            cabin_window: {
+                image: '/api/placeholder/800/400',
+                narrative: "You creep to one of the windows and peer inside. The cabin consists of a single room with simple furnishings—a bed, a table with papers scattered across it, a woodstove, and a rocking chair that slowly moves back and forth.<br><br>Someone is sitting in the chair, facing away from the window. You can only see the back of their head, but something about their posture sends a chill through you. On the table, you can make out maps, journal pages, and what looks like the same note you found in your pocket.<br><br>The figure in the chair suddenly stops rocking, as if sensing your presence.",
+                choices: [
+                    { text: "Duck away from the window", nextLocation: "cabin_hide" },
+                    { text: "Knock on the door anyway", nextLocation: "knock_cabin" },
+                    { text: "Try the back door instead", nextLocation: "cabin_rear" }
+                ],
+                onEnter: () => decreaseSanity(10)
+            },
+            
+            cabin_hide: {
+                image: '/api/placeholder/800/400',
+                narrative: "You drop down beneath the window just as the figure begins to turn. Your heart hammers in your chest as you press yourself against the cabin wall, waiting.<br><br>Footsteps approach the window from inside. The curtain moves slightly. You hold your breath, praying you haven't been seen. After what feels like an eternity, the footsteps move away. Through the wall, you hear the creak of the rocking chair resuming its motion.<br><br>As carefully and quietly as possible, you edge away from the window, planning your next move.",
+                choices: [
+                    { text: "Try to sneak around to the back door", nextLocation: "cabin_rear" },
+                    { text: "Gather courage and knock on the front door", nextLocation: "knock_cabin" },
+                    { text: "This is too risky—return to the forest crossroads", nextLocation: "look_around" }
+                ]
+            },
+            
+            knock_cabin: {
+                image: '/api/placeholder/800/400',
+                narrative: "You approach the door and knock firmly. The sound echoes in the clearing, and the woods around you seem to fall silent, as if holding their breath.<br><br>The rocking chair stops. Footsteps approach the door slowly, deliberately. There's a long pause—so long you consider knocking again—before the door swings open.<br><br>Standing in the doorway is... you. Not someone who looks like you, but an exact duplicate, wearing the same clothes, with the same expression of shock that must be mirrored on your own face.<br><br>The cabin's occupant recovers first. \"I've been waiting for you,\" your doppelgänger says. \"Please, come in. We have much to discuss.\"",
+                choices: [
+                    { text: "Cautiously enter the cabin", nextLocation: "enter_cabin" },
+                    { text: "Refuse and demand answers", nextLocation: "cabin_confront" },
+                    { text: "Turn and run back toward the forest crossroads", nextLocation: "cabin_flee" }
+                ],
+                onEnter: () => decreaseSanity(20)
+            },
+            
+            enter_cabin: {
+                image: '/api/placeholder/800/400',
+                narrative: "Fighting every instinct screaming at you to run, you step inside. The cabin is warm—a welcome relief from the cold outside. Your double closes the door and gestures to a chair at the table.<br><br>\"You're confused. Scared. I understand—I felt the same way when I first arrived,\" they say, voice identical to yours. \"But I'm not your enemy. I'm you, just... a few loops ahead.\"<br><br>They explain that you're caught in a temporal loop, reliving the same day over and over. Each cycle creates another version of you. The only escape is to reach the military bunker and use the reset device inside.<br><br>\"The code to enter is on that paper,\" your double says, pointing to a notebook on the table with the numbers 7-3-9-2 written inside.",
+                choices: [
+                    { text: "Take the notebook and ask more about the bunker", nextLocation: "cabin_information" },
+                    { text: "Ask why you should trust them", nextLocation: "cabin_trust" },
+                    { text: "Look for a weapon—this feels like a trap", nextLocation: "cabin_weapon" }
+                ],
+                onEnter: () => decreaseSanity(10)
+            },
+            
+            cabin_information: {
+                image: '/api/placeholder/800/400',
+                narrative: "You take the notebook, examining the code: 7-3-9-2. Your doppelgänger produces a rough map showing the location of the bunker entrance within the cave system to the west.<br><br>\"There are others out there—more versions of us,\" they explain. \"Some have... changed. Become hostile. They don't want the loop to end. They've adapted to it, learned to use it.\"<br><br>As your double speaks, you notice something unsettling. Occasionally, their form seems to flicker, becoming transparent for a split second. They don't seem to notice your reaction.<br><br>\"Take the back path through the woods,\" they continue, marking the route on the map. \"It's longer but safer. The others monitor the main paths.\"",
+                choices: [
+                    { text: "Thank them and leave with the information", nextLocation: "cabin_exit" },
+                    { text: "Ask why they're helping you instead of going themselves", nextLocation: "cabin_question" }
+                ],
+                onEnter: () => {
+                    addToInventory("Bunker Code (7-3-9-2)");
+                    addToInventory("Bunker Map");
+                }
+            },
+            
+            cabin_exit: {
+                image: '/api/placeholder/800/400',
+                narrative: "You thank your doppelgänger for the help and head for the door, eager to be outside again despite the cold. They watch you go with an unreadable expression.<br><br>\"One more thing,\" they call as you reach for the handle. \"Trust nothing you see in the military post. It's where this all started.\"<br><br>Outside, the air feels cleaner, the danger less immediate. But as you look back at the cabin, you notice something odd—no smoke rises from the chimney anymore, though it was clearly smoking when you arrived.<br><br>Map and code in hand, you set off back toward the forest crossroads, more determined than ever to find the bunker.",
+                choices: [
+                    { text: "Return to the forest crossroads", nextLocation: "look_around" }
+                ]
+            },
+            
+            cabin_rear: {
+                image: '/api/placeholder/800/400',
+                narrative: "You circle around to the back of the cabin. There's a small porch with a rear door and a woodshed attached to the cabin wall. A collection of tools hangs on the outer wall—an axe, a saw, various gardening implements.<br><br>The back door has a small window. Peering through, you can see directly into the cabin. The rocking chair is empty now, but a notebook lies open on the table. From this angle, you can make out a sequence of numbers written in large digits: 7-3-9-2.<br><br>There's no sign of the cabin's occupant, but a sound from inside suggests they're in a part of the cabin you can't see from this window.",
+                choices: [
+                    { text: "Try the back door quietly", nextLocation: "cabin_sneak_in" },
+                    { text: "Take the axe for protection and check the front", nextLocation: "cabin_take_axe" },
+                    { text: "Leave before you're discovered", nextLocation: "cabin_leave" }
+                ]
+            },
+            
+            cabin_take_axe: {
+                image: '/api/placeholder/800/400',
+                narrative: "You carefully lift the axe from its hooks. It's heavier than you expected, but gives you a sense of security. Armed, you move back toward the front of the cabin, ready to confront whoever—or whatever—is inside.<br><br>As you round the corner, the front door opens. You freeze, gripping the axe tightly. Your own face stares back at you from the doorway, eyes widening at the sight of the weapon in your hands.<br><br>\"Wait,\" your doppelgänger says, raising their hands. \"I'm not what you think. I've been trying to help you.\" They gesture inside the cabin. \"I have information about the bunker. The code you need. Please, don't make the same mistake I did.\"",
+                choices: [
+                    { text: "Lower the axe and listen", nextLocation: "enter_cabin" },
+                    { text: "Keep the axe raised and demand answers from a distance", nextLocation: "cabin_confront" },
+                    { text: "Don't trust them—retreat to the forest", nextLocation: "cabin_flee" }
+                ],
+                onEnter: () => {
+                    addToInventory("Axe");
+                    decreaseSanity(15);
+                }
+            },
+            
+            cabin_sneak_in: {
+                image: '/api/placeholder/800/400',
+                narrative: "You turn the handle slowly—the door is unlocked. It creaks slightly as you push it open, but not loudly enough to raise alarm. You slip inside, immediately moving to the table to see the notebook.<br><br>The numbers 7-3-9-2 are indeed written there, along with notes about the bunker's location in the cave system to the west. A hand-drawn map shows the route.<br><br>As you're examining these items, the floorboard creaks behind you. Before you can turn, a voice—your voice—speaks softly.<br><br>\"I wondered when you'd arrive.\" Your doppelgänger stands in a doorway you hadn't noticed, leading to what appears to be a small bathroom. \"Don't be afraid. I'm you, from an earlier cycle.\"",
+                choices: [
+                    { text: "Ask what they mean by 'cycle'", nextLocation: "cabin_cycle_explanation" },
+                    { text: "Grab the notebook and map and run", nextLocation: "cabin_grab_and_run" },
+                    { text: "Look for a weapon to defend yourself", nextLocation: "cabin_interior_weapon" }
+                ],
+                onEnter: () => {
+                    decreaseSanity(15);
+                }
+            },
+            
+            cabin_grab_and_run: {
+                image: '/api/placeholder/800/400',
+                narrative: "You snatch the notebook and map from the table and dash for the door. Your doppelgänger makes no move to stop you, merely watching with what looks like resignation.<br><br>\"You won't escape the loop this way,\" they call after you. \"But perhaps you'll learn faster than I did.\"<br><br>You burst out of the cabin, sprinting until you reach the tree line. Looking back, you see your double standing in the doorway, simply watching. They raise a hand in what might be a farewell gesture before going back inside.<br><br>Catching your breath, you examine what you took. The notebook contains the code—7-3-9-2—and the map shows the bunker's location in the western caves, along with several marked paths and warnings about areas to avoid.",
+                choices: [
+                    { text: "Return to the forest crossroads with this information", nextLocation: "look_around" }
+                ],
+                onEnter: () => {
+                    addToInventory("Bunker Code (7-3-9-2)");
+                    addToInventory("Bunker Map");
+                }
+            },
+            
+            cave_entrance: {
+                image: '/api/placeholder/800/400',
+                narrative: "You head west toward the rocky outcropping. The terrain becomes increasingly difficult as you climb upward. Snow gives way to stone, and the trees thin out, affording a view of the surrounding forest stretching for miles in all directions.<br><br>The outcropping conceals a cave entrance, dark and uninviting. Cold air flows from the opening, carrying a faint metallic smell. Just inside the entrance, you find an abandoned backpack and what looks like research equipment—a camera, a notebook, and a flashlight with dead batteries.<br><br>The cave splits into three tunnels. The left passage descends steeply, the middle continues relatively level, and the right tunnel climbs further upward.",
+                choices: [
+                    { text: "Take the left tunnel, going down", nextLocation: "cave_left" },
+                    { text: "Follow the middle tunnel", nextLocation: "cave_middle" },
+                    { text: "Climb the right tunnel, going up", nextLocation: "cave_right" },
+                    { text: "Examine the abandoned equipment more closely", nextLocation: "cave_equipment" }
+                ]
+            },
+            
+            cave_equipment: {
+                image: '/api/placeholder/800/400',
+                narrative: "You search through the abandoned backpack. Inside, you find a research journal belonging to Dr. Eleanor Wright, dated six months ago. The entries describe an investigation into local legends about 'forest doppelgängers' and 'time slips' in these woods.<br><br>The final entry is disturbing: \"Day 7: I'm not alone in these caves. I keep seeing glimpses of someone who looks exactly like me watching from the shadows. The locals were right. Something is wrong with this place—it creates duplicates. If I don't make it out, the military bunker is our only hope. The entrance is in the lowest chamber, code is personal to each visitor.\"<br><br>You also find a box of matches and an emergency flare.",
+                choices: [
+                    { text: "Take the matches and flare, then go left", nextLocation: "cave_left" },
+                    { text: "Take the matches and flare, then go middle", nextLocation: "cave_middle" },
+                    { text: "Take the matches and flare, then go right", nextLocation: "cave_right" }
+                ],
+                onEnter: () => {
+                    addToInventory("Matches");
+                    addToInventory("Emergency Flare");
+                    addToInventory("Research Journal");
+                }
+            },
+            
+            cave_left: {
+                image: '/api/placeholder/800/400',
+                narrative: "You take the left tunnel, descending into the earth. The passage is steep at first, requiring careful footing on the slick stone. Your flashlight illuminates mineral deposits on the walls that sparkle eerily in the beam.<br><br>The tunnel gradually levels out and widens into a large chamber. The air is noticeably cooler here, and water drips from stalactites overhead. At the far end of the chamber is what looks like a modern door—metal, with a keypad beside it.<br><br>This must be the entrance to the military bunker mentioned in your note. The keypad suggests it needs a numerical code to open.",
+                choices: [
+                    { text: "Try the code from the church: 4-8-1-5", condition: () => hasItem("Bunker Code (4-8-1-5)"), nextLocation: "bunker_church_code" },
+                    { text: "Try the code from the cabin: 7-3-9-2", condition: () => hasItem("Bunker Code (7-3-9-2)"), nextLocation: "bunker_cabin_code" },
+                    { text: "Look around the chamber for clues", nextLocation: "bunker_search_clues" },
+                    { text: "This feels wrong—go back and try another tunnel", nextLocation: "cave_entrance" }
+                ],
+                condition: () => hasItem("Flashlight")
+            },
+            
+            bunker_search_clues: {
+                image: '/api/placeholder/800/400',
+                narrative: "You search the chamber carefully. Near the door, you find a small alcove in the rock wall that was previously hidden from view. Inside is a laminated card that appears to be a security protocol.<br><br>It reads: \"In case of emergency reset, each subject's access code is determined by their intake date. Use personal code only. Using another subject's code may result in identity contamination.\"<br><br>This doesn't immediately help you, but as you turn to leave the alcove, your flashlight illuminates scratches on the rock wall. Someone has carved four digits: 7-3-9-2. Beneath it is your name—a name you suddenly recognize as your own, triggering a flood of memories. You were a research volunteer for a experiment studying isolated environments. Your intake date was July 3, 1992.",
+                choices: [
+                    { text: "Use the code 7-3-9-2 on the keypad", nextLocation: "bunker_cabin_code" },
+                    { text: "Try a different tunnel instead", nextLocation: "cave_entrance" }
+                ],
+                onEnter: () => {
+                    addToInventory("Bunker Code (7-3-9-2)");
+                    increaseSanity(10);
+                }
+            },
+            
+            bunker_cabin_code: {
+                image: '/api/placeholder/800/400',
+                narrative: "You approach the keypad and enter the code from the cabin: 7-3-9-2. The pad beeps in confirmation, and with a hiss of releasing pressure, the metal door slides open. Stale air rushes out, suggesting the bunker hasn't been opened in some time.<br><br>Beyond the door is a short corridor leading to another room illuminated by emergency lighting that flickers to life as you enter. The facility looks like a combination of research lab and living quarters, designed for long-term occupation.<br><br>At the center of the main room stands a strange device—a chair surrounded by equipment you don't recognize, with a helmet-like apparatus suspended above it. A sign on the wall reads \"PERSONALITY REINTEGRATION CHAMBER.\"",
+                choices: [
+                    { text: "Investigate the strange chair", nextLocation: "reintegration_chair" },
+                    { text: "Look for documents explaining the facility's purpose", nextLocation: "bunker_documents" },
+                    { text: "Search for supplies or weapons", nextLocation: "bunker_supplies" }
+                ]
+            },
+            
+            bunker_church_code: {
+                image: '/api/placeholder/800/400',
+                narrative: "You approach the keypad and enter the code from the church: 4-8-1-5. The keypad flashes red and emits an error tone. A small screen lights up with a message: \"INVALID IDENTITY SIGNATURE. SECURITY PROTOCOL INITIATED.\"<br><br>A hissing sound fills the chamber as vents in the ceiling open, releasing a colorless gas. Your vision begins to blur, and a strange doubling effect occurs—you seem to see another version of yourself standing across the chamber, watching impassively as you struggle to remain conscious.<br><br>The last thing you hear before darkness claims you is your own voice saying, \"Wrong code, wrong you.\"",
+                choices: [
+                    { text: "Lose consciousness", nextLocation: "wrong_code_reset" }
+                ],
+                onEnter: () => decreaseSanity(30)
+            },
+            
+            wrong_code_reset: {
+                image: '/api/placeholder/800/400',
+                narrative: "You wake up in the forest, snow falling gently around you. It's like the beginning again, but something is different. Your memories remain—fragmented, but present. You remember the bunker, the code, your failure.<br><br>A note in your pocket is different this time: \"FIND THE RIGHT CODE FOR THE RIGHT YOU.\"<br><br>Standing, you notice footprints in the snow—your footprints—leading away in all directions, as if multiple versions of you had left from this very spot. The feeling of being watched is stronger than ever, and when you look at your reflection in a frozen puddle, your face seems subtly different—features slightly rearranged, expression not quite your own.",
+                choices: [
+                    { text: "Try again, armed with the knowledge of your past attempt", nextLocation: "look_around" }
+                ],
+                onEnter: () => {
+                    gameState.gameOver = false;
+                    gameState.inventory = ["Flashlight", "Mysterious Note", "Broken Compass"];
+                    gameState.sanity = 80;
+                    gameState.watcherSeen = 2;
+                    gameState.visitedLocations = ["start", "check_pockets"];
+                }
+            },
+            
+            reintegration_chair: {
+                image: '/api/placeholder/800/400',
+                narrative: "You approach the strange chair and examine it carefully. It resembles a high-tech dental chair with restraints for arms and legs. The helmet apparatus above has numerous wires and tubes connecting to a computer system nearby.<br><br>A laminated instruction sheet is attached to the armrest:<br><br>\"PROCEDURE: Subject must be seated and secured. Helmet will lower automatically. Process takes approximately 20 minutes. WARNING: Procedure will eliminate all duplicate personalities and reset identity partition. Only the ORIGINAL consciousness will survive. Duplicates will be reabsorbed.\"<br><br>A red button on the armrest is labeled \"INITIATE.\" This appears to be the device that can end your ordeal—but at what cost?",
+                choices: [
+                    { text: "Sit in the chair and press the button", nextLocation: "use_reintegration" },
+                    { text: "Look for more information before making a decision", nextLocation: "bunker_documents" }
+                ],
+                onEnter: () => decreaseSanity(10)
+            },
+            
+            bunker_documents: {
+                image: '/api/placeholder/800/400',
+                narrative: "You search the facility and find a secure terminal that's still operational. The files detail \"Project Mirror\"—an experiment in consciousness duplication conducted in the 1960s.<br><br>According to the documents, the military was attempting to create perfect duplicates of operatives for deep-cover missions. The process worked but had an unforeseen side effect: the duplicates and the original would begin to fracture further, creating more copies, all growing increasingly unstable and hostile toward one another.<br><br>The woods around this facility became a containment zone when test subjects escaped. The bunker was repurposed as an \"identity reintegration center\" where subjects could be reset, eliminating all duplicates and restoring the original personality.<br><br>A final note warns that only the original consciousness survives the process—any duplicates using the machine will be erased entirely.",
+                choices: [
+                    { text: "Use the reintegration chair", nextLocation: "use_reintegration" },
+                    { text: "Search for another way", nextLocation: "bunker_alternative" }
+                ],
+                onEnter: () => increaseSanity(5)
+            },
+            
+            bunker_supplies: {
+                image: '/api/placeholder/800/400',
+                narrative: "A supply room off the main chamber contains preserved rations, water, medical kits, and other survival essentials. This facility was designed for long-term occupation. You also find a pistol in a locked cabinet, which you manage to open.<br><br>As you're gathering supplies, you hear a noise from the entrance corridor—footsteps. Someone else has entered the bunker. Peering around the door frame, you see yourself—another you—examining the reintegration chair.<br><br>The doppelgänger looks up suddenly, as if sensing your presence. \"I know you're here,\" they call, voice identical to yours. \"We need to talk before you do something irreversible.\"",
+                choices: [
+                    { text: "Step out and confront your double", nextLocation: "bunker_confrontation" },
+                    { text: "Remain hidden, pistol ready", nextLocation: "bunker_ambush" },
+                    { text: "Try to sneak to the chair while they're distracted", nextLocation: "bunker_sneak" }
+                ],
+                onEnter: () => {
+                    addToInventory("Pistol");
+                    decreaseSanity(15);
+                }
+            },
+            
+            bunker_confrontation: {
+                image: '/api/placeholder/800/400',
+                narrative: "You step out to face your doppelgänger. They look exactly like you but seem calmer, more confident—as if they've been in this situation before.<br><br>\"You found the bunker. Good,\" they say. \"But you need to understand what that chair does before you use it.\"<br><br>They explain that the reintegration process only works for the original consciousness—the real you. If you're a duplicate and use the chair, you'll be erased permanently.<br><br>\"The problem is,\" they continue, \"after all this time in the loop, how can any of us be sure which one is the original anymore? We've all experienced fracturing. We all have gaps in our memory. We all feel real.\"",
+                choices: [
+                    { text: "Ask how to determine who is the original", nextLocation: "original_test" },
+                    { text: "Suggest you both walk away and find another solution", nextLocation: "bunker_alternative_2" },
+                    { text: "Make a dash for the chair while they're talking", nextLocation: "chair_dash" }
+                ]
+            },
+            
+            original_test: {
+                image: '/api/placeholder/800/400',
+                narrative: "\"There is one way to know,\" your double says. \"The original has a complete memory of arriving at the research facility. The intake process, the initial tests, the moment the first duplicate was created. Duplicates only have fragments or false memories constructed to fill gaps.\"<br><br>They describe the facility—details that suddenly unlock memories in your mind. You remember signing a consent form, the first day of tests, the strange sensation of looking at yourself for the first time. The memories feel authentic, vivid.<br><br>Your doppelgänger watches your reaction closely. \"You remember, don't you? But so do I. That's the problem. We both believe we're the original.\"<br><br>They pull out a coin. \"There's only one fair way to decide. Call it in the air.\"",
+                choices: [
+                    { text: "Accept the coin toss", nextLocation: "coin_toss" },
+                    { text: "Refuse and insist you're the original", nextLocation: "refuse_toss" },
+                    { text: "Suggest you both use the chair together", nextLocation: "chair_together" }
+                ],
+                onEnter: () => increaseSanity(10)
+            },
+            
+            coin_toss: {
+                image: '/api/placeholder/800/400',
+                narrative: "\"Fair enough,\" you say. Your doppelgänger nods and flips the coin high. It spins in the air, catching the light from the bunker's fixtures.<br><br>\"Call it,\" they say as the coin reaches its apex.<br><br>\"Heads,\" you say firmly.<br><br>The coin lands on the back of their hand, and they cover it immediately. There's a moment of tension as you both stare at the covered coin. Finally, they reveal it.<br><br>It's heads.<br><br>\"Congratulations,\" they say, voice tight but resigned. \"The chair is yours. I hope, for both our sakes, you really are the original.\"",
+                choices: [
+                    { text: "Thank them and proceed to the chair", nextLocation: "use_reintegration" },
+                    { text: "Ask if there's another way for both of you to survive", nextLocation: "bunker_alternative_2" }
+                ]
+            },
+            
+            use_reintegration: {
+                image: '/api/placeholder/800/400',
+                narrative: "You sit in the chair. The restraints automatically secure your arms and legs—not painfully, but firmly. The helmet apparatus lowers over your head, cool metal touching your temples.<br><br>The moment you press the initiation button, the room's lights dim, and the machinery hums to life. There's no turning back now.<br><br>A strange sensation washes over you—like your consciousness is being pulled in multiple directions at once. Images flash through your mind: every path you've taken in the forest, every encounter with your other selves, every decision point.<br><br>You hear whispers—your own voice, multiplied—some pleading, some angry, some accepting. One by one, the voices fade until only yours remains.",
+                choices: [
+                    { text: "Complete the reintegration process", nextLocation: "reintegration_complete" }
+                ],
+                onEnter: () => decreaseSanity(20)
+            },
+            
+            reintegration_complete: {
+                image: '/api/placeholder/800/400',
+                narrative: "The process ends, and the restraints release. The helmet retracts upward. You sit in the chair, feeling fundamentally changed. Your mind feels complete for the first time since waking in the woods—all gaps in your memory filled, all uncertainty gone.<br><br>You remember everything now: volunteering for the Project Mirror experiment, the initial success, the gradual fracturing of your identity, the escape into the woods, and the desperate struggle to find your way back to wholeness.<br><br>A message appears on the nearby terminal: \"REINTEGRATION COMPLETE. SUBJECT STABILIZED. CONTAINMENT PROTOCOL LIFTED.\"<br><br>The bunker door opens, revealing not the cave tunnel you entered through, but a modern facility corridor. People in lab coats approach, expressions relieved.<br><br>\"Welcome back,\" one says. \"How much do you remember?\"",
+                choices: [
+                    { text: "Everything", nextLocation: "epilogue" }
+                ],
+                onEnter: () => {
+                    increaseSanity(100);
+                }
+            },
+            
+            epilogue: {
+                image: '/api/placeholder/800/400',
+                narrative: "One month later, you sit in a debriefing room. The Project Mirror experiment has been officially terminated, deemed too dangerous to continue. Your experience—the fragmentation, the doppelgängers, the psychological horror of confronting yourself—has been documented as a cautionary tale.<br><br>You're told you're the only subject who successfully reintegrated. Others remain lost in fragments, either in secure facilities or still wandering similar containment zones around the country.<br><br>As you leave the facility, stepping into real sunlight for the first time in months, you can't shake the feeling that something is still watching you. In reflections, sometimes, you catch a glimpse of your face with an expression you don't recognize—just for a moment before it matches your own again.<br><br>You're whole now. At least, that's what the tests confirm. But in your dreams, you still walk those snowy woods, searching for yourself.",
+                choices: [
+                    { text: "The End - Restart Game", nextLocation: "start" }
+                ],
+                onEnter: () => {
+                    gameState.gameOver = true;
+                    gameState.inventory = [];
+                    gameState.sanity = 100;
+                    gameState.watcherSeen = 0;
+                    gameState.visitedLocations = [];
+                }
+            },
+            
+            lost_sanity: {
+                image: '/api/placeholder/800/400',
+                narrative: "The world around you begins to warp and distort. The trees bend at impossible angles, and the snow beneath your feet turns black like ash. The feeling of being watched is overwhelming—eyes seem to peer from every shadow, every tree, every snowflake.<br><br>Your doppelgängers no longer hide. They step from behind trees, rise from the snow, descend from branches above. Dozens of them, all wearing your face with different expressions—some sad, some angry, some hungry.<br><br>\"You're not real,\" they chant in unison. \"You never were.\"<br><br>As they close in around you, their bodies merge together, and with yours, until individuality loses all meaning. You are them, they are you, all boundaries dissolved.",
+                choices: [
+                    { text: "Restart Game", nextLocation: "start" }
+                ],
+                onEnter: () => {
+                    gameState.gameOver = true;
+                    gameState.inventory = [];
+                    gameState.sanity = 100;
+                    gameState.watcherSeen = 0;
+                    gameState.visitedLocations = [];
+                }
+            },
+            
+            // Additional locations for other paths and endings would be defined here
+            // This is a partial implementation of the game world
+        
+        };
+        
+        // Function to go to a specific location in the game
+        function goToLocation(locationId) {
+            // Get the location data
+            const location = gameLocations[locationId];
+            
+            if (!location) {
+                console.error(`Location ${locationId} not found!`);
+                return;
+            }
+            
+            // Check if this location has a condition and if it's not met
+            if (location.condition && !location.condition()) {
+                // If condition exists and is not met, show message and don't change location
+                narrativeElement.innerHTML = "You can't go there without the necessary items.";
+                return;
+            }
+            
+            // Run the onEnter function if it exists
+            if (location.onEnter) {
+                location.onEnter();
+            }
+            
+            // Update current location
+            gameState.currentLocation = locationId;
+            
+            // Add to visited locations if not already there
+            if (!gameState.visitedLocations.includes(locationId)) {
+                gameState.visitedLocations.push(locationId);
+            }
+            
+            // Update the narrative text
+            narrativeElement.innerHTML = location.narrative;
+            
+            // Update the scene image
+            sceneImageElement.src = location.image;
+            
+            // Clear existing choices
+            choicesElement.innerHTML = '';
+            
+            // Add new choices
+            location.choices.forEach(choice => {
+                // Check if this choice has a condition and if it's met
+                if (!choice.condition || choice.condition()) {
+                    const button = document.createElement('button');
+                    button.classList.add('choice-btn');
+                    button.textContent = choice.text;
+                    button.addEventListener('click', () => {
+                        playClickSound();
+                        goToLocation(choice.nextLocation);
+                    });
+                    choicesElement.appendChild(button);
+                }
+            });
+            
+            // Maybe show the watcher figure
+            maybeShowWatcher();
+            
+            // Scroll narrative to top
+            narrativeElement.scrollTop = 0;
+            
+            // Update status text
+            statusElement.textContent = `Locations visited: ${gameState.visitedLocations.length} | Watcher sightings: ${gameState.watcherSeen}`;
+        }
+        
+        // Initialize the game
+        function initGame() {
+            // Create snow effect
+            createSnow();
+            
+            // Setup audio
+            setupAudio();
+            
+            // Initialize inventory
+            updateInventory();
+            
+            // Initialize sanity meter
+            updateSanityMeter();
+            
+            // Go to the starting location
+            goToLocation('start');
+        }
+        
+        // Start the game when the page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>

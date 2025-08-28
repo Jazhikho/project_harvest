@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Module Test</title>
+</head>
+<body>
+    <h1>Simple Module Test</h1>
+    <p>Testing only utils.js import</p>
+    
+    <script type="module">
+        console.log("Simple test running");
+        
+        // Define a fallback function in case import fails
+        window.testComplete = function(success, message) {
+            const resultElement = document.createElement('div');
+            resultElement.style.padding = '10px';
+            resultElement.style.margin = '10px';
+            resultElement.style.border = '1px solid ' + (success ? 'green' : 'red');
+            resultElement.style.backgroundColor = success ? '#e6ffe6' : '#ffe6e6';
+            resultElement.textContent = message;
+            document.body.appendChild(resultElement);
+        };
+        
+        try {
+            import('./js/utils.js')
+                .then(module => {
+                    console.log("Module imported successfully", module);
+                    window.testComplete(true, "Success! utils.js module loaded correctly.");
+                })
+                .catch(error => {
+                    console.error("Error importing module:", error);
+                    window.testComplete(false, "Error importing module: " + error.message);
+                });
+        } catch (error) {
+            console.error("Critical error:", error);
+            window.testComplete(false, "Critical error: " + error.message);
+        }
+    </script>
+</body>
+</html> 

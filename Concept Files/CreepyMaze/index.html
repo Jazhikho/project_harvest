@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creepy Maze</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        console.log("Document loading");
+    </script>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
+        <div id="hud">Weird Findings: <span id="counter">0</span></div>
+        <div class="vignette"></div>
+        <div id="message-overlay">
+            <div id="message-content"></div>
+        </div>
+        <div id="jumpscare-overlay">
+            <div id="jumpscare-face">
+                <svg width="400" height="300" viewBox="0 0 400 300">
+                    <path d="M200,50 Q270,30 300,100 Q330,170 200,250 Q70,170 100,100 Q130,30 200,50" fill="#ffb3b3" />
+                    <circle cx="150" cy="120" r="25" fill="#000" />
+                    <circle cx="250" cy="120" r="25" fill="#000" />
+                    <path d="M150 150 Q200 220 250 150" stroke="#500" stroke-width="10" fill="none" />
+                    <path d="M170 90 L130 105" stroke="#500" stroke-width="6" />
+                    <path d="M230 90 L270 105" stroke="#500" stroke-width="6" />
+                    
+                    <circle cx="150" cy="120" r="10" fill="#f00" />
+                    <circle cx="250" cy="120" r="10" fill="#f00" />
+                    <path d="M150 170 Q200 220 250 170" stroke="#f00" stroke-width="5" fill="none" />
+                </svg>
+            </div>
+            <div id="game-over-text">GAME OVER</div>
+        </div>
+        <div id="cursor"></div>
+    </div>
+
+    <script src="js/utils.js" type="module"></script>
+    <script src="js/player.js" type="module"></script>
+    <script src="js/renderer.js" type="module"></script>
+    <script src="js/mazeGenerator.js" type="module"></script>
+    <script src="js/weirdThings.js" type="module"></script>
+    <script src="js/gameLogic.js" type="module"></script>
+    
+    <script type="module">
+        console.log("Main script running");
+        
+        import { Game } from './js/gameLogic.js';
+        
+        console.log("Game module imported");
+        
+        // Handle mouse movement for the cursor
+        window.handleMouseMove = function(event) {
+            const cursor = document.getElementById('cursor');
+            const canvas = document.getElementById('gameCanvas');
+            if (!cursor || !canvas) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            cursor.style.left = `${x}px`;
+            cursor.style.top = `${y}px`;
+        };
+        
+        // Initialize game only when DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded");
+            
+            // Give a bit more time for everything to settle
+            setTimeout(function() {
+                console.log("Starting game initialization");
+                try {
+                    const game = new Game();
+                    console.log("Game instance created");
+                    game.init();
+                } catch (error) {
+                    console.error("Error initializing game:", error);
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
