@@ -224,17 +224,52 @@ Every ending reinforces the "harvest" theme - player survival is temporary or ho
 
 **🔄 Legacy System:** Future runs reference your previous "cause of death" through whispers, notes, and environmental storytelling
 
-## 11. Technical Plan
+## 11. Technical Implementation (Godot 4.x)
 
-* **Prototype (2D, TileMap):** Quick test of maze generation, fog-of-war, Weird Things, sanity.
-* **Transition to 3D:** Modular chunks (straight, corner, T, cross) aligned to 20×20 logical grid.
-* **Autoload Managers:** Sanity, Inventory, MazeManager, GameDirector, HarvestRunLog.
-* **Replayability Implementation:**
+### Current Architecture
+* **Engine:** Godot 4.4.1 with GDScript
+* **3D Tile System:** Modular maze segments with dynamic streaming
+* **Autoload Managers:** 
+  - `GameDirector.gd` - Core game state and progression
+  - `TileManager.gd` - Dynamic tile spawning and culling
+  - `SanityManager.gd` - Psychological state tracking
+  - `WeirdThingsManager.gd` - Artifact spawning and effects
+  - `HarvestLogger.gd` - Run persistence and echo system
+  - `MazeManager.gd` - Maze generation and navigation
 
-  * On run end, save JSON with timestamp + summary.
-  * On new run, GameDirector queries log and spawns echo props.
+### Tile Streaming System
+* **Base Tile Scene:** `tile.gd` with door anchor system
+* **Tile Variants:** 5 base shapes (dead end, straight, corner, T-junction, cross)
+* **Dynamic Loading:** 3×3 active grid with forward spawning and backward culling
+* **Performance:** Pre-baked navigation regions with dynamic links
 
-## 12. Balancing Parameters
+### Harvest System Implementation
+* **Run Logging:** JSON persistence with timestamp and death data
+* **Echo Spawning:** Previous run artifacts integrated into new maze generation
+* **Meta-Narrative:** System date/time integration for unique harvest logs
+
+## 12. Development Status & Current Focus
+
+### ✅ Implemented Systems
+* **Core Tile System:** Base tile scenes with door anchor connectivity
+* **Player Controller:** FPS movement with grid-based navigation
+* **Autoload Architecture:** All core managers initialized and connected
+* **Tile Streaming:** Dynamic spawning and culling of maze segments
+* **Basic UI:** HUD framework with sanity display
+
+### 🔄 In Development
+* **Spawning Behavior:** Tile generation and entity placement logic
+* **Weird Things System:** Artifact spawning and interaction mechanics
+* **Entity AI:** Watcher and Stalker behavior implementation
+* **Harvest Logging:** Run persistence and echo system
+
+### 📋 Next Priorities
+* **Graybox Testing:** Validate tile connectivity and spawning patterns
+* **Entity Spawning:** Implement Weird Things and hostile entity placement
+* **Sanity Integration:** Connect psychological state to visual/audio effects
+* **Performance Optimization:** Ensure stable 60fps with dynamic tile streaming
+
+## 13. Balancing Parameters
 
 ### Core Mechanics
 - **Weird Things:** 5–10 spawned per run
@@ -259,7 +294,7 @@ Every ending reinforces the "harvest" theme - player survival is temporary or ho
 - **Log Retention:** Oldest runs pruned after 10 entries
 - **Echo Spawn Rate:** 80% chance per eligible prior death
 
-## 13. MVP Checklist (Target: September 30)
+## 14. MVP Checklist (Target: September 30)
 
 ### Essential Systems
 - [ ] **Maze Generation:** 10+ modular 3D chunks with procedural assembly

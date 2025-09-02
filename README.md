@@ -44,14 +44,16 @@ A survival horror game set in a shifting corn maze where the maze itself is aliv
 Currently in **early development** phase with:
 
 ### ✅ Completed
-- **Game Design Document** (comprehensive 140+ line specification)
-- **2D Prototype** (Creepy Maze proof-of-concept in HTML5/JavaScript)
-- **Core Systems Architecture** (modular ES6 implementation)
+- **Game Design Document** (comprehensive specification focused on Godot implementation)
+- **Core Godot Architecture** (autoload managers and tile streaming system)
+- **Base Tile System** (modular 3D maze segments with door connectivity)
+- **Player Controller** (FPS movement with grid-based navigation)
 
 ### 🔄 In Progress
-- **3D Prototype** (transitioning to Godot Engine)
-- **Maze Generation System** (upgrading from 2D to 3D chunks)
-- **Harvest Log System** (persistent run data storage)
+- **Spawning Behavior** (tile generation and entity placement logic)
+- **Weird Things System** (artifact spawning and interaction mechanics)
+- **Entity AI** (Watcher and Stalker behavior implementation)
+- **Harvest Log System** (persistent run data and echo spawning)
 
 ### 📋 Planned Features
 - **Advanced Entity AI** (Stalker hunt patterns, Watcher psychological effects)
@@ -63,8 +65,8 @@ Currently in **early development** phase with:
 ## 🏗️ Technical Architecture
 
 ### Current Stack
-- **Engine:** Godot 4.x (transitioning from HTML5 prototype)
-- **Language:** GDScript + JavaScript (legacy prototype)
+- **Engine:** Godot 4.4.1
+- **Language:** GDScript
 - **Platform:** PC (Windows/Linux/Mac)
 
 ### Project Structure
@@ -72,42 +74,39 @@ Currently in **early development** phase with:
 project_harvest/
 ├── GDD.md                     # Game Design Document
 ├── project.godot              # Godot project file
-├── Concept Files/             # Prototype implementations
-│   └── CreepyMaze/           # 2D HTML5 prototype
-│       ├── index.html        # Main prototype entry
-│       ├── js/               # Modular JavaScript implementation
-│       └── README.md         # Prototype documentation
-└── README.md                 # This file
+├── scripts/                   # Core game systems
+│   ├── autoloads/            # Global managers (GameDirector, TileManager, etc.)
+│   ├── entities/             # Player, Stalker, Watcher implementations
+│   ├── tiles/                # Tile system and door logic
+│   └── ui/                   # HUD and interface systems
+├── scenes/                    # Game scenes and prefabs
+│   ├── tiles/                # Modular maze segment scenes
+│   ├── entities/             # Entity prefabs
+│   └── ui/                   # Interface scenes
+├── assets/                    # 3D models, textures, audio
+└── Concept Files/             # Legacy 2D prototype (reference only)
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Godot Engine 4.x** for main development
-- **Modern Web Browser** for prototype testing
-- **Local Web Server** (Python/Node.js) for prototype
-
-### Running the 2D Prototype
-1. Navigate to `Concept Files/CreepyMaze/`
-2. Start a local web server:
-   ```bash
-   # Using Python
-   python -m http.server 8000
-   
-   # Using Node.js
-   npx http-server
-   ```
-3. Open `http://localhost:8000` in your browser
+- **Godot Engine 4.4.1** for main development
+- **Git** for version control
 
 ### Development Setup
 1. Clone the repository
-2. Open `project.godot` in Godot Engine
+2. Open `project.godot` in Godot Engine 4.4.1
 3. Review `GDD.md` for full design specifications
-4. Check prototype implementation for reference mechanics
+4. Run the project to test current graybox implementation
+
+### Current Development Focus
+- **Graybox Testing:** Validating tile connectivity and spawning patterns
+- **Spawning Behavior:** Implementing proper entity and Weird Things placement
+- **Performance Optimization:** Ensuring stable frame rates with dynamic tile streaming
 
 ## 📅 Development Timeline
 
-**Target:** September 28, 2024 (Minimum Viable Product)
+**Target:** September 28, 2025 (Minimum Viable Product)
 **Available Time:** 1-2 hours daily
 
 See [TIMELINE.md](TIMELINE.md) for detailed week-by-week development schedule.

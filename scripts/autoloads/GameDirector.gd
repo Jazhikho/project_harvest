@@ -31,7 +31,7 @@ func _ready():
 	_initialize_game_systems()
 
 func _initialize_game_systems():
-	maze_manager = get_node("/root/MazeManager")
+	maze_manager = get_node("/root/TileManager")
 	sanity_manager = get_node("/root/SanityManager") 
 	harvest_logger = get_node("/root/HarvestLogger")
 	weird_things_manager = get_node("/root/WeirdThingsManager")

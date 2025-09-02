@@ -5,7 +5,7 @@ extends CharacterBody3D
 @export var movement_speed: float = 4.5
 @export var sprint_mult: float = 1.6
 @export var mouse_sensitivity: float = 0.003
-@export var flashlight_battery_max: float = 300.0  # 5 minutes
+@export var flashlight_battery_max: float = 300.0  # 5 minutes max
 @export var flashlight_drain_rate: float = 1.0     # per second
 
 # Tile-based positioning for streaming maze
@@ -17,8 +17,8 @@ var position_in_tile: Vector3 = Vector3.ZERO  # Local position within current ti
 var last_move_time: float = 0.0
 var move_cooldown: float = 0.2  # Prevent too-rapid grid movement
 
-# Flashlight system
-var flashlight_battery: float = 300.0
+# Flashlight system - randomized battery life between 1-5 minutes
+var flashlight_battery: float
 var flashlight_enabled: bool = true
 
 # References
@@ -28,6 +28,7 @@ var flashlight_enabled: bool = true
 
 # Input handling
 var mouse_captured: bool = false
+var debug_mode: bool = false
 
 func _ready():
 	# Add to player group for tile entrance detection
@@ -45,14 +46,15 @@ func _ready():
 	# Set initial world position based on tile position
 	_update_tile_position()
 	
-	# Initialize flashlight
+	# Initialize flashlight with random battery life (1-5 minutes)
+	flashlight_battery = randf_range(60.0, 300.0)  # 1-5 minutes in seconds
+	flashlight_battery_max = flashlight_battery  # Set max to current for proper ratio calculations
 	_update_flashlight_state()
 	
 	# Connect to tile system
 	var tile_manager = get_node("/root/TileManager")
 	if tile_manager:
-		tile_manager.tile_spawned.connect(_on_tile_spawned)
-		tile_manager.tile_culled.connect(_on_tile_culled)
+		tile_manager.player_entered_tile.connect(_on_player_entered_tile)
 
 func _input(event):
 	if not mouse_captured:
@@ -65,6 +67,11 @@ func _input(event):
 	# Toggle flashlight
 	if event.is_action_pressed("toggle_flashlight"):
 		_toggle_flashlight()
+	
+	# Toggle debug mode
+	if event is InputEventKey and event.pressed and event.keycode == KEY_TAB:
+		debug_mode = !debug_mode
+		print("Debug mode: ", debug_mode)
 	
 	# Escape to release mouse (for debugging)
 	if event.is_action_pressed("ui_cancel"):
@@ -93,36 +100,51 @@ func _handle_movement(delta):
 	"""Handle continuous FPS movement within tiles"""
 	var input_dir = Vector3.ZERO
 	
-	# Get input direction relative to camera
-	if Input.is_action_pressed("move_forward"):
-		input_dir -= transform.basis.z
-	if Input.is_action_pressed("move_back"):
-		input_dir += transform.basis.z
-	if Input.is_action_pressed("move_left"):
-		input_dir -= transform.basis.x
-	if Input.is_action_pressed("move_right"):
-		input_dir += transform.basis.x
-	
-	# Apply movement
-	if input_dir.length() > 0:
-		velocity = input_dir.normalized() * movement_speed
-		move_and_slide()
+	if debug_mode:
+		# Debug flight mode - free movement
+		if Input.is_action_pressed("move_forward"):
+			input_dir -= transform.basis.z
+		if Input.is_action_pressed("move_back"):
+			input_dir += transform.basis.z
+		if Input.is_action_pressed("move_left"):
+			input_dir -= transform.basis.x
+		if Input.is_action_pressed("move_right"):
+			input_dir += transform.basis.x
+		if Input.is_key_pressed(KEY_Q):  # Q key for up
+			input_dir += Vector3.UP
+		if Input.is_key_pressed(KEY_E):  # E key for down
+			input_dir += Vector3.DOWN
 		
-		# Update position within tile
-		_update_position_in_tile()
+		# Apply debug movement (no collision, direct position change)
+		if input_dir.length() > 0:
+			global_position += input_dir.normalized() * movement_speed * delta * 3.0  # Faster in debug
+		
+		# Clear velocity to prevent physics interference
+		velocity = Vector3.ZERO
+	else:
+		# Normal movement with collision
+		if Input.is_action_pressed("move_forward"):
+			input_dir -= transform.basis.z
+		if Input.is_action_pressed("move_back"):
+			input_dir += transform.basis.z
+		if Input.is_action_pressed("move_left"):
+			input_dir -= transform.basis.x
+		if Input.is_action_pressed("move_right"):
+			input_dir += transform.basis.x
+		
+		# Apply movement
+		if input_dir.length() > 0:
+			velocity = input_dir.normalized() * movement_speed
+			move_and_slide()
+			
+			# Update position within tile
+			_update_position_in_tile()
 
 func _check_tile_transitions():
-	"""Check if player has moved between tiles"""
-	var new_tile = _world_to_tile(global_position)
-	
-	if new_tile != current_tile:
-		var tile_manager = get_node("/root/TileManager")
-		if tile_manager:
-			# Determine transition direction
-			var direction = _get_transition_direction(current_tile, new_tile)
-			if direction != -1:
-				tile_manager.on_player_transition(current_tile, new_tile, direction)
-				current_tile = new_tile
+	"""Check if player has crossed any door thresholds"""
+	# This is now handled by the tile door detection system
+	# Player transitions are detected when crossing 3D markers
+	pass
 
 func _get_transition_direction(from_tile: Vector2i, to_tile: Vector2i) -> int:
 	"""Determine which direction the player moved between tiles"""
@@ -175,11 +197,12 @@ func _update_flashlight_state():
 	if flashlight_enabled and flashlight_battery > 0.0:
 		flashlight.visible = true
 		
-		# Dim light as battery drains
-		var battery_ratio = flashlight_battery / flashlight_battery_max
-		flashlight.light_energy = battery_ratio * 2.0
+		# Maintain consistent light energy - don't scale with battery
+		# Battery only affects duration, not brightness
+		flashlight.light_energy = 2.0
 		
-		# Flicker when battery is low
+		# Flicker when battery is low (below 20%)
+		var battery_ratio = flashlight_battery / flashlight_battery_max
 		if battery_ratio < 0.2:
 			if randf() < 0.1:  # 10% chance to flicker
 				flashlight.visible = false
@@ -242,13 +265,11 @@ func set_tile_position(new_tile: Vector2i):
 	current_tile = new_tile
 	_update_tile_position()
 
-func _on_tile_spawned(tile_pos: Vector2i, tile_type: String):
-	"""Handle tile spawning events"""
-	print("PLAYER: Tile spawned at ", tile_pos, " (type: ", tile_type, ")")
-
-func _on_tile_culled(tile_pos: Vector2i):
-	"""Handle tile culling events"""
-	print("PLAYER: Tile culled at ", tile_pos)
+func _on_player_entered_tile(tile_pos: Vector2i):
+	"""Handle player entering a new tile"""
+	print("PLAYER: Entered tile at ", tile_pos)
+	current_tile = tile_pos
+	_update_position_in_tile()
 
 # Flashlight API
 func get_flashlight_battery_ratio() -> float:
