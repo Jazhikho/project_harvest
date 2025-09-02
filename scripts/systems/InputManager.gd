@@ -33,7 +33,7 @@ func _input(event):
 	# Track input timing for buffer/combo systems
 	for action in INPUT_ACTIONS.keys():
 		if event.is_action_pressed(action):
-			last_input_time[action] = Time.get_time_from_start()
+			last_input_time[action] = Time.get_time_string_from_system()
 			input_buffer[action] = true
 		elif event.is_action_released(action):
 			input_buffer[action] = false

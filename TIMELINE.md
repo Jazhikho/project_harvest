@@ -23,33 +23,33 @@
 *Goal: Establish solid technical foundation*
 
 #### **Day 1 (Aug 28) - Project Setup** [1.5h]
-- [ ] Create Godot project structure
-- [ ] Set up autoload managers (GameDirector, MazeManager, etc.)
-- [ ] Import assets folder structure
-- [ ] Test basic scene setup
+- [x] Create Godot project structure
+- [x] Set up autoload managers (GameDirector, MazeManager, etc.)
+- [x] Import assets folder structure
+- [x] Test basic scene setup
 
 #### **Day 2 (Aug 29) - Scene Architecture** [1.5h]
-- [ ] Create main game scene hierarchy
-- [ ] Set up basic lighting system
-- [ ] Create player spawn point
-- [ ] Test camera controller basics
+- [x] Create main game scene hierarchy
+- [x] Set up basic lighting system
+- [x] Create player spawn point
+- [x] Test camera controller basics
 
 #### **Day 3 (Aug 30) - Maze Foundation** [2h]
-- [ ] Port maze generation logic from JS prototype
+- [x] Port maze generation logic from JS prototype
 - [ ] Create basic 3D tile system (walls, floors)
-- [ ] Test 20x20 grid generation
-- [ ] Basic collision setup
+- [x] Test 20x20 grid generation
+- [x] Basic collision setup
 
 #### **Day 4 (Aug 31) - Visual Systems** [1.5h]
 - [ ] Implement fog-of-war prototype
-- [ ] Basic flashlight mechanics
+- [x] Basic flashlight mechanics
 - [ ] Simple corn maze textures/materials
-- [ ] Test lighting visibility
+- [x] Test lighting visibility
 
 #### **Day 5 (Sep 1) - Player Basics** [1.5h]
-- [ ] FPS controller implementation
-- [ ] Grid-based movement logic
-- [ ] Flashlight attachment and controls
+- [x] FPS controller implementation
+- [x] Grid-based movement logic
+- [x] Flashlight attachment and controls
 - [ ] Basic movement sound effects
 
 #### **Day 6 (Sep 2) - Polish Week 1** [1h]
@@ -71,17 +71,17 @@
 #### **Day 8 (Sep 4) - Maze Chunks** [2h]
 - [ ] Create modular 3D maze pieces (straight, corner, T-junction, cross)
 - [ ] Implement chunk swapping system
-- [ ] Test procedural assembly
+- [x] Test procedural assembly
 
 #### **Day 9 (Sep 5) - Maze Shifting** [1.5h]
-- [ ] Port `changeMazePart` logic from prototype
-- [ ] Implement timer-based maze shifts
-- [ ] Add visual/audio feedback for shifts
+- [x] Port `changeMazePart` logic from prototype
+- [x] Implement timer-based maze shifts
+- [x] Add visual/audio feedback for shifts
 
 #### **Day 10 (Sep 6) - Distortion Zones** [1.5h]
-- [ ] Create special maze areas with enhanced shifting
-- [ ] Implement proximity-triggered distortions
-- [ ] Test maze stability
+- [x] Create special maze areas with enhanced shifting
+- [x] Implement proximity-triggered distortions
+- [x] Test maze stability
 
 #### **Day 11 (Sep 7) - Navigation Polish** [1.5h]
 - [ ] Improve collision detection
@@ -110,34 +110,34 @@
 *Goal: Watcher, Stalker, Overseer Eyes, and psychological horror systems*
 
 #### **Day 15 (Sep 11) - Sanity System** [1.5h]
-- [ ] Implement sanity manager (0-100 scale)
-- [ ] Create visual feedback (screen effects, color grading)
-- [ ] Basic sanity loss triggers
+- [x] Implement sanity manager (0-100 scale)
+- [x] Create visual feedback (screen effects, color grading)
+- [x] Basic sanity loss triggers
 
 #### **Day 16 (Sep 12) - The Watcher** [2h]
-- [ ] Create Watcher entity prefab
-- [ ] Implement probability-based spawning
-- [ ] Basic stalking behavior AI
+- [x] Create Watcher entity prefab
+- [x] Implement probability-based spawning
+- [x] Basic stalking behavior AI
 
 #### **Day 17 (Sep 13) - Weird Things Foundation** [1.5h]
-- [ ] Create weird things spawning system
-- [ ] Implement 3 basic weird thing types
-- [ ] Pickup interaction mechanics
+- [x] Create weird things spawning system
+- [x] Implement 3 basic weird thing types
+- [x] Pickup interaction mechanics
 
 #### **Day 18 (Sep 14) - Weird Things Effects** [1.5h]
-- [ ] Screen flicker effects
-- [ ] Local maze distortion triggers
-- [ ] Audio/visual feedback system
+- [x] Screen flicker effects
+- [x] Local maze distortion triggers
+- [x] Audio/visual feedback system
 
 #### **Day 19 (Sep 15) - Inventory System** [1h]
-- [ ] Basic inventory manager
-- [ ] Simple UI display
-- [ ] Item collection mechanics
+- [x] Basic inventory manager
+- [x] Simple UI display
+- [x] Item collection mechanics
 
 #### **Day 20 (Sep 16) - Entity Integration** [1.5h]
-- [ ] Watcher-sanity interaction
-- [ ] Weird things affect sanity
-- [ ] Test entity spawning balance
+- [x] Watcher-sanity interaction
+- [x] Weird things affect sanity
+- [x] Test entity spawning balance
 
 #### **Day 21 (Sep 17) - Week 3 Polish** [1h]
 - [ ] Bug fixes and optimization
@@ -192,14 +192,14 @@
 *Goal: Dr. Amundsen integration, false exit, and MVP completion*
 
 #### **Day 29 (Sep 25) - Harvest System Foundation** [1.5h]
-- [ ] Implement run logging (JSON save system)
-- [ ] Create timestamp-based run identification
-- [ ] Basic echo spawning system
+- [x] Implement run logging (JSON save system)
+- [x] Create timestamp-based run identification
+- [x] Basic echo spawning system
 
 #### **Day 30 (Sep 26) - Echo Implementation** [1.5h]
-- [ ] Spawn corpse/effigy of previous run
-- [ ] Generate notes from prior attempts
-- [ ] Test replay echo placement
+- [x] Spawn corpse/effigy of previous run
+- [x] Generate notes from prior attempts
+- [x] Test replay echo placement
 
 #### **Day 31 (Sep 27) - Final Polish** [1h]
 - [ ] Audio implementation and mixing
@@ -254,6 +254,7 @@ By September 28, the game must have:
 - ✅ **Functional sanity** system with feedback
 - ✅ **Basic weird things** collection (minimum 3 types)
 - ✅ **Watcher entity** with spawning
+- ✅ **Stalker entity** with hunt AI
 - ✅ **Exit gate** with key requirement
 - ✅ **Harvest logging** system with timestamped runs
 - ✅ **At least 1 echo** spawning in subsequent runs

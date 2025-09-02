@@ -13,7 +13,7 @@ A survival horror game set in a shifting corn maze where the maze itself is aliv
 ## 🎮 Key Features
 
 ### Core Horror Mechanics
-- **🌪️ Living Maze:** 100×100 procedural grid that actively reshapes during gameplay
+- **🌪️ Living Maze:** 20×20 procedural grid that actively reshapes during gameplay
 - **🔦 Limited Vision:** First-person perspective with dynamic fog and lighting
 - **🎭 Weird Things:** Mysterious artifacts (dolls, music boxes, mirrors) that trigger disturbing effects
 - **🧠 Sanity System:** Psychological degradation affects entity encounters and maze hostility

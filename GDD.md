@@ -15,14 +15,21 @@ A survival horror game set in a shifting corn maze at **"Jeri's Happy Funtime Ha
 ## 2. Key Features
 
 ### Core Mechanics
-* **🌪️ Shifting Maze:** 100×100 grid with procedural generation and distortion zones. Maze actively reshapes over time or when triggered by events
+* **🌊 Dynamic Tile-Streaming Maze:** Infinite procedural maze using modular tile segments
+  - Each tile is a self-contained 10×10m maze segment with 4 potential exits (N/E/S/W)
+  - Only current tile + immediate neighbors exist in memory (3×3 grid maximum)
+  - As player moves forward, new tiles spawn ahead and old tiles behind are culled
+  - Creates endless, non-repeating maze that feels truly infinite
+* **🔄 Tile Library System:** 5 base shapes rotated to create all variations
+  - **Dead End** (1 exit), **Straight** (2 opposite), **Corner** (2 adjacent)
+  - **T-Junction** (3 exits), **Cross** (4 exits)
+  - Door bitmask system with rotation logic for seamless connections
 * **🔦 Limited Vision:** First-person perspective with fog volumes and dynamic lighting that obscures distant areas
-* **🎭 Weird Things (Pickups):** Mysterious objects scattered throughout (doll, music box, mirror, symbols, pocket watch, notes)
+* **🎭 Weird Things (Pickups):** Mysterious objects scattered throughout maze segments
+  - Spawn based on distance tiers and tension levels
   - Trigger narrative messages and visual effects
-  - Cause screen/light flickers
-  - Create local maze distortions
-  - Temporarily lift fog of war
-  - Can activate Stalker pursuit
+  - Create local reality distortions within tiles
+  - Can activate Stalker pursuit and entity spawning
 
 ### Psychological Systems
 * **🧠 Sanity System:** Gradually drops during encounters and over time. Lower sanity increases:
@@ -36,20 +43,21 @@ A survival horror game set in a shifting corn maze at **"Jeri's Happy Funtime Ha
 
 ### Horror Elements
 * **🚪 False Exit:** The "escape" door triggers a final jumpscare - there is no true escape
-* **⚱️ Harvest System:** Each run is timestamped and logged. Subsequent runs contain echoes:
-  - Corpse/scarecrow effigy with previous run's timestamp
-  - Auto-generated notes in "your handwriting" from prior attempts
-  - Distorted items dropped by the "previous you"
-  - Sanity whispers referencing past choices and deaths
+* **⚱️ Harvest System:** Each run logged with timestamp, tile progression, and death data:
+  - Previous run's final 6-10 tiles may spawn echo props (corpses, notes, whispers)
+  - Timestamp integration: "Subject logged at 22:14. Outcome: fragmented."
+  - Tile pattern matching creates familiar yet distorted revisitations
+  - Auto-generated notes in "your handwriting" from tile-specific encounters
 
 ## 3. Gameplay Loop
 
-1. Navigate maze with limited vision.
-2. Collect Weird Things and lore notes.
-3. Manage sanity while avoiding Watcher/Stalker.
-4. Survive maze shifts that alter known paths.
-5. Find and unlock the exit gate.
-6. Fail or succeed → new run integrates echoes of the last subject.
+1. **Navigate** infinite maze segments with limited vision
+2. **Transition** between tiles as new areas generate ahead and old areas fade behind
+3. **Collect** Weird Things and lore notes scattered throughout tiles
+4. **Manage** sanity while avoiding Watcher/Stalker entities that spawn in new tiles
+5. **Progress** through content tiers as distance increases (basic → intermediate → advanced threats)
+6. **Encounter** false exits and harvest chambers as the maze weaponizes hope
+7. **Fail or succeed** → tile progression and death location logged for future echo spawning
 
 ## 4. Narrative Layers
 
@@ -62,13 +70,39 @@ A survival horror game set in a shifting corn maze at **"Jeri's Happy Funtime Ha
   * Caves/Bunker → Service Tunnel and Exit Gate
 * **Stalker Theme:** Encounters with stalker escalate toward the exit, where the final decision is made.
 
-## 5. Level & Systems Mapping
+## 5. Dynamic Tile-Streaming System
 
-* **Maze Generator:** Grid DFS with distortion patterns and `changeMazePart` (local wall toggling). Direct lift from JS Creepy Maze.
-* **Player Movement:** Continuous first-person controller in 3D (grid-mapped for logic).
-* **Renderer/Presentation:** Fog-of-war and lighting ported to 3D fog volumes and flashlight.
-* **WeirdThings Manager:** Items randomly placed (5–10). Random effects + story text.
-* **Game Director:** Oversees sanity, maze shift timers, narrative thresholds, replay logging, and run echoes.
+### Technical Architecture
+* **TileManager (Autoload):** Manages active tile grid, spawning/culling, and tile selection logic
+* **Tile.tscn Base Scene:** Modular maze segments with consistent structure:
+  - **DoorAnchor nodes** (N/E/S/W) for seamless connection between tiles
+  - **NavRegion** pre-baked per tile for AI pathfinding
+  - **PortalOccluder** for performance optimization
+  - **Decoration spawn points** for Weird Things and entities
+
+### Door System & Rotation Logic
+* **Door Bitmask:** 4 bits encode exits (N=1, E=2, S=4, W=8)
+* **Rotation Algorithm:** 90° clockwise bit shifts for seamless tile orientation
+* **Connectivity Rules:** New tiles must have entrance door matching player's exit direction
+* **NavigationLink3D** connects door anchors across tile boundaries
+
+### Streaming Rules
+* **Active Radius:** Keep only current tile + immediate neighbors (3×3 grid max)
+* **Forward Spawning:** Generate next tile based on player movement direction
+* **Backward Culling:** Remove tiles beyond active radius to maintain performance
+* **Transition Detection:** PlayerTileTrigger Area3D fires when crossing tile boundaries
+
+### Content Generation Tiers
+* **Tier 1 (Tiles 1-4):** Batteries, guiding notes, no active threats
+* **Tier 2 (Tiles 5-10):** Basic Weird Things, Caretaker spawn chance
+* **Tier 3 (Tiles 10+):** Advanced Weird Things, Overseer Eyes, Stalker activation
+* **Special Tiles:** Landmarks, false exits, safe rooms placed by distance/state
+
+### Performance Benefits
+* **Minimal Memory Footprint:** Only 9 tiles maximum in memory
+* **No Global Navigation Rebaking:** Pre-baked tiles with dynamic links
+* **Predictable Performance:** Constant tile count regardless of play duration
+* **Endless Exploration:** True infinite maze without repetition detection
 
 ## 6. Core Systems (Integration)
 

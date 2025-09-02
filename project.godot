@@ -12,18 +12,24 @@ config_version=5
 
 config/name="Project Harvest"
 config/description="A survival horror game set in a shifting corn maze where failed runs become part of future attempts."
-run/main_scene="res://scenes/Main.tscn"
+config/version="0.1"
+run/main_scene="res://tests/TestScene.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
+boot_splash/image="uid://bfcs07l4fo4rs"
 config/icon="res://icon.svg"
 
 [autoload]
 
 GameDirector="*res://scripts/autoloads/GameDirector.gd"
-MazeManager="*res://scripts/autoloads/MazeManager.gd"
+TileManager="*res://scripts/autoloads/TileManager.gd"
 SanityManager="*res://scripts/autoloads/SanityManager.gd"
 WeirdThingsManager="*res://scripts/autoloads/WeirdThingsManager.gd"
 HarvestLogger="*res://scripts/autoloads/HarvestLogger.gd"
 InputManager="*res://scripts/systems/InputManager.gd"
+
+[dotnet]
+
+project/assembly_name="Project Harvest"
 
 [input]
 
@@ -58,11 +64,14 @@ interact={
 ]
 }
 
+[layer_names]
+
+3d_physics/layer_1="player"
+3d_physics/layer_2="walls"
+3d_physics/layer_3="objects"
+3d_physics/layer_4="entities"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
-environment/defaults/default_clear_color=Color(0.05, 0.05, 0.1, 1)
-
-[dotnet]
-
-project/assembly_name="Project Harvest"
+environment/defaults/default_clear_color=Color(0.552617, 0.557704, 0.742004, 1)

@@ -1,0 +1,11 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://b0bhcig5i434c"]
+
+[ext_resource type="Texture2D" uid="uid://od0ny70snc00" path="res://assets/textures/cornleaf.png" id="1_a6us0"]
+
+[resource]
+cull_mode = 2
+albedo_texture = ExtResource("1_a6us0")
+uv1_scale = Vector3(0.09, 0.09, 1.03)
+uv1_offset = Vector3(0.5, 0, 0)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 84.4486

@@ -1,0 +1,59 @@
+[gd_scene load_steps=8 format=3 uid="uid://dtkjjh5mhxesh"]
+
+[ext_resource type="PackedScene" uid="uid://cgq0opw06gk1j" path="res://assets/models/cornstalk.glb" id="1_mol7p"]
+[ext_resource type="Material" uid="uid://c50i2vqj0plh0" path="res://assets/textures/stalk.tres" id="3_y6cgm"]
+[ext_resource type="Material" uid="uid://cwhg35tkdmyb2" path="res://assets/textures/stalks.tres" id="4_tvt03"]
+[ext_resource type="Material" uid="uid://b0bhcig5i434c" path="res://assets/textures/leaf.tres" id="5_0i1ab"]
+
+[sub_resource type="Animation" id="Animation_78gn6"]
+resource_name = "Sway"
+length = 4.0
+loop_mode = 1
+step = 30.0
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:Tip")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 2, 1, 0.026, 0, 0, 1, 4, 1, 0, 0, 0, 1)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:Mid-tip")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 2, 1, 0.017, 0, 0, 1, 4, 1, 0, 0, 0, 1)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:Mid-root")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 2, 1, 0.009, 0, 0, 1, 4, 1, 0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_mol7p"]
+length = 0.001
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_17ufp"]
+_data = {
+&"RESET": SubResource("Animation_mol7p"),
+&"Sway": SubResource("Animation_78gn6")
+}
+
+[node name="cornstalk" instance=ExtResource("1_mol7p")]
+
+[node name="Skeleton3D" parent="Armature" index="0"]
+bones/1/rotation = Quaternion(0.00331188, 0, 0, 0.999995)
+bones/2/rotation = Quaternion(0.00625569, 0, 0, 0.99998)
+bones/3/rotation = Quaternion(0.00956728, 0, 0, 0.999954)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Armature/Skeleton3D" index="0"]
+libraries = {
+&"": SubResource("AnimationLibrary_17ufp")
+}
+
+[node name="Stalk" parent="Armature/Skeleton3D" index="1"]
+surface_material_override/0 = ExtResource("3_y6cgm")
+surface_material_override/1 = ExtResource("5_0i1ab")
+surface_material_override/2 = ExtResource("4_tvt03")

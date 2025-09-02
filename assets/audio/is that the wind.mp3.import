@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://btwwvusmwf1vf"
+path="res://.godot/imported/is that the wind.mp3-7537e1e2eb780cdacc2f4df8963ca10d.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/is that the wind.mp3"
+dest_files=["res://.godot/imported/is that the wind.mp3-7537e1e2eb780cdacc2f4df8963ca10d.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,17 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3 uid="uid://cwhg35tkdmyb2"]
+
+[ext_resource type="Texture2D" uid="uid://c8srcfjqsv4ig" path="res://assets/textures/Foliage003_4K-PNG/Foliage003_4K-PNG_Color.png" id="1_2w6dt"]
+[ext_resource type="Texture2D" uid="uid://b2t4khis8co4" path="res://assets/textures/Foliage003_4K-PNG/Foliage003_4K-PNG_NormalGL.png" id="2_0thw0"]
+[ext_resource type="Texture2D" uid="uid://cjku2f645mrr6" path="res://assets/textures/Foliage003_4K-PNG/Foliage003_4K-PNG_Roughness.png" id="3_1gmjx"]
+
+[resource]
+transparency = 2
+alpha_scissor_threshold = 0.005
+alpha_antialiasing_mode = 2
+alpha_antialiasing_edge = 0.06
+cull_mode = 2
+depth_draw_mode = 1
+albedo_texture = ExtResource("1_2w6dt")
+roughness_texture = ExtResource("3_1gmjx")
+normal_enabled = true
+normal_texture = ExtResource("2_0thw0")

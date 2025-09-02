@@ -2,14 +2,16 @@ extends CharacterBody3D
 ## Player Controller - First-person movement with grid-based logic
 ## Ported from JavaScript player.js with 3D enhancements
 
-@export var movement_speed: float = 5.0
+@export var movement_speed: float = 4.5
+@export var sprint_mult: float = 1.6
 @export var mouse_sensitivity: float = 0.003
 @export var flashlight_battery_max: float = 300.0  # 5 minutes
 @export var flashlight_drain_rate: float = 1.0     # per second
 
-# Grid-based positioning for maze logic
-var grid_position: Vector2i = Vector2i(1, 1)
-var grid_size: float = 4.0  # Size of each maze cell in world units
+# Tile-based positioning for streaming maze
+var current_tile: Vector2i = Vector2i(0, 0)
+var tile_size: float = 20.0  # Size of each tile segment in world units
+var position_in_tile: Vector3 = Vector3.ZERO  # Local position within current tile
 
 # Movement state
 var last_move_time: float = 0.0
@@ -28,15 +30,29 @@ var flashlight_enabled: bool = true
 var mouse_captured: bool = false
 
 func _ready():
+	# Add to player group for tile entrance detection
+	add_to_group("player")
+	
+	# Set collision layers and masks
+	# Layer 1: player, Layer 2: walls, Layer 3: objects, Layer 4: entities
+	collision_layer = 1  # Player is on layer 1
+	collision_mask = 2   # Player collides with walls (layer 2)
+	
 	# Capture mouse for FPS controls
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	mouse_captured = true
 	
-	# Set initial world position based on grid position
-	_update_world_position()
+	# Set initial world position based on tile position
+	_update_tile_position()
 	
 	# Initialize flashlight
 	_update_flashlight_state()
+	
+	# Connect to tile system
+	var tile_manager = get_node("/root/TileManager")
+	if tile_manager:
+		tile_manager.tile_spawned.connect(_on_tile_spawned)
+		tile_manager.tile_culled.connect(_on_tile_culled)
 
 func _input(event):
 	if not mouse_captured:
@@ -69,66 +85,79 @@ func _handle_mouse_look(relative_motion: Vector2):
 
 func _physics_process(delta):
 	_handle_movement(delta)
-	_update_flashlight(delta)
+	_update_flashlight(delta) 
+	_check_tile_transitions()
 	_check_maze_interactions()
 
 func _handle_movement(delta):
-	"""Handle player movement with grid constraints"""
-	var input_vector = Vector2.ZERO
+	"""Handle continuous FPS movement within tiles"""
+	var input_dir = Vector3.ZERO
 	
-	# Get input direction
+	# Get input direction relative to camera
 	if Input.is_action_pressed("move_forward"):
-		input_vector.y -= 1
+		input_dir -= transform.basis.z
 	if Input.is_action_pressed("move_back"):
-		input_vector.y += 1
+		input_dir += transform.basis.z
 	if Input.is_action_pressed("move_left"):
-		input_vector.x -= 1
+		input_dir -= transform.basis.x
 	if Input.is_action_pressed("move_right"):
-		input_vector.x += 1
+		input_dir += transform.basis.x
 	
-	# Apply movement cooldown
-	if Time.get_time_from_start() - last_move_time < move_cooldown:
-		return
-	
-	if input_vector.length() > 0:
-		_attempt_grid_movement(input_vector.normalized())
-
-func _attempt_grid_movement(direction: Vector2):
-	"""Attempt to move to adjacent grid cell"""
-	var new_grid_pos = grid_position
-	
-	# Determine grid movement direction
-	if abs(direction.x) > abs(direction.y):
-		new_grid_pos.x += 1 if direction.x > 0 else -1
-	else:
-		new_grid_pos.y += 1 if direction.y > 0 else -1
-	
-	# Check if movement is valid with maze
-	var maze_manager = get_node("/root/MazeManager")
-	if maze_manager and maze_manager.can_move(grid_position.x, grid_position.y, new_grid_pos.x, new_grid_pos.y):
-		grid_position = new_grid_pos
-		_update_world_position()
-		last_move_time = Time.get_time_from_start()
+	# Apply movement
+	if input_dir.length() > 0:
+		velocity = input_dir.normalized() * movement_speed
+		move_and_slide()
 		
-		# Check for weird things at new position
-		_check_weird_things_collection()
+		# Update position within tile
+		_update_position_in_tile()
 
-func _update_world_position():
-	"""Update 3D world position based on grid position"""
-	var world_pos = Vector3(
-		grid_position.x * grid_size,
-		global_position.y,  # Keep current Y
-		grid_position.y * grid_size
-	)
-	global_position = world_pos
+func _check_tile_transitions():
+	"""Check if player has moved between tiles"""
+	var new_tile = _world_to_tile(global_position)
+	
+	if new_tile != current_tile:
+		var tile_manager = get_node("/root/TileManager")
+		if tile_manager:
+			# Determine transition direction
+			var direction = _get_transition_direction(current_tile, new_tile)
+			if direction != -1:
+				tile_manager.on_player_transition(current_tile, new_tile, direction)
+				current_tile = new_tile
+
+func _get_transition_direction(from_tile: Vector2i, to_tile: Vector2i) -> int:
+	"""Determine which direction the player moved between tiles"""
+	var delta = to_tile - from_tile
+	
+	if delta == Vector2i(0, -1):
+		return 0  # North
+	elif delta == Vector2i(1, 0):
+		return 1  # East
+	elif delta == Vector2i(0, 1):
+		return 2  # South
+	elif delta == Vector2i(-1, 0):
+		return 3  # West
+	
+	return -1  # Invalid transition
+
+func _update_position_in_tile():
+	"""Update local position within current tile"""
+	var tile_origin = Vector3(current_tile.x * tile_size, 0, current_tile.y * tile_size)
+	position_in_tile = global_position - tile_origin
+
+func _update_tile_position():
+	"""Update tile position based on world position"""
+	current_tile = _world_to_tile(global_position)
+	_update_position_in_tile()
+
+func _world_to_tile(world_pos: Vector3) -> Vector2i:
+	"""Convert world position to tile coordinates"""
+	return Vector2i(int(world_pos.x / tile_size), int(world_pos.z / tile_size))
 
 func _check_weird_things_collection():
-	"""Check if player stepped on a weird thing"""
+	"""Check if player is near a weird thing in current tile"""
 	var weird_things_manager = get_node("/root/WeirdThingsManager")
 	if weird_things_manager:
-		var weird_thing = weird_things_manager.check_collection_at_position(grid_position)
-		if not weird_thing.is_empty():
-			weird_things_manager.collect_weird_thing(weird_thing)
+		weird_things_manager.check_collection_in_tile(current_tile, global_position)
 
 func _update_flashlight(delta):
 	"""Update flashlight battery and effects"""
@@ -178,8 +207,8 @@ func _check_maze_interactions():
 
 func _update_visibility():
 	"""Update what the player can see (fog of war)"""
-	var maze_manager = get_node("/root/MazeManager")
-	if not maze_manager:
+	var tile_manager = get_node("/root/TileManager")
+	if not tile_manager:
 		return
 	
 	# TODO: Implement fog of war system
@@ -200,14 +229,26 @@ func get_world_position() -> Vector3:
 	"""Get current world position"""
 	return global_position
 
-func get_grid_position() -> Vector2i:
-	"""Get current grid position"""
-	return grid_position
+func get_current_tile() -> Vector2i:
+	"""Get current tile position"""
+	return current_tile
 
-func set_grid_position(new_pos: Vector2i):
-	"""Set grid position and update world position"""
-	grid_position = new_pos
-	_update_world_position()
+func get_position_in_tile() -> Vector3:
+	"""Get local position within current tile"""
+	return position_in_tile
+
+func set_tile_position(new_tile: Vector2i):
+	"""Set tile position and update world position"""
+	current_tile = new_tile
+	_update_tile_position()
+
+func _on_tile_spawned(tile_pos: Vector2i, tile_type: String):
+	"""Handle tile spawning events"""
+	print("PLAYER: Tile spawned at ", tile_pos, " (type: ", tile_type, ")")
+
+func _on_tile_culled(tile_pos: Vector2i):
+	"""Handle tile culling events"""
+	print("PLAYER: Tile culled at ", tile_pos)
 
 # Flashlight API
 func get_flashlight_battery_ratio() -> float:
@@ -227,4 +268,4 @@ func _on_area_entered(area):
 	if area.is_in_group("exit_trigger"):
 		var game_director = get_node("/root/GameDirector")
 		if game_director:
-			game_director.end_game("Harvested", Vector2(grid_position.x, grid_position.y))
+			game_director.end_game("Harvested", Vector2(current_tile.x, current_tile.y))

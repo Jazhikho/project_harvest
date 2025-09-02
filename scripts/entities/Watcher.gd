@@ -141,7 +141,6 @@ func _play_manifestation_effect():
 	# TODO: Add particle effects, distortion, audio
 	
 	# Start with low opacity and fade in
-	modulate.a = 0.0
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 0.7, 0.5)
 
@@ -163,7 +162,7 @@ func _update_visible_behavior(delta):
 	look_at(player.global_position, Vector3.UP)
 	
 	# Subtle movement/floating
-	global_position.y += sin(Time.get_time_from_start() * 2.0) * 0.02
+	global_position.y += sin(Time.get_ticks_msec() * 2.0) * 0.02
 	
 	# Check if player is looking at Watcher
 	if _is_player_looking_at_watcher(player):
@@ -212,7 +211,6 @@ func _complete_despawn():
 	"""Complete the despawn process"""
 	visible = false
 	current_state = WatcherState.HIDDEN
-	modulate.a = 1.0  # Reset for next spawn
 
 func _on_despawn_timer_timeout():
 	"""Handle automatic despawn after visibility duration"""
