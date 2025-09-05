@@ -15,17 +15,19 @@ var door_paths = {
 var door_markers = {}  # DoorDirection -> Marker3D node
 var current_rotation: int = 0  # 0, 1, 2, 3 representing 0°, 90°, 180°, 270°
 
-# Tile dimensions (must be set by scene or detected from floor mesh)
+# Tile dimensions
 var tile_size: Vector2 = Vector2.ZERO  # Will be detected from floor mesh
 
-# Called when the node enters the scene tree
+# Tile state
+var is_active_tile: bool = false
+var is_connecting_tile: bool = false
+
 func _ready():
 	detect_tile_size()
 	detect_doors()
-	setup_door_detection()
 	setup_collision_layers()
+	# Don't setup door detection on _ready - only when tile becomes connecting
 
-# Detect tile size from floor mesh
 func detect_tile_size():
 	"""Detect tile dimensions from the floor mesh"""
 	var floor_mesh = get_node_or_null("Maze/Floor")
@@ -41,12 +43,11 @@ func detect_tile_size():
 		print("WARNING: Could not find floor mesh, using default size")
 		tile_size = Vector2(20, 20)  # Default fallback
 
-# Get tile dimensions
 func get_tile_size() -> Vector2:
 	return tile_size
 
-# Automatically detect which doors are present in this tile
 func detect_doors():
+	"""Automatically detect which doors are present in this tile"""
 	door_markers.clear()
 	
 	for direction in door_paths:
@@ -57,66 +58,86 @@ func detect_doors():
 	
 	print("Tile initialized with ", door_markers.size(), " doors")
 
-# Set up door detection areas for player crossing
-func setup_door_detection():
-	"""Setup Area3D collision detection for each door marker"""
-	for direction in door_markers:
-		var marker = door_markers[direction]
-		
-		# Create Area3D for door crossing detection
-		var area = Area3D.new()
-		area.name = "DoorDetector_" + get_direction_name(direction)
-		
-		# Create collision shape
-		var collision = CollisionShape3D.new()
-		var shape = BoxShape3D.new()
-		shape.size = Vector3(2.0, 3.0, 2.0)  # Door threshold area
-		collision.shape = shape
-		
-		# Add components to marker
-		marker.add_child(area)
-		area.add_child(collision)
-		
-		# Connect signals for player crossing detection
-		area.body_entered.connect(func(body): _on_door_crossed(direction, body))
-		
-		# Set collision layers/masks for player detection
-		area.collision_layer = 0  # Don't collide with anything
-		area.collision_mask = 1   # Detect layer 1 (player)
+func setup_tile_entrance_detection():
+	"""Setup detection for when player enters THIS tile (connecting tile detection)"""
+	print("TILE: Setting up entrance detection for tile at ", position)
+	
+	# Create a large Area3D that covers the entire tile
+	var entrance_area = Area3D.new()
+	entrance_area.name = "TileEntranceDetector"
+	
+	# Create collision shape covering the whole tile
+	var collision = CollisionShape3D.new()
+	var shape = BoxShape3D.new()
+	shape.size = Vector3(tile_size.x - 2, 4.0, tile_size.y - 2)  # Slightly smaller to avoid edge cases
+	collision.shape = shape
+	
+	# Add to tile
+	add_child(entrance_area)
+	entrance_area.add_child(collision)
+	
+	# Set collision layers/masks for player detection
+	entrance_area.collision_layer = 0  # Don't collide with anything
+	entrance_area.collision_mask = 1   # Detect layer 1 (player)
+	
+	# Connect signals
+	entrance_area.body_entered.connect(_on_player_entered_tile)
+	
+	# Mark as connecting tile
+	is_connecting_tile = true
+	print("TILE: Entrance detection setup complete - tile is now CONNECTING")
 
-func _on_door_crossed(direction: DoorDirection, body: Node3D):
-	"""Handle when player crosses a door threshold"""
+func _on_player_entered_tile(body: Node3D):
+	"""Called when player enters this tile - THE KEY DETECTION POINT"""
 	if not body.is_in_group("player"):
+		print("TILE: Non-player body entered: ", body.name)
 		return
 	
-	print("Player crossed door: ", get_direction_name(direction))
+	if not is_connecting_tile:
+		print("TILE: Player entered but this is not a connecting tile (state: active=", is_active_tile, " connecting=", is_connecting_tile, ")")
+		return  # Only connecting tiles should trigger this
 	
-	# Get the tile position from TileManager
+	var grid_pos = get_meta("grid_position", Vector2i(0, 0))
+	print("TILE: *** PLAYER ENTERED CONNECTING TILE *** at position ", position, " grid: ", grid_pos)
+	
+	# Notify TileManager that this tile is now active
 	var tile_manager = get_node("/root/TileManager")
 	if tile_manager:
-		# Calculate which tile position this door leads to
-		var current_pos = tile_manager.get_current_player_tile()
-		var target_pos = _get_door_target_position(current_pos, direction)
-		
-		# Notify TileManager that player entered a new tile
-		tile_manager.on_player_entered_tile(target_pos)
+		print("TILE: Notifying TileManager of player entrance")
+		tile_manager.on_player_entered_tile(grid_pos)
+	else:
+		print("TILE: ERROR - TileManager not found!")
+	
+	# This tile is now active, no longer connecting
+	is_active_tile = true
+	is_connecting_tile = false
+	print("TILE: State changed - now ACTIVE")
+	
+	# Remove entrance detection (no longer needed)
+	var entrance_detector = get_node_or_null("TileEntranceDetector")
+	if entrance_detector:
+		entrance_detector.queue_free()
+		print("TILE: Removed entrance detector")
 
-func _get_door_target_position(current_pos: Vector2i, door_direction: DoorDirection) -> Vector2i:
-	"""Get the target tile position when crossing a door"""
-	match door_direction:
-		DoorDirection.NORTH: return current_pos + Vector2i(1, 0)   # North = +X in grid
-		DoorDirection.EAST: return current_pos + Vector2i(0, 1)    # East = +Y in grid  
-		DoorDirection.SOUTH: return current_pos + Vector2i(-1, 0)  # South = -X in grid
-		DoorDirection.WEST: return current_pos + Vector2i(0, -1)   # West = -Y in grid
-		_: return current_pos
+func set_as_active_tile():
+	"""Mark this tile as the active tile"""
+	is_active_tile = true
+	is_connecting_tile = false
+	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now ACTIVE")
 
-# Check if tile has a specific door
+func set_as_connecting_tile():
+	"""Mark this tile as a connecting tile and setup entrance detection"""
+	is_active_tile = false
+	is_connecting_tile = true
+	setup_tile_entrance_detection()
+	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now CONNECTING")
+
 func has_door(direction: DoorDirection) -> bool:
+	"""Check if tile has a specific door"""
 	return door_markers.has(direction)
 
-# Get all available doors with their world data
 func get_available_doors() -> Dictionary:
-	"""Get all available doors with their world positions and orientations"""
+	"""Get all available doors with their world data"""
 	var available = {}
 	
 	print("TILE: Getting available doors - found ", door_markers.size(), " door markers")
@@ -132,32 +153,62 @@ func get_available_doors() -> Dictionary:
 	
 	return available
 
-# Get the world position of a door
 func get_door_world_position(direction: DoorDirection) -> Vector3:
+	"""Get the world position of a door"""
 	if not has_door(direction):
 		return Vector3.ZERO
 	
 	var marker = door_markers[direction]
 	return marker.global_position
 
-# Get the world orientation (forward direction) of a door  
 func get_door_world_orientation(direction: DoorDirection) -> Vector3:
+	"""Get the world orientation (forward direction) of a door"""
 	if not has_door(direction):
 		return Vector3.ZERO
 	
 	var marker = door_markers[direction]
 	return -marker.global_transform.basis.z
 
-# Set tile to specific rotation (0-3, representing 0°, 90°, 180°, 270°)
 func set_tile_rotation(rotation_steps: int):
+	"""Set tile to specific rotation (0-3, representing 0°, 90°, 180°, 270°)"""
 	current_rotation = rotation_steps % 4
 	rotation.y = current_rotation * PI / 2
 	print("Tile set to rotation: ", current_rotation * 90, " degrees")
 	
-	# Note: Door markers physically rotate with the tile, so we don't need to remap directions
+	# After rotation, doors are automatically re-oriented by physical rotation
+	# The door markers physically rotate with the tile, so their global orientations
+	# are automatically re-designated to match their new global directions
 
-# Helper function to get direction name from enum value
+func get_current_rotation() -> int:
+	"""Get current rotation in steps (0-3)"""
+	return current_rotation
+
+func get_door_after_rotation(original_door: DoorDirection, rotation_steps: int) -> DoorDirection:
+	"""Get what door direction becomes after rotation"""
+	var door_index = _door_enum_to_index(original_door)
+	var new_index = (door_index + rotation_steps) % 4
+	return _index_to_door_enum(new_index)
+
+func _door_enum_to_index(door_enum: DoorDirection) -> int:
+	"""Convert door enum to index (0=North, 1=East, 2=South, 3=West)"""
+	match door_enum:
+		DoorDirection.NORTH: return 0
+		DoorDirection.EAST: return 1
+		DoorDirection.SOUTH: return 2
+		DoorDirection.WEST: return 3
+		_: return 0
+
+func _index_to_door_enum(index: int) -> DoorDirection:
+	"""Convert index back to door enum"""
+	match index:
+		0: return DoorDirection.NORTH
+		1: return DoorDirection.EAST
+		2: return DoorDirection.SOUTH
+		3: return DoorDirection.WEST
+		_: return DoorDirection.NORTH
+
 func get_direction_name(direction: DoorDirection) -> String:
+	"""Helper function to get direction name from enum value"""
 	match direction:
 		DoorDirection.NORTH: return "North"
 		DoorDirection.EAST: return "East" 
@@ -181,3 +232,19 @@ func _set_walls_collision_layer(node: Node, layer: int):
 	# Recursively process children
 	for child in node.get_children():
 		_set_walls_collision_layer(child, layer)
+
+# === DEBUG FUNCTIONS ===
+
+func debug_print_tile_info():
+	"""Debug function to print tile information"""
+	print("=== TILE DEBUG INFO ===")
+	print("Position: ", position)
+	print("Rotation: ", current_rotation * 90, "°")
+	print("Grid Position: ", get_meta("grid_position", "Unknown"))
+	print("Is Active: ", is_active_tile)
+	print("Is Connecting: ", is_connecting_tile)
+	print("Available Doors: ", door_markers.keys().size())
+	for direction in door_markers:
+		var marker = door_markers[direction]
+		print("  ", get_direction_name(direction), ": ", marker.global_position)
+	print("=====================")
