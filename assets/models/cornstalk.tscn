@@ -5,6 +5,9 @@
 [ext_resource type="Material" uid="uid://cwhg35tkdmyb2" path="res://assets/textures/stalks.tres" id="4_tvt03"]
 [ext_resource type="Material" uid="uid://b0bhcig5i434c" path="res://assets/textures/leaf.tres" id="5_0i1ab"]
 
+[sub_resource type="Animation" id="Animation_mol7p"]
+length = 0.001
+
 [sub_resource type="Animation" id="Animation_78gn6"]
 resource_name = "Sway"
 length = 4.0
@@ -31,9 +34,6 @@ tracks/2/path = NodePath(".:Mid-root")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 2, 1, 0.009, 0, 0, 1, 4, 1, 0, 0, 0, 1)
-
-[sub_resource type="Animation" id="Animation_mol7p"]
-length = 0.001
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_17ufp"]
 _data = {

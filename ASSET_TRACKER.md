@@ -50,6 +50,28 @@ This document provides complete attribution for all assets used in Project Harve
 
 **Attribution:** "Mealie Road HDRI by Greg Zaal, available at Poly Haven (https://polyhaven.com/), licensed under CC0"
 
+### Concept Art & Design
+**Source:** Project Development  
+**Creator:** Project Harvest Development Team  
+**License:** Project-specific (internal use)  
+**Assets Used:**
+- `Concept Files/projectharvest.png` - Main project concept art
+- `Concept Files/horror.html` - Horror atmosphere concept prototype
+
+**Attribution:** "Concept art and prototypes developed for Project Harvest"
+
+### Effigy Concept Files (GPT-5 Generated)
+**Source:** Generated with GPT-5  
+**Creator:** OpenAI GPT-5  
+**License:** Generated content (check OpenAI terms for commercial use)  
+**Assets Used:**
+- `Concept Files/stage1effigy.png` - Effigy concept, stage 1
+- `Concept Files/stage2effigy.png` - Effigy concept, stage 2
+- `Concept Files/stage3effigy.png` - Effigy concept, stage 3
+- `Concept Files/stage4effigy.png` - Effigy concept, stage 4
+
+**Attribution:** "Effigy concept files generated using OpenAI GPT-5"
+
 ---
 
 ## Audio
@@ -66,6 +88,16 @@ This document provides complete attribution for all assets used in Project Harve
 - `resources/audio/ComfyUI_00012_.mp3` - Generated ambient sound  
 - `resources/audio/cornrustle.mp3` - Corn rustling sound effect
 - `resources/audio/is that the wind.mp3` - Wind ambient sound
+
+### Voice Audio
+**Source:** SampleFocus (https://samplefocus.com/)  
+**Creator:** Nightmare Oliveira  
+**License:** [Check SampleFocus license terms]  
+**Asset:** "Cowboy Bebop-type spoken: I think it's time"  
+**URL:** https://samplefocus.com/samples/cowboy-bebop-type-spoken-i-think-it-s-time  
+**Status:** Tracked for potential future use
+
+**Attribution:** "Voice sample by Nightmare Oliveira, available at SampleFocus (https://samplefocus.com/)"
 
 **Attribution:** "Audio generated using Stability AI's Stable Audio 1.0 under the Stable Audio Community License"
 
@@ -132,6 +164,7 @@ AI-generated assets (textures, code assistance) should comply with the respectiv
 
 **Applicable Assets:**
 - GPT-5 generated corn textures
+- GPT-5 generated effigy concept files
 - Claude-4 Sonnet assisted code
 
 ---

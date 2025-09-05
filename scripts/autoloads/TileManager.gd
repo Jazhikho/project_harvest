@@ -21,7 +21,6 @@ func _ready():
 	_spawn_start_tile()
 
 func _load_available_tiles():
-	"""Load all available tile scenes from the tiles folder"""
 	available_tile_scenes.clear()
 	
 	# Load all tile scenes except start_tile
@@ -34,13 +33,8 @@ func _load_available_tiles():
 			if file_name.ends_with(".tscn") and file_name != "start_tile.tscn":
 				available_tile_scenes.append("res://scenes/tiles/" + file_name)
 			file_name = tiles_dir.get_next()
-	
-	print("Loaded ", available_tile_scenes.size(), " tile scenes")
 
 func _spawn_start_tile():
-	"""Spawn the starting tile and connect tiles to its doors"""
-	print("Spawning start tile...")
-	
 	# Check if there's already a start tile in the scene
 	var maze_container = get_tree().current_scene.get_node_or_null("MazeContainer")
 	var existing_start_tile = null

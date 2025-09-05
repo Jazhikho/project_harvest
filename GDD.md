@@ -1,323 +1,295 @@
-# Project Harvest – Game Design Document
-
-## 1. Core Concept
-
-A survival horror game set in a shifting corn maze at **"Jeri's Happy Funtime Harvest Cornmaze Experience!"** The player enters expecting a fun Halloween attraction but quickly realizes the maze is alive, reshaping itself, and filled with disturbing objects, whispers, and doppelgänger encounters. 
-
-**Inspirations:**
-- **Creepy Maze System:** Procedural shifting maze with pickups and jumpscares
-- **Forgotten in the Woods:** Branching narrative, sanity mechanics, and the Watcher entity
-
-**Unique Feature - The Harvest System:** The game pulls **system date/time** and **death location** to integrate into replayability. Each run is logged as a prior "subject." On subsequent runs, the maze contains echoes of previous attempts—notes, corpses, whispers, or artifacts left behind. 
-
-**Meta-Backstory:** Subjects are being **harvested for experiments** orchestrated by **Dr. Amundsen** (appears as "A", "Amundsen", or "Dr. Amundsen" in documentation). Every failed run becomes another lost soul feeding the maze's memory.
-
-## 2. Key Features
-
-### Core Mechanics
-* **🌊 Dynamic Tile-Streaming Maze:** Infinite procedural maze using modular tile segments
-  - Each tile is a self-contained 10×10m maze segment with 4 potential exits (N/E/S/W)
-  - Only current tile + immediate neighbors exist in memory (3×3 grid maximum)
-  - As player moves forward, new tiles spawn ahead and old tiles behind are culled
-  - Creates endless, non-repeating maze that feels truly infinite
-* **🔄 Tile Library System:** 5 base shapes rotated to create all variations
-  - **Dead End** (1 exit), **Straight** (2 opposite), **Corner** (2 adjacent)
-  - **T-Junction** (3 exits), **Cross** (4 exits)
-  - Door bitmask system with rotation logic for seamless connections
-* **🔦 Limited Vision:** First-person perspective with fog volumes and dynamic lighting that obscures distant areas
-* **🎭 Weird Things (Pickups):** Mysterious objects scattered throughout maze segments
-  - Spawn based on distance tiers and tension levels
-  - Trigger narrative messages and visual effects
-  - Create local reality distortions within tiles
-  - Can activate Stalker pursuit and entity spawning
-
-### Psychological Systems
-* **🧠 Sanity System:** Gradually drops during encounters and over time. Lower sanity increases:
-  - Watcher appearance frequency
-  - Maze hostility and shift rate
-  - Visual/audio distortions
-* **👁️ The Watcher:** Non-corporeal entity that appears more frequently as sanity decreases
-  - Causes visual/audio disturbances
-  - Slowly pursues the player
-  - Cannot be defeated, only avoided
-
-### Horror Elements
-* **🚪 False Exit:** The "escape" door triggers a final jumpscare - there is no true escape
-* **⚱️ Harvest System:** Each run logged with timestamp, tile progression, and death data:
-  - Previous run's final 6-10 tiles may spawn echo props (corpses, notes, whispers)
-  - Timestamp integration: "Subject logged at 22:14. Outcome: fragmented."
-  - Tile pattern matching creates familiar yet distorted revisitations
-  - Auto-generated notes in "your handwriting" from tile-specific encounters
-
-## 3. Gameplay Loop
-
-1. **Navigate** infinite maze segments with limited vision
-2. **Transition** between tiles as new areas generate ahead and old areas fade behind
-3. **Collect** Weird Things and lore notes scattered throughout tiles
-4. **Manage** sanity while avoiding Watcher/Stalker entities that spawn in new tiles
-5. **Progress** through content tiers as distance increases (basic → intermediate → advanced threats)
-6. **Encounter** false exits and harvest chambers as the maze weaponizes hope
-7. **Fail or succeed** → tile progression and death location logged for future echo spawning
-
-## 4. Narrative Layers
-
-* **Backstory:** Project Harvest is a clandestine experiment, harvesting subjects trapped in shifting mazes. The Weird Things are fragments of past test runs, psychological conditioning props, or instruments of identity manipulation.
-* **Environmental Storytelling:** Notes, Weird Things, and run echoes hint at **experiments in duplication, consciousness, and identity fragmentation**.
-* **Branching Encounters (from Forgotten in the Woods):**
-  * Scarecrow Crossroads
-  * Equipment Shed
-  * Open clearance
-  * Caves/Bunker → Service Tunnel and Exit Gate
-* **Stalker Theme:** Encounters with stalker escalate toward the exit, where the final decision is made.
-
-## 5. Dynamic Tile-Streaming System
-
-### Technical Architecture
-* **TileManager (Autoload):** Manages active tile grid, spawning/culling, and tile selection logic
-* **Tile.tscn Base Scene:** Modular maze segments with consistent structure:
-  - **DoorAnchor nodes** (N/E/S/W) for seamless connection between tiles
-  - **NavRegion** pre-baked per tile for AI pathfinding
-  - **PortalOccluder** for performance optimization
-  - **Decoration spawn points** for Weird Things and entities
-
-### Door System & Rotation Logic
-* **Door Bitmask:** 4 bits encode exits (N=1, E=2, S=4, W=8)
-* **Rotation Algorithm:** 90° clockwise bit shifts for seamless tile orientation
-* **Connectivity Rules:** New tiles must have entrance door matching player's exit direction
-* **NavigationLink3D** connects door anchors across tile boundaries
-
-### Streaming Rules
-* **Active Radius:** Keep only current tile + immediate neighbors (3×3 grid max)
-* **Forward Spawning:** Generate next tile based on player movement direction
-* **Backward Culling:** Remove tiles beyond active radius to maintain performance
-* **Transition Detection:** PlayerTileTrigger Area3D fires when crossing tile boundaries
-
-### Content Generation Tiers
-* **Tier 1 (Tiles 1-4):** Batteries, guiding notes, no active threats
-* **Tier 2 (Tiles 5-10):** Basic Weird Things, Caretaker spawn chance
-* **Tier 3 (Tiles 10+):** Advanced Weird Things, Overseer Eyes, Stalker activation
-* **Special Tiles:** Landmarks, false exits, safe rooms placed by distance/state
-
-### Performance Benefits
-* **Minimal Memory Footprint:** Only 9 tiles maximum in memory
-* **No Global Navigation Rebaking:** Pre-baked tiles with dynamic links
-* **Predictable Performance:** Constant tile count regardless of play duration
-* **Endless Exploration:** True infinite maze without repetition detection
-
-## 6. Core Systems (Integration)
-
-* **Sanity:** Drops from Weird Things, Watcher, narrative beats. Color and VFX feedback.
-* **Inventory:** Lightweight array; visible in UI. Items: flashlight, shovel, map fragments, research files, codes, etc.
-* **Maze Shifts:** Triggered every 30 s (later 15 s) or by Weird Thing type 1.
-* **Narrative Progression:**
-
-  * 3 Weird Things → whispers, headaches, hints.
-  * 5 Weird Things → “something follows you.” Maze shifts accelerate.
-  * Random narrative lines fire while exploring (scratching sounds, shadows, whispers).
-* **Run Echo System:**
-
-  * At end of each run, save summary: date/time, sanity at death/exit, Weird Things collected, exit status.
-  * On next run, instantiate echoes: corpse/effigy, note text, or ghostly replay of prior movement.
-
-## 7. Visual & Audio Design
-
-### Aesthetic Direction
-**🌅 Time Progression:** Late afternoon rapidly descending into foggy evening/night
-**🎆 Atmosphere:** Flickering carnival lights, weathered scarecrows, corn stalks swaying unnaturally
-**🎪 Tone:** Deceptive cheerfulness corrupted into organic horror
-
-### User Interface
-- **HUD Elements:** "Weird Findings" counter, sanity indicator, flashlight battery
-- **Message System:** Short narrative stingers with typewriter effect
-- **Jumpscare Overlay:** Full-screen effects with "SUBJECT TERMINATED" messaging
-- **Inventory Display:** Minimal, context-sensitive item showing
-
-### Audio Design
-**🎵 Ambient Layers:**
-- Low-frequency drones and corn rustling
-- Distant carnival music (distorted)
-- Whispers that increase with story progression
-
-**🔊 Dynamic Audio:**
-- Randomized jumpscare stings
-- Sanity-based audio distortions
-- Harvest system callbacks: "Subject logged: [date]. Outcome: [death type]"
-
-## 8. Entities
-
-* **Player:** FPS controller; flashlight with limited battery.
-* **Watcher:** Non-physical spook, triggered probabilistically based on sanity.
-* **Stalker:** Activated after certain Weird Things or story beats. Patrols, chases briefly.
-* **Weird Things:** 5 archetypes with effects.
-* **Run Echoes:** Ghosts, corpses, or effigies representing prior attempts.
-
-## 9. Entity Design
-
-### Primary Antagonists
-
-**🕴️ Dr. Amundsen (The Architect)**
-- **Purpose:** Unseen mastermind orchestrating Project Harvest
-- **Presence:** Notes, PA announcements, surveillance systems
-- **Symbolism:** Human cruelty disguised as scientific progress
-
-**🌾 The Stalker (The Harvester)**
-- **Purpose:** Apex predator representing inevitable consumption
-- **Behavior:** Hunt-and-chase entity activated after collecting enough Weird Things
-- **Mechanics:** Cannot be defeated, only temporarily evaded
-
-**👁️ The Watcher** 
-- **Purpose:** Half-formed duplicate from failed experiments
-- **Behavior:** Flickers at vision's edge, triggers sanity loss
-- **Mechanics:** Appears more frequently as sanity decreases
-
-### Environmental Entities
-
-**🎭 Effigies (Failed Subjects)**
-- **Purpose:** Corpses of past subjects displayed as warnings
-- **Behavior:** Whisper and twitch at low sanity levels
-- **Mechanics:** Environmental storytelling that echoes prior player runs
-
-**🗣️ The Choir (Whisperers)**
-- **Purpose:** Psychic remnants of harvested subjects
-- **Behavior:** Audio-only entities that drain sanity over time
-- **Mechanics:** Provide misleading hints about exits and solutions
-
-**🤖 Overseer Eyes**
-- **Purpose:** Bio-organic surveillance tied to Dr. Amundsen's systems
-- **Behavior:** Scan and track player movement
-- **Mechanics:** Detection accelerates maze shifts and increases difficulty
-
-### Supporting Entities
-
-**🌽 Caretakers (Corn Hands)**
-- **Purpose:** Biomechanical "farmhands" that corral subjects
-- **Behavior:** Briefly slow and restrain the player
-- **Mechanics:** Create opportunities for Stalker to close distance
-
-**👻 Residual Subjects (Ghost-Runners)** 
-- **Purpose:** Shadows of past participants echoing through time
-- **Behavior:** Fleeting silhouettes that can be followed
-- **Mechanics:** May lead to lore/items but waste sanity and time
-
-**🚪 The False Exit**
-- **Purpose:** The maze weaponizing hope itself
-- **Behavior:** Appears as salvation but triggers harvest sequence
-- **Mechanics:** Final jumpscare before revealing no true escape exists
-
-## 10. Ending Variations (No True Escape)
-
-Every ending reinforces the "harvest" theme - player survival is temporary or hollow.
-
-### Death States
-- **💀 Consumed:** Stalker or Watcher overwhelms you → logged as "consumed"
-- **⚗️ Harvested:** Reach the escape gate → harvested at the moment of apparent freedom
-- **🌫️ Fragmented:** Sanity reaches zero → consciousness dissolves into maze whispers
-- **🎭 Exchanged:** Doppelgänger replaces you → "successful" escape but you become the trapped version
-
-### Meta-Progression
-**📊 Experiment Log:** Regardless of outcome, each run is archived with:
-- Timestamp and duration
-- Cause of termination
-- Weird Things collected
-- Sanity level at death
-- Death location coordinates
-
-**🔄 Legacy System:** Future runs reference your previous "cause of death" through whispers, notes, and environmental storytelling
-
-## 11. Technical Implementation (Godot 4.x)
-
-### Current Architecture
-* **Engine:** Godot 4.4.1 with GDScript
-* **3D Tile System:** Modular maze segments with dynamic streaming
-* **Autoload Managers:** 
-  - `GameDirector.gd` - Core game state and progression
-  - `TileManager.gd` - Dynamic tile spawning and culling
-  - `SanityManager.gd` - Psychological state tracking
-  - `WeirdThingsManager.gd` - Artifact spawning and effects
-  - `HarvestLogger.gd` - Run persistence and echo system
-  - `MazeManager.gd` - Maze generation and navigation
-
-### Tile Streaming System
-* **Base Tile Scene:** `tile.gd` with door anchor system
-* **Tile Variants:** 5 base shapes (dead end, straight, corner, T-junction, cross)
-* **Dynamic Loading:** 3×3 active grid with forward spawning and backward culling
-* **Performance:** Pre-baked navigation regions with dynamic links
-
-### Harvest System Implementation
-* **Run Logging:** JSON persistence with timestamp and death data
-* **Echo Spawning:** Previous run artifacts integrated into new maze generation
-* **Meta-Narrative:** System date/time integration for unique harvest logs
-
-## 12. Development Status & Current Focus
-
-### ✅ Implemented Systems
-* **Core Tile System:** Base tile scenes with door anchor connectivity
-* **Player Controller:** FPS movement with grid-based navigation
-* **Autoload Architecture:** All core managers initialized and connected
-* **Tile Streaming:** Dynamic spawning and culling of maze segments
-* **Basic UI:** HUD framework with sanity display
-
-### 🔄 In Development
-* **Spawning Behavior:** Tile generation and entity placement logic
-* **Weird Things System:** Artifact spawning and interaction mechanics
-* **Entity AI:** Watcher and Stalker behavior implementation
-* **Harvest Logging:** Run persistence and echo system
-
-### 📋 Next Priorities
-* **Graybox Testing:** Validate tile connectivity and spawning patterns
-* **Entity Spawning:** Implement Weird Things and hostile entity placement
-* **Sanity Integration:** Connect psychological state to visual/audio effects
-* **Performance Optimization:** Ensure stable 60fps with dynamic tile streaming
-
-## 13. Balancing Parameters
-
-### Core Mechanics
-- **Weird Things:** 5–10 spawned per run
-- **Maze Shifts:** 30s initial interval → 15s when stalker activates
-- **Sanity Decay:** 1 point per 30 seconds baseline + event triggers
-
-### Probability Tables
-**Watcher Spawn Rates (per minute):**
-- 100-80 Sanity: 10% chance
-- 79-50 Sanity: 25% chance  
-- 49-20 Sanity: 40% chance
-- 19-0 Sanity: 60% chance
-
-**Sanity Loss Events:**
-- Weird Thing pickup: 5-15 points
-- Watcher encounter: 10-25 points
-- Maze shift witness: 5 points
-- Stalker proximity: 20-40 points
-
-### Harvest System
-- **Echo Limit:** Maximum 3 echoes per run
-- **Log Retention:** Oldest runs pruned after 10 entries
-- **Echo Spawn Rate:** 80% chance per eligible prior death
-
-## 14. MVP Checklist (Target: September 30)
-
-### Essential Systems
-- [ ] **Maze Generation:** 10+ modular 3D chunks with procedural assembly
-- [ ] **Player Systems:** FPS controller with flashlight and grid-based logic
-- [ ] **Weird Things:** 3-5 interactive props with narrative effects
-- [ ] **Sanity System:** HUD display with visual feedback and decay mechanics
-- [ ] **Entity AI:** Watcher spawning and basic stalking behavior
-
-### Horror Elements
-- [ ] **Exit Sequence:** False escape door with jumpscare trigger
-- [ ] **Audio System:** Ambient sounds, whispers, and jumpscare stings
-- [ ] **Visual Effects:** Screen distortions, lighting changes, fog manipulation
-
-### Harvest Features
-- [ ] **Run Logging:** Timestamp and death data persistence
-- [ ] **Echo System:** Spawn at least one prior-run artifact per new game
-- [ ] **Meta Narrative:** Whispers referencing previous attempts
-
-### Polish Elements
-- [ ] **UI Polish:** Clean HUD, message overlays, inventory display
-- [ ] **Performance:** Stable 60fps with 100x100 maze grid
-- [ ] **Content:** 2+ landmark areas (Scarecrow Crossroads, Equipment Shed)
+# Game Design Document for: Project Harvest
+
+## A Halloween Horror Rogue-Lite Walking Sim
+
+**Author:** Christopher B. Del Gesso  
+**Institution:** Lindenwood University  
+**Course:** GAM56800: Game Development  
+**Professor:** Ben Fulcher  
+**Date:** Sunday, 4 September 2025
 
 ---
 
-**Project Harvest**: Each run is another harvested subject. The maze remembers. Your past selves litter the corridors. You aren’t escaping alone—you’re competing with every version of you that’s already been consumed.
+## Table of Contents
+
+- [Game Overview](#game-overview)
+- [Philosophy](#philosophy)
+- [Common Questions](#common-questions)
+- [Feature Set](#feature-set)
+- [Core Gameplay Loop](#core-gameplay-loop)
+- [Game Characters](#game-characters)
+- [User Interface](#user-interface)
+- [User Experience (UX)](#user-experience-ux)
+- [Musical Scores and Sound Effects](#musical-scores-and-sound-effects)
+- [Influences and References](#influences-and-references)
+- [Bibliography](#bibliography)
+
+---
+
+## Game Overview
+
+## Philosophy
+
+### Philosophical Point #1
+> When in doubt, keep it stupid simple.
+
+### Philosophical Point #2
+> This game is a school project and part of my portfolio. Scope is intentionally limited, but execution should be careful and complete.
+
+### Philosophical Point #3
+> MVP first, feature creep later. Ship the core, then iterate. When uncertain, see Point #1.
+
+---
+
+## Common Questions
+
+### What is the game (Elevator Pitch)
+
+**Project Harvest** is a first-person horror rogue-lite walking sim set in a shifting corn maze. It begins like a seasonal attraction and slowly reveals its true purpose: the maze is an apparatus designed to harvest those who enter. The player pieces together the mystery while navigating procedural tiles, managing a hidden sanity state, and evading entities that embody surveillance, pursuit, and prior failures.
+
+### Why create this game?
+
+This fulfills a course assignment and advances my portfolio. It also honors a close friend with whom I conceived the original concept and who passed away last year.
+
+### Where does the game take place?
+
+Inside **"Crazy Jeri's Happy Fun Time Harvest Corn Maze Experience!"** A neglected roadside farm attraction hides a research site where identity is fragmented and harvested.
+
+### What do I control?
+
+A first-person protagonist equipped with a flashlight and a simple inventory. The player explores, reads found notes, collects artifacts, and interacts with specific event tiles to progress narrative beats.
+
+### What is the main focus?
+
+The apparent goal is to escape the maze. The real goal is to uncover the nature and authorship of the maze, culminating in a confrontation with the idea of identity itself. Repeated runs are expected; echoes of prior deaths reappear as effigies, notes, and world changes. The ending intentionally problematizes agency and identity.
+
+### Who is the game for?
+
+**Teens and up.** No twitch skills required, but the tone and psychological elements are not suitable for younger audiences. **Target platform:** Windows.
+
+## Feature Set
+
+### MVP (Minimum Viable Product) Goals
+
+#### Core Features (Must Have)
+
+**Player Control**
+- **Movement:** walk, sprint, look
+- **Interaction:** pick up/read notes, use simple world props, basic inventory open/close
+
+**Procedural Shifting Maze**
+- Modular 20×20 meter tiles assembled at runtime
+- 5 base shapes (dead end, straight, corner, T-junction, cross) rotated/connected
+- Behind-the-player culling; forward spawning; a few "stable island" event tiles
+
+**Entities**
+- **Effigies:** appear at or near prior death locations; become more active/unnatural as sanity drops
+- **Watchers:** organic eyes among the corn; non-damaging, escalate tension/sanity effects
+- **The Stalker:** featureless pursuer that shifts from distant glimpses to timed hunts as sanity falls
+- **The Architect (Dr. Amundsen):** never seen; present via notes, PA-style lines, environmental control
+
+**Systems**
+- **Sanity:** hidden meter that modulates visuals, audio, entity frequency, and tile hostility
+- **Flashlight battery:** limited use with flicker/failure at low charge
+- **Logged runs:** time, death cause, discoveries; prior runs echo as props/notes/effigies
+
+**Narrative/Interactables**
+- Semi-randomized notes from prior subjects and the experimenter
+- Key items (e.g., key, photo, music box) to gate specific event tiles
+- False Exit set piece that delivers the "no true escape" theme
+
+**UI**
+- Main menu, pause, inventory, results screen, basic save (time, deaths, collectibles revealed), credits
+
+**Audio/FX**
+- Footsteps, corn rustle, whispers, distant screams
+- Minimal stingers for encounters and pick-ups
+
+### Nice-to-Have Features
+
+- Short intro cutscene (arriving at the farm, greeted by "Jeri")
+- Protagonist VO for inner thoughts (inconsistent timbre to reflect identity drift)
+- Faux "difficulty" settings that mock the player without actually changing difficulty
+- Internally shifting sub-walls within select tiles
+- Pulling the player's OS username for unsettling diegetic messaging
+
+## Core Gameplay Loop
+
+> "They ask me why. Why persist? Because the self is a disease. Multiplicity is cure. Reintegration is ascension…" — Dr. Amundsen
+
+1. **Spawn** at a start tile leading into procedural maze segments.
+2. **Explore** with limited vision, reading notes and collecting artifacts needed to unlock event tiles.
+3. **Endure** escalating pressure: sanity falls over time and with encounters; The Stalker graduates from presence to pursuit.
+4. **Encounter** stable story tiles that anchor progress across runs.
+5. **Fail or "escape":** death or the False Exit logs the run. New effigies/echoes spawn next run at late-run tiles.
+6. **Repeat** with increased world memory, new notes, and shifting tile mixes to push deeper.
+
+---
+
+## Game Characters
+
+### Overview
+
+There are no "traditional" companions. The maze refracts the player into multiple roles: **subject, witness, pursuer, and author.**
+
+### Main Character – The Protagonist(s)
+
+Identity is unstable. In text (and potentially VO), narration drifts between first, second, and third person as sanity drops. The player never sees a reliable reflection. Inventory uses "my" language early, then slips.
+
+### The Architect – Dr. Amundsen
+
+The unseen architect of Project Harvest, running experiments in duplication, partition, and reintegration. His stated aim is scientific progress; his actual aim is dominion over identity. He appears in notes, signage, PA lines, and surveillance detritus. The maze is both his lab and his abattoir; cruelty is an acceptable budget line.
+
+### The Effigies
+
+Markers of prior runs. At high sanity they read as "harmless scarecrows"; at low sanity they distort, twitch, and edge closer when unwatched. They host notes and items from previous subjects and from the player's past deaths, doubling as landmarks in a world that refuses to stay put.
+
+### The Stalker
+
+A pressure valve for pacing. Early glimpses raise dread. As sanity dips, patrols become chases in controlled pulses that force movement and route choice. It cannot be killed, only evaded.
+
+### The Watchers
+
+Organic surveillance embedded in the corn. They track and "judge" but don't attack. Their presence increases paranoia and nudges sanity downward, unlocking more distortions and spawns.
+
+### The Choir
+
+A disembodied chorus of fragments. Whisper layers begin as wind, then articulate misdirection and doubts near items, event tiles, or threats.
+
+## User Interface
+
+### Controls
+
+#### Keyboard (Primary)
+
+| Action | Key |
+|--------|-----|
+| Move | `WASD` / Arrow Keys |
+| Run | `Spacebar` |
+| Interact | `E` |
+| Flashlight toggle | `F` |
+| Inventory | `I` |
+| Pause | `P` |
+| Menu | `Esc` |
+| Look | Mouse |
+
+#### Controller Support (Nice-to-Have)
+
+| Action | Button |
+|--------|--------|
+| Move | Left stick/D-pad |
+| Look | Right stick |
+| Run | A/Cross |
+| Interact | X/Square |
+| Flashlight | Y/Triangle |
+| Inventory | B/Circle |
+| Pause | Start |
+| Menu | Menu |
+
+### HUD Elements
+
+No persistent HUD. Contextual prompts display briefly. **Sanity is hidden** but expressed through VFX, audio layering, encounter frequency, and world behavior.
+
+### Inventory
+
+Simple panel that slides up with scrollable item slots. Notes open to full-screen readable panels.
+
+### Menu Systems
+
+#### Main Menu
+- Start
+- Settings
+- Credits
+- Quit
+
+> **Note:** Quitting mid-run counts as a "death" and logs the run summary
+
+#### Settings
+- Audio sliders (Master, Music, SFX)
+- Control remapping (Nice-to-have)
+- Graphics toggle (if needed)
+- Reset Data (wipe saves)
+
+## User Experience (UX)
+
+### Player Onboarding
+
+1. **Autodetect input device**; show compact control hints that fade.
+2. **Short in-world tutorialization** through narrated thoughts: flashlight use, picking up a note, first interactable.
+3. **On first "Weird Thing,"** surface sprint reminder diegetically ("tighten laces").
+4. **First entity glimpse** and first stable event tile occur within 3–5 tiles to establish tone and loop.
+
+---
+
+## Musical Scores and Sound Effects
+
+### Diegetic Audio
+
+#### Movement
+- Light footfalls; accelerated steps while sprinting
+- Subtle scrape on plant collision
+- Effigy rustle when repositioning
+
+#### Environment
+- Corn wind beds; intermittent crow calls scaling with sanity thresholds
+
+#### Feedback
+- Paper "fwip" for note pick-ups
+- Flashlight click; sputter at low battery
+- The Choir near points of interest; distant screams at critical sanity
+
+### Non-Diegetic Audio
+
+#### Music Tracks
+- **Main Menu:** warped carnival loop oscillating between eerie and off-kilter jolly
+- **Exploration Bed:** sparse drones that emerge if the player lingers
+- **Stalker Cue:** sharp percussive build that spikes and releases
+- **End Credits:** somber, unresolved motif
+
+#### UI Audio
+- Soft scratch for menu navigation
+- Subtle snap on confirm
+- Whispering gust between scene transitions
+
+---
+
+## Influences and References
+
+### Game Influences
+
+- **Del Gesso, C. B.** (2025). *FORGOTTEN IN THE WOODS* [HTML game]. Created with the assistance of Anthropic's Claude AI.
+- **Del Gesso, C. B.** (2025). *Creepy Maze* [HTML/JS game]. Created with the assistance of Anthropic's Claude AI.
+- **Silent Hill** (video game). (1999). Konami Computer Entertainment Tokyo.
+
+### Other Media Influences
+
+- **King, S.** (Writer), & **Kiersch, F.** (Director). (1984). *Children of the Corn* [Film]. New World Pictures.
+- **Duncan, D. S.** (Director). (2023). *Dark Harvest* [Film]. Metro-Goldwyn-Mayer.
+- **Slenderman meme.** (2009). Created by E. Knudsen (Victor Surge) [Internet meme].
+- **Petscop** [Creepypasta web series]. (2017–2019). YouTube. Created by Tony Domenico.
+
+### Other Influence
+
+- **Del Gesso, C. B., & Amundsen, J.** (2020). *Project Harvest* [Unpublished game concept discussion].
+
+---
+
+## Bibliography
+
+- Del Gesso, C. B. (2025). *Creepy Maze* [HTML/JS game]. Created with the assistance of Anthropic's Claude AI.
+- Del Gesso, C. B. (2025). *FORGOTTEN IN THE WOODS* [HTML game]. Created with the assistance of Anthropic's Claude AI.
+- Del Gesso, C. B., & Amundsen, J. (2020). *Project Harvest* [Unpublished game concept discussion].
+- Duncan, D. S. (Director). (2023). *Dark Harvest* [Film]. Metro-Goldwyn-Mayer.
+- King, S. (Writer), & Kiersch, F. (Director). (1984). *Children of the Corn* [Film]. New World Pictures.
+- OpenAI. (2025). *ChatGPT* [Large language model]. https://chat.openai.com. Used for concept art and Game Design Document suggestions.
+- Petscop [Creepypasta web series]. (2017–2019). YouTube. Created by Tony Domenico.
+- Silent Hill (video game). (1999). Konami Computer Entertainment Tokyo.
+- Slenderman meme. (2009). Created by E. Knudsen (Victor Surge) [Internet meme].
+
+---
+
+## Notes on Scope Alignment
+
+- All systems are expressed in MVP language and map to a single-semester deliverable.
+- Identity theme is threaded through narration, entities, and meta-progression without requiring cutscenes.
+- "False Exit" and run logging anchor the rogue-lite loop and portfolio value.
