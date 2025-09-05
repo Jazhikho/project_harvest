@@ -21,6 +21,10 @@ var tile_size: Vector2 = Vector2.ZERO  # Will be detected from floor mesh
 # Tile state
 var is_active_tile: bool = false
 var is_connecting_tile: bool = false
+var is_past_tile: bool = false
+
+# Permanent tile attribute (can be set in inspector)
+@export var is_permanent: bool = false
 
 func _ready():
 	detect_tile_size()
@@ -123,18 +127,32 @@ func set_as_active_tile():
 	"""Mark this tile as the active tile"""
 	is_active_tile = true
 	is_connecting_tile = false
+	is_past_tile = false
 	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now ACTIVE")
 
 func set_as_connecting_tile():
 	"""Mark this tile as a connecting tile and setup entrance detection"""
 	is_active_tile = false
 	is_connecting_tile = true
+	is_past_tile = false
 	setup_tile_entrance_detection()
 	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now CONNECTING")
+
+func set_as_past_tile():
+	"""Mark this tile as a past tile (also acts as connecting temporarily)"""
+	is_active_tile = false
+	is_connecting_tile = true  # Past tiles also act as connecting tiles temporarily
+	is_past_tile = true
+	setup_tile_entrance_detection()
+	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now PAST (also connecting)")
 
 func has_door(direction: DoorDirection) -> bool:
 	"""Check if tile has a specific door"""
 	return door_markers.has(direction)
+
+func is_tile_permanent() -> bool:
+	"""Check if this tile is marked as permanent"""
+	return is_permanent
 
 func get_available_doors() -> Dictionary:
 	"""Get all available doors with their world data"""
@@ -243,6 +261,8 @@ func debug_print_tile_info():
 	print("Grid Position: ", get_meta("grid_position", "Unknown"))
 	print("Is Active: ", is_active_tile)
 	print("Is Connecting: ", is_connecting_tile)
+	print("Is Past: ", is_past_tile)
+	print("Is Permanent: ", is_permanent)
 	print("Available Doors: ", door_markers.keys().size())
 	for direction in door_markers:
 		var marker = door_markers[direction]

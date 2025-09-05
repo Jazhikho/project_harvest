@@ -15,6 +15,8 @@ var start_tile_scene: String = "res://scenes/tiles/start_tile.tscn"
 var active_tiles: Dictionary = {}  # Vector2i -> Node3D
 var current_player_tile: Vector2i = Vector2i(0, 0)
 var active_tile_node: Node3D = null
+var past_tile_position: Vector2i = Vector2i(-1000, -1000)  # Invalid position initially
+var past_tile_node: Node3D = null
 
 # Permanent tiles system - tiles that can persist between maze shifts
 var permanent_tiles: Dictionary = {}  # Vector2i -> Node3D
@@ -71,6 +73,10 @@ func _spawn_start_tile():
 	current_player_tile = Vector2i(0, 0)
 	active_tile_node = start_tile
 	
+	# Reset past tile tracking
+	past_tile_position = Vector2i(-1000, -1000)
+	past_tile_node = null
+	
 	# Mark start tile as active
 	if start_tile.has_method("set_as_active_tile"):
 		start_tile.set_as_active_tile()
@@ -116,9 +122,9 @@ func _run_door_detection_and_spawn(tile: Node3D, tile_pos: Vector2i):
 			active_tiles.erase(connecting_pos)
 			print("  Removed invalid tile reference at ", connecting_pos)
 		
-		# Don't spawn start tile again
-		if connecting_pos == Vector2i(0, 0):
-			print("  Would spawn at start position - skipping")
+		# Check if there's a permanent tile at this position
+		if _has_permanent_tile_at_position(connecting_pos):
+			print("  Permanent tile exists at ", connecting_pos, " - skipping spawn")
 			continue
 		
 		# Step 3: Pre-spawn a random tile
@@ -243,6 +249,32 @@ func on_player_entered_tile(tile_position: Vector2i):
 		print("ERROR: Player entered non-existent tile at ", tile_position)
 		return
 	
+	# FIRST: Clean up any stray past tiles to ensure only one past tile exists
+	_cleanup_all_past_tiles_except_current()
+	
+	# Handle past tile logic - clear any existing past tile first
+	if past_tile_node and is_instance_valid(past_tile_node):
+		# Clean up connections to the OLD past tile before replacing it
+		print("TILMGR: Cleaning up connections to old past tile at ", past_tile_position)
+		_cleanup_tile_connections(past_tile_position, tile_position, old_tile_pos)
+		
+		# Clear the past tile state (it becomes a regular connecting tile or gets cleaned up)
+		if past_tile_node.has_method("set_as_connecting_tile"):
+			past_tile_node.set_as_connecting_tile()
+		print("TILMGR: Cleared previous past tile at ", past_tile_position)
+	
+	# Set the previous active tile as the new past tile (if it exists and isn't permanent)
+	if active_tiles.has(old_tile_pos) and is_instance_valid(active_tiles[old_tile_pos]):
+		var old_tile_node = active_tiles[old_tile_pos]
+		if old_tile_node.has_method("is_tile_permanent") and not old_tile_node.is_tile_permanent():
+			past_tile_position = old_tile_pos
+			past_tile_node = old_tile_node
+			if old_tile_node.has_method("set_as_past_tile"):
+				old_tile_node.set_as_past_tile()
+			print("TILMGR: Set past tile at ", old_tile_pos)
+		else:
+			print("TILMGR: Old tile is permanent, not setting as past tile")
+	
 	# Set new active tile
 	active_tile_node = active_tiles[tile_position]
 	
@@ -253,9 +285,9 @@ func on_player_entered_tile(tile_position: Vector2i):
 	# Check if this tile should become permanent (first 5 visited tiles)
 	_check_for_permanent_tile_registration(tile_position)
 	
-	# IMPORTANT: Clean up previous tile connections (except the one player came from)
+	# IMPORTANT: Clean up previous tile connections (except the one player came from and past tile)
 	if old_tile_pos != tile_position:
-		_cleanup_previous_tile_connections(old_tile_pos, tile_position)
+		_cleanup_tile_connections(old_tile_pos, tile_position, past_tile_position)
 	
 	# Wait for tile to be ready, then spawn new connections
 	await get_tree().process_frame
@@ -265,46 +297,76 @@ func on_player_entered_tile(tile_position: Vector2i):
 	
 	emit_signal("player_entered_tile", tile_position)
 
-func _cleanup_previous_tile_connections(old_pos: Vector2i, current_pos: Vector2i):
-	"""Clean up tiles connected to the previous tile (except current tile)"""
-	print("=== CLEANUP: Previous tile ", old_pos, " -> Current tile ", current_pos, " ===")
+func _cleanup_all_past_tiles_except_current():
+	"""Clean up any stray past tiles that might exist from previous moves - ensure only one past tile exists"""
+	print("TILMGR: Cleaning up all stray past tiles...")
+	var past_tiles_found = 0
+	var tiles_to_remove = []
+	
+	for pos in active_tiles.keys():
+		var tile = active_tiles[pos]
+		if is_instance_valid(tile) and tile.is_past_tile:
+			# This is a past tile - if it's not the current tracked past tile, mark for removal
+			if pos != past_tile_position or tile != past_tile_node:
+				print("TILMGR: Found stray past tile at ", pos, " - marking for cleanup")
+				tiles_to_remove.append(pos)
+			past_tiles_found += 1
+	
+	# Remove stray past tiles
+	for pos in tiles_to_remove:
+		if active_tiles.has(pos):
+			var tile = active_tiles[pos]
+			active_tiles.erase(pos)
+			tile.queue_free()
+			print("TILMGR: Removed stray past tile at ", pos)
+	
+	print("TILMGR: Found ", past_tiles_found, " past tiles, removed ", tiles_to_remove.size(), " strays")
+
+func _cleanup_tile_connections(cleanup_pos: Vector2i, current_player_pos: Vector2i, exclude_past_pos: Vector2i = Vector2i(-1000, -1000)):
+	"""Clean up tiles connected to a specific tile (except protected tiles)"""
+	print("=== CLEANUP: Cleaning connections from tile ", cleanup_pos, " ===")
+	print("  Current player at: ", current_player_pos)
+	print("  Exclude past tile at: ", exclude_past_pos)
 	print("  Active tiles before cleanup: ", active_tiles.keys())
 	
-	if not active_tiles.has(old_pos):
-		print("  ERROR: Previous tile not found in active_tiles")
+	if not active_tiles.has(cleanup_pos):
+		print("  ERROR: Cleanup tile not found in active_tiles")
 		return
 	
-	var old_tile = active_tiles[old_pos]
-	if not old_tile or not old_tile.has_method("get_available_doors"):
-		print("  ERROR: Previous tile has no get_available_doors method")
+	var cleanup_tile = active_tiles[cleanup_pos]
+	if not cleanup_tile or not cleanup_tile.has_method("get_available_doors"):
+		print("  ERROR: Cleanup tile has no get_available_doors method")
 		return
 	
-	var old_doors = old_tile.get_available_doors()
-	print("  Previous tile has ", old_doors.size(), " doors")
+	var cleanup_doors = cleanup_tile.get_available_doors()
+	print("  Cleanup tile has ", cleanup_doors.size(), " doors")
 	
 	var destroyed_count = 0
-	for door_direction in old_doors:
-		var connecting_pos = _get_connecting_position(old_pos, door_direction)
+	for door_direction in cleanup_doors:
+		var connecting_pos = _get_connecting_position(cleanup_pos, door_direction)
 		print("  Checking connection at ", connecting_pos, " (", _get_direction_name(door_direction), " door)")
 		
 		# Don't destroy the tile the player is currently on
-		if connecting_pos == current_pos:
+		if connecting_pos == current_player_pos:
 			print("    SKIP: This is current player tile")
 			continue
 		
-		# Don't destroy permanent tiles
-		if permanent_tiles.has(connecting_pos):
+		# Don't destroy the past tile (if specified)
+		if connecting_pos == exclude_past_pos:
+			print("    SKIP: This is the excluded past tile")
+			continue
+		
+		# Don't destroy permanent tiles (including those with is_permanent attribute)
+		if _has_permanent_tile_at_position(connecting_pos):
 			print("    SKIP: This is a permanent tile")
 			continue
 		
-		# Don't destroy the start tile
-		if connecting_pos == Vector2i(0, 0):
-			print("    SKIP: This is the start tile")
-			continue
-		
-		# Destroy the connecting tile
+		# Destroy connecting tile (including any other past tiles - only 1 past allowed)
 		if active_tiles.has(connecting_pos):
 			var tile_to_destroy = active_tiles[connecting_pos]
+			# Special handling for past tiles - there can only be one
+			if tile_to_destroy.is_past_tile:
+				print("    DESTROYING OLD PAST TILE: Only one past tile allowed")
 			active_tiles.erase(connecting_pos)
 			tile_to_destroy.queue_free()
 			destroyed_count += 1
@@ -376,9 +438,11 @@ func _position_player_at_start(start_tile: Node3D):
 		print("WARNING: PlayerStart marker not found!")
 
 func _check_for_permanent_tile_registration(tile_pos: Vector2i):
-	"""Check if this tile should be registered as permanent (first 5 unique tiles visited)"""
-	if permanent_tile_positions.size() < 5 and not permanent_tiles.has(tile_pos):
-		add_permanent_tile(tile_pos)
+	"""Check if this tile should be registered as permanent (based on tile's permanent property)"""
+	if not permanent_tiles.has(tile_pos) and active_tiles.has(tile_pos):
+		var tile = active_tiles[tile_pos]
+		if tile.has_method("is_tile_permanent") and tile.is_tile_permanent():
+			add_permanent_tile(tile_pos)
 
 # Permanent tile system
 func add_permanent_tile(pos: Vector2i):
@@ -387,7 +451,7 @@ func add_permanent_tile(pos: Vector2i):
 		permanent_tiles[pos] = active_tiles[pos]
 		permanent_tile_positions.append(pos)
 		active_tiles[pos].set_meta("is_permanent", true)
-		print("Added PERMANENT tile at ", pos, " (", permanent_tile_positions.size(), "/5)")
+		print("Added PERMANENT tile at ", pos, " (total permanent tiles: ", permanent_tile_positions.size(), ")")
 
 func shift_permanent_tiles():
 	"""Shift permanent tiles (50% chance to move 1 position)"""
@@ -424,6 +488,20 @@ func _wrap_position(pos: Vector2i) -> Vector2i:
 		wrapped_y = (world_size / 2) + (pos.y + world_size / 2)
 	
 	return Vector2i(wrapped_x, wrapped_y)
+
+func _has_permanent_tile_at_position(pos: Vector2i) -> bool:
+	"""Check if there's a permanent tile at the given position"""
+	# Check the old permanent tiles system
+	if permanent_tiles.has(pos):
+		return true
+	
+	# Check for tiles with is_permanent attribute
+	if active_tiles.has(pos) and is_instance_valid(active_tiles[pos]):
+		var tile = active_tiles[pos]
+		if tile.has_method("is_tile_permanent"):
+			return tile.is_tile_permanent()
+	
+	return false
 
 # Utility functions
 func _get_direction_name(direction: int) -> String:
