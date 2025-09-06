@@ -521,3 +521,16 @@ func get_active_tile_count() -> int:
 
 func get_active_tile_node() -> Node3D:
 	return active_tile_node
+
+# EventManager integration
+func _on_event_maze_shift():
+	"""Handle maze shift requests from EventManager"""
+	print("TileManager: Maze shift requested via EventManager")
+	shift_maze_section()
+
+func shift_maze_section():
+	"""Trigger a maze section shift"""
+	# For now, just shift permanent tiles
+	# TODO: Implement more complex maze shifting
+	shift_permanent_tiles()
+	print("TileManager: Maze section shifted")

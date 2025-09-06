@@ -55,7 +55,6 @@ script = ExtResource("1_e6iyi")
 
 [node name="Floor" type="MeshInstance3D" parent="Maze"]
 mesh = SubResource("PlaneMesh_e6iyi")
-skeleton = NodePath("../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Floor"]
 
@@ -71,7 +70,6 @@ shape = SubResource("BoxShape3D_e6iyi")
 [node name="EntranceOffset" type="MeshInstance3D" parent="Maze/Maze/AllWalls/NWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1, 0.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/NWalls/EntranceOffset"]
 
@@ -81,7 +79,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="EntranceOffset2" type="MeshInstance3D" parent="Maze/Maze/AllWalls/NWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5, 1, 7.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/NWalls/EntranceOffset2"]
 
@@ -91,7 +88,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="EntranceOffset3" type="MeshInstance3D" parent="Maze/Maze/AllWalls/NWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 1, 8.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/NWalls/EntranceOffset3"]
 
@@ -101,7 +97,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="EWall" type="MeshInstance3D" parent="Maze/Maze/AllWalls/NWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 1, 5.5)
 mesh = SubResource("BoxMesh_lbrlu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/NWalls/EWall"]
 
@@ -113,7 +108,6 @@ shape = SubResource("BoxShape3D_lbrlu")
 [node name="EntranceOffset" type="MeshInstance3D" parent="Maze/Maze/AllWalls/EWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 1, 9.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/EWalls/EntranceOffset"]
 
@@ -123,7 +117,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="NWall" type="MeshInstance3D" parent="Maze/Maze/AllWalls/EWalls"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 4.5, 1, 9.5)
 mesh = SubResource("BoxMesh_lbrlu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/EWalls/NWall"]
 
@@ -133,7 +126,6 @@ shape = SubResource("BoxShape3D_lbrlu")
 [node name="NWall2" type="MeshInstance3D" parent="Maze/Maze/AllWalls/EWalls"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -2.5, 1, 5)
 mesh = SubResource("BoxMesh_di3up")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/EWalls/NWall2"]
 
@@ -143,7 +135,6 @@ shape = SubResource("BoxShape3D_di3up")
 [node name="NWall3" type="MeshInstance3D" parent="Maze/Maze/AllWalls/EWalls"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -2.5, 1, -5.5)
 mesh = SubResource("BoxMesh_di3up")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/EWalls/NWall3"]
 
@@ -153,7 +144,6 @@ shape = SubResource("BoxShape3D_di3up")
 [node name="NWall4" type="MeshInstance3D" parent="Maze/Maze/AllWalls/EWalls"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 9.5, 1, -3.5)
 mesh = SubResource("BoxMesh_di3up")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/EWalls/NWall4"]
 
@@ -163,7 +153,6 @@ shape = SubResource("BoxShape3D_di3up")
 [node name="SWall" type="MeshInstance3D" parent="Maze/Maze/AllWalls/EWalls"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -4.5, 1, 9.5)
 mesh = SubResource("BoxMesh_lbrlu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/EWalls/SWall"]
 
@@ -175,7 +164,6 @@ shape = SubResource("BoxShape3D_lbrlu")
 [node name="EntranceOffset3" type="MeshInstance3D" parent="Maze/Maze/AllWalls/SWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 1, 1.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SWalls/EntranceOffset3"]
 
@@ -185,7 +173,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="EntranceOffset2" type="MeshInstance3D" parent="Maze/Maze/AllWalls/SWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1, -9.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SWalls/EntranceOffset2"]
 
@@ -195,7 +182,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="EWall3" type="MeshInstance3D" parent="Maze/Maze/AllWalls/SWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 1, 5.5)
 mesh = SubResource("BoxMesh_lbrlu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SWalls/EWall3"]
 
@@ -205,7 +191,6 @@ shape = SubResource("BoxShape3D_lbrlu")
 [node name="EWall4" type="MeshInstance3D" parent="Maze/Maze/AllWalls/SWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 1, -5.5)
 mesh = SubResource("BoxMesh_lbrlu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SWalls/EWall4"]
 
@@ -215,7 +200,6 @@ shape = SubResource("BoxShape3D_lbrlu")
 [node name="WWall3" type="MeshInstance3D" parent="Maze/Maze/AllWalls/SWalls"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -6.5, 1, -1.5)
 mesh = SubResource("BoxMesh_lbrlu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SWalls/WWall3"]
 
@@ -225,7 +209,6 @@ shape = SubResource("BoxShape3D_lbrlu")
 [node name="WWall4" type="MeshInstance3D" parent="Maze/Maze/AllWalls/SWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 1, 2.5)
 mesh = SubResource("BoxMesh_lbrlu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SWalls/WWall4"]
 
@@ -237,7 +220,6 @@ shape = SubResource("BoxShape3D_lbrlu")
 [node name="EntranceOffset" type="MeshInstance3D" parent="Maze/Maze/AllWalls/WWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1, -7.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/WWalls/EntranceOffset"]
 
@@ -247,7 +229,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="EntranceOffset2" type="MeshInstance3D" parent="Maze/Maze/AllWalls/WWalls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1, -8.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/WWalls/EntranceOffset2"]
 
@@ -257,7 +238,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="NWall" type="MeshInstance3D" parent="Maze/Maze/AllWalls/WWalls"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 6.5, 1, -6.5)
 mesh = SubResource("BoxMesh_lbrlu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/WWalls/NWall"]
 
@@ -267,7 +247,6 @@ shape = SubResource("BoxShape3D_lbrlu")
 [node name="SWall" type="MeshInstance3D" parent="Maze/Maze/AllWalls/WWalls"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 5.5, 1, -9.5)
 mesh = SubResource("BoxMesh_lbrlu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/WWalls/SWall"]
 
@@ -279,7 +258,6 @@ shape = SubResource("BoxShape3D_lbrlu")
 [node name="NECorner" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Corners"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 1, 9.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Corners/NECorner"]
 
@@ -289,7 +267,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="NWCorner" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Corners"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 1, -9.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Corners/NWCorner"]
 
@@ -299,7 +276,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="SWCorner" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Corners"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 1, -9.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Corners/SWCorner"]
 
@@ -311,7 +287,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="LCorridor1" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1, 6.5)
 mesh = SubResource("BoxMesh_griu4")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/LCorridor1"]
 
@@ -321,7 +296,6 @@ shape = SubResource("BoxShape3D_griu4")
 [node name="LCorridor2" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 2.5, 1, 4.5)
 mesh = SubResource("BoxMesh_griu4")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/LCorridor2"]
 
@@ -331,7 +305,6 @@ shape = SubResource("BoxShape3D_griu4")
 [node name="LCorridor6" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -2.5, 1, -0.5)
 mesh = SubResource("BoxMesh_griu4")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/LCorridor6"]
 
@@ -341,7 +314,6 @@ shape = SubResource("BoxShape3D_griu4")
 [node name="LCorridor5" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -6.5, 1, 4.5)
 mesh = SubResource("BoxMesh_griu4")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/LCorridor5"]
 
@@ -351,7 +323,6 @@ shape = SubResource("BoxShape3D_griu4")
 [node name="LCorridor3" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 1, -9.5)
 mesh = SubResource("BoxMesh_griu4")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/LCorridor3"]
 
@@ -361,7 +332,6 @@ shape = SubResource("BoxShape3D_griu4")
 [node name="LCorridor4" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 2.5, 1, -3.5)
 mesh = SubResource("BoxMesh_griu4")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/LCorridor4"]
 
@@ -373,7 +343,6 @@ shape = SubResource("BoxShape3D_griu4")
 [node name="CenterWall1" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 9.5, 1, -8)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall1"]
 
@@ -383,7 +352,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall2" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.5, 1, -9)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall2"]
 
@@ -393,7 +361,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall3" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -4.5)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall3"]
 
@@ -403,7 +370,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall4" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6.5, 1, -4)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall4"]
 
@@ -413,7 +379,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall5" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 4.5, 1, -5)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall5"]
 
@@ -423,7 +388,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall6" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 4.5, 1, -2)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall6"]
 
@@ -433,7 +397,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall8" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(1, 0, 1.06581e-14, 0, 1, 0, -1.06581e-14, 0, 1, 4, 1, -0.5)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall8"]
 
@@ -443,7 +406,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall9" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(1, 0, 1.06581e-14, 0, 1, 0, -1.06581e-14, 0, 1, 5, 1, 1.5)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall9"]
 
@@ -453,7 +415,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall10" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 5.5, 1, 3)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall10"]
 
@@ -463,7 +424,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall11" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 5, 1, 4.5)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall11"]
 
@@ -473,7 +433,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall12" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -9, 1, 9.5)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall12"]
 
@@ -483,7 +442,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="CenterWall7" type="MeshInstance3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 7, 1, -1.5)
 mesh = SubResource("BoxMesh_xak5w")
-skeleton = NodePath("../../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/LShapeCorridors/CenterBlocks/CenterWall7"]
 
@@ -495,7 +453,6 @@ shape = SubResource("BoxShape3D_xak5w")
 [node name="Bridge1" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Bridges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1, 8.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Bridges/Bridge1"]
 
@@ -505,7 +462,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="Bridge2" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Bridges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1, -0.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Bridges/Bridge2"]
 
@@ -515,7 +471,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="Bridge3" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Bridges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 1, 4)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Bridges/Bridge3"]
 
@@ -525,7 +480,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="Bridge4" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Bridges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 1, 6.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Bridges/Bridge4"]
 
@@ -535,7 +489,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="Bridge5" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Bridges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 1, -8.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Bridges/Bridge5"]
 
@@ -545,7 +498,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="Bridge7" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Bridges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 1, 1.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Bridges/Bridge7"]
 
@@ -555,7 +507,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="Bridge6" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Bridges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, 8.5)
 mesh = SubResource("BoxMesh_ybcqj")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Bridges/Bridge6"]
 
@@ -565,7 +516,6 @@ shape = SubResource("BoxShape3D_ybcqj")
 [node name="EntranceOffset4" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Bridges"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -0.75, 1, 9.5)
 mesh = SubResource("BoxMesh_o67iu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Bridges/EntranceOffset4"]
 
@@ -575,7 +525,6 @@ shape = SubResource("BoxShape3D_bufvs")
 [node name="EntranceOffset6" type="MeshInstance3D" parent="Maze/Maze/AllWalls/Bridges"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.75, 1, 9.5)
 mesh = SubResource("BoxMesh_o67iu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Bridges/EntranceOffset6"]
 
@@ -597,7 +546,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
 [node name="EntranceOffset4" type="MeshInstance3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -9.5, 1, -0.75)
 mesh = SubResource("BoxMesh_o67iu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="EntranceOffset4"]
 
@@ -607,7 +555,6 @@ shape = SubResource("BoxShape3D_bufvs")
 [node name="EntranceOffset6" type="MeshInstance3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -9.5, 1, 0.75)
 mesh = SubResource("BoxMesh_o67iu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="EntranceOffset6"]
 
@@ -617,7 +564,6 @@ shape = SubResource("BoxShape3D_bufvs")
 [node name="EntranceOffset5" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 1, -9.5)
 mesh = SubResource("BoxMesh_o67iu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="EntranceOffset5"]
 
@@ -627,7 +573,6 @@ shape = SubResource("BoxShape3D_bufvs")
 [node name="EntranceOffset7" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 1, -9.5)
 mesh = SubResource("BoxMesh_o67iu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="EntranceOffset7"]
 
@@ -637,7 +582,6 @@ shape = SubResource("BoxShape3D_bufvs")
 [node name="EntranceOffset8" type="MeshInstance3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.5, 1, -0.75)
 mesh = SubResource("BoxMesh_o67iu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="EntranceOffset8"]
 
@@ -647,7 +591,6 @@ shape = SubResource("BoxShape3D_bufvs")
 [node name="EntranceOffset9" type="MeshInstance3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.5, 1, 0.75)
 mesh = SubResource("BoxMesh_o67iu")
-skeleton = NodePath("../../../../..")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="EntranceOffset9"]
 

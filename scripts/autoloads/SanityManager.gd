@@ -211,3 +211,11 @@ func reset_sanity():
 	is_critical = false
 	decay_timer = 0.0
 	emit_signal("sanity_changed", current_sanity)
+
+# EventManager integration
+func _on_event_sanity_changed(new_sanity: int):
+	"""Handle sanity change events from EventManager"""
+	var old_sanity = current_sanity
+	current_sanity = new_sanity
+	emit_signal("sanity_changed", current_sanity)
+	_check_sanity_thresholds(old_sanity)

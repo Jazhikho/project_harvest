@@ -311,3 +311,14 @@ func clear_harvest_log():
 	"""Clear all stored run data (for testing)"""
 	run_history.clear()
 	_save_run_history()
+
+# EventManager integration
+func _on_event_run_logged(summary: String):
+	"""Handle run logging from EventManager"""
+	print("HarvestLogger: Run logged via EventManager - ", summary)
+
+func _on_event_echo_spawned(text: String):
+	"""Handle echo spawning from EventManager"""
+	print("HarvestLogger: Echo spawned via EventManager - ", text)
+	# For now, just print the echo text
+	# TODO: Implement proper echo visualization

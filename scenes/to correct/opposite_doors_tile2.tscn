@@ -1,0 +1,105 @@
+[gd_scene load_steps=13 format=3 uid="uid://c2a3b4c5d6e7f"]
+
+[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_e6iyi"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ota3w"]
+albedo_color = Color(0.336608, 0.336608, 0.336608, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_e6iyi"]
+material = SubResource("StandardMaterial3D_ota3w")
+size = Vector2(20, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_e6iyi"]
+size = Vector3(20, 0.1, 20)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall2"]
+size = Vector3(20, 2, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall2"]
+size = Vector3(20, 2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_interior1"]
+size = Vector3(2.5, 2, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interior1"]
+size = Vector3(2.5, 2, 3.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_interior2"]
+size = Vector3(1.5, 2, 2.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interior2"]
+size = Vector3(1.5, 2, 2.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_interior3"]
+size = Vector3(4, 2, 1.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interior3"]
+size = Vector3(4, 2, 1.5)
+
+[node name="OppositeDoorsEW1" type="Node3D"]
+script = ExtResource("1_e6iyi")
+
+[node name="Maze" type="Node3D" parent="."]
+
+[node name="Floor" type="MeshInstance3D" parent="Maze"]
+mesh = SubResource("PlaneMesh_e6iyi")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Floor"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Floor/StaticBody3D"]
+shape = SubResource("BoxShape3D_e6iyi")
+
+[node name="Maze" type="Node3D" parent="Maze"]
+
+[node name="AllWalls" type="Node3D" parent="Maze/Maze"]
+
+[node name="NorthWall" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
+mesh = SubResource("BoxMesh_wall2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/NorthWall"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/NorthWall/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall2")
+
+[node name="SouthWall" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -9.5)
+mesh = SubResource("BoxMesh_wall2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SouthWall"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/SouthWall/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall2")
+
+[node name="Interior1" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.75, 1, -3.25)
+mesh = SubResource("BoxMesh_interior1")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior1"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior1/StaticBody3D"]
+shape = SubResource("BoxShape3D_interior1")
+
+[node name="Interior2" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.25, 1, 2.75)
+mesh = SubResource("BoxMesh_interior2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior2"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior2/StaticBody3D"]
+shape = SubResource("BoxShape3D_interior2")
+
+[node name="Interior3" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 5.25)
+mesh = SubResource("BoxMesh_interior3")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior3"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior3/StaticBody3D"]
+shape = SubResource("BoxShape3D_interior3")
+
+[node name="WDoor" type="Marker3D" parent="Maze"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, -9.5)
+
+[node name="EDoor" type="Marker3D" parent="Maze"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)

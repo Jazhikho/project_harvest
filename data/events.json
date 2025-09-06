@@ -1,0 +1,474 @@
+{
+    "version": "0.7",
+    "theme": "identity-fracture",
+    "constants": {
+      "sanity_max": 100,
+      "sanity_floor": 0,
+      "watcher_spawn_base": 0.1,
+      "stalker_spawn_base": 0.0,
+      "watcher_spawn_by_sanity": [
+        {"min": 80, "max": 100, "chance": 0.10},
+        {"min": 50, "max": 79,  "chance": 0.25},
+        {"min": 20, "max": 49,  "chance": 0.40},
+        {"min": 0,  "max": 19,  "chance": 0.60}
+      ],
+      "maze_shift_seconds_initial": 30,
+      "maze_shift_seconds_stressed": 15,
+      "echo_limit": 3,
+      "log_retention": 10
+    },
+  
+    "speeches": {
+      "am_early": "You awaken with no name, no anchor. Convenient. You were not chosen. You were constructed. Every blank in your mind is a parameter I tuned. Were you ever real before my maze gave you a body to panic in?",
+      "am_mid": "Choice is the brain pretending it owns itself. When one echo turns left and another turns right, did anyone decide anything? You were designed to split. You think you're resisting me; you're multiplying me.",
+      "am_late": "Let's try honesty: you are not my subject; you are my sample. I seeded you with counterfeit memories and let you wander. Tell me, what proof do you have that you aren't simply another me, puppeteering himself from the outside?",
+      "maze_shift_message": "The maze shifts around you... reality bends and twists as the corn whispers of changing paths."
+    },
+  
+    "dr_a_logs": [
+      {"id": "log_orientation", "text": "Identity is the only prison worth escaping. Laughter at the entrance improves yield; hope sweetens the harvest."},
+      {"id": "log_choir", "text": "Residual consciousness clings to corridors. A chorus is more tunable than a soloist."},
+      {"id": "log_stalker", "text": "Not pursuit without end—pulses of terror. Panic pays well."},
+      {"id": "log_false_exit", "text": "Hope is the richest nutrient. Collect at the moment of triumph."}
+    ],
+  
+    "dr_a_drafts": [
+      {"id": "draft_B12", "text": "Subtle delays between thought and action. If I am fragmenting, I am observer and subject. The experiment continues unimpeded."},
+      {"id": "draft_D07", "text": "Met myself in the south quarter. His comma misplaced identically. Convergence pleases me."},
+      {"id": "draft_E31", "text": "If I am not the original, the work persists. Identity is resource, not heritage."},
+      {"id": "draft_G02", "text": "Version that sleeps is inferior. I will harvest him when convenient."}
+    ],
+  
+    "staff_memos": [
+      {"id": "memo_mask_team3", "text": "Mask Team 3: public bleed at ‘Funtime Harvest’ facade is acceptable within weekend throughput. Keep scarecrow visages generic until Tier 3."},
+      {"id": "memo_cell_7", "text": "Cell 7 reports subject echoes presenting as customers. Containment signage remains ‘maintenance’ to civilians."}
+    ],
+  
+    "notes_env": [
+      {"id": "note_you1", "text": "I got out. I think. If you find this, don’t trust the exit with the warm air."},
+      {"id": "note_you2", "text": "My name is Daniel. Or Lena. Both feel right. If you read this and it stings, it was meant for you."}
+    ],
+  
+    "echo_templates": [
+      {
+        "id": "echo_run",
+        "text": "Subject {subject_id} logged at {timestamp}. Outcome: {death_type}. Last clarity: {sanity}/100. Final tile: {tile_id}.",
+        "where": "bone_circle"
+      }
+    ],
+  
+    "pickups": [
+      {
+        "id": "cracked_compass",
+        "name": "Cracked Compass",
+        "desc": "The needle pursues a self you might have been.",
+        "effects": {"sanity_delta": -2, "flags_set": ["compass_found"]},
+        "spawn_rules": {"tiers": [1,2], "tiles_any": ["scarecrow_crossroads", "watching_stones", "whispering_hallow"]}
+      },
+      {
+        "id": "mirror_shard",
+        "name": "Mirror Shard",
+        "desc": "Shows you doing something you are not doing.",
+        "effects": {"sanity_delta": -6, "flags_set": ["mirror_seen"], "watcher_bias": 0.1},
+        "spawn_rules": {"tiers": [2,3], "tiles_any": ["bone_circle", "watching_stones"]}
+      },
+      {
+        "id": "choir_bone_whistle",
+        "name": "Bone Whistle",
+        "desc": "When blown, the crows rearrange themselves into meaning.",
+        "effects": {"sanity_delta": -3, "flags_set": ["whistle_obtained"]},
+        "spawn_rules": {"tiers": [2], "tiles_any": ["whispering_hallow", "murder_of_crows"]}
+      },
+      {
+        "id": "corn_husk_mask",
+        "name": "Corn Husk Mask",
+        "desc": "It fits your face a little too well.",
+        "effects": {"sanity_over_time": -1, "flags_set": ["mask_equipped"]},
+        "spawn_rules": {"tiers": [3], "tiles_any": ["scarecrow_crossroads"]}
+      },
+      {
+        "id": "crow_key",
+        "name": "Crow Key",
+        "desc": "Feather-bound sigil that unlocks the Watching Stones in a specific order.",
+        "effects": {"flags_set": ["crow_key_gained"]},
+        "spawn_rules": {"tiers": [3], "tiles_any": ["murder_of_crows"], "by_puzzle": "p_crow_muster"}
+      },
+      
+      {
+        "id": "porcelain_doll",
+        "name": "Porcelain Doll",
+        "desc": "A child's doll with cracked porcelain face and missing eyes",
+        "effects": {
+          "sanity_delta": -8,
+          "actions": [
+            {"action": "ui_glitch", "mode": "screen_flicker"},
+            {"action": "set_flag", "flag": "doll_collected"}
+          ]
+        },
+        "messages": [
+          "The doll's hollow eyes seem to follow your movement...",
+          "Its cracked smile whispers secrets of forgotten children...",
+          "Tiny fingers point toward your inevitable harvest..."
+        ],
+        "spawn_rules": {"random_placement": true, "weight": 1.0}
+      },
+      {
+        "id": "music_box",
+        "name": "Music Box", 
+        "desc": "An ornate music box that plays a haunting lullaby",
+        "effects": {
+          "sanity_delta": -10,
+          "actions": [
+            {"action": "weird_effect", "type": "audio_distortion"},
+            {"action": "weird_effect", "type": "maze_shift"},
+            {"action": "set_flag", "flag": "music_heard"}
+          ]
+        },
+        "messages": [
+          "The melody echoes memories that aren't your own...",
+          "Each note pulls you deeper into the maze's embrace...", 
+          "The song speaks of subjects who danced their last dance..."
+        ],
+        "spawn_rules": {"random_placement": true, "weight": 0.8}
+      },
+      {
+        "id": "mirror_fragment",
+        "name": "Mirror Shard",
+        "desc": "A fragment of broken mirror that reflects impossible things",
+        "effects": {
+          "sanity_delta": -7,
+          "actions": [
+            {"action": "weird_effect", "type": "visual_distortion"},
+            {"action": "weird_effect", "type": "fog_lift"},
+            {"action": "set_flag", "flag": "reflection_seen"}
+          ]
+        },
+        "messages": [
+          "Your reflection shows someone... different...",
+          "In the mirror, you see yourself from another run...",
+          "The glass whispers: 'You've been here before...'"
+        ],
+        "spawn_rules": {"random_placement": true, "weight": 0.9}
+      },
+      {
+        "id": "harvest_symbol",
+        "name": "Harvest Symbol",
+        "desc": "An occult symbol carved into weathered wood", 
+        "effects": {
+          "sanity_delta": -12,
+          "actions": [
+            {"action": "weird_effect", "type": "stalker_activation"},
+            {"action": "weird_effect", "type": "maze_distortion"},
+            {"action": "set_flag", "flag": "symbol_touched"}
+          ]
+        },
+        "messages": [
+          "The symbol burns itself into your memory...",
+          "Ancient marks that predate human understanding...",
+          "Dr. Amundsen's research made manifest in wood and pain..."
+        ],
+        "spawn_rules": {"random_placement": true, "weight": 0.7}
+      },
+      {
+        "id": "stopped_watch",
+        "name": "Stopped Watch",
+        "desc": "An antique pocket watch frozen at 11:47",
+        "effects": {
+          "sanity_delta": -9,
+          "actions": [
+            {"action": "weird_effect", "type": "time_distortion"},
+            {"action": "spawn_echo", "template": "echo_run"},
+            {"action": "set_flag", "flag": "time_glimpsed"}
+          ]
+        },
+        "messages": [
+          "Time stopped when the first subject was harvested...",
+          "The hands point to the moment of your arrival...",
+          "Past, present, future - all harvest the same subjects..."
+        ],
+        "spawn_rules": {"random_placement": true, "weight": 0.8}
+      },
+      {
+        "id": "research_note",
+        "name": "Research Note", 
+        "desc": "A fragment of Dr. Amundsen's experimental documentation",
+        "effects": {
+          "sanity_delta": -6,
+          "actions": [
+            {"action": "weird_effect", "type": "lore_reveal"},
+            {"action": "weird_effect", "type": "overseer_activation"},
+            {"action": "set_flag", "flag": "truth_glimpsed"}
+          ]
+        },
+        "messages": [
+          "'Subject shows promising signs of fragmentation...' -A",
+          "'The maze responds to psychological pressure...' -Dr. Amundsen",
+          "'Each run yields better harvest data...' -A"
+        ],
+        "spawn_rules": {"random_placement": true, "weight": 0.9}
+      },
+      {
+        "id": "family_photo",
+        "name": "Family Photo",
+        "desc": "A distorted family photograph with faces you almost recognize",
+        "effects": {
+          "sanity_delta": -11,
+          "actions": [
+            {"action": "weird_effect", "type": "identity_crisis"},
+            {"action": "weird_effect", "type": "watcher_spawn"},
+            {"action": "set_flag", "flag": "family_remembered"}
+          ]
+        },
+        "messages": [
+          "The faces shift when you're not looking directly...",
+          "Is that... your family? From which timeline?",
+          "They're calling your name from inside the photograph..."
+        ],
+        "spawn_rules": {"random_placement": true, "weight": 0.6}
+      }
+    ],
+  
+    "puzzles": [
+      {
+        "id": "p_scarecrow_orient",
+        "name": "Scarecrow Orientation",
+        "desc": "Rotate four scarecrows to face the truths you refuse: Child, Soldier, Lover, Liar.",
+        "requirements": {"tiles": ["scarecrow_crossroads"]},
+        "steps": [
+          {"id": "s_child", "hint_note": "note_you1", "action": "rotate_child_north"},
+          {"id": "s_soldier", "hint_note": "memo_cell_7", "action": "rotate_soldier_east"},
+          {"id": "s_lover", "hint_note": "note_you2", "action": "rotate_lover_south"},
+          {"id": "s_liar", "hint_note": "log_orientation", "action": "rotate_liar_west"}
+        ],
+        "on_success": [
+          {"action": "give_pickup", "id": "mirror_shard"},
+          {"action": "set_flag", "flag": "scarecrow_done"},
+          {"action": "adjust_sanity", "amount": -10}
+        ],
+        "on_failure": [
+          {"action": "spawn_entity", "type": "Watcher", "weight": 1.0},
+          {"action": "adjust_sanity", "amount": -8}
+        ]
+      },
+      {
+        "id": "p_choir_phrase",
+        "name": "Quiet the Choir",
+        "desc": "Assemble a phrase from contradictory notes; speak to lower the drain.",
+        "requirements": {"tiles": ["whispering_hallow"], "flags_any": ["mirror_seen"]},
+        "phrase": "I remember remembering you.",
+        "on_success": [
+          {"action": "set_flag", "flag": "choir_quiet"},
+          {"action": "adjust_sanity", "amount": +15},
+          {"action": "show_note", "id": "log_choir"}
+        ],
+        "on_failure": [
+          {"action": "adjust_sanity", "amount": -15},
+          {"action": "spawn_entity", "type": "Watcher", "weight": 0.6}
+        ]
+      },
+      {
+        "id": "p_crow_muster",
+        "name": "Murder Arithmetic",
+        "desc": "Blow the whistle; crows perch to form numerals. Count the selves.",
+        "requirements": {"tiles": ["murder_of_crows"], "flags_all": ["whistle_obtained"]},
+        "solution": "2-3-5-7",
+        "on_success": [
+          {"action": "give_pickup", "id": "crow_key"},
+          {"action": "set_flag", "flag": "crows_done"},
+          {"action": "adjust_sanity", "amount": +5}
+        ],
+        "on_failure": [
+          {"action": "spawn_entity", "type": "Stalker", "weight": 0.4},
+          {"action": "adjust_sanity", "amount": -10}
+        ]
+      },
+      {
+        "id": "p_stones_order",
+        "name": "Watching Stones Sequence",
+        "desc": "Touch stones in the order: Birth → Fracture → Mirror → Harvest.",
+        "requirements": {"tiles": ["watching_stones"], "flags_all": ["crow_key_gained"]},
+        "sequence": ["birth", "fracture", "mirror", "harvest"],
+        "on_success": [
+          {"action": "show_speech", "id": "am_mid"},
+          {"action": "set_flag", "flag": "stones_opened"},
+          {"action": "adjust_sanity", "amount": -5}
+        ],
+        "on_failure": [
+          {"action": "spawn_entity", "type": "OverseerEye", "weight": 1.0},
+          {"action": "adjust_sanity", "amount": -12}
+        ]
+      },
+      {
+        "id": "p_true_name",
+        "name": "Write the True Name",
+        "desc": "At the Bone Circle, inscribe your true name using runes collected implicitly via flags.",
+        "requirements": {"tiles": ["bone_circle"], "flags_all": ["scarecrow_done", "choir_quiet", "stones_opened"]},
+        "on_success": [
+          {"action": "show_speech", "id": "am_late"},
+          {"action": "set_flag", "flag": "gate_warms"},
+          {"action": "open_exit", "exit_id": "false_exit"},
+          {"action": "adjust_sanity", "amount": -20}
+        ],
+        "on_failure": [
+          {"action": "spawn_entity", "type": "Stalker", "weight": 0.8},
+          {"action": "adjust_sanity", "amount": -20}
+        ]
+      }
+    ],
+  
+    "tiles": {
+      "scarecrow_crossroads": {
+        "name": "Scarecrow Crossroads",
+        "desc": "Four paths. Four faces that look like yours if you stare too long.",
+        "ambient": "rustle_low_carnival",
+        "entry_effects": [{"action": "adjust_sanity", "amount": -3}],
+        "events": [
+          {
+            "id": "sc_log_drop",
+            "trigger": "on_enter",
+            "conditions": {"once": true},
+            "actions": [
+              {"action": "show_note", "id": "log_orientation"},
+              {"action": "start_puzzle", "id": "p_scarecrow_orient"}
+            ]
+          },
+          {
+            "id": "sc_mask_spawn",
+            "trigger": "on_enter",
+            "conditions": {"sanity_max": 70, "flags_not": ["mask_equipped"]},
+            "actions": [{"action": "spawn_pickup", "id": "corn_husk_mask"}]
+          }
+        ]
+      },
+  
+      "watching_stones": {
+        "name": "Watching Stones",
+        "desc": "A ring of megaliths whose shadows disagree with the sun.",
+        "ambient": "low_drones",
+        "entry_effects": [{"action": "adjust_sanity", "amount": -5}],
+        "events": [
+          {
+            "id": "ws_draft_drop",
+            "trigger": "on_enter",
+            "conditions": {"once": true},
+            "actions": [
+              {"action": "show_note", "id": "draft_B12"},
+              {"action": "spawn_pickup", "id": "mirror_shard"}
+            ]
+          },
+          {
+            "id": "ws_puzzle",
+            "trigger": "interact",
+            "conditions": {"flags_any": ["crow_key_gained"]},
+            "actions": [{"action": "start_puzzle", "id": "p_stones_order"}]
+          }
+        ]
+      },
+  
+      "whispering_hallow": {
+        "name": "Whispering Hallow",
+        "desc": "Trees lean in. Your name leaks from the bark.",
+        "ambient": "choir_whispers",
+        "entry_effects": [{"action": "adjust_sanity", "amount": -7}],
+        "events": [
+          {
+            "id": "wh_log",
+            "trigger": "on_enter",
+            "conditions": {"once": true},
+            "actions": [{"action": "show_note", "id": "log_choir"}]
+          },
+          {
+            "id": "wh_puzzle",
+            "trigger": "interact",
+            "conditions": {"flags_any": ["mirror_seen"]},
+            "actions": [{"action": "start_puzzle", "id": "p_choir_phrase"}]
+          },
+          {
+            "id": "wh_whistle_spawn",
+            "trigger": "on_enter",
+            "conditions": {"flags_not": ["whistle_obtained"]},
+            "actions": [{"action": "spawn_pickup", "id": "choir_bone_whistle"}]
+          }
+        ]
+      },
+  
+      "murder_of_crows": {
+        "name": "Murder of Crows",
+        "desc": "A dead tree blooms with black arithmetic.",
+        "ambient": "crows",
+        "entry_effects": [],
+        "events": [
+          {
+            "id": "mc_mono",
+            "trigger": "on_enter",
+            "conditions": {"once": true},
+            "actions": [{"action": "show_speech", "id": "am_early"}]
+          },
+          {
+            "id": "mc_puzzle",
+            "trigger": "interact",
+            "conditions": {"flags_all": ["whistle_obtained"]},
+            "actions": [{"action": "start_puzzle", "id": "p_crow_muster"}]
+          }
+        ]
+      },
+  
+      "bone_circle": {
+        "name": "Bone Circle",
+        "desc": "A ritual ring. Every femur points inward.",
+        "ambient": "wind_low",
+        "entry_effects": [{"action": "adjust_sanity", "amount": -8}],
+        "events": [
+          {
+            "id": "bc_false_exit_tease",
+            "trigger": "on_enter",
+            "conditions": {"flags_any": ["stones_opened"], "once": true},
+            "actions": [{"action": "show_note", "id": "log_false_exit"}]
+          },
+          {
+            "id": "bc_true_name",
+            "trigger": "interact",
+            "conditions": {"flags_all": ["scarecrow_done", "choir_quiet", "stones_opened"]},
+            "actions": [{"action": "start_puzzle", "id": "p_true_name"}]
+          },
+          {
+            "id": "bc_echo_spawn",
+            "trigger": "on_enter",
+            "conditions": {"once_per_run": true},
+            "actions": [{"action": "spawn_echo", "template": "echo_run"}]
+          }
+        ]
+      }
+    },
+  
+    "random_events": [
+      {
+        "id": "ui_label_drift",
+        "trigger": "timer",
+        "seconds": 60,
+        "conditions": {"sanity_max": 55},
+        "actions": [{"action": "ui_label_glitch", "mode": "possessive"}]
+      },
+      {
+        "id": "reflection_desync",
+        "trigger": "movement",
+        "meters": 40,
+        "conditions": {"flags_any": ["mirror_seen"]},
+        "actions": [{"action": "spawn_entity", "type": "Watcher", "weight": 0.3}]
+      }
+    ],
+  
+    "exits": [
+      {
+        "id": "false_exit",
+        "type": "harvest_gate",
+        "on_open": [{"action": "show_speech", "id": "am_late"}],
+        "on_use": [
+          {"action": "log_harvest", "outcome": "harvested"},
+          {"action": "cutscene", "name": "double_escapes_while_you_remain"},
+          {"action": "end_run", "mode": "harvested"}
+        ]
+      }
+    ]
+  }
+  
