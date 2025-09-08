@@ -21,7 +21,7 @@ var pickup_mapping = {
 	"harvest_symbol": "SYMBOL",
 	"stopped_watch": "POCKET_WATCH",
 	"research_note": "NOTE",
-	"family_photo": "PHOTO"
+	"staff_photo": "PHOTO"
 }
 
 func _ready():

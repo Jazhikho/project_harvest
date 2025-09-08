@@ -1,15 +1,15 @@
 extends Node
-## Simple Tile Manager - Implements the exact game loop described
-## Spawns tiles with simple positioning and door rotation logic
+## Tile Manager - Now integrated with EventManager for item spawning
 
 signal player_entered_tile(tile_position: Vector2i)
 
 # Door constants matching tile.gd
 enum DoorDirection { NORTH = 1, EAST = 2, SOUTH = 4, WEST = 8 }
 
-# Available tile scenes (excluding start tile)
+# Available tile scenes
 var available_tile_scenes: Array[String] = []
 var start_tile_scene: String = "res://scenes/tiles/start_tile.tscn"
+var final_tile_scene: String = "res://scenes/tiles/final_event_tile.tscn"  # Special final tile
 
 # Active tiles: only the current player tile and its connections
 var active_tiles: Dictionary = {}  # Vector2i -> Node3D
@@ -21,13 +21,23 @@ var past_tile_node: Node3D = null
 # Permanent tiles system - tiles that can persist between maze shifts
 var permanent_tiles: Dictionary = {}  # Vector2i -> Node3D
 var permanent_tile_positions: Array[Vector2i] = []  # List of positions that can be permanent
+var permanent_puzzle_tiles: Dictionary = {}  # tile_position -> puzzle_id
+
+# Reference to EventManager
+var event_manager: Node
 
 func _ready():
 	_load_available_tiles()
+	
+	# Get EventManager reference
+	event_manager = get_node_or_null("/root/EventManager")
+	if not event_manager:
+		push_error("TileManager: EventManager not found!")
+	
 	_spawn_start_tile()
 
 func _load_available_tiles():
-	"""Load all available tile scenes except start tile"""
+	"""Load all available tile scenes except start and final tiles"""
 	available_tile_scenes.clear()
 	
 	var tiles_dir = DirAccess.open("res://scenes/tiles/")
@@ -36,7 +46,7 @@ func _load_available_tiles():
 		var file_name = tiles_dir.get_next()
 		
 		while file_name != "":
-			if file_name.ends_with(".tscn") and file_name != "start_tile.tscn":
+			if file_name.ends_with(".tscn") and file_name != "start_tile.tscn" and file_name != "final_event_tile.tscn":
 				available_tile_scenes.append("res://scenes/tiles/" + file_name)
 			file_name = tiles_dir.get_next()
 	
@@ -127,27 +137,37 @@ func _run_door_detection_and_spawn(tile: Node3D, tile_pos: Vector2i):
 			print("  Permanent tile exists at ", connecting_pos, " - skipping spawn")
 			continue
 		
-		# Step 3: Pre-spawn a random tile
-		print("  Pre-spawning random tile...")
-		var new_tile = _create_random_tile(connecting_pos)
+		# Step 3: Decide which tile to spawn (check for final event)
+		var new_tile: Node3D
+		if event_manager and event_manager.is_final_event_available() and randf() < event_manager.get_final_tile_spawn_weight():
+			print("  Pre-spawning FINAL EVENT tile...")
+			new_tile = _create_tile_from_scene(final_tile_scene, connecting_pos)
+		else:
+			print("  Pre-spawning random tile...")
+			new_tile = _create_random_tile(connecting_pos)
+		
 		if not new_tile:
 			print("  ✗ Failed to create tile")
 			continue
 		
-		# Step 4: Position using simple formula: source_center + half_source + half_target
-		_position_tile_simple(tile, new_tile, door_direction)
-		
-		# Step 5: Rotate tile so a random door connects to source door
+		# Step 4: Rotate tile FIRST so a random door faces the right direction
 		_rotate_and_align_tile(tile, new_tile, door_direction)
 		
-		# Step 6: Re-designate doors after rotation
-		# This is handled automatically by physical rotation of markers in Godot
+		# Step 5: Position using simple formula (now the rotated door will align)
+		_position_tile_simple(tile, new_tile, door_direction)
 		
-		# Step 7: Register on world map
+		# Step 6: Register on world map
 		new_tile.set_meta("world_map_pos", connecting_pos)
 		active_tiles[connecting_pos] = new_tile
 		
-		# Step 8: Mark as connecting tile (enables entrance detection)
+		# Step 7: Check if this tile is permanent and handle accordingly
+		if new_tile.has_method("is_tile_permanent") and new_tile.is_tile_permanent():
+			_register_permanent_tile(new_tile, connecting_pos)
+		else:
+			# Step 8: Process item spawning for non-permanent tiles
+			_process_tile_item_spawning(new_tile, connecting_pos)
+		
+		# Step 9: Mark as connecting tile (enables entrance detection)
 		if new_tile.has_method("set_as_connecting_tile"):
 			new_tile.set_as_connecting_tile()
 			print("  ✓ Tile marked as CONNECTING - entrance detection enabled")
@@ -157,6 +177,232 @@ func _run_door_detection_and_spawn(tile: Node3D, tile_pos: Vector2i):
 		print("  ✓ Successfully spawned and aligned tile at ", connecting_pos)
 	
 	print("=== Door detection complete ===\n")
+
+func _process_tile_item_spawning(tile: Node3D, tile_position: Vector2i):
+	"""Process item spawning for a newly created tile"""
+	print("Processing item spawning for tile at ", tile_position)
+	
+	if not event_manager:
+		print("  ERROR: EventManager not available for item spawning")
+		return
+	
+	# Get spawn points from the tile
+	var spawn_points = _get_tile_spawn_points(tile)
+	if spawn_points.is_empty():
+		print("  No spawn points found on tile")
+		return
+	
+	print("  Found ", spawn_points.size(), " spawn points")
+	
+	# Check if tile is permanent
+	var is_permanent = tile.has_method("is_tile_permanent") and tile.is_tile_permanent()
+	
+	# Query EventManager for what should spawn
+	var spawn_data = event_manager.on_tile_spawning(tile_position, spawn_points, is_permanent)
+	
+	# Process backpack spawn
+	if spawn_data.get("spawn_backpack", false):
+		_spawn_backpack(tile, spawn_data.get("backpack_pos", Vector3.ZERO), spawn_data.get("backpack_inventory", []))
+		
+		# Process effigy spawn
+		if spawn_data.get("spawn_effigy", false):
+			_spawn_effigy(tile, spawn_data.get("effigy_pos", Vector3.ZERO))
+	
+	# Process item spawns
+	var items = spawn_data.get("items", [])
+	for item_data in items:
+		_spawn_item(tile, item_data.get("id", ""), item_data.get("position", Vector3.ZERO))
+
+func _get_tile_spawn_points(tile: Node3D) -> Array:
+	"""Get all spawn points from a tile (Maze/SpawnPoints markers)"""
+	var spawn_points = []
+	
+	var spawn_parent = tile.get_node_or_null("Maze/SpawnPoints")
+	if not spawn_parent:
+		print("  No Maze/SpawnPoints node found")
+		return spawn_points
+	
+	# Get all Marker3D children
+	for child in spawn_parent.get_children():
+		if child is Marker3D:
+			spawn_points.append(child.global_position)
+	
+	return spawn_points
+
+func _spawn_backpack(tile: Node3D, position: Vector3, inventory: Array):
+	"""Spawn a backpack containing previous run's inventory"""
+	print("  Spawning backpack at ", position, " with ", inventory.size(), " items")
+	
+	# TODO: Load actual backpack scene when created
+	# For now, create a placeholder
+	var backpack = MeshInstance3D.new()
+	backpack.name = "Backpack"
+	
+	# Create a simple box mesh as placeholder
+	var box_mesh = BoxMesh.new()
+	box_mesh.size = Vector3(0.5, 0.5, 0.5)
+	backpack.mesh = box_mesh
+	
+	# Add material to make it visible
+	var material = StandardMaterial3D.new()
+	material.albedo_color = Color(0.5, 0.3, 0.1)  # Brown color
+	backpack.set_surface_override_material(0, material)
+	
+	# Position it
+	tile.add_child(backpack)
+	backpack.global_position = position
+	backpack.position.y = 0.25  # Slightly above ground
+	
+	# Store inventory data
+	backpack.set_meta("inventory", inventory)
+	backpack.set_meta("is_backpack", true)
+	
+	# Add collision for pickup
+	var static_body = StaticBody3D.new()
+	var collision = CollisionShape3D.new()
+	var shape = BoxShape3D.new()
+	shape.size = Vector3(0.5, 0.5, 0.5)
+	collision.shape = shape
+	
+	backpack.add_child(static_body)
+	static_body.add_child(collision)
+	
+	print("  ✓ Backpack spawned with inventory: ", inventory)
+
+func _spawn_effigy(tile: Node3D, position: Vector3):
+	"""Spawn an enemy effigy"""
+	print("  Spawning effigy at ", position)
+	
+	# TODO: Load actual effigy/enemy scene when created
+	# For now, create a placeholder
+	var effigy = MeshInstance3D.new()
+	effigy.name = "Effigy"
+	
+	# Create a simple capsule mesh as placeholder
+	var capsule_mesh = CapsuleMesh.new()
+	capsule_mesh.height = 2.0
+	capsule_mesh.radius = 0.3
+	effigy.mesh = capsule_mesh
+	
+	# Add material to make it look spooky
+	var material = StandardMaterial3D.new()
+	material.albedo_color = Color(0.2, 0.2, 0.2)  # Dark gray
+	effigy.set_surface_override_material(0, material)
+	
+	# Position it
+	tile.add_child(effigy)
+	effigy.global_position = position
+	effigy.position.y = 1.0  # Standing height
+	
+	# Make it face the backpack (simple look-at)
+	var backpack = tile.get_node_or_null("Backpack")
+	if backpack:
+		effigy.look_at(backpack.global_position, Vector3.UP)
+	
+	effigy.set_meta("is_effigy", true)
+	
+	print("  ✓ Effigy spawned")
+	
+	# TODO: When enemy system is implemented, this should spawn an actual enemy
+
+func _spawn_item(tile: Node3D, item_id: String, position: Vector3):
+	"""Spawn a collectible item"""
+	print("  Spawning item '", item_id, "' at ", position)
+	
+	# TODO: Load actual item scenes based on item_id
+	# For now, create a placeholder
+	var item = MeshInstance3D.new()
+	item.name = "Item_" + item_id
+	
+	# Create a simple sphere mesh as placeholder
+	var sphere_mesh = SphereMesh.new()
+	sphere_mesh.radius = 0.2
+	sphere_mesh.height = 0.4
+	item.mesh = sphere_mesh
+	
+	# Add material based on item type
+	var material = StandardMaterial3D.new()
+	if "note" in item_id:
+		material.albedo_color = Color(1.0, 1.0, 0.8)  # Yellowish for notes
+	elif "puzzle" in item_id:
+		material.albedo_color = Color(0.5, 0.8, 1.0)  # Blue for puzzle pieces
+	else:
+		material.albedo_color = Color(0.8, 0.5, 0.8)  # Purple for weird objects
+	
+	item.set_surface_override_material(0, material)
+	
+	# Position it
+	tile.add_child(item)
+	item.global_position = position
+	item.position.y = 0.5  # Float above ground
+	
+	# Store item data
+	item.set_meta("item_id", item_id)
+	item.set_meta("is_collectible", true)
+	item.set_meta("tile_position", tile.get_meta("world_map_pos", Vector2i()))
+	
+	# Add collision for pickup
+	var area = Area3D.new()
+	var collision = CollisionShape3D.new()
+	var shape = SphereShape3D.new()
+	shape.radius = 0.3
+	collision.shape = shape
+	
+	item.add_child(area)
+	area.add_child(collision)
+	
+	# Set collision layers
+	area.collision_layer = 0
+	area.collision_mask = 1  # Detect player
+	
+	# Connect pickup signal
+	area.body_entered.connect(_on_item_pickup.bind(item))
+	
+	print("  ✓ Item spawned: ", item_id)
+
+func _on_item_pickup(body: Node3D, item: Node3D):
+	"""Handle item pickup"""
+	if not body.is_in_group("player"):
+		return
+	
+	var item_id = item.get_meta("item_id", "")
+	var tile_pos = item.get_meta("tile_position", Vector2i())
+	
+	print("Player picked up item: ", item_id)
+	
+	# Notify EventManager
+	if event_manager:
+		event_manager.on_item_collected(item_id, tile_pos)
+	
+	# Remove the item
+	item.queue_free()
+
+func _register_permanent_tile(tile: Node3D, position: Vector2i):
+	"""Register a permanent tile and its puzzle if it has one"""
+	permanent_tiles[position] = tile
+	permanent_tile_positions.append(position)
+	
+	print("Registered PERMANENT tile at ", position)
+	
+	# Check if tile has a puzzle
+	if tile.has_method("get_puzzle_id"):
+		var puzzle_id = tile.get_puzzle_id()
+		if puzzle_id != "":
+			permanent_puzzle_tiles[position] = puzzle_id
+			
+			# Register with EventManager
+			if event_manager:
+				event_manager.register_permanent_tile_puzzle(position, puzzle_id)
+			
+			print("  Tile has puzzle: ", puzzle_id)
+
+func remove_permanent_tile(position: Vector2i):
+	"""Remove a tile from permanent status (called when puzzle is completed)"""
+	if permanent_tiles.has(position):
+		permanent_tiles.erase(position)
+		permanent_tile_positions.erase(position)
+		permanent_puzzle_tiles.erase(position)
+		print("Removed permanent tile at ", position, " - puzzle completed!")
 
 func _position_tile_simple(source_tile: Node3D, target_tile: Node3D, source_door_direction):
 	"""Position tile using simple formula: source_center + half_source + half_target"""
@@ -189,27 +435,65 @@ func _rotate_and_align_tile(source_tile: Node3D, target_tile: Node3D, source_doo
 		print("    Target tile has no doors to align")
 		return
 	
-	var target_doors = target_tile.get_available_doors()
-	if target_doors.is_empty():
+	# Ensure the tile has detected its doors first
+	if not target_tile.has_method("detect_doors"):
+		print("    ERROR: Target tile has no detect_doors method")
+		return
+		
+	# Force door detection if not already done
+	target_tile.detect_doors()
+	
+	# Get the original doors before rotation
+	var original_doors = []
+	for original_dir in target_tile.door_markers.keys():
+		original_doors.append(original_dir)
+	
+	if original_doors.is_empty():
 		print("    Target tile has no available doors")
 		return
 	
-	# Pick a random door from target tile to connect
-	var target_door_keys = target_doors.keys()
-	var chosen_door = target_door_keys[randi() % target_door_keys.size()]
-	print("    Chosen door ", _get_direction_name(chosen_door), " to connect to source door ", _get_direction_name(source_door_direction))
+	# Pick a random door from the original doors
+	var chosen_original_door = original_doors[randi() % original_doors.size()]
+	print("    Chose original door ", _get_direction_name(chosen_original_door), " to connect")
 	
-	# Calculate required rotation to align doors
-	var rotation_needed = _calculate_door_alignment_rotation(chosen_door, source_door_direction)
+	# Calculate rotation needed to make this door face the opposite of source_door_direction
+	var required_global_direction = _get_opposite_direction(source_door_direction)
+	var rotation_needed = _calculate_rotation_to_global_direction(chosen_original_door, required_global_direction)
 	
-	# Apply rotation to tile
+	# Apply rotation - this will automatically update the global door assignments
 	if target_tile.has_method("set_tile_rotation"):
 		target_tile.set_tile_rotation(rotation_needed)
-		print("    Applied ", rotation_needed * 90, "° rotation to align doors")
+		print("    Applied ", rotation_needed * 90, "° rotation (counter-clockwise)")
 	else:
-		# Fallback: direct rotation
+		# Fallback direct rotation
 		target_tile.rotation.y = rotation_needed * PI / 2
-		print("    Applied direct rotation: ", rotation_needed * 90, "°")
+		if target_tile.has_method("_update_global_door_assignments"):
+			target_tile._update_global_door_assignments(rotation_needed)
+		print("    Applied direct rotation: ", rotation_needed * 90, "° (counter-clockwise)")
+
+func _get_opposite_direction(direction: int) -> int:
+	"""Get the opposite direction"""
+	match direction:
+		DoorDirection.NORTH: return DoorDirection.SOUTH
+		DoorDirection.EAST: return DoorDirection.WEST
+		DoorDirection.SOUTH: return DoorDirection.NORTH
+		DoorDirection.WEST: return DoorDirection.EAST
+		_: return DoorDirection.NORTH
+
+func _calculate_rotation_to_global_direction(original_door: int, target_global_direction: int) -> int:
+	"""Calculate rotation steps to make original_door point toward target_global_direction"""
+	var original_index = _door_enum_to_index(original_door)
+	var target_index = _door_enum_to_index(target_global_direction)
+	
+	# For counter-clockwise rotation (positive Y rotation in Godot)
+	# We need to rotate FROM original TO target
+	var rotation = (original_index - target_index + 4) % 4
+	
+	print("    Original door ", _get_direction_name(original_door), " (index ", original_index, ")")
+	print("    Target direction ", _get_direction_name(target_global_direction), " (index ", target_index, ")")
+	print("    Rotation steps needed: ", rotation, " (", rotation * 90, "° counter-clockwise)")
+	
+	return rotation
 
 func _calculate_door_alignment_rotation(target_door: int, source_door: int) -> int:
 	"""Calculate rotation steps needed to align doors (0-3 for 0°, 90°, 180°, 270°)"""
@@ -249,6 +533,11 @@ func on_player_entered_tile(tile_position: Vector2i):
 		print("ERROR: Player entered non-existent tile at ", tile_position)
 		return
 	
+	# Notify EventManager of tile entry
+	if event_manager:
+		var tile_id = active_tiles[tile_position].get_meta("scene_path", "").get_file().get_basename()
+		event_manager.on_tile_enter(tile_id, tile_position)
+	
 	# FIRST: Clean up any stray past tiles to ensure only one past tile exists
 	_cleanup_all_past_tiles_except_current()
 	
@@ -257,6 +546,10 @@ func on_player_entered_tile(tile_position: Vector2i):
 		# Clean up connections to the OLD past tile before replacing it
 		print("TILMGR: Cleaning up connections to old past tile at ", past_tile_position)
 		_cleanup_tile_connections(past_tile_position, tile_position, old_tile_pos)
+		
+		# Notify EventManager of tile cleanup for item removal
+		if event_manager:
+			event_manager.on_tile_cleanup(past_tile_position)
 		
 		# Clear the past tile state (it becomes a regular connecting tile or gets cleaned up)
 		if past_tile_node.has_method("set_as_connecting_tile"):
@@ -364,9 +657,15 @@ func _cleanup_tile_connections(cleanup_pos: Vector2i, current_player_pos: Vector
 		# Destroy connecting tile (including any other past tiles - only 1 past allowed)
 		if active_tiles.has(connecting_pos):
 			var tile_to_destroy = active_tiles[connecting_pos]
+			
+			# Notify EventManager of cleanup for item removal
+			if event_manager:
+				event_manager.on_tile_cleanup(connecting_pos)
+			
 			# Special handling for past tiles - there can only be one
 			if tile_to_destroy.is_past_tile:
 				print("    DESTROYING OLD PAST TILE: Only one past tile allowed")
+			
 			active_tiles.erase(connecting_pos)
 			tile_to_destroy.queue_free()
 			destroyed_count += 1

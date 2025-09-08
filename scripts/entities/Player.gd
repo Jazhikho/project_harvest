@@ -30,6 +30,11 @@ var flashlight_enabled: bool = true
 var mouse_captured: bool = false
 var debug_mode: bool = false
 
+# Health and death system
+var health: int = 100
+var inventory: Node
+var event_manager: Node
+
 func _ready():
 	# Add to player group for tile entrance detection
 	add_to_group("player")
@@ -50,6 +55,10 @@ func _ready():
 	flashlight_battery = randf_range(60.0, 300.0)  # 1-5 minutes in seconds
 	flashlight_battery_max = flashlight_battery  # Set max to current for proper ratio calculations
 	_update_flashlight_state()
+	
+	# Initialize inventory and event manager references
+	inventory = get_node_or_null("PlayerInventory")
+	event_manager = get_node_or_null("/root/EventManager")
 	
 	# Connect to tile system
 	var tile_manager = get_node("/root/TileManager")
@@ -242,11 +251,50 @@ func _show_message(text: String):
 	print("PLAYER: ", text)
 	# TODO: Connect to UI system
 
-func take_damage(amount: int, source: String):
-	"""Handle player taking damage (sanity loss)"""
-	var sanity_manager = get_node("/root/SanityManager")
-	if sanity_manager:
-		sanity_manager.apply_sanity_loss_event(source, amount)
+func take_damage(amount: int, source: String = ""):
+	"""Take damage and potentially die"""
+	health -= amount
+	
+	if health <= 0:
+		die(source)
+
+func die(cause: String):
+	"""Handle player death"""
+	print("PLAYER DIED: ", cause)
+	
+	# Get current position in grid coordinates
+	var world_pos = global_position
+	var grid_pos = _world_to_grid_position(world_pos)
+	
+	# Notify EventManager with death location and inventory
+	if event_manager:
+		event_manager.on_player_death(cause, grid_pos)
+	
+	# Notify GameDirector
+	var game_director = get_node_or_null("/root/GameDirector")
+	if game_director:
+		game_director.end_game(cause, Vector2(grid_pos.x, grid_pos.y))
+
+func _world_to_grid_position(world_pos: Vector3) -> Vector2i:
+	"""Convert world position to grid coordinates"""
+	# Assuming each tile is 20x20 units
+	var tile_size = 20.0
+	return Vector2i(
+		int(world_pos.x / tile_size),
+		int(world_pos.z / tile_size)
+	)
+
+# Call this when sanity breaks
+func on_sanity_break():
+	die("Fragmented")
+
+# Call this when caught by stalker
+func on_caught_by_stalker():
+	die("Consumed")
+
+# Call this when entering final tile successfully
+func on_harvest_complete():
+	die("Harvested")
 
 func get_world_position() -> Vector3:
 	"""Get current world position"""

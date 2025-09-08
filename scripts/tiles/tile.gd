@@ -15,6 +15,12 @@ var door_paths = {
 var door_markers = {}  # DoorDirection -> Marker3D node
 var current_rotation: int = 0  # 0, 1, 2, 3 representing 0°, 90°, 180°, 270°
 
+# Global door tracking - which doors are pointing in which global directions
+var global_north_door: Marker3D = null
+var global_east_door: Marker3D = null  
+var global_south_door: Marker3D = null
+var global_west_door: Marker3D = null
+
 # Tile dimensions
 var tile_size: Vector2 = Vector2.ZERO  # Will be detected from floor mesh
 
@@ -30,6 +36,13 @@ func _ready():
 	detect_tile_size()
 	detect_doors()
 	setup_collision_layers()
+	
+	# Add items to collectibles group
+	_register_collectibles()
+	
+	# Add backpacks to their group
+	_register_backpacks()
+	
 	# Don't setup door detection on _ready - only when tile becomes connecting
 
 func detect_tile_size():
@@ -60,7 +73,40 @@ func detect_doors():
 			door_markers[direction] = door_node
 			print("Detected door: ", get_direction_name(direction))
 	
+	# Initialize global door tracking with original positions
+	_update_global_door_assignments(0)  # 0 rotation initially
+	
 	print("Tile initialized with ", door_markers.size(), " doors")
+
+func _update_global_door_assignments(rotation_steps: int):
+	"""Update which doors are pointing in which global directions after rotation"""
+	# Clear all global door assignments
+	global_north_door = null
+	global_east_door = null
+	global_south_door = null
+	global_west_door = null
+	
+	# For each original door, figure out which global direction it now points
+	for original_direction in door_markers:
+		var marker = door_markers[original_direction]
+		var current_global_direction = get_door_after_rotation(original_direction, rotation_steps)
+		
+		# Assign to the appropriate global direction variable
+		match current_global_direction:
+			DoorDirection.NORTH:
+				global_north_door = marker
+			DoorDirection.EAST:
+				global_east_door = marker
+			DoorDirection.SOUTH:
+				global_south_door = marker
+			DoorDirection.WEST:
+				global_west_door = marker
+	
+	print("TILE: Updated global door assignments after ", rotation_steps * 90, "° rotation:")
+	if global_north_door: print("  Global NORTH door: ", global_north_door.name)
+	if global_east_door: print("  Global EAST door: ", global_east_door.name)
+	if global_south_door: print("  Global SOUTH door: ", global_south_door.name)
+	if global_west_door: print("  Global WEST door: ", global_west_door.name)
 
 func setup_tile_entrance_detection():
 	"""Setup detection for when player enters THIS tile (connecting tile detection)"""
@@ -155,19 +201,28 @@ func is_tile_permanent() -> bool:
 	return is_permanent
 
 func get_available_doors() -> Dictionary:
-	"""Get all available doors with their world data"""
+	"""Get all available doors using GLOBAL directions"""
 	var available = {}
 	
-	print("TILE: Getting available doors - found ", door_markers.size(), " door markers")
+	print("TILE: Getting available doors using global directions")
 	
-	for direction in door_markers:
-		var marker = door_markers[direction]
-		available[direction] = {
-			"world_position": marker.global_position,
-			"world_orientation": -marker.global_transform.basis.z,  # Forward direction
-			"marker": marker
-		}
-		print("  - Door ", get_direction_name(direction), " at ", marker.global_position)
+	# Check each global direction
+	var global_doors = {
+		DoorDirection.NORTH: global_north_door,
+		DoorDirection.EAST: global_east_door,
+		DoorDirection.SOUTH: global_south_door,
+		DoorDirection.WEST: global_west_door
+	}
+	
+	for global_direction in global_doors:
+		var marker = global_doors[global_direction]
+		if marker:  # If there's a door pointing in this global direction
+			available[global_direction] = {
+				"world_position": marker.global_position,
+				"world_orientation": -marker.global_transform.basis.z,
+				"marker": marker
+			}
+			print("  - Global ", get_direction_name(global_direction), " door at ", marker.global_position)
 	
 	return available
 
@@ -188,23 +243,25 @@ func get_door_world_orientation(direction: DoorDirection) -> Vector3:
 	return -marker.global_transform.basis.z
 
 func set_tile_rotation(rotation_steps: int):
-	"""Set tile to specific rotation (0-3, representing 0°, 90°, 180°, 270°)"""
+	"""Set tile to specific rotation and update global door assignments"""
 	current_rotation = rotation_steps % 4
-	rotation.y = current_rotation * PI / 2
-	print("Tile set to rotation: ", current_rotation * 90, " degrees")
+	rotation.y = current_rotation * PI / 2  # POSITIVE for counter-clockwise in Godot
 	
-	# After rotation, doors are automatically re-oriented by physical rotation
-	# The door markers physically rotate with the tile, so their global orientations
-	# are automatically re-designated to match their new global directions
+	# Update global door assignments after rotation
+	_update_global_door_assignments(current_rotation)
+	
+	print("Tile set to rotation: ", current_rotation * 90, " degrees (counter-clockwise)")
 
 func get_current_rotation() -> int:
 	"""Get current rotation in steps (0-3)"""
 	return current_rotation
 
+# Update the get_door_after_rotation function to handle counter-clockwise:
 func get_door_after_rotation(original_door: DoorDirection, rotation_steps: int) -> DoorDirection:
-	"""Get what door direction becomes after rotation"""
+	"""Get what door direction becomes after rotation (counter-clockwise)"""
 	var door_index = _door_enum_to_index(original_door)
-	var new_index = (door_index + rotation_steps) % 4
+	# For counter-clockwise rotation, we subtract instead of add
+	var new_index = (door_index - rotation_steps + 4) % 4
 	return _index_to_door_enum(new_index)
 
 func _door_enum_to_index(door_enum: DoorDirection) -> int:
@@ -252,6 +309,30 @@ func _set_walls_collision_layer(node: Node, layer: int):
 		_set_walls_collision_layer(child, layer)
 
 # === DEBUG FUNCTIONS ===
+
+func _register_collectibles():
+	"""Register all collectible items in this tile"""
+	for child in get_children():
+		if child.has_meta("is_collectible"):
+			child.add_to_group("collectibles")
+
+func _register_backpacks():
+	"""Register all backpacks in this tile"""
+	for child in get_children():
+		if child.has_meta("is_backpack"):
+			child.add_to_group("backpacks")
+
+func get_spawn_points() -> Array[Vector3]:
+	"""Get all item spawn points in this tile"""
+	var spawn_points = []
+	var spawn_parent = get_node_or_null("Maze/SpawnPoints")
+	
+	if spawn_parent:
+		for child in spawn_parent.get_children():
+			if child is Marker3D:
+				spawn_points.append(child.global_position)
+	
+	return spawn_points
 
 func debug_print_tile_info():
 	"""Debug function to print tile information"""

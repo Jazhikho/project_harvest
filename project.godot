@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+SettingsManager="*res://scripts/autoloads/SettingsManager.gd"
 EventManager="*res://scripts/autoloads/EventManager.gd"
 GameDirector="*res://scripts/autoloads/GameDirector.gd"
 TileManager="*res://scripts/autoloads/TileManager.gd"
