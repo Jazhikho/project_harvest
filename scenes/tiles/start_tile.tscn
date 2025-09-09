@@ -48,7 +48,7 @@ size = Vector3(1, 2, 1)
 [sub_resource type="BoxMesh" id="BoxMesh_548me"]
 size = Vector3(0.5, 2, 1)
 
-[node name="CrossTile2Corrected" type="Node3D"]
+[node name="StartTile" type="Node3D"]
 script = ExtResource("1_xuooa")
 
 [node name="Maze" type="Node3D" parent="."]
@@ -306,13 +306,15 @@ shape = SubResource("BoxShape3D_2x1x2")
 
 [node name="ConnectorWalls" type="Node3D" parent="Maze/Maze/AllWalls"]
 
-[node name="NDoor" type="Marker3D" parent="Maze"]
+[node name="Doors" type="Node3D" parent="Maze"]
+
+[node name="NDoor" type="Marker3D" parent="Maze/Doors"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.5, 1, 0)
 
-[node name="WDoor" type="Marker3D" parent="Maze"]
+[node name="WDoor" type="Marker3D" parent="Maze/Doors"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, -9.5)
 
-[node name="EDoor" type="Marker3D" parent="Maze"]
+[node name="EDoor" type="Marker3D" parent="Maze/Doors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
 
 [node name="PlayerStart" type="Marker3D" parent="."]

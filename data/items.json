@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "items": [
+	{
+	  "id": "note_1",
+	  "category": "notes",
+	  "name": "Research Log #1",
+	  "description": "Dr. A's first research notes",
+	  "spawn_rules": {
+		"weight": 1.0,
+		"min_sanity": 0,
+		"max_sanity": 100
+	  },
+	  "effects": {
+		"sanity_delta": -5
+	  }
+	},
+	{
+	  "id": "note_2",
+	  "category": "notes", 
+	  "name": "Research Log #2",
+	  "description": "Dr. A's continued research",
+	  "spawn_rules": {
+		"weight": 1.0
+	  },
+	  "effects": {
+		"sanity_delta": -7
+	  }
+	},
+	{
+	  "id": "porcelain_doll",
+	  "category": "weird_objects",
+	  "name": "Porcelain Doll",
+	  "description": "Its eyes seem to follow you...",
+	  "spawn_rules": {
+		"weight": 0.8,
+		"max_sanity": 80
+	  },
+	  "effects": {
+		"sanity_delta": -15
+	  }
+	},
+	{
+	  "id": "music_box",
+	  "category": "weird_objects",
+	  "name": "Music Box",
+	  "description": "Plays a haunting melody",
+	  "spawn_rules": {
+		"weight": 0.6,
+		"max_sanity": 60
+	  },
+	  "effects": {
+		"sanity_delta": -12
+	  }
+	},
+	{
+	  "id": "puzzle_piece_1",
+	  "category": "puzzle_pieces",
+	  "name": "Puzzle Fragment Alpha",
+	  "description": "Part of a larger mechanism",
+	  "spawn_rules": {
+		"weight": 1.2
+	  },
+	  "effects": {}
+	}
+  ]
+}

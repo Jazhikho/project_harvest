@@ -1,6 +1,6 @@
 extends CharacterBody3D
 ## The Stalker - Apex predator entity that hunts the player
-## Activated when too many Weird Things are collected, represents inevitable harvest
+## Activated when too many Weird Things are collectedor on low sanity
 
 @export var movement_speed: float = 3.0
 @export var hunt_speed: float = 6.0

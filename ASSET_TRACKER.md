@@ -3,10 +3,44 @@
 This document provides complete attribution for all assets used in Project Harvest, ensuring proper credit is given to all creators and sources.
 
 ## Table of Contents
+- [3D Models](#3d-models)
 - [Textures](#textures)
 - [Audio](#audio)
 - [Code & Development](#code--development)
 - [License Information](#license-information)
+
+---
+
+## 3D Models
+
+### Animpic POLY - Farm Pack
+**Source:** Animpic POLY  
+**Creator:** Animpic  
+**License:** Standard License (purchased 2025)  
+**Website:** [Animpic POLY Store]
+
+**Assets Used:**
+- `assets/models/corn_01.glb` - Corn stalk model for maze environment
+- `assets/models/well.glb` - Well model for landmark areas
+
+**Attribution:** "Farm pack models by Animpic POLY, licensed under Standard License (purchased 2025)"
+
+### Animpic POLY - Lite Halloween Pack
+**Source:** Animpic POLY  
+**Creator:** Animpic  
+**License:** Standard License (purchased 2025)  
+**Website:** [Animpic POLY Store]
+
+**Assets Used:**
+- `assets/models/bag.glb` - Bag prop for environmental storytelling
+- `assets/models/rock_1.glb` - Rock prop for environmental details
+- `assets/models/1A.glb` - Halloween prop variant 1A
+- `assets/models/2A.glb` - Halloween prop variant 2A
+- `assets/models/scarecrow.glb` - Scarecrow model for landmark areas
+- `assets/models/field.glb` - Field model for environmental background
+- `assets/models/grave.glb` - Grave model for atmospheric elements
+
+**Attribution:** "Lite Halloween pack models by Animpic POLY, licensed under Standard License (purchased 2025)"
 
 ---
 
@@ -108,7 +142,7 @@ This document provides complete attribution for all assets used in Project Harve
 ## Code & Development
 
 ### Programming & Scripts
-**Primary Developer:** [Your Name/Studio]  
+**Primary Developer:** Christopher B. Del Gesso, Chosen Gaming
 **AI Assistant:** Anthropic Claude-4 Sonnet  
 **Development Support:** Code written with assistance from Claude-4 Sonnet
 
@@ -136,9 +170,30 @@ This document provides complete attribution for all assets used in Project Harve
 
 ### Game Engine
 **Engine:** Godot Engine  
-**Version:** [Current Godot version used]  
+**Version:** 4.4.1  
 **License:** MIT License  
 **Website:** https://godotengine.org/
+
+### 3D Modeling & Development Tools
+**Primary 3D Software:** Blender  
+**Version:** 4.5.2
+**License:** GNU GPL v3  
+**Website:** https://www.blender.org/
+
+**Additional Tools:**
+- **AccuRig** - Character rigging and animation tool
+- **3DS Max** - 3D modeling and animation software
+- **MakeHuman** - 3D human character generation
+- **Materialize v1.78** - Material and texture generation tool
+
+**Toolchain Purpose:**
+- Blender: Primary 3D modeling, texturing, and scene assembly
+- AccuRig: Character rigging for entities (Watcher, Stalker, Effigies)
+- 3DS Max: Alternative modeling and advanced techniques
+- MakeHuman: Base human models for character development
+- Materialize: PBR material generation and texture processing
+
+**Attribution:** "3D models created using Blender, AccuRig, 3DS Max, MakeHuman, and Materialize v1.78"
 
 ---
 
@@ -158,6 +213,15 @@ Audio assets generated with Stability AI's Stable Audio are subject to their com
 - All audio files in `resources/audio/`
 
 **Important:** Verify current license terms at https://stability.ai/ before commercial use.
+
+### Standard License (Commercial)
+Assets purchased under standard license terms from Animpic POLY.
+
+**Applicable Assets:**
+- Animpic POLY Farm Pack models
+- Animpic POLY Lite Halloween Pack models
+
+**Important:** These assets are licensed for commercial use as per the standard license terms purchased in 2025.
 
 ### Generated Content
 AI-generated assets (textures, code assistance) should comply with the respective AI service terms of use.

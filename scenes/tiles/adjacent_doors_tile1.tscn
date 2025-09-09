@@ -179,10 +179,12 @@ mesh = SubResource("BoxMesh_interior3")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior6/StaticBody3D"]
 shape = SubResource("BoxShape3D_interior3")
 
-[node name="NDoor" type="Marker3D" parent="Maze"]
+[node name="Doors" type="Node3D" parent="Maze"]
+
+[node name="NDoor" type="Marker3D" parent="Maze/Doors"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.5, 1, 0)
 
-[node name="EDoor" type="Marker3D" parent="Maze"]
+[node name="EDoor" type="Marker3D" parent="Maze/Doors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
 
 [node name="ItemSpawn" type="Node3D" parent="Maze"]
@@ -191,7 +193,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, -4.5)
 
 [node name="ItemPoint2" type="Marker3D" parent="Maze/ItemSpawn"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.25, -4.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.25, -7.5)
 
 [node name="ItemPoint3" type="Marker3D" parent="Maze/ItemSpawn"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 2, 0.25, 6)
@@ -209,3 +211,6 @@ transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 2, 0.25,
 
 [node name="EntityPoint3" type="Marker3D" parent="Maze/EntitySpawn"]
 transform = Transform3D(-1.49012e-08, 0, 1, 0, 1, 0, -1, 0, -1.49012e-08, -3.5, 0.25, -7)
+
+[node name="EntityPoint4" type="Marker3D" parent="Maze/EntitySpawn"]
+transform = Transform3D(-7.25216e-08, 0, -1, 0, 1, 0, 1, 0, -7.25216e-08, 5.5, 0.25, 1.5)
