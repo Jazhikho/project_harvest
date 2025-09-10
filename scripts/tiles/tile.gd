@@ -1,4 +1,6 @@
 extends Node3D
+## Tile - Basic tile functionality without state management
+## State management is now handled by TileStateManager
 
 # Door constants
 enum DoorDirection { NORTH = 1, EAST = 2, SOUTH = 4, WEST = 8 }
@@ -16,13 +18,13 @@ var global_west_door: Marker3D = null
 # Tile dimensions
 var tile_size: Vector2 = Vector2.ZERO
 
-# Tile state
+# Permanent tile attribute
+@export var is_permanent: bool = false
+
+# State callbacks (called by TileStateManager)
 var is_active_tile: bool = false
 var is_connecting_tile: bool = false
 var is_past_tile: bool = false
-
-# Permanent tile attribute
-@export var is_permanent: bool = false
 
 func _ready() -> void:
 	detect_tile_size()
@@ -167,91 +169,27 @@ func _update_global_door_assignments(rotation_steps: int) -> void:
 	if global_south_door: print("  Global SOUTH door: ", global_south_door.name)
 	if global_west_door: print("  Global WEST door: ", global_west_door.name)
 
-# [Rest of the functions remain the same as before...]
-
-func setup_tile_entrance_detection() -> void:
-	"""Setup detection for when player enters THIS tile (connecting tile detection)"""
-	print("TILE: Setting up entrance detection for tile at ", position)
-	
-	# Create a large Area3D that covers the entire tile
-	var entrance_area: Area3D = Area3D.new()
-	entrance_area.name = "TileEntranceDetector"
-	
-	# Create collision shape covering the whole tile
-	var collision: CollisionShape3D = CollisionShape3D.new()
-	var shape: BoxShape3D = BoxShape3D.new()
-	shape.size = Vector3(tile_size.x - 2, 4.0, tile_size.y - 2)
-	collision.shape = shape
-	
-	# Add to tile
-	add_child(entrance_area)
-	entrance_area.add_child(collision)
-	
-	# Set collision layers/masks for player detection
-	entrance_area.collision_layer = 0
-	entrance_area.collision_mask = 1
-	
-	# Connect signals
-	entrance_area.body_entered.connect(_on_player_entered_tile)
-	
-	# Mark as connecting tile
-	is_connecting_tile = true
-	print("TILE: Entrance detection setup complete - tile is now CONNECTING")
-
-func _on_player_entered_tile(body: Node3D) -> void:
-	"""Called when player enters this tile"""
-	if not body.is_in_group("player"):
-		print("TILE: Non-player body entered: ", body.name)
-		return
-	
-	if not is_connecting_tile:
-		print("TILE: Player entered but this is not a connecting tile")
-		return
-	
-	var grid_pos: Vector2i = get_meta("grid_position", Vector2i(0, 0))
-	print("TILE: *** PLAYER ENTERED CONNECTING TILE *** at position ", position, " grid: ", grid_pos)
-	
-	# Notify TileManager
-	var tile_manager: Node = get_node_or_null("/root/TileManager")
-	if tile_manager:
-		print("TILE: Notifying TileManager of player entrance")
-		tile_manager.on_player_entered_tile(grid_pos)
-	else:
-		print("TILE: ERROR - TileManager not found!")
-	
-	# This tile is now active
-	is_active_tile = true
-	is_connecting_tile = false
-	print("TILE: State changed - now ACTIVE")
-	
-	# Remove entrance detection (no longer needed)
-	var entrance_detector: Node = get_node_or_null("TileEntranceDetector")
-	if entrance_detector:
-		entrance_detector.queue_free()
-		print("TILE: Removed entrance detector")
-
+# State management callbacks (called by TileStateManager)
 func set_as_active_tile() -> void:
-	"""Mark this tile as the active tile"""
+	"""Called by TileStateManager when tile becomes active"""
 	is_active_tile = true
 	is_connecting_tile = false
 	is_past_tile = false
 	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now ACTIVE")
 
 func set_as_connecting_tile() -> void:
-	"""Mark this tile as a connecting tile and setup entrance detection"""
+	"""Called by TileStateManager when tile becomes connecting"""
 	is_active_tile = false
 	is_connecting_tile = true
 	is_past_tile = false
-	setup_tile_entrance_detection()
 	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now CONNECTING")
 
 func set_as_past_tile() -> void:
-	"""Mark this tile as a past tile (also acts as connecting temporarily)"""
+	"""Called by TileStateManager when tile becomes past"""
 	is_active_tile = false
-	is_connecting_tile = true
+	is_connecting_tile = true  # Past tiles are also connecting
 	is_past_tile = true
-	setup_tile_entrance_detection()
-	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now PAST (also connecting)")
+	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now PAST")
 
 func has_door(direction: int) -> bool:
 	"""Check if tile has a specific door"""

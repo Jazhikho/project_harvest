@@ -37,6 +37,7 @@ WeirdThingsManager="*res://scripts/autoloads/gameloop/WeirdThingsManager.gd"
 SanityManager="*res://scripts/autoloads/gameloop/SanityManager.gd"
 HarvestLogger="*res://scripts/autoloads/gameloop/HarvestLogger.gd"
 PlayerInventory="*res://scripts/systems/PlayerInventory.gd"
+TileStateManager="*res://scripts/autoloads/gameloop/TileStateManager.gd"
 
 [dotnet]
 

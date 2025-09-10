@@ -1,7 +1,7 @@
 extends Node
 
 const GAME_SCENE = "res://scenes/game/Game.tscn"
-const MAIN_MENU = "res://scenes/ui/MainMenu.tscn"
+const MAIN_MENU = "res://scenes/ui/Main.tscn"
 const DEATH_SCREEN = "res://scenes/ui/DeathScreen.tscn"
 
 func load_game_scene():

@@ -1,6 +1,6 @@
 extends Node
 ## Central communication hub for game-wide events
-## Decouples systems by providing event-based messaging
+## Decouples systems by providing event-based messaging with circular reference protection
 
 # === GAME STATE EVENTS ===
 signal game_started()
@@ -13,7 +13,7 @@ signal player_moved(from: Vector2i, to: Vector2i)
 signal player_died(cause: String, position: Vector2i, data: Dictionary)
 signal player_interacted(target: Node3D, interaction_type: String)
 
-# === VISIBILITY EVENTS === (new section)
+# === VISIBILITY EVENTS ===
 signal player_looking_at(target: Node3D, target_type: String)
 signal player_looked_away(target: Node3D, target_type: String)
 signal visibility_changed(entity: Node3D, is_visible: bool, viewer: Node3D)
@@ -29,6 +29,7 @@ signal tile_generated(tile_node: Node3D, position: Vector2i, tile_data: Dictiona
 signal tile_entered(tile_node: Node3D, position: Vector2i, player: Node3D)
 signal tile_exited(tile_node: Node3D, position: Vector2i, player: Node3D)
 signal tile_cleaned_up(position: Vector2i, items_removed: Array)
+signal tile_state_changed(tile_node: Node3D, position: Vector2i, old_state: String, new_state: String)
 
 # === PUZZLE EVENTS ===
 signal puzzle_started(puzzle_id: String, tile_pos: Vector2i)
@@ -67,13 +68,17 @@ var _event_history: Array[Dictionary] = []
 var _max_history: int = 100
 var _debug_mode: bool = false
 
+# Circular reference protection
+var _emission_stack: Array[String] = []
+var _max_stack_depth: int = 10
+
 func _ready() -> void:
 	name = "MessageBus"
 	add_to_group("core_systems")
 
 func emit_event(signal_name: String, args: Array = []) -> bool:
 	"""
-	Safely emit a signal with error handling and optional logging
+	Safely emit a signal with error handling and circular reference protection
 	
 	@param signal_name: Name of the signal to emit
 	@param args: Array of arguments to pass with the signal (max 5)
@@ -87,6 +92,12 @@ func emit_event(signal_name: String, args: Array = []) -> bool:
 		push_error("MessageBus: Too many arguments for signal '%s' (max 5)" % signal_name)
 		return false
 	
+	# Check for circular references
+	if _is_circular_emission(signal_name):
+		push_warning("MessageBus: Circular emission detected for signal '%s', skipping" % signal_name)
+		return false
+	
+	_emission_stack.append(signal_name)
 	_log_event(signal_name, args)
 	
 	match args.size():
@@ -97,7 +108,21 @@ func emit_event(signal_name: String, args: Array = []) -> bool:
 		4: emit_signal(signal_name, args[0], args[1], args[2], args[3])
 		5: emit_signal(signal_name, args[0], args[1], args[2], args[3], args[4])
 	
+	_emission_stack.pop_back()
 	return true
+
+func _is_circular_emission(signal_name: String) -> bool:
+	"""
+	Check if emitting this signal would create a circular reference
+	
+	@param signal_name: Signal to check
+	@return: True if circular reference detected
+	"""
+	if _emission_stack.size() >= _max_stack_depth:
+		return true
+	
+	# Check if this signal is already in the current emission stack
+	return signal_name in _emission_stack
 
 func connect_event(signal_name: String, callable: Callable, flags: int = 0) -> int:
 	"""
@@ -162,7 +187,8 @@ func _log_event(signal_name: String, args: Array) -> void:
 	var event := {
 		"signal": signal_name,
 		"args": args.duplicate(),
-		"timestamp": Time.get_ticks_msec()
+		"timestamp": Time.get_ticks_msec(),
+		"stack_depth": _emission_stack.size()
 	}
 	
 	_event_history.append(event)
@@ -171,7 +197,8 @@ func _log_event(signal_name: String, args: Array) -> void:
 		_event_history.pop_front()
 	
 	if _debug_mode:
-		print("[MessageBus] %s(%s)" % [signal_name, _format_args(args)])
+		var indent = "  ".repeat(_emission_stack.size())
+		print("[MessageBus] %s%s(%s)" % [indent, signal_name, _format_args(args)])
 
 func _format_args(args: Array) -> String:
 	"""
@@ -184,3 +211,11 @@ func _format_args(args: Array) -> String:
 	for arg in args:
 		formatted.append(str(arg))
 	return ", ".join(formatted)
+
+# Debug functions
+func debug_print_emission_stack() -> void:
+	"""Print current emission stack for debugging"""
+	print("=== EMISSION STACK ===")
+	for i in range(_emission_stack.size()):
+		print("  ", i, ": ", _emission_stack[i])
+	print("======================")

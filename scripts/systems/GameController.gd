@@ -25,6 +25,11 @@ func _ready():
 	call_deferred("_initialize_game")
 
 func _initialize_game():
+	
+	var tile_manager = get_node_or_null("/root/TileManager")
+	if tile_manager and tile_manager.has_method("initialize_game_tiles"):
+		print("GameController: Telling TileManager to initialize game tiles")
+		tile_manager.initialize_game_tiles()
 	# Make sure MessageBus knows game started
 	var message_bus = get_node_or_null("/root/MessageBus")
 	if message_bus:
@@ -34,7 +39,6 @@ func _initialize_game():
 	await get_tree().create_timer(0.1).timeout
 	
 	# Force initial tile connections
-	var tile_manager = get_node_or_null("/root/TileManager")
 	if tile_manager:
 		# Get the start tile
 		var start_tile = $MazeContainer/StartTile
@@ -58,6 +62,7 @@ func toggle_pause():
 	game_paused = !game_paused
 	pause_menu.visible = game_paused
 	get_tree().paused = game_paused
+	get_node("/root/TileManager").debug_check_start_tile()
 	
 	if game_paused:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)

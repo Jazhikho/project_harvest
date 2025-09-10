@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://0atthfte3o13"]
 
 [ext_resource type="PackedScene" uid="uid://c5yqrv82hov2i" path="res://scenes/tiles/start_tile.tscn" id="1_start_tile"]
-[ext_resource type="PackedScene" uid="uid://d3luoi7330cps" path="res://scenes/entities/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/entities/player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://h3dp65gy6hmq" path="res://scripts/systems/GameController.gd" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="4"]
 [ext_resource type="PackedScene" uid="uid://5m8oiae77mxv" path="res://scenes/ui/InventoryUI.tscn" id="5"]

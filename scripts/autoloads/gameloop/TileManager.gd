@@ -1,15 +1,14 @@
 extends Node
-## Manages tile generation, connections, and lifecycle
-## Fixed to prevent respawning of tiles player moves between
+## TileManager - Handles tile generation, connections, and cleanup
+## State management delegated to TileStateManager
 
 var _message_bus: Node
 var _state_manager: Node
 var _spawn_manager: Node
+var _tile_state_manager: Node
 
 # Tile tracking
 var _active_tiles: Dictionary = {}  # Vector2i -> Node3D
-var _current_player_tile: Vector2i = Vector2i(0, 0)
-var _previous_player_tile: Vector2i = Vector2i(-1000, -1000)
 var _permanent_tiles: Dictionary = {}  # Vector2i -> Node3D
 var _puzzle_tiles: Dictionary = {}  # Vector2i -> puzzle_id
 
@@ -20,6 +19,9 @@ var _established_connections: Dictionary = {}  # "pos1_pos2" -> true
 var _available_tile_scenes: Array[String] = []
 var _start_tile_scene: String = "res://scenes/tiles/start_tile.tscn"
 var _final_tile_scene: String = "res://scenes/tiles/final_event_tile.tscn"
+
+# Initialization flag
+var _start_tile_initialized: bool = false
 
 # Door constants
 enum DoorDirection { NORTH = 1, EAST = 2, SOUTH = 4, WEST = 8 }
@@ -33,17 +35,25 @@ func _ready() -> void:
 
 func _initialize() -> void:
 	"""Initialize connections and load tile scenes"""
+	print("TileManager: Starting initialization...")
+	
 	_message_bus = get_node_or_null("/root/MessageBus")
 	_state_manager = get_node_or_null("/root/GameStateManager")
 	_spawn_manager = get_node_or_null("/root/SpawnManager")
+	_tile_state_manager = get_node_or_null("/root/TileStateManager")
 	
-	if not _message_bus or not _state_manager or not _spawn_manager:
+	if not _message_bus or not _state_manager or not _spawn_manager or not _tile_state_manager:
 		push_error("TileManager: Required core systems not found")
 		return
 	
+	print("TileManager: Core systems found, loading tiles...")
 	_load_available_tiles()
+	
+	print("TileManager: Connecting to events...")
 	_connect_to_events()
-	_spawn_start_tile()
+	
+	# DON'T spawn start tile here - wait for game scene
+	print("TileManager: Initialization complete (waiting for game scene)")
 
 func _load_available_tiles() -> void:
 	"""Load all available tile scenes"""
@@ -65,41 +75,77 @@ func _load_available_tiles() -> void:
 	tiles_dir.list_dir_end()
 	print("TileManager: Loaded ", _available_tile_scenes.size(), " tile scenes")
 
-func _spawn_start_tile() -> void:
-	"""Spawn the initial start tile"""
-	var maze_container: Node = get_tree().current_scene.get_node_or_null("MazeContainer")
-	if not maze_container:
-		push_error("TileManager: MazeContainer not found in scene")
+func initialize_game_tiles() -> void:
+	"""Called when the game scene is actually loaded"""
+	if _start_tile_initialized:
+		print("TileManager: Start tile already initialized")
 		return
 	
-	var start_tile: Node3D = null
-	var existing_start: Node = maze_container.get_node_or_null("StartTile")
+	print("TileManager: Initializing game tiles...")
+	_spawn_start_tile()
+	_start_tile_initialized = true
+
+func _spawn_start_tile() -> void:
+	"""Register the existing start tile from the game scene"""
+	print("TileManager: Looking for start tile in game scene...")
 	
-	if existing_start:
-		start_tile = existing_start as Node3D
-		start_tile.position = Vector3.ZERO
-	else:
-		start_tile = _create_tile_from_scene(_start_tile_scene, Vector2i(0, 0))
+	# The StartTile should be in the current scene
+	var start_tile: Node3D = null
+	
+	# Check various possible locations
+	var possible_paths = [
+		"StartTile",
+		"MazeContainer/StartTile",
+		"Maze/StartTile",
+		"./StartTile"
+	]
+	
+	for path in possible_paths:
+		start_tile = get_tree().current_scene.get_node_or_null(path) as Node3D
 		if start_tile:
-			start_tile.name = "StartTile"
-			start_tile.position = Vector3.ZERO
+			print("TileManager: Found StartTile at path: ", path)
+			break
 	
 	if not start_tile:
-		push_error("TileManager: Failed to create start tile")
+		push_error("TileManager: StartTile not found in scene! Check scene structure.")
+		print("TileManager: Scene root children: ", get_tree().current_scene.get_children().map(func(n): return n.name))
 		return
 	
+	# Configure the start tile
+	start_tile.position = Vector3.ZERO
+	
+	# Make sure it's not permanent
+	if start_tile.has_method("set") and start_tile.get("is_permanent") != null:
+		start_tile.set("is_permanent", false)
+	
+	# Set required metadata
+	start_tile.set_meta("grid_position", Vector2i(0, 0))
+	start_tile.set_meta("scene_path", "res://scenes/tiles/start_tile.tscn")
+	start_tile.set_meta("world_map_pos", Vector2i(0, 0))
+	
+	print("TileManager: Configuring existing StartTile")
+	
+	# CRITICAL: Register with TileManager
 	_register_tile(start_tile, Vector2i(0, 0))
-	_current_player_tile = Vector2i(0, 0)
+	print("TileManager: Start tile registered - active tiles: ", _active_tiles.keys())
 	
-	if start_tile.has_method("set_as_active_tile"):
-		start_tile.set_as_active_tile()
+	# Register with TileStateManager
+	if _tile_state_manager:
+		_tile_state_manager.register_tile(start_tile, Vector2i(0, 0), _tile_state_manager.TileState.ACTIVE)
+		_tile_state_manager.set_initial_player_position(Vector2i(0, 0))
 	
+	# Position player
 	call_deferred("_position_player_at_start", start_tile)
+	
+	# Wait for everything to settle
 	await get_tree().process_frame
 	await get_tree().process_frame
 	
+	# Spawn connections
 	_spawn_tile_connections(start_tile, Vector2i(0, 0))
 	_message_bus.emit_event("tile_generated", [start_tile, Vector2i(0, 0), {}])
+	
+	print("TileManager: Start tile setup complete - final active tiles: ", _active_tiles.keys())
 
 func _create_tile_from_scene(scene_path: String, grid_pos: Vector2i) -> Node3D:
 	"""
@@ -123,6 +169,12 @@ func _create_tile_from_scene(scene_path: String, grid_pos: Vector2i) -> Node3D:
 	tile_instance.set_meta("scene_path", scene_path)
 	tile_instance.set_meta("world_map_pos", grid_pos)
 	
+	# For start tile, explicitly ensure it's not permanent
+	if scene_path == _start_tile_scene:
+		if tile_instance.has_method("set") and tile_instance.get("is_permanent") != null:
+			tile_instance.set("is_permanent", false)
+		print("TileManager: Set start tile as non-permanent")
+	
 	var maze_container: Node = get_tree().current_scene.get_node("MazeContainer")
 	if maze_container:
 		maze_container.add_child(tile_instance)
@@ -142,13 +194,17 @@ func _register_tile(tile: Node3D, position: Vector2i) -> void:
 	"""
 	_active_tiles[position] = tile
 	
+	# Only register as permanent if the tile is actually marked as permanent
 	if tile.has_method("is_tile_permanent") and tile.is_tile_permanent():
 		_permanent_tiles[position] = tile
+		print("TileManager: Registered permanent tile at ", position)
 		
 		if tile.has_method("get_puzzle_id"):
 			var puzzle_id: String = tile.get_puzzle_id()
 			if not puzzle_id.is_empty():
 				_puzzle_tiles[position] = puzzle_id
+	else:
+		print("TileManager: Registered regular tile at ", position)
 
 func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 	"""
@@ -171,18 +227,31 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 		
 		print("  Checking connection to ", connecting_pos, " via ", _get_direction_name(door_direction))
 		
-		# Skip if connection already established (THIS IS THE KEY FIX)
+		# Skip if connection already established
 		if _is_connection_established(source_pos, connecting_pos):
 			print("    Connection already established - skipping")
 			continue
 		
 		# Skip if tile already exists
 		if _active_tiles.has(connecting_pos) and is_instance_valid(_active_tiles[connecting_pos]):
-			print("    Tile already exists - establishing connection")
+			print("    Tile already exists at ", connecting_pos, " - establishing connection")
 			_establish_connection(source_pos, connecting_pos)
+			# Make sure existing tile is set to connecting state
+			_tile_state_manager.set_tile_state(connecting_pos, _tile_state_manager.TileState.CONNECTING)
 			continue
 		elif _active_tiles.has(connecting_pos):
+			# Clean up invalid reference
 			_active_tiles.erase(connecting_pos)
+		
+		# IMPORTANT: Don't create a new tile at (0, 0) if we already have the start tile there
+		if connecting_pos == Vector2i(0, 0):
+			print("    Position (0, 0) is reserved for start tile - checking if it exists")
+			# The start tile should already be registered if it exists
+			if _active_tiles.has(Vector2i(0, 0)):
+				print("    Start tile found at (0, 0) - establishing connection")
+				_establish_connection(source_pos, connecting_pos)
+				_tile_state_manager.set_tile_state(connecting_pos, _tile_state_manager.TileState.CONNECTING)
+				continue
 		
 		# Skip if permanent tile exists
 		if _has_permanent_tile_at(connecting_pos):
@@ -200,12 +269,11 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 		_align_tiles(source_tile, new_tile, door_direction)
 		_register_tile(new_tile, connecting_pos)
 		
+		# Register with TileStateManager as connecting
+		_tile_state_manager.register_tile(new_tile, connecting_pos, _tile_state_manager.TileState.CONNECTING)
+		
 		# Establish the connection
 		_establish_connection(source_pos, connecting_pos)
-		
-		# Mark as connecting tile
-		if new_tile.has_method("set_as_connecting_tile"):
-			new_tile.set_as_connecting_tile()
 		
 		# Emit tile generated event for spawn processing
 		_message_bus.emit_event("tile_generated", [new_tile, connecting_pos, {}])
@@ -347,107 +415,158 @@ func _has_permanent_tile_at(position: Vector2i) -> bool:
 	@param position: Grid position to check
 	@return: True if permanent tile exists
 	"""
+	# First check our permanent tiles registry
 	if _permanent_tiles.has(position):
 		return true
 	
+	# Then check if there's an active tile that's marked permanent
 	if _active_tiles.has(position) and is_instance_valid(_active_tiles[position]):
 		var tile: Node3D = _active_tiles[position]
-		if tile.has_method("is_tile_permanent"):
-			return tile.is_tile_permanent()
+		if tile.has_method("is_tile_permanent") and tile.is_tile_permanent():
+			return true
 	
 	return false
 
 func on_player_entered_tile(tile_position: Vector2i) -> void:
 	"""
-	Handle player entering a new tile
+	Handle player entering a new tile (called by TileStateManager)
 	
 	@param tile_position: Grid position of entered tile
 	"""
-	print("TileManager: Player entered tile at ", tile_position, " (was at ", _current_player_tile, ")")
-	
-	# Check if this is actually a new tile or just a false transition
-	if tile_position == _current_player_tile:
-		print("TileManager: Player is already on this tile, ignoring transition")
-		return
-	
-	_previous_player_tile = _current_player_tile
-	_current_player_tile = tile_position
+	print("TileManager: === PLAYER ENTERED TILE ===")
+	print("  Position: ", tile_position)
+	print("  Active tiles before cleanup: ", _active_tiles.size())
+	print("  Active tile positions: ", _active_tiles.keys())
 	
 	if not _active_tiles.has(tile_position):
 		push_error("TileManager: Player entered non-existent tile at " + str(tile_position))
 		return
 	
 	var entered_tile: Node3D = _active_tiles[tile_position]
-	var player: Node3D = get_tree().get_first_node_in_group("player") as Node3D
 	
-	# Emit tile entry event
-	_message_bus.emit_event("tile_entered", [entered_tile, tile_position, player])
+	# First perform cleanup of distant tiles
+	_cleanup_tiles_for_position(tile_position)
 	
-	# Update tile states
-	_update_tile_states(_previous_player_tile, tile_position)
+	print("  Active tiles after cleanup: ", _active_tiles.size())
+	print("  Remaining tile positions: ", _active_tiles.keys())
 	
-	# Clean up distant tiles (but keep connected ones)
-	_cleanup_distant_tiles(tile_position)
-	
-	# Spawn new connections from current tile
+	# Then spawn new connections from current tile
 	await get_tree().process_frame
 	_spawn_tile_connections(entered_tile, tile_position)
+	print("=============================")
 
-func _update_tile_states(old_pos: Vector2i, new_pos: Vector2i) -> void:
+func _cleanup_tiles_for_position(player_pos: Vector2i) -> void:
 	"""
-	Update tile active/past states
-	
-	@param old_pos: Previous tile position
-	@param new_pos: Current tile position
-	"""
-	# Set new tile as active
-	if _active_tiles.has(new_pos):
-		var new_tile: Node3D = _active_tiles[new_pos]
-		if new_tile.has_method("set_as_active_tile"):
-			new_tile.set_as_active_tile()
-	
-	# Set old tile as connecting (so player can return)
-	if _active_tiles.has(old_pos) and is_instance_valid(_active_tiles[old_pos]):
-		var old_tile: Node3D = _active_tiles[old_pos]
-		if old_tile.has_method("set_as_connecting_tile"):
-			old_tile.set_as_connecting_tile()
-
-func _cleanup_distant_tiles(player_pos: Vector2i) -> void:
-	"""
-	Clean up tiles that are too far from player (but preserve connections)
+	Clean up tiles based on STRICT game loop rules:
+	According to step 13: "the previous tile's connecting tiles are 'cleaned up'"
+	Only keep: Active tile, Previous tile, and tiles connecting to the ACTIVE tile
 	
 	@param player_pos: Current player position
 	"""
+	print("TileManager: === CLEANUP ANALYSIS ===")
+	print("  Player position: ", player_pos)
+	
+	var previous_pos = _tile_state_manager.get_previous_player_tile()
+	print("  Previous position: ", previous_pos)
+	
+	# According to game loop: Keep only Active, Previous, and 0-3 connecting tiles to Active
+	var tiles_to_keep: Array[Vector2i] = []
+	
+	# 1. Always keep current (ACTIVE) tile
+	tiles_to_keep.append(player_pos)
+	print("  Keeping ACTIVE tile: ", player_pos)
+	
+	# 2. Keep previous tile if valid (allows player to go back)
+	if previous_pos != Vector2i(-1000, -1000):
+		tiles_to_keep.append(previous_pos)
+		print("  Keeping PREVIOUS tile: ", previous_pos)
+	
+	# 3. Keep only tiles that are DIRECTLY connected to the ACTIVE tile
+	# These are the "connecting tiles" mentioned in the game loop
+	for dir in [DoorDirection.NORTH, DoorDirection.EAST, DoorDirection.SOUTH, DoorDirection.WEST]:
+		var adjacent_pos = _get_connecting_position(player_pos, dir)
+		if _active_tiles.has(adjacent_pos):
+			tiles_to_keep.append(adjacent_pos)
+			print("  Keeping CONNECTING tile: ", adjacent_pos, " (", _get_direction_name(dir), " of active)")
+	
+	print("  Total tiles to keep: ", tiles_to_keep)
+	
+	# 4. Build removal list - everything NOT in the keep list
 	var tiles_to_remove: Array[Vector2i] = []
-	var max_distance: int = 3  # Keep tiles within 3 positions
-	
 	for pos in _active_tiles.keys():
-		var distance: float = player_pos.distance_to(pos)
-		
-		# Skip cleanup for:
-		# - Current player tile
-		# - Previous player tile (allow return)
-		# - Permanent tiles
-		# - Recently connected tiles
-		if pos == player_pos:
-			continue
-		if pos == _previous_player_tile:
-			continue
-		if _has_permanent_tile_at(pos):
-			continue
-		if distance <= max_distance:
-			continue
-		
-		tiles_to_remove.append(pos)
+		if pos not in tiles_to_keep:
+			# Check if it's permanent (puzzle tiles should be preserved)
+			if _has_permanent_tile_at(pos):
+				print("  Keeping PERMANENT tile: ", pos)
+			else:
+				tiles_to_remove.append(pos)
 	
-	# Remove distant tiles and their connections
-	for pos in tiles_to_remove:
-		if _active_tiles.has(pos):
-			var tile: Node3D = _active_tiles[pos]
-			_active_tiles.erase(pos)
-			_remove_connections_for_position(pos)
-			tile.queue_free()
-			print("TileManager: Cleaned up distant tile at ", pos)
+	print("  Tiles scheduled for removal: ", tiles_to_remove)
+	
+	# 5. Remove tiles
+	if tiles_to_remove.size() > 0:
+		print("  EXECUTING CLEANUP...")
+		for pos in tiles_to_remove:
+			_cleanup_single_tile(pos)
+	else:
+		print("  No tiles need cleanup")
+	
+	print("=================================")
+
+func _cleanup_single_tile(pos: Vector2i) -> void:
+	"""
+	Clean up a single tile and its resources
+	
+	@param pos: Position of tile to clean up
+	"""
+	if not _active_tiles.has(pos):
+		print("    ERROR: Tile at ", pos, " not found for cleanup")
+		return
+	
+	var tile: Node3D = _active_tiles[pos]
+	var tile_name = "UNKNOWN"
+	if is_instance_valid(tile):
+		tile_name = tile.name
+	
+	# Count and remove items/entities
+	var items_removed: Array = []
+	var entities_removed: Array = []
+	
+	if is_instance_valid(tile):
+		# Find and log items being removed
+		for child in tile.get_children():
+			if child.has_meta("is_collectible"):
+				var item_id = child.get_meta("item_id", "unknown")
+				items_removed.append(item_id)
+			elif child.has_meta("is_backpack"):
+				items_removed.append("backpack")
+			elif child.is_in_group("enemies") or child.is_in_group("effigies"):
+				entities_removed.append(child.name)
+	
+	# Log what's being cleaned up
+	print("    CLEANING UP: ", pos, " (", tile_name, ")")
+	if items_removed.size() > 0:
+		print("      Items removed: ", items_removed)
+	if entities_removed.size() > 0:
+		print("      Entities removed: ", entities_removed)
+	
+	# Special message for important tiles
+	if pos == Vector2i(0, 0):
+		print("      *** START TILE CLEANED UP *** (as intended)")
+	
+	# Emit cleanup event
+	_message_bus.emit_event("tile_cleaned_up", [pos, items_removed])
+	
+	# Remove from tracking
+	_active_tiles.erase(pos)
+	_remove_connections_for_position(pos)
+	_tile_state_manager.cleanup_tile(pos)
+	
+	# Free the tile
+	if is_instance_valid(tile):
+		tile.queue_free()
+	
+	print("      ✓ Cleanup complete for ", pos)
 
 func _remove_connections_for_position(pos: Vector2i) -> void:
 	"""
@@ -481,6 +600,7 @@ func remove_permanent_tile(position: Vector2i) -> void:
 	"""
 	if _permanent_tiles.has(position):
 		_permanent_tiles.erase(position)
+		print("TileManager: Removed permanent status from tile at ", position)
 	
 	if _puzzle_tiles.has(position):
 		_puzzle_tiles.erase(position)
@@ -504,7 +624,7 @@ func _position_player_at_start(start_tile: Node3D) -> void:
 
 func get_current_player_tile() -> Vector2i:
 	"""Get current player tile position"""
-	return _current_player_tile
+	return _tile_state_manager.get_current_player_tile()
 
 func get_active_tile_count() -> int:
 	"""Get number of active tiles"""
@@ -517,8 +637,9 @@ func _connect_to_events() -> void:
 	_message_bus.puzzle_completed.connect(_on_puzzle_completed)
 
 func _on_game_started() -> void:
-	"""Handle game start"""
-	print("TileManager: Game started")
+	"""Handle game start - initialize tiles when game actually starts"""
+	print("TileManager: Game started - initializing tiles")
+	initialize_game_tiles()
 
 func _on_maze_shift(center: Vector2i, radius: int, affected_tiles: Array) -> void:
 	"""Handle maze shift request"""
@@ -527,3 +648,39 @@ func _on_maze_shift(center: Vector2i, radius: int, affected_tiles: Array) -> voi
 func _on_puzzle_completed(puzzle_id: String, tile_pos: Vector2i, reward: Dictionary) -> void:
 	"""Handle puzzle completion"""
 	remove_permanent_tile(tile_pos)
+
+# Debug functions
+func debug_print_active_tiles() -> void:
+	"""Print all active tiles for debugging"""
+	print("=== ACTIVE TILES DEBUG ===")
+	print("Total active tiles: ", _active_tiles.size())
+	print("Permanent tiles: ", _permanent_tiles.size())
+	for pos in _active_tiles.keys():
+		var tile = _active_tiles[pos]
+		if is_instance_valid(tile):
+			var is_perm = _has_permanent_tile_at(pos)
+			print("  ", pos, ": ", tile.name, " at ", tile.global_position, " (permanent: ", is_perm, ")")
+		else:
+			print("  ", pos, ": INVALID")
+	print("==========================")
+
+func force_cleanup_debug() -> void:
+	"""Force cleanup for debugging purposes"""
+	print("=== FORCE CLEANUP DEBUG ===")
+	var current_pos = _tile_state_manager.get_current_player_tile()
+	print("Current player tile: ", current_pos)
+	_cleanup_tiles_for_position(current_pos)
+	debug_print_active_tiles()
+	print("===========================")
+
+func debug_check_start_tile() -> void:
+	"""Debug function to check start tile status"""
+	print("=== START TILE DEBUG ===")
+	print("Start tile in active_tiles: ", _active_tiles.has(Vector2i(0, 0)))
+	if _active_tiles.has(Vector2i(0, 0)):
+		var tile = _active_tiles[Vector2i(0, 0)]
+		print("Start tile node: ", tile.name if is_instance_valid(tile) else "INVALID")
+		print("Start tile position: ", tile.global_position if is_instance_valid(tile) else "INVALID")
+		print("Start tile permanent: ", tile.get("is_permanent") if is_instance_valid(tile) and tile.has_method("get") else "N/A")
+	print("All active tiles: ", _active_tiles.keys())
+	print("========================")
