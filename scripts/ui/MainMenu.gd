@@ -48,21 +48,36 @@ func _detect_input_device():
 		InputManager.set_control_scheme("keyboard")
 
 func _load_settings():
-	# Load volume settings
-	var master_vol = AudioManager.get_bus_volume("Master")
-	var music_vol = AudioManager.get_bus_volume("Music")
-	var sfx_vol = AudioManager.get_bus_volume("SFX")
+	# Wait for AudioManager to initialize buses, then load volume settings
+	await get_tree().process_frame
 	
-	master_slider.value = master_vol
-	music_slider.value = music_vol
-	sfx_slider.value = sfx_vol
+	# Load volume settings with fallbacks
+	var master_vol = 1.0
+	var music_vol = 0.8
+	var sfx_vol = 1.0
+	
+	if AudioManager:
+		master_vol = AudioManager.get_bus_volume("Master")
+		music_vol = AudioManager.get_bus_volume("Music") 
+		sfx_vol = AudioManager.get_bus_volume("SFX")
+	
+	# Set slider values
+	if master_slider:
+		master_slider.value = master_vol
+	if music_slider:
+		music_slider.value = music_vol
+	if sfx_slider:
+		sfx_slider.value = sfx_vol
 	
 	_update_volume_labels()
 
 func _update_volume_labels():
-	master_value_label.text = str(int(master_slider.value * 100)) + "%"
-	music_value_label.text = str(int(music_slider.value * 100)) + "%"
-	sfx_value_label.text = str(int(sfx_slider.value * 100)) + "%"
+	if master_value_label and master_slider:
+		master_value_label.text = str(int(master_slider.value * 100)) + "%"
+	if music_value_label and music_slider:
+		music_value_label.text = str(int(music_slider.value * 100)) + "%"
+	if sfx_value_label and sfx_slider:
+		sfx_value_label.text = str(int(sfx_slider.value * 100)) + "%"
 
 # Button Signals
 func _on_start_pressed():

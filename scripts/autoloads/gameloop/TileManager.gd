@@ -209,6 +209,7 @@ func _register_tile(tile: Node3D, position: Vector2i) -> void:
 func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 	"""
 	Spawn connecting tiles for all doors (only if connection doesn't exist)
+	Implements GAMELOOP.md step 5: Check for permanent tiles with 7x7 grid wrapping
 	
 	@param source_tile: Source tile to connect from
 	@param source_pos: Grid position of source tile
@@ -223,13 +224,20 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 	print("  Found ", available_doors.size(), " doors")
 	
 	for door_direction in available_doors:
-		var connecting_pos: Vector2i = _get_connecting_position(source_pos, door_direction)
+		var raw_connecting_pos: Vector2i = _get_connecting_position(source_pos, door_direction)
+		var connecting_pos: Vector2i = _apply_world_wrapping(raw_connecting_pos)
 		
-		print("  Checking connection to ", connecting_pos, " via ", _get_direction_name(door_direction))
+		print("  Checking connection to ", connecting_pos, " (raw: ", raw_connecting_pos, ") via ", _get_direction_name(door_direction))
 		
 		# Skip if connection already established
 		if _is_connection_established(source_pos, connecting_pos):
 			print("    Connection already established - skipping")
+			continue
+		
+		# Step 5a: Check for permanent tile at wrapped position first
+		if _has_permanent_tile_at(connecting_pos):
+			print("    Permanent tile exists at wrapped position - establishing connection")
+			_establish_connection(source_pos, connecting_pos)
 			continue
 		
 		# Skip if tile already exists
@@ -253,14 +261,8 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 				_tile_state_manager.set_tile_state(connecting_pos, _tile_state_manager.TileState.CONNECTING)
 				continue
 		
-		# Skip if permanent tile exists
-		if _has_permanent_tile_at(connecting_pos):
-			print("    Permanent tile exists - establishing connection")
-			_establish_connection(source_pos, connecting_pos)
-			continue
-		
-		# Create new connecting tile
-		print("    Creating new tile")
+		# Step 5b: Create random tile if no permanent tile exists
+		print("    Creating new tile (no permanent tile found)")
 		var new_tile: Node3D = _create_random_tile(connecting_pos)
 		if not new_tile:
 			continue
@@ -279,6 +281,12 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 		_message_bus.emit_event("tile_generated", [new_tile, connecting_pos, {}])
 		
 		print("    ✓ Created and connected tile at ", connecting_pos)
+		print("    ✓ Tile position: ", new_tile.global_position)
+		print("    ✓ Tile visible: ", new_tile.visible)
+		print("    ✓ Tile parent: ", new_tile.get_parent().name if new_tile.get_parent() else "NO PARENT")
+		print("    ✓ Tile children count: ", new_tile.get_child_count())
+		if new_tile.get_child_count() > 0:
+			print("    ✓ First child: ", new_tile.get_child(0).name, " (", new_tile.get_child(0).get_class(), ")")
 
 func _is_connection_established(pos1: Vector2i, pos2: Vector2i) -> bool:
 	"""
@@ -408,6 +416,34 @@ func _get_connecting_position(tile_pos: Vector2i, door_direction: int) -> Vector
 		DoorDirection.WEST: return tile_pos + Vector2i(0, -1)
 		_: return tile_pos
 
+func _apply_world_wrapping(position: Vector2i) -> Vector2i:
+	"""
+	Apply 7x7 world grid wrapping as described in GAMELOOP.md step 5a
+	Grid covers square area with corners at (3,3) and (-3,-3)
+	
+	@param position: Raw grid position
+	@return: Wrapped position within 7x7 grid
+	"""
+	var wrapped_pos = position
+	
+	# Wrap X coordinate: -3 to 3
+	if wrapped_pos.x > 3:
+		wrapped_pos.x = -3 + (wrapped_pos.x - 4)
+	elif wrapped_pos.x < -3:
+		wrapped_pos.x = 3 + (wrapped_pos.x + 4)
+	
+	# Wrap Y coordinate: -3 to 3  
+	if wrapped_pos.y > 3:
+		wrapped_pos.y = -3 + (wrapped_pos.y - 4)
+	elif wrapped_pos.y < -3:
+		wrapped_pos.y = 3 + (wrapped_pos.y + 4)
+	
+	# Log wrapping for debugging
+	if wrapped_pos != position:
+		print("TileManager: Wrapped position ", position, " to ", wrapped_pos)
+	
+	return wrapped_pos
+
 func _has_permanent_tile_at(position: Vector2i) -> bool:
 	"""
 	Check if permanent tile exists at position
@@ -507,6 +543,7 @@ func _cleanup_tiles_for_position(player_pos: Vector2i) -> void:
 	if tiles_to_remove.size() > 0:
 		print("  EXECUTING CLEANUP...")
 		for pos in tiles_to_remove:
+			print("  REMOVING TILE: ", pos)
 			_cleanup_single_tile(pos)
 	else:
 		print("  No tiles need cleanup")

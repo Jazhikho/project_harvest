@@ -83,7 +83,7 @@ func _find_player() -> void:
 
 func _check_player_tile_position() -> void:
 	"""Check if player has moved to a different tile"""
-	if not _player_node:
+	if not _player_node or not is_instance_valid(_player_node) or not _player_node.is_inside_tree():
 		return
 	
 	var player_pos = _player_node.global_position

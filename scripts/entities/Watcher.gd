@@ -48,11 +48,11 @@ func _ready():
 	# Connect area detection
 	area_3d.body_entered.connect(_on_area_entered)
 
-func _process(delta):
+func _process(delta: float) -> void:
 	_update_spawn_logic(delta)
 	_update_watcher_behavior(delta)
 
-func _update_spawn_logic(delta):
+func _update_spawn_logic(delta: float) -> void:
 	"""Handle Watcher spawning based on sanity and time"""
 	if current_state != WatcherState.HIDDEN:
 		return
@@ -144,7 +144,7 @@ func _play_manifestation_effect():
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 0.7, 0.5)
 
-func _update_watcher_behavior(delta):
+func _update_watcher_behavior(delta: float) -> void:
 	"""Update Watcher behavior based on current state"""
 	match current_state:
 		WatcherState.VISIBLE:
@@ -152,7 +152,7 @@ func _update_watcher_behavior(delta):
 		WatcherState.DESPAWNING:
 			_update_despawn_behavior(delta)
 
-func _update_visible_behavior(delta):
+func _update_visible_behavior(_delta: float) -> void:
 	"""Behavior while Watcher is visible"""
 	var player = _get_player()
 	if not player:
@@ -202,7 +202,7 @@ func _start_despawn():
 	tween.tween_property(self, "modulate:a", 0.0, 1.0)
 	tween.tween_callback(_complete_despawn)
 
-func _update_despawn_behavior(delta):
+func _update_despawn_behavior(_delta: float) -> void:
 	"""Handle despawning behavior"""
 	# Visual distortion effects could go here
 	pass
@@ -217,13 +217,13 @@ func _on_despawn_timer_timeout():
 	if current_state == WatcherState.VISIBLE:
 		_start_despawn()
 
-func _on_area_entered(body):
+func _on_area_entered(body: Node3D) -> void:
 	"""Handle player getting too close to Watcher"""
 	if body.is_in_group("player"):
 		_trigger_sanity_loss()
 		_start_despawn()
 
-func _on_sanity_changed(new_sanity: int):
+func _on_sanity_changed(new_sanity: int) -> void:
 	"""React to player sanity changes"""
 	var sanity_manager = get_node("/root/SanityManager")
 	if sanity_manager:

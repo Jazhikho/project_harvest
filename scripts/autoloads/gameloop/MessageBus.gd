@@ -64,6 +64,11 @@ signal screen_effect_requested(effect_type: String, duration: float, intensity: 
 signal dialogue_started(dialogue_id: String, speaker: String)
 signal dialogue_ended(dialogue_id: String)
 
+# === SETTINGS EVENTS ===
+signal setting_changed(category: String, key: String, old_value: Variant, new_value: Variant)
+signal settings_category_reset(category: String)
+signal settings_reset()
+
 var _event_history: Array[Dictionary] = []
 var _max_history: int = 100
 var _debug_mode: bool = false

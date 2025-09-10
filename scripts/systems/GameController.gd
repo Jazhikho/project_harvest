@@ -34,6 +34,10 @@ func _initialize_game():
 	var message_bus = get_node_or_null("/root/MessageBus")
 	if message_bus:
 		message_bus.emit_event("game_started", [])
+		
+		# Connect to player death events
+		if message_bus.has_signal("player_died"):
+			message_bus.player_died.connect(_on_player_died)
 	
 	# Give TileManager a moment to finish initialization
 	await get_tree().create_timer(0.1).timeout
@@ -131,6 +135,11 @@ func fade_in():
 func fade_out():
 	var tween = create_tween()
 	tween.tween_property(fade_rect, "color:a", 1.0, 0.5)
+
+func _on_player_died(cause: String, position: Vector2i, death_data: Dictionary):
+	"""Handle player death event from MessageBus"""
+	print("GameController: Player died - %s at %s" % [cause, position])
+	trigger_death(cause)
 
 func trigger_death(death_type: String):
 	print("GameController: Triggering death screen for: ", death_type)

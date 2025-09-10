@@ -1,6 +1,6 @@
 [gd_scene load_steps=17 format=3 uid="uid://cxlm8q3satp2k"]
 
-[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_e6iyi"]
+[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_di3up"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ota3w"]
 albedo_color = Color(0.336608, 0.336608, 0.336608, 1)
@@ -49,9 +49,51 @@ size = Vector3(0.5, 2, 1)
 size = Vector3(0.5, 2, 1)
 
 [node name="CrossTile3" type="Node3D"]
-script = ExtResource("1_e6iyi")
+script = ExtResource("1_di3up")
 
 [node name="Maze" type="Node3D" parent="."]
+
+[node name="Doors" type="Node3D" parent="Maze"]
+
+[node name="SDoor" type="Marker3D" parent="Maze/Doors"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -9.5, 1, 0)
+
+[node name="NDoor" type="Marker3D" parent="Maze/Doors"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.5, 1, 0)
+
+[node name="WDoor" type="Marker3D" parent="Maze/Doors"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, -9.5)
+
+[node name="EDoor" type="Marker3D" parent="Maze/Doors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
+
+[node name="ItemSpawn" type="Node3D" parent="Maze"]
+
+[node name="ItemPoint" type="Marker3D" parent="Maze/ItemSpawn"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 0.25, 7.5)
+
+[node name="ItemPoint2" type="Marker3D" parent="Maze/ItemSpawn"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -4, 0.25, 7.5)
+
+[node name="ItemPoint3" type="Marker3D" parent="Maze/ItemSpawn"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -8.5, 0.25, -8.5)
+
+[node name="ItemPoint4" type="Marker3D" parent="Maze/ItemSpawn"]
+transform = Transform3D(-0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, -0.5, 8.5, 0.25, -7.5)
+
+[node name="EntitySpawn" type="Node3D" parent="Maze"]
+
+[node name="EntityPoint" type="Marker3D" parent="Maze/EntitySpawn"]
+transform = Transform3D(0.707106, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707106, -7.5, 0.25, -7.5)
+
+[node name="EntityPoint2" type="Marker3D" parent="Maze/EntitySpawn"]
+transform = Transform3D(-1, 0, -1.19209e-07, 0, 1, 0, 1.19209e-07, 0, -1, -8, 0.25, 4.5)
+
+[node name="EntityPoint3" type="Marker3D" parent="Maze/EntitySpawn"]
+transform = Transform3D(-5.96046e-08, 0, 1, 0, 1, 0, -1, 0, -5.96046e-08, 4.5, 0.25, -3.5)
+
+[node name="EntityPoint4" type="Marker3D" parent="Maze/EntitySpawn"]
+transform = Transform3D(-1.03316e-07, 0, -1, 0, 1, 0, 1, 0, -1.03316e-07, 4.5, 0.25, 3)
 
 [node name="Floor" type="MeshInstance3D" parent="Maze"]
 mesh = SubResource("PlaneMesh_e6iyi")
@@ -530,18 +572,6 @@ mesh = SubResource("BoxMesh_o67iu")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Bridges/EntranceOffset6/StaticBody3D"]
 shape = SubResource("BoxShape3D_bufvs")
-
-[node name="SDoor" type="Marker3D" parent="Maze"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -9.5, 1, 0)
-
-[node name="NDoor" type="Marker3D" parent="Maze"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.5, 1, 0)
-
-[node name="WDoor" type="Marker3D" parent="Maze"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, -9.5)
-
-[node name="EDoor" type="Marker3D" parent="Maze"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
 
 [node name="EntranceOffset4" type="MeshInstance3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -9.5, 1, -0.75)

@@ -23,9 +23,9 @@ func _create_dialogs():
 	# Create quit confirmation dialog
 	quit_dialog = ConfirmationDialog.new()
 	quit_dialog.name = "QuitConfirmDialog"
-	quit_dialog.title = "TERMINATE SUBJECT"
-	quit_dialog.dialog_text = "This will terminate the current subject and end their run.\n\nDr. Amundsen will not be pleased with premature termination.\n\nAre you certain?"
-	quit_dialog.ok_button_text = "TERMINATE"
+	quit_dialog.title = "QUIT GAME"
+	quit_dialog.dialog_text = "This will quit the game and end your current run.\n\nYour death will be recorded at your current position.\n\nAre you certain?"
+	quit_dialog.ok_button_text = "QUIT"
 	quit_dialog.cancel_button_text = "CONTINUE EXPERIMENT"
 	quit_dialog.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_PRIMARY_SCREEN
 	quit_dialog.size = Vector2i(500, 200)
@@ -53,8 +53,12 @@ func _on_settings_pressed():
 
 func _on_main_menu_pressed():
 	# Show confirmation dialog
+	print("PauseMenu: Main menu button pressed")
 	if main_menu_dialog:
+		print("PauseMenu: Showing main menu dialog")
 		main_menu_dialog.popup_centered()
+	else:
+		print("PauseMenu: ERROR - main_menu_dialog is null!")
 
 func _on_quit_pressed():
 	# Show confirmation dialog
@@ -63,10 +67,27 @@ func _on_quit_pressed():
 
 func _on_quit_confirmed():
 	print("PauseMenu: Quit confirmed, terminating subject")
-	emit_signal("quit_requested")
+	
+	# Record death at current position before quitting
+	var game_director = get_node_or_null("/root/GameDirector")
+	if game_director and game_director.has_method("end_game"):
+		var state_manager = get_node_or_null("/root/GameStateManager")
+		var current_pos = Vector2i.ZERO
+		if state_manager:
+			current_pos = state_manager.get_state("current_tile_position")
+		
+		game_director.end_game("Quit", {"reason": "player_quit", "position": current_pos})
+		
+		# Wait a frame for death recording, then quit
+		await get_tree().process_frame
+		get_tree().quit()
+	else:
+		# Fallback: just quit
+		get_tree().quit()
 
 func _on_main_menu_confirmed():
-	print("PauseMenu: Main menu confirmed, terminating subject")
+	print("PauseMenu: Main menu confirmed, emitting signal")
+	# The GameController will handle the actual scene transition and death recording
 	emit_signal("main_menu_requested")
 
 func _on_reset_data_pressed():

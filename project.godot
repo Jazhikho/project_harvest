@@ -38,6 +38,15 @@ SanityManager="*res://scripts/autoloads/gameloop/SanityManager.gd"
 HarvestLogger="*res://scripts/autoloads/gameloop/HarvestLogger.gd"
 PlayerInventory="*res://scripts/systems/PlayerInventory.gd"
 TileStateManager="*res://scripts/autoloads/gameloop/TileStateManager.gd"
+EnemyManager="*res://scripts/autoloads/gameloop/EnemyManager.gd"
+EffigyManager="*res://scripts/autoloads/gameloop/EffigyManager.gd"
+
+[debug]
+
+gdscript/warnings/unused_variable=0
+gdscript/warnings/unused_parameter=0
+gdscript/warnings/unused_signal=0
+gdscript/warnings/narrowing_conversion=0
 
 [dotnet]
 
@@ -94,9 +103,10 @@ sprint={
 [layer_names]
 
 3d_physics/layer_1="player"
-3d_physics/layer_2="walls"
-3d_physics/layer_3="objects"
-3d_physics/layer_4="entities"
+3d_physics/layer_2="entities"
+3d_physics/layer_3="walls"
+3d_physics/layer_4="objects"
+3d_physics/layer_5="puzzle_objects"
 
 [rendering]
 

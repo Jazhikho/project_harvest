@@ -38,9 +38,8 @@ func _ready() -> void:
 	add_to_group("enemies")
 	add_to_group("effigies")
 	
-	# Set collision properties
-	collision_layer = 2  # Enemy layer
-	collision_mask = 1   # Collides with player layer
+	# Set collision properties using CollisionHelper
+	CollisionHelper.setup_entity_collision(self)
 	
 	# Initialize stages - only stage 1 visible initially
 	_setup_stages()

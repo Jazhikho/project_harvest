@@ -42,22 +42,23 @@ var grid_position: Vector2i
 var target_grid_position: Vector2i
 var grid_size: float = 4.0
 
-func _ready():
+func _ready() -> void:
 	add_to_group("stalker")
 	
 	# Initially dormant and invisible
 	visible = false
 	set_physics_process(false)
 	
-	# Connect detection area
-	detection_area.body_entered.connect(_on_player_detected)
-	detection_area.body_exited.connect(_on_player_lost)
+	# Connect detection area with proper Godot 4.x syntax
+	if detection_area:
+		detection_area.body_entered.connect(_on_player_detected.bind())
+		detection_area.body_exited.connect(_on_player_lost.bind())
 	
 	# Set initial position
 	patrol_center = global_position
 	current_target_position = global_position
 
-func _physics_process(delta):
+func _physics_process(delta: float) -> void:
 	if current_state == StalkerState.DORMANT:
 		return
 	
@@ -65,7 +66,7 @@ func _physics_process(delta):
 	_update_movement(delta)
 	_update_effects(delta)
 
-func _update_ai_logic(delta):
+func _update_ai_logic(delta: float) -> void:
 	"""Update AI decision making"""
 	navigation_timer += delta
 	
@@ -132,7 +133,7 @@ func _convert_to_grid_target(world_pos: Vector3):
 		int(world_pos.z / grid_size)
 	)
 
-func _update_movement(delta):
+func _update_movement(delta: float) -> void:
 	"""Handle actual movement towards target"""
 	if target_grid_position == grid_position:
 		return
@@ -190,29 +191,46 @@ func _move_to_grid_position(new_grid_pos: Vector2i, delta: float):
 	global_position = global_position.move_toward(target_world_pos, speed * delta)
 
 func _check_state_transitions():
-	"""Check for state transitions based on player proximity"""
+	"""Check for state transitions based on player proximity and sanity"""
 	var player = _get_player()
 	if not player:
 		return
 	
 	var distance_to_player = global_position.distance_to(player.global_position)
+	var state_manager = get_node_or_null("/root/GameStateManager")
+	var current_sanity = 100
+	if state_manager:
+		current_sanity = state_manager.get_state("sanity")
 	
-	match current_state:
-		StalkerState.PATROLLING:
-			if distance_to_player <= detection_range:
-				_transition_to_hunting()
+	# Implement GAMELOOP.md Stalker behavior based on sanity levels
+	if current_sanity > 70:
+		# Stalker is idle, just watching
+		current_state = StalkerState.PATROLLING
+		movement_speed = 0.0  # Don't move, just watch
+		return
+	elif current_sanity > 50:
+		# Move toward player at ~half speed, stop 2 meters away
+		if distance_to_player > 2.0:
+			current_state = StalkerState.HUNTING
+			movement_speed = 2.25  # Half of player's normal speed (4.5)
+		else:
+			current_state = StalkerState.PATROLLING
+			movement_speed = 0.0  # Stop and watch
+	elif current_sanity > 30:
+		# Actively try to touch the player (no stopping)
+		current_state = StalkerState.HUNTING
+		movement_speed = 2.25
+		if distance_to_player <= 1.0:
+			_trigger_player_caught()
+	else:
+		# Move at increasing speed up to player's speed at 10% sanity
+		current_state = StalkerState.CLOSING_IN
+		# Speed scales from half speed (30% sanity) to full speed (10% sanity)
+		var speed_ratio = (30.0 - current_sanity) / 20.0  # 0.0 at 30%, 1.0 at 10%
+		movement_speed = 2.25 + (2.25 * speed_ratio)  # 2.25 to 4.5
 		
-		StalkerState.HUNTING:
-			if distance_to_player <= 8.0:
-				_transition_to_closing_in()
-			elif distance_to_player >= lose_target_range:
-				_transition_to_patrolling()
-		
-		StalkerState.CLOSING_IN:
-			if distance_to_player >= 12.0:
-				_transition_to_hunting()
-			elif distance_to_player <= 3.0:
-				_trigger_player_caught()
+		if distance_to_player <= 1.0:
+			_trigger_player_caught()
 
 func _transition_to_patrolling():
 	"""Transition to patrolling state"""
@@ -260,7 +278,7 @@ func _trigger_player_caught():
 		
 		game_director.end_game("Consumed", player_pos)
 
-func _update_effects(delta):
+func _update_effects(delta: float) -> void:
 	"""Update visual and audio effects"""
 	var player = _get_player()
 	if not player:
@@ -276,7 +294,7 @@ func _update_effects(delta):
 	if current_state != StalkerState.PATROLLING:
 		look_at(player.global_position, Vector3.UP)
 
-func _apply_proximity_sanity_drain(delta):
+func _apply_proximity_sanity_drain(_delta: float) -> void:
 	"""Apply gradual sanity drain when Stalker is nearby"""
 	# Occasional sanity drain instead of constant
 	if randf() < 0.05:  # 5% chance per frame when close
@@ -295,12 +313,12 @@ func _play_state_audio(state_type: String):
 		"closing":
 			pass  # Terrifying approach sounds
 
-func _on_player_detected(body):
+func _on_player_detected(body: Node3D) -> void:
 	"""Handle player entering detection range"""
 	if body.is_in_group("player") and current_state == StalkerState.PATROLLING:
 		_transition_to_hunting()
 
-func _on_player_lost(body):
+func _on_player_lost(body: Node3D) -> void:
 	"""Handle player leaving detection range"""
 	if body.is_in_group("player") and current_state == StalkerState.HUNTING:
 		# Don't immediately lose target, use timer

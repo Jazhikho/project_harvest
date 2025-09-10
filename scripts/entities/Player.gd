@@ -31,9 +31,8 @@ func _ready() -> void:
 	name = "Player"
 	add_to_group("player")
 	
-	# Set collision properties
-	collision_layer = 1
-	collision_mask = 2
+	# Set collision properties using CollisionHelper
+	CollisionHelper.setup_player_collision(self)
 	
 	# Initialize mouse capture
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -64,7 +63,25 @@ func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""
 	_message_bus.game_ended.connect(_on_game_ended)
 
+func _notification(what: int) -> void:
+	"""Handle window focus notifications"""
+	if what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		# Recapture mouse when window regains focus
+		if mouse_captured:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		# Release mouse when window loses focus to prevent it getting stuck
+		if mouse_captured:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
 func _input(event: InputEvent) -> void:
+	# Handle mouse recapture on click when mouse is visible
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE and mouse_captured:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			print("Player: Mouse recaptured via click")
+			return
+	
 	# Debug mode toggle with Tab
 	if event is InputEventKey and event.pressed and event.keycode == KEY_TAB:
 		debug_mode = !debug_mode
@@ -171,7 +188,7 @@ func _check_interactions() -> void:
 		camera.global_position,
 		camera.global_position - camera.global_transform.basis.z * 2.0
 	)
-	query.collision_mask = 4  # Layer 3 for interactable objects
+	CollisionHelper.setup_interaction_raycast(query)
 	
 	var result: Dictionary = space_state.intersect_ray(query)
 	if result and result.has("collider"):
@@ -185,7 +202,7 @@ func _try_interact() -> void:
 		camera.global_position,
 		camera.global_position - camera.global_transform.basis.z * 2.0
 	)
-	query.collision_mask = 4
+	CollisionHelper.setup_interaction_raycast(query)
 	
 	var result: Dictionary = space_state.intersect_ray(query)
 	if result and result.has("collider"):
@@ -428,7 +445,7 @@ func is_looking_at_position(target_position: Vector3, fov_degrees: float = 90.0)
 		target_position
 	)
 	query.exclude = [self]
-	query.collision_mask = 2 | 4  # Check against environment and obstacles
+	CollisionHelper.setup_visibility_raycast(query)
 	
 	var result = space_state.intersect_ray(query)
 	

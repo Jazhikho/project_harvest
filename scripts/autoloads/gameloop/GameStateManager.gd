@@ -137,10 +137,18 @@ func has_flag(flag: String) -> bool:
 func add_to_inventory(item_id: String) -> bool:
 	"""
 	Add item to inventory if not already present
+	DEPRECATED: Use PlayerInventory autoload instead
 	
 	@param item_id: Item identifier to add
 	@return: True if item was added (wasn't already present)
 	"""
+	push_warning("GameStateManager.add_to_inventory() is deprecated. Use PlayerInventory.add_item() instead.")
+	
+	var player_inventory = get_node_or_null("/root/PlayerInventory")
+	if player_inventory and player_inventory.has_method("add_item"):
+		return player_inventory.add_item(item_id)
+	
+	# Fallback to old behavior if PlayerInventory not available
 	if item_id in _state.inventory:
 		return false
 	
@@ -156,10 +164,18 @@ func add_to_inventory(item_id: String) -> bool:
 func remove_from_inventory(item_id: String) -> bool:
 	"""
 	Remove item from inventory
+	DEPRECATED: Use PlayerInventory autoload instead
 	
 	@param item_id: Item identifier to remove
 	@return: True if item was removed (was present)
 	"""
+	push_warning("GameStateManager.remove_from_inventory() is deprecated. Use PlayerInventory.remove_item() instead.")
+	
+	var player_inventory = get_node_or_null("/root/PlayerInventory")
+	if player_inventory and player_inventory.has_method("remove_item"):
+		return player_inventory.remove_item(item_id)
+	
+	# Fallback to old behavior
 	if item_id not in _state.inventory:
 		return false
 	
@@ -174,18 +190,30 @@ func remove_from_inventory(item_id: String) -> bool:
 func has_item(item_id: String) -> bool:
 	"""
 	Check if item is in inventory
+	DEPRECATED: Use PlayerInventory autoload instead
 	
 	@param item_id: Item identifier to check
 	@return: True if item is in inventory
 	"""
+	var player_inventory = get_node_or_null("/root/PlayerInventory")
+	if player_inventory and player_inventory.has_method("has_item"):
+		return player_inventory.has_item(item_id)
+	
+	# Fallback to state data
 	return item_id in _state.inventory
 
 func get_inventory() -> Array:
 	"""
 	Get current inventory
+	DEPRECATED: Use PlayerInventory autoload instead
 	
 	@return: Array of item identifiers in inventory
 	"""
+	var player_inventory = get_node_or_null("/root/PlayerInventory")
+	if player_inventory and player_inventory.has_method("get_inventory"):
+		return player_inventory.get_inventory()
+	
+	# Fallback to state data
 	return _state.inventory.duplicate()
 
 func record_death_location(position: Vector2i, cause: String) -> void:
@@ -195,10 +223,29 @@ func record_death_location(position: Vector2i, cause: String) -> void:
 	@param position: Grid position where death occurred
 	@param cause: Cause of death string
 	"""
+	var player_inventory = get_node_or_null("/root/PlayerInventory")
+	var current_inventory = []
+	if player_inventory and player_inventory.has_method("get_inventory"):
+		current_inventory = player_inventory.get_inventory()
+	else:
+		current_inventory = _state.inventory.duplicate()
+	
+	# Special handling for start tile (0,0) - distribute inventory to adjacent tiles
+	var final_position = position
+	if position == Vector2i.ZERO and not current_inventory.is_empty():
+		print("GameStateManager: Death on start tile - distributing inventory to adjacent tiles")
+		var adjacent_positions = [
+			Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
+		]
+		# Pick a random adjacent tile for the backpack
+		final_position = adjacent_positions[randi() % adjacent_positions.size()]
+		print("  Inventory will spawn at adjacent tile: %s" % final_position)
+	
 	var death_data := {
-		"position": position,
+		"position": final_position,
+		"original_death_position": position,  # Keep track of actual death location
 		"cause": cause,
-		"inventory": _state.inventory.duplicate(),
+		"inventory": current_inventory,
 		"timestamp": Time.get_unix_time_from_system(),
 		"run_id": _state.run_data.get("id", "unknown"),
 		"used": false

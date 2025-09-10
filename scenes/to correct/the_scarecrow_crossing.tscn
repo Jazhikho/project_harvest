@@ -45,6 +45,12 @@ is_permanent = true
 
 [node name="Maze" type="Node3D" parent="."]
 
+[node name="Doors" type="Node3D" parent="Maze"]
+
+[node name="ItemSpawn" type="Node3D" parent="Maze"]
+
+[node name="EntitySpawn" type="Node3D" parent="Maze"]
+
 [node name="Floor" type="MeshInstance3D" parent="Maze"]
 mesh = SubResource("PlaneMesh_e6iyi")
 
@@ -94,14 +100,14 @@ mesh = SubResource("BoxMesh_interior3")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior3/StaticBody3D"]
 shape = SubResource("BoxShape3D_interior3")
 
-[node name="SDoor" type="Marker3D" parent="Maze"]
+[node name="SDoor" type="Marker3D" parent="Maze/Doors"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -9.5, 1, 0)
 
-[node name="NDoor" type="Marker3D" parent="Maze"]
+[node name="NDoor" type="Marker3D" parent="Maze/Doors"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.5, 1, 0)
 
-[node name="WDoor" type="Marker3D" parent="Maze"]
+[node name="WDoor" type="Marker3D" parent="Maze/Doors"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, -9.5)
 
-[node name="EDoor" type="Marker3D" parent="Maze"]
+[node name="EDoor" type="Marker3D" parent="Maze/Doors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)

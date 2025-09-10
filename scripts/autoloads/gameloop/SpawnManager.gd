@@ -44,44 +44,102 @@ func process_tile_spawning(tile_node: Node3D, tile_position: Vector2i) -> Dictio
 	@param tile_position: Grid position of the tile
 	@return: Dictionary of spawned entities {entity_type: [positions]}
 	"""
-	var spawn_results := {}
-	var spawn_points := _get_spawn_points(tile_node)
+	print("SpawnManager: === PROCESSING TILE SPAWNING ===")
+	print("  Tile: %s at position %s" % [tile_node.name, tile_position])
 	
-	if spawn_points.is_empty():
+	var spawn_results := {}
+	var item_spawn_points := _get_item_spawn_points(tile_node)
+	var entity_spawn_points := _get_entity_spawn_points(tile_node)
+	
+	print("  Found %d item spawn points and %d entity spawn points" % [item_spawn_points.size(), entity_spawn_points.size()])
+	
+	if item_spawn_points.is_empty() and entity_spawn_points.is_empty():
+		print("  No spawn points available - skipping spawning")
 		return spawn_results
 	
 	var context := {
 		"tile_position": tile_position,
 		"tile_node": tile_node,
-		"spawn_points": spawn_points,
+		"item_spawn_points": item_spawn_points,
+		"entity_spawn_points": entity_spawn_points,
 		"is_permanent": _is_permanent_tile(tile_node)
 	}
 	
+	# Check for death location (step 10 in GAMELOOP.md)
 	var death_data: Dictionary = _state_manager.get_unused_death_at_position(tile_position)
 	if not death_data.is_empty():
-		spawn_results["backpack"] = _spawn_backpack_at_death(tile_node, death_data, spawn_points)
+		print("  DEATH LOCATION FOUND: Spawning backpack and effigy")
+		print("    Death cause: %s" % death_data.get("cause", "unknown"))
+		print("    Inventory items: %d" % death_data.get("inventory", []).size())
+		spawn_results["backpack"] = _spawn_backpack_at_death(tile_node, death_data, item_spawn_points)
+		print("  ✓ Death location processing complete")
+		print("===========================================")
 		return spawn_results
 	
-	spawn_results["items"] = _spawn_items(tile_node, context, spawn_points)
+	# Process regular item spawning (step 10b in GAMELOOP.md)
+	print("  No death location - processing regular item spawning")
+	spawn_results["items"] = _spawn_items(tile_node, context, item_spawn_points)
 	
+	# Process entity spawning on the tile
+	print("  Processing entity spawning...")
+	spawn_results["entities"] = _spawn_entities(tile_node, context, entity_spawn_points)
+	
+	print("  ✓ Tile spawning complete")
+	print("===========================================")
 	return spawn_results
 
-func _get_spawn_points(tile_node: Node3D) -> Array[Vector3]:
+func _get_item_spawn_points(tile_node: Node3D) -> Array[Vector3]:
 	"""
-	Get spawn points from tile
+	Get ITEM spawn points from tile
 	
-	@param tile_node: Tile to extract spawn points from
-	@return: Array of world positions for spawning
+	@param tile_node: Tile to extract item spawn points from
+	@return: Array of world positions for item spawning only
 	"""
 	var points: Array[Vector3] = []
-	var spawn_parent := tile_node.get_node_or_null("Maze/SpawnPoints")
 	
-	if not spawn_parent:
-		return points
+	# Check for ItemSpawn points
+	var item_spawn_parent := tile_node.get_node_or_null("Maze/ItemSpawn")
+	if item_spawn_parent:
+		print("  Found ItemSpawn container with %d children" % item_spawn_parent.get_child_count())
+		for child in item_spawn_parent.get_children():
+			if child is Marker3D:
+				points.append(child.global_position)
+				print("    Added ItemSpawn point at %s" % child.global_position)
+	else:
+		print("  No Maze/ItemSpawn found")
+		
+		# Fallback: check legacy SpawnPoints
+		var legacy_spawn_parent := tile_node.get_node_or_null("Maze/SpawnPoints")
+		if legacy_spawn_parent:
+			print("  Found legacy SpawnPoints container with %d children" % legacy_spawn_parent.get_child_count())
+			for child in legacy_spawn_parent.get_children():
+				if child is Marker3D:
+					points.append(child.global_position)
+					print("    Added legacy spawn point at %s" % child.global_position)
+		else:
+			print("  No legacy Maze/SpawnPoints found either")
 	
-	for child in spawn_parent.get_children():
-		if child is Marker3D:
-			points.append(child.global_position)
+	return points
+
+func _get_entity_spawn_points(tile_node: Node3D) -> Array[Vector3]:
+	"""
+	Get ENTITY spawn points from tile
+	
+	@param tile_node: Tile to extract entity spawn points from
+	@return: Array of world positions for entity spawning only
+	"""
+	var points: Array[Vector3] = []
+	
+	# Check for EntitySpawn points
+	var entity_spawn_parent := tile_node.get_node_or_null("Maze/EntitySpawn")
+	if entity_spawn_parent:
+		print("  Found EntitySpawn container with %d children" % entity_spawn_parent.get_child_count())
+		for child in entity_spawn_parent.get_children():
+			if child is Marker3D:
+				points.append(child.global_position)
+				print("    Added EntitySpawn point at %s" % child.global_position)
+	else:
+		print("  No Maze/EntitySpawn found")
 	
 	return points
 
@@ -96,7 +154,7 @@ func _is_permanent_tile(tile_node: Node3D) -> bool:
 
 func _spawn_items(tile_node: Node3D, context: Dictionary, spawn_points: Array[Vector3]) -> Array:
 	"""
-	Spawn regular items on tile
+	Spawn regular items on tile (GAMELOOP.md step 10b: 3% base chance per drop point)
 	
 	@param tile_node: Tile node to spawn items on
 	@param context: Spawning context
@@ -107,18 +165,41 @@ func _spawn_items(tile_node: Node3D, context: Dictionary, spawn_points: Array[Ve
 	var shuffled_points := spawn_points.duplicate()
 	shuffled_points.shuffle()
 	
-	for spawn_point in shuffled_points:
+	print("    Checking %d spawn points for items (3%% chance each)" % shuffled_points.size())
+	
+	for i in range(shuffled_points.size()):
+		var spawn_point = shuffled_points[i]
+		
 		if spawned_items.size() >= MAX_ITEMS_PER_TILE:
+			print("    Max items per tile reached (%d)" % MAX_ITEMS_PER_TILE)
 			break
 		
-		if randf() < ITEM_SPAWN_CHANCE:
+		var roll = randf()
+		print("    Spawn point %d: Rolling %.3f (need < %.3f)" % [i+1, roll, ITEM_SPAWN_CHANCE])
+		
+		if roll < ITEM_SPAWN_CHANCE:
+			print("      SUCCESS: Item will spawn")
 			var spawnable: Array[Dictionary] = _item_manager.get_spawnable_items(context)
+			print("      Available items: %d" % spawnable.size())
+			
 			if not spawnable.is_empty():
 				var item_id: String = _item_manager.select_random_item(spawnable)
+				print("      Selected item: %s" % item_id)
+				
 				if _spawn_item_visual(tile_node, item_id, spawn_point):
 					spawned_items.append(item_id)
 					_message_bus.emit_event("item_spawned", [item_id, spawn_point, context.tile_position, {}])
+					print("      ✓ Item spawned successfully")
+					# GAMELOOP.md: Break after first item spawns
+					break
+				else:
+					print("      ✗ Item spawn failed")
+			else:
+				print("      No spawnable items available")
+		else:
+			print("      No spawn (%.3f >= %.3f)" % [roll, ITEM_SPAWN_CHANCE])
 	
+	print("    Final result: %d items spawned" % spawned_items.size())
 	return spawned_items
 
 func _spawn_item_visual(tile_node: Node3D, item_id: String, position: Vector3) -> bool:
@@ -282,6 +363,87 @@ func _spawn_echo(tile_node: Node3D, position: Vector3) -> void:
 	@param position: Spawn position
 	"""
 	pass
+
+func _spawn_entities(tile_node: Node3D, context: Dictionary, spawn_points: Array[Vector3]) -> Array:
+	"""
+	Spawn entities on tile based on game state and conditions
+	
+	@param tile_node: Tile node to spawn entities on
+	@param context: Spawning context
+	@param spawn_points: Available entity spawn positions
+	@return: Array of spawned entity types
+	"""
+	var spawned_entities := []
+	
+	if spawn_points.is_empty():
+		print("    No entity spawn points available")
+		return spawned_entities
+	
+	print("    Checking entity spawn conditions...")
+	
+	# Get current game state
+	var current_sanity: int = _state_manager.get_state("sanity")
+	var tiles_explored_value = _state_manager.get_state("tiles_explored")
+	var tiles_explored: int = tiles_explored_value if tiles_explored_value != null else 0
+	var weird_things_collected: int = 0
+	
+	# Check with WeirdThingsManager if available
+	var weird_things_manager = get_node_or_null("/root/WeirdThingsManager")
+	if weird_things_manager and weird_things_manager.has_method("get_collected_count"):
+		weird_things_collected = weird_things_manager.get_collected_count()
+	
+	print("    Game state: Sanity=%d, Tiles=%d, Weird Things=%d" % [current_sanity, tiles_explored, weird_things_collected])
+	
+	# Chance-based spawning with different probabilities
+	var spawn_chances := {}
+	
+	# Base spawn chances (very low for balanced gameplay)
+	spawn_chances["effigy"] = 0.02  # 2% chance for effigy
+	
+	# Conditional spawn chances
+	if current_sanity < 80:
+		spawn_chances["watcher"] = 0.05  # 5% chance when sanity is low
+	
+	if weird_things_collected >= 2:
+		spawn_chances["stalker"] = 0.03  # 3% chance when player has collected weird things
+	
+	if tiles_explored > 5:
+		spawn_chances["echo"] = 0.01  # 1% chance after exploring several tiles
+	
+	# Try to spawn entities
+	var shuffled_points := spawn_points.duplicate()
+	shuffled_points.shuffle()
+	
+	for i in range(min(2, shuffled_points.size())):  # Max 2 entities per tile
+		var spawn_point = shuffled_points[i]
+		
+		# Roll for each entity type
+		for entity_type in spawn_chances.keys():
+			var chance = spawn_chances[entity_type]
+			var roll = randf()
+			
+			print("      Entity %s: Rolling %.3f (need < %.3f)" % [entity_type, roll, chance])
+			
+			if roll < chance:
+				print("        SUCCESS: Spawning %s" % entity_type)
+				
+				# Use EnemyManager to spawn the entity
+				var enemy_manager = get_node_or_null("/root/EnemyManager")
+				if enemy_manager and enemy_manager.has_method("spawn_enemy"):
+					var spawned_entity = enemy_manager.spawn_enemy(entity_type, spawn_point, true)  # Force spawn
+					if spawned_entity:
+						spawned_entities.append(entity_type)
+						print("        ✓ %s spawned successfully" % entity_type)
+						break  # Only spawn one entity per spawn point
+					else:
+						print("        ✗ %s spawn failed" % entity_type)
+				else:
+					print("        ✗ EnemyManager not available")
+			else:
+				print("        No spawn (%.3f >= %.3f)" % [roll, chance])
+	
+	print("    Entity spawning result: %d entities spawned" % spawned_entities.size())
+	return spawned_entities
 
 func _on_item_pickup(body: Node3D, item_node: Node3D) -> void:
 	"""
