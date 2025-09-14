@@ -58,9 +58,8 @@ func _collect_item(item: Node3D):
 		
 		# Remove the item
 		item.queue_free()
-		print("Collected: ", item_id)
 	else:
-		print("Inventory full! Cannot collect ", item_id)
+		pass
 
 func _check_for_backpacks(player_pos: Vector3):
 	"""Check for nearby backpacks from previous runs"""
@@ -80,7 +79,6 @@ func _collect_backpack(backpack: Node3D):
 	
 	# Remove the backpack
 	backpack.queue_free()
-	print("Collected backpack with ", backpack_inventory.size(), " items")
 
 func _check_for_puzzles(player_pos: Vector3):
 	"""Check for nearby puzzle interaction points"""
@@ -103,10 +101,8 @@ func _show_puzzle_ui():
 	var available_pieces = inventory.get_puzzle_pieces()
 	
 	if available_pieces.is_empty():
-		print("No puzzle pieces in inventory!")
 		return
 	
-	# TODO: Show actual UI for piece selection
 	# For now, try the first piece
 	_try_use_puzzle_piece(available_pieces[0], puzzle_id)
 
@@ -126,6 +122,6 @@ func _try_use_puzzle_piece(piece_id: String, puzzle_id: String):
 		if current_puzzle_tile.has_method("add_puzzle_piece"):
 			current_puzzle_tile.add_puzzle_piece(piece_id)
 		
-		print("Puzzle piece placed successfully!")
+		pass
 	else:
-		print("Wrong piece for this puzzle!")
+		pass

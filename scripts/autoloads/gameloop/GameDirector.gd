@@ -1,39 +1,40 @@
-extends Node
+extends BaseManager
 ## Game Director - High-level game flow coordination
 ## Orchestrates game states and major events through MessageBus
+## Refactored to use BaseManager for common initialization patterns
 
-var _message_bus: Node
-var _state_manager: Node
 var _event_manager: Node
 
 var _game_session_data: Dictionary = {}
 var _maze_shift_timer: float = 0.0
-var _current_difficulty: String = "normal"
+var _current_difficulty: String = GameConstants.DIFFICULTY_NORMAL
 
 # Game timing
 var _session_start_time: float = 0.0
 var _last_shift_time: float = 0.0
 
 # Difficulty scaling
-var _base_shift_interval: float = 45.0
-var _stressed_shift_interval: float = 20.0
-var _current_shift_interval: float = 45.0
+var _base_shift_interval: float = GameConstants.MAZE_SHIFT_INTERVAL_MIN
+var _stressed_shift_interval: float = GameConstants.MAZE_SHIFT_INTERVAL_MAX / 6.0
+var _current_shift_interval: float = GameConstants.MAZE_SHIFT_INTERVAL_MIN
 
 func _ready() -> void:
 	name = "GameDirector"
 	add_to_group("core_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus", "GameStateManager", "EventManager"])
+	super()
 
-func _initialize() -> void:
-	"""Initialize connections to core systems"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_state_manager = get_node_or_null("/root/GameStateManager")
-	_event_manager = get_node_or_null("/root/EventManager")
-	
-	if not _message_bus or not _state_manager or not _event_manager:
-		push_error("GameDirector: Required core systems not found")
-		return
-	
+func _notification(what: int) -> void:
+	"""Handle application quit as death if a game is active"""
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		# Check if a game is currently active
+		if _state_manager and _state_manager.get_state("game_active"):
+			end_game("Force Quit", {"forced_termination": true})
+		# Let the quit proceed
+
+func _initialize_manager() -> void:
+	"""Initialize GameDirector-specific systems"""
+	_event_manager = get_system_node("EventManager")
 	_connect_to_events()
 	_initialize_session()
 
@@ -46,7 +47,6 @@ func _process(delta: float) -> void:
 
 func start_new_game() -> void:
 	"""Initialize a new game session"""
-	print("GameDirector: Starting new game")
 	
 	_session_start_time = Time.get_unix_time_from_system()
 	_maze_shift_timer = 0.0
@@ -66,7 +66,6 @@ func end_game(cause: String, additional_data: Dictionary = {}) -> void:
 	@param cause: Reason for game end
 	@param additional_data: Additional data for game end
 	"""
-	print("GameDirector: Game ended - ", cause)
 	
 	var session_duration: float = Time.get_unix_time_from_system() - _session_start_time
 	var end_data: Dictionary = {
@@ -103,7 +102,6 @@ func trigger_major_event(event_type: String, context: Dictionary = {}) -> void:
 	@param event_type: Type of major event
 	@param context: Event context data
 	"""
-	print("GameDirector: Triggering major event - ", event_type)
 	
 	match event_type:
 		"harvest_finale":
@@ -244,7 +242,6 @@ func _update_difficulty_scaling() -> void:
 	
 	# Notify of difficulty change
 	if old_difficulty != _current_difficulty:
-		print("GameDirector: Difficulty changed to ", _current_difficulty)
 		_on_difficulty_changed(old_difficulty, _current_difficulty)
 
 func _on_difficulty_changed(old_difficulty: String, new_difficulty: String) -> void:
@@ -324,8 +321,8 @@ func _on_player_died(cause: String, position: Vector2i, data: Dictionary) -> voi
 func _on_sanity_threshold_crossed(threshold_name: String, value: int, crossed_down: bool) -> void:
 	"""Handle sanity threshold changes"""
 	if threshold_name == "critical" and crossed_down:
-		_current_difficulty = "nightmare"
-		_message_bus.emit_event("notification_requested", ["The walls close in...", 3.0, 3])
+		_current_difficulty = GameConstants.DIFFICULTY_NIGHTMARE
+		emit_event("notification_requested", ["The walls close in...", GameConstants.NOTIFICATION_MEDIUM, GameConstants.UI_PRIORITY_HIGH])
 
 func _on_puzzle_completed(puzzle_id: String, tile_pos: Vector2i, reward: Dictionary) -> void:
 	"""Handle puzzle completion"""

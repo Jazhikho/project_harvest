@@ -133,12 +133,9 @@ func _manifest_at_position(pos: Vector3):
 	visible = true
 	current_state = WatcherState.VISIBLE
 	despawn_timer.start()
-	
-	print("WATCHER: Manifested at ", pos)
 
 func _play_manifestation_effect():
 	"""Play visual/audio effects for Watcher manifestation"""
-	# TODO: Add particle effects, distortion, audio
 	
 	# Start with low opacity and fade in
 	var tween = create_tween()

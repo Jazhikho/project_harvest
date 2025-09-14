@@ -63,14 +63,7 @@ func spawn_enemy(enemy_type: String, position: Vector3 = Vector3.ZERO, force_spa
 	@param force_spawn: Ignore cooldowns and limits
 	@return: Spawned enemy node or null if failed
 	"""
-	print("EnemyManager: === ENEMY SPAWN REQUEST ===")
-	print("  Type: %s" % enemy_type)
-	print("  Position: %s" % position)
-	print("  Force spawn: %s" % force_spawn)
-	
 	if not _can_spawn_enemy(enemy_type) and not force_spawn:
-		print("  ✗ Spawn blocked by conditions")
-		print("=====================================")
 		return null
 	
 	if not _enemy_scenes.has(enemy_type):
@@ -78,39 +71,27 @@ func spawn_enemy(enemy_type: String, position: Vector3 = Vector3.ZERO, force_spa
 		return null
 	
 	var scene_path = _enemy_scenes[enemy_type]
-	print("  Scene path: %s" % scene_path)
 	
 	if not FileAccess.file_exists(scene_path):
-		print("  Scene file not found - creating placeholder")
 		var placeholder = _spawn_placeholder_enemy(enemy_type, position)
-		print("  ✓ Placeholder enemy created")
-		print("=====================================")
 		return placeholder
 	
-	print("  Loading enemy scene...")
 	var enemy_scene = load(scene_path) as PackedScene
 	if not enemy_scene:
 		push_error("EnemyManager: Failed to load enemy scene: %s" % scene_path)
-		print("  ✗ Scene load failed")
-		print("=====================================")
 		return null
 	
-	print("  Instantiating enemy...")
 	var enemy_instance = enemy_scene.instantiate()
 	if not enemy_instance:
 		push_error("EnemyManager: Failed to instantiate enemy: %s" % enemy_type)
-		print("  ✗ Instantiation failed")
-		print("=====================================")
 		return null
 	
 	# Add to scene
-	print("  Adding to scene tree...")
 	get_tree().current_scene.add_child(enemy_instance)
 	
 	# Set position
 	if position == Vector3.ZERO:
 		position = _find_spawn_position(enemy_type)
-		print("  Auto-selected position: %s" % position)
 	enemy_instance.global_position = position
 	
 	# Register enemy
@@ -121,13 +102,10 @@ func spawn_enemy(enemy_type: String, position: Vector3 = Vector3.ZERO, force_spa
 	
 	# Set cooldown
 	_enemy_spawn_cooldowns[enemy_type] = _get_spawn_cooldown(enemy_type)
-	print("  Set cooldown: %.1fs" % _get_spawn_cooldown(enemy_type))
 	
 	# Emit spawn event
 	_message_bus.emit_event("entity_spawned", [enemy_type, enemy_instance, position])
 	
-	print("  ✓ Enemy spawned successfully (ID: %s)" % entity_id)
-	print("=====================================")
 	return enemy_instance
 
 func _spawn_placeholder_enemy(enemy_type: String, position: Vector3) -> Node3D:
@@ -178,7 +156,6 @@ func _spawn_placeholder_enemy(enemy_type: String, position: Vector3) -> Node3D:
 	placeholder.set_meta("entity_id", entity_id)
 	placeholder.set_meta("enemy_type", enemy_type)
 	
-	print("EnemyManager: Created placeholder %s" % enemy_type)
 	return placeholder
 
 func despawn_enemy(entity_id: String) -> bool:
@@ -199,7 +176,6 @@ func despawn_enemy(entity_id: String) -> bool:
 	if is_instance_valid(enemy):
 		enemy.queue_free()
 	
-	print("EnemyManager: Despawned %s (ID: %s)" % [enemy_type, entity_id])
 	return true
 
 func get_enemies_in_range(position: Vector3, radius: float) -> Array[Node3D]:
@@ -258,7 +234,7 @@ func cleanup_invalid_enemies() -> void:
 	
 	for entity_id in invalid_ids:
 		_active_enemies.erase(entity_id)
-		print("EnemyManager: Cleaned up invalid enemy ID: %s" % entity_id)
+		pass
 
 func _can_spawn_enemy(enemy_type: String) -> bool:
 	"""
@@ -302,7 +278,6 @@ func _can_spawn_watcher() -> bool:
 	"""Check if watcher can be spawned"""
 	# MVP: Watchers are disabled for initial release
 	if _watcher_spawn_conditions.get("mvp_disabled", false):
-		print("EnemyManager: Watcher spawn blocked - MVP disabled")
 		return false
 	
 	# Check if max active watchers reached
@@ -412,21 +387,6 @@ func _on_game_ended(cause: String, data: Dictionary) -> void:
 
 # Debug functions
 
-func debug_print_enemies() -> void:
-	"""Print debug info about all active enemies"""
-	print("=== ENEMY MANAGER DEBUG ===")
-	print("Active enemies: %d" % _active_enemies.size())
-	for entity_id in _active_enemies.keys():
-		var enemy = _active_enemies[entity_id]
-		if is_instance_valid(enemy):
-			var enemy_type = enemy.get_meta("enemy_type", "unknown")
-			print("  %s (%s): %s" % [entity_id, enemy_type, enemy.global_position])
-		else:
-			print("  %s: INVALID" % entity_id)
-	print("Spawn cooldowns:")
-	for enemy_type in _enemy_spawn_cooldowns.keys():
-		print("  %s: %.1fs" % [enemy_type, _enemy_spawn_cooldowns[enemy_type]])
-	print("===========================")
 
 func get_enemy_count() -> int:
 	"""Get total number of active enemies"""

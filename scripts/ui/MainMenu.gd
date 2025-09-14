@@ -20,15 +20,14 @@ extends Control
 func _ready():
 	# Check for existing save data
 	_check_save_data()
-	
 	# Load settings
 	_load_settings()
 	
-	# Set initial focus
-	start_button.grab_focus()
-	
 	# Detect input device
 	_detect_input_device()
+
+	# Set initial focus
+	start_button.grab_focus()
 
 func _check_save_data():
 	# Check if save file exists
@@ -108,6 +107,12 @@ func _on_credits_pressed():
 
 func _on_quit_pressed():
 	get_tree().quit()
+
+func _notification(what: int) -> void:
+	"""Handle window close requests"""
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		# In main menu, just quit normally - no active game to record death for
+		get_tree().quit()
 
 # Settings Panel Signals
 func _on_master_volume_changed(value):

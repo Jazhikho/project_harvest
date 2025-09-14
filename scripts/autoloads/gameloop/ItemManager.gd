@@ -82,8 +82,6 @@ func _process_item_data(data: Dictionary) -> void:
 		_item_effects[item_id] = item.get("effects", {})
 	
 	_unlocked_notes = _item_categories.notes.slice(0, min(3, _item_categories.notes.size()))
-	
-	print("ItemManager: Loaded %d items" % _item_definitions.size())
 
 func _create_default_definitions() -> void:
 	"""Create minimal default item definitions as fallback"""
@@ -246,7 +244,6 @@ func _unlock_next_note(collected_note_id: String) -> void:
 	
 	if next_index < all_notes.size() and all_notes[next_index] not in _unlocked_notes:
 		_unlocked_notes.append(all_notes[next_index])
-		print("ItemManager: Unlocked next note - " + all_notes[next_index])
 
 func reset_for_new_run() -> void:
 	"""Reset item availability for new game run"""

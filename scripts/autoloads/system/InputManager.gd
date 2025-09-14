@@ -31,7 +31,7 @@ func _setup_input_actions():
 	# This would be handled in the input map, but we can validate here
 	for action in INPUT_ACTIONS.keys():
 		if not InputMap.has_action(action):
-			print("WARNING: Input action '", action, "' not found in InputMap")
+			push_warning("Input action '%s' not found in InputMap" % action)
 
 func _input(event):
 	"""Handle global input events"""

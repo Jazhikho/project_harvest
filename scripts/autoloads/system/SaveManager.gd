@@ -8,8 +8,25 @@ var save_data = {
 	"collectibles": [],
 	"run_active": false,
 	"last_position": Vector3.ZERO,
+	"permanent_tiles": {},
+	"event_flags": [],
 	"settings": {}
 }
+
+func _ready():
+	# Connect to game events to manage run state
+	call_deferred("_connect_to_events")
+
+func _connect_to_events():
+	"""Connect to MessageBus events"""
+	var message_bus = get_node_or_null("/root/MessageBus")
+	if message_bus:
+		if message_bus.has_signal("game_started"):
+			message_bus.game_started.connect(_on_game_started)
+
+func _on_game_started():
+	"""Handle game start event"""
+	start_run()
 
 func has_save_data() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
@@ -39,6 +56,11 @@ func _reset_save_data():
 		"last_position": Vector3.ZERO,
 		"settings": {}
 	}
+
+func start_run():
+	"""Mark a run as active and save the state"""
+	save_data.run_active = true
+	save_game()
 
 func record_death():
 	save_data.deaths += 1

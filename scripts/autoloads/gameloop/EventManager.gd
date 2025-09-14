@@ -50,7 +50,6 @@ func _load_event_data() -> void:
 		return
 	
 	_event_data = json.data
-	print("EventManager: Loaded events.json v", _event_data.get("version", "unknown"))
 
 func _create_default_events() -> void:
 	"""Create minimal default events as fallback"""
@@ -252,8 +251,6 @@ func _execute_event_action(action: Dictionary, context: Dictionary) -> void:
 		
 		"play_sound":
 			var sound_id: String = action.get("id", "")
-			# TODO: Implement sound system integration
-			print("EventManager: Play sound - ", sound_id)
 		
 		_:
 			push_warning("EventManager: Unknown action type - " + action_type)

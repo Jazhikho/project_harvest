@@ -40,9 +40,7 @@ func detect_tile_size() -> void:
 	if floor_mesh and floor_mesh.mesh is PlaneMesh:
 		var plane_mesh: PlaneMesh = floor_mesh.mesh as PlaneMesh
 		tile_size = plane_mesh.size
-		print("Detected tile size: ", tile_size)
 	else:
-		print("WARNING: Floor mesh is not a PlaneMesh, using default size")
 		tile_size = Vector2(20, 20)
 
 func get_tile_size() -> Vector2:
@@ -55,19 +53,11 @@ func detect_doors() -> void:
 	# First try: Look in Maze/Doors container
 	var doors_container: Node = get_node_or_null("Maze/Doors")
 	if doors_container:
-		print("Found Maze/Doors container, detecting doors...")
 		_detect_doors_from_container(doors_container)
 	else:
-		print("No Maze/Doors container, trying old door paths...")
 		_detect_doors_legacy()
-	
-	if door_markers.is_empty():
-		print("WARNING: No doors detected on this tile!")
-	
-	# Initialize global door tracking
 	_update_global_door_assignments(0)
 	
-	print("Tile initialized with ", door_markers.size(), " doors")
 
 func _detect_doors_from_container(container: Node) -> void:
 	"""Detect doors from all Marker3D children in Doors container"""
@@ -80,7 +70,6 @@ func _detect_doors_from_container(container: Node) -> void:
 		
 		if door_direction != -1:
 			door_markers[door_direction] = marker
-			print("  Detected door: ", get_direction_name(door_direction), " from marker '", marker.name, "'")
 
 func _determine_door_direction_from_marker(marker: Marker3D) -> int:
 	"""Determine door direction from marker name or position"""
@@ -119,10 +108,8 @@ func _determine_door_direction_from_marker(marker: Marker3D) -> int:
 	
 	# Only accept if reasonably close to an edge (within 2 units)
 	if min_distance < 2.0:
-		print("  Determined door direction from position: ", get_direction_name(closest_direction))
 		return closest_direction
 	
-	print("  Could not determine door direction for marker: ", marker.name)
 	return -1
 
 func _detect_doors_legacy() -> void:
@@ -140,7 +127,6 @@ func _detect_doors_legacy() -> void:
 		
 		if door_marker and door_marker is Marker3D:
 			door_markers[direction] = door_marker as Marker3D
-			print("  Detected legacy door: ", get_direction_name(direction), " at ", door_path)
 
 func _update_global_door_assignments(rotation_steps: int) -> void:
 	"""Update which doors are pointing in which global directions after rotation"""
@@ -163,11 +149,6 @@ func _update_global_door_assignments(rotation_steps: int) -> void:
 			DoorDirection.WEST:
 				global_west_door = marker
 	
-	print("TILE: Updated global door assignments after ", rotation_steps * 90, "° rotation:")
-	if global_north_door: print("  Global NORTH door: ", global_north_door.name)
-	if global_east_door: print("  Global EAST door: ", global_east_door.name)
-	if global_south_door: print("  Global SOUTH door: ", global_south_door.name)
-	if global_west_door: print("  Global WEST door: ", global_west_door.name)
 
 # State management callbacks (called by TileStateManager)
 func set_as_active_tile() -> void:
@@ -175,21 +156,18 @@ func set_as_active_tile() -> void:
 	is_active_tile = true
 	is_connecting_tile = false
 	is_past_tile = false
-	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now ACTIVE")
 
 func set_as_connecting_tile() -> void:
 	"""Called by TileStateManager when tile becomes connecting"""
 	is_active_tile = false
 	is_connecting_tile = true
 	is_past_tile = false
-	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now CONNECTING")
 
 func set_as_past_tile() -> void:
 	"""Called by TileStateManager when tile becomes past"""
 	is_active_tile = false
 	is_connecting_tile = true  # Past tiles are also connecting
 	is_past_tile = true
-	print("TILE: [", get_meta("grid_position", "?"), "] at ", position, " is now PAST")
 
 func has_door(direction: int) -> bool:
 	"""Check if tile has a specific door"""
@@ -203,7 +181,6 @@ func get_available_doors() -> Dictionary:
 	"""Get all available doors using GLOBAL directions"""
 	var available: Dictionary = {}
 	
-	print("TILE: Getting available doors using global directions")
 	
 	# Check each global direction
 	var global_doors: Dictionary = {
@@ -221,7 +198,6 @@ func get_available_doors() -> Dictionary:
 				"world_orientation": -marker.global_transform.basis.z,
 				"marker": marker
 			}
-			print("  - Global ", get_direction_name(global_direction), " door at ", marker.global_position)
 	
 	return available
 
@@ -248,7 +224,6 @@ func set_tile_rotation(rotation_steps: int) -> void:
 	
 	_update_global_door_assignments(current_rotation)
 	
-	print("Tile set to rotation: ", current_rotation * 90, " degrees (counter-clockwise)")
 
 func get_current_rotation() -> int:
 	"""Get current rotation in steps (0-3)"""
@@ -289,7 +264,7 @@ func get_direction_name(direction: int) -> String:
 
 func setup_collision_layers() -> void:
 	"""Set up proper collision layers for this tile"""
-	_set_walls_collision_layer(self, 2)
+	_set_walls_collision_layer(self, CollisionHelper.LAYER_WALLS)
 
 func _set_walls_collision_layer(node: Node, layer: int) -> void:
 	"""Recursively set collision layers for all StaticBody3D nodes (walls)"""
@@ -326,16 +301,4 @@ func get_spawn_points() -> Array[Vector3]:
 
 func debug_print_tile_info() -> void:
 	"""Debug function to print tile information"""
-	print("=== TILE DEBUG INFO ===")
-	print("Position: ", position)
-	print("Rotation: ", current_rotation * 90, "°")
-	print("Grid Position: ", get_meta("grid_position", "Unknown"))
-	print("Is Active: ", is_active_tile)
-	print("Is Connecting: ", is_connecting_tile)
-	print("Is Past: ", is_past_tile)
-	print("Is Permanent: ", is_permanent)
-	print("Available Doors: ", door_markers.keys().size())
-	for direction in door_markers:
-		var marker: Marker3D = door_markers[direction]
-		print("  ", get_direction_name(direction), ": ", marker.global_position)
-	print("=====================")
+	pass

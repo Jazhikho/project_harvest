@@ -120,7 +120,6 @@ func _update_flashlight_battery(ratio: float):
 func _add_screen_effects_critical():
 	"""Add visual effects for critical states"""
 	# Screen edge darkening/reddening for low sanity
-	# TODO: Implement post-processing effects
 	pass
 
 func show_message(text: String, duration: float = 3.0):
@@ -195,10 +194,8 @@ func _add_message_effects(effect_type: String):
 	"""Add special effects for different message types"""
 	match effect_type:
 		"weird":
-			# TODO: Add flickering effect, distortion
 			pass
 		"sanity":
-			# TODO: Add screen shake, color shift
 			pass
 
 func _on_message_timer_timeout():
@@ -218,12 +215,10 @@ func _hide_current_message():
 # Public API for other systems
 func show_game_over_screen():
 	"""Show game over overlay"""
-	# TODO: Implement game over screen
 	pass
 
 func show_pause_menu():
 	"""Show pause menu"""
-	# TODO: Implement pause menu
 	pass
 
 func hide_hud():

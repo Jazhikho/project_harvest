@@ -42,6 +42,138 @@ This document provides complete attribution for all assets used in Project Harve
 
 **Attribution:** "Lite Halloween pack models by Animpic POLY, licensed under Standard License (purchased 2025)"
 
+### Low Poly Skeleton
+**Source:** Free Asset  
+**Creator:** Samy Belaloui  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** [Asset Source]
+
+**Assets Used:**
+- `assets/models/low_poly_skeleton.glb` - Low poly skeleton model for horror elements
+
+**Attribution:** "Low Poly Skeleton by Samy Belaloui is licensed under Creative Commons Attribution"
+
+### Key
+**Source:** Free Asset  
+**Creator:** yomans  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** [Asset Source]
+
+**Assets Used:**
+- `assets/models/key.fbx` - Key model for gameplay elements
+
+**Attribution:** "key by yomans is licensed under Creative Commons Attribution"
+
+### Paper Debris
+**Source:** Sketchfab  
+**Creator:** Sousinho  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/paper_debris.dae` - Paper debris model for environmental details (13MB, DAE format)
+
+**Attribution:** "Paper debris by Sousinho is licensed under Creative Commons Attribution"
+
+### Broken Glass
+**Source:** Sketchfab  
+**Creator:** Kirrek  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/broken_glass.blend` - Broken glass model for environmental details (3MB, Blender format)
+
+**Attribution:** "Broken Glass by Kirrek is licensed under Creative Commons Attribution"
+
+### Gate Apocalyptic Rusty
+**Source:** Sketchfab  
+**Creator:** AnishRoyalinc  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/gate_apocalyptic_rusty.fbx` - Rusty apocalyptic gate model for environmental details (2MB, FBX format)
+
+**Attribution:** "Gate apocalyptic rusty by AnishRoyalinc is licensed under Creative Commons Attribution"
+
+### Corn Maze-01 (GLB)
+**Source:** Sketchfab  
+**Creator:** Psychopete696  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/corn_maze_01.glb` - Corn maze model for environmental details (3MB, GLB format)
+
+**Attribution:** "CORN MAZE-01 (GLB) by Psychopete696 is licensed under Creative Commons Attribution"
+
+### Maize Corn Plant
+**Source:** Sketchfab  
+**Creator:** gilles.schaeck  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/maize_corn_plant.dae` - Maize corn plant model for environmental details (7MB, DAE format)
+
+**Attribution:** "Maize Corn Plant by gilles.schaeck is licensed under Creative Commons Attribution"
+
+### Crow
+**Source:** Sketchfab  
+**Creator:** Alexei Ostapenko  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/crow.fbx` - Crow model for environmental details (23MB, FBX format)
+
+**Attribution:** "Crow by Alexei Ostapenko is licensed under Creative Commons Attribution"
+
+### Music Box
+**Source:** Sketchfab  
+**Creator:** claravnelson  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/music_box.fbx` - Music box model for environmental details (380KB, FBX format)
+
+**Attribution:** "Music Box by claravnelson is licensed under Creative Commons Attribution"
+
+### Low Poly Mobile Phone
+**Source:** Sketchfab  
+**Creator:** kimmy.k  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/low_poly_mobile_phone.fbx` - Low poly mobile phone model for environmental details (292KB, FBX format)
+
+**Attribution:** "Low Poly Mobile Phone by kimmy.k is licensed under Creative Commons Attribution"
+
+### 49 Star Flag - Preview
+**Source:** Sketchfab  
+**Creator:** 3D History  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/49_star_flag_preview.obj` - 49 star flag model for environmental details (10MB, OBJ format)
+
+**Attribution:** "49 Star Flag - Preview by 3D History is licensed under Creative Commons Attribution"
+
+### Anubis Bible
+**Source:** Sketchfab  
+**Creator:** Errlatte  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/anubis_bible.fbx` - Anubis bible model for environmental details (684KB, FBX format)
+
+**Attribution:** "Anubis bible by Errlatte is licensed under Creative Commons Attribution"
+
 ---
 
 ## Textures
@@ -105,6 +237,18 @@ This document provides complete attribution for all assets used in Project Harve
 - `Concept Files/stage4effigy.png` - Effigy concept, stage 4
 
 **Attribution:** "Effigy concept files generated using OpenAI GPT-5"
+
+### Pumpkin, Flannel, Dirty Flannel, and Dirty Jean Diffuse Textures (GPT Generated)
+**Source:** Diffuse generated with GPT
+**Creator:** OpenAI GPT  
+**License:** Generated content (check OpenAI terms for commercial use)  
+**Assets Used:**
+- `assets/textures/Pumpkin/` - Pumpkin diffuse texture (1 PNG files)
+- Flannel diffuse texture (referenced in project)
+- Dirty Flannel diffuse texture
+- Dirty Fabric diffuse texture
+
+**Attribution:** "Pumpkin, Flannel, Dirty Flannel, and Dirty Jean diffuse textures generated using OpenAI GPT"
 
 ---
 
@@ -178,22 +322,43 @@ This document provides complete attribution for all assets used in Project Harve
 **Primary 3D Software:** Blender  
 **Version:** 4.5.2
 **License:** GNU GPL v3  
-**Website:** https://www.blender.org/
+
+**3D Software:** 3DS Max  
+**Version:** 2026
+**License:** Student License
 
 **Additional Tools:**
 - **AccuRig** - Character rigging and animation tool
 - **3DS Max** - 3D modeling and animation software
 - **MakeHuman** - 3D human character generation
 - **Materialize v1.78** - Material and texture generation tool
+- **IMGonline.com.ua Seamless Texture Tool** - Online texture processing for creating seamless textures
 
 **Toolchain Purpose:**
 - Blender: Primary 3D modeling, texturing, and scene assembly
-- AccuRig: Character rigging for entities (Watcher, Stalker, Effigies)
+- AccuRig: Character rigging for entities (Stalker, Effigies)
 - 3DS Max: Alternative modeling and advanced techniques
 - MakeHuman: Base human models for character development
 - Materialize: PBR material generation and texture processing
 
 **Attribution:** "3D models created using Blender, AccuRig, 3DS Max, MakeHuman, and Materialize v1.78"
+
+### Seemless Texture Processing Tools
+**Source:** IMGonline.com.ua  
+**Tool:** Make Seamless Texture Online  
+**Website:** https://www.imgonline.com.ua/eng/make-seamless-texture.php  
+**License:** Free online tool  
+**Purpose:** Creating seamless textures for tiling applications
+**Attribution:** "Seamless texture processing using IMGonline.com.ua (https://www.imgonline.com.ua/eng/make-seamless-texture.php)"
+
+## Texture generation
+**Tool:** Materialize v1.78  
+**Website:** http://www.boundingboxsoftware.com/materialize/  
+**Developer:** Bounding Box Software  
+**License:** GNU GPL v3  
+**Purpose:** Generate height, normal, etc maps for textures using diffuse image  
+**Attribution:** "Textures generated using Materialize v1.78 by Bounding Box Software (http://www.boundingboxsoftware.com/materialize/)"
+
 
 ---
 
@@ -222,6 +387,15 @@ Assets purchased under standard license terms from Animpic POLY.
 - Animpic POLY Lite Halloween Pack models
 
 **Important:** These assets are licensed for commercial use as per the standard license terms purchased in 2025.
+
+### Creative Commons Attribution (CC Attribution)
+Assets under CC Attribution require attribution to the creator and allow commercial use.
+
+**Applicable Assets:**
+- Low Poly Skeleton by Samy Belaloui
+- Key by yomans
+
+**Important:** Must credit the creator as specified in the attribution requirements.
 
 ### Generated Content
 AI-generated assets (textures, code assistance) should comply with the respective AI service terms of use.

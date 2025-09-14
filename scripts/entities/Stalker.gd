@@ -237,7 +237,6 @@ func _transition_to_patrolling():
 	current_state = StalkerState.PATROLLING
 	patrol_center = global_position
 	_play_state_audio("patrol")
-	print("STALKER: Lost target, returning to patrol")
 
 func _transition_to_hunting():
 	"""Transition to hunting state"""
@@ -248,8 +247,6 @@ func _transition_to_hunting():
 	var sanity_manager = get_node("/root/SanityManager")
 	if sanity_manager:
 		sanity_manager.apply_sanity_loss_event("stalker_proximity", 20)
-	
-	print("STALKER: Target acquired, beginning hunt")
 
 func _transition_to_closing_in():
 	"""Transition to closing in state"""
@@ -260,12 +257,9 @@ func _transition_to_closing_in():
 	var sanity_manager = get_node("/root/SanityManager")
 	if sanity_manager:
 		sanity_manager.apply_sanity_loss_event("stalker_proximity", 40)
-	
-	print("STALKER: Closing in for the harvest...")
 
 func _trigger_player_caught():
 	"""Handle player being caught by stalker"""
-	print("STALKER: Subject captured for harvest")
 	
 	# End game with consumed status
 	var game_director = get_node("/root/GameDirector")
@@ -304,7 +298,6 @@ func _apply_proximity_sanity_drain(_delta: float) -> void:
 
 func _play_state_audio(state_type: String):
 	"""Play audio appropriate for current state"""
-	# TODO: Load and play appropriate audio clips
 	match state_type:
 		"patrol":
 			pass  # Subtle movement sounds
@@ -355,12 +348,10 @@ func activate():
 		patrol_center = global_position
 		
 		# Update grid position
-		grid_position = Vector2i(
-			int(global_position.x / grid_size),
-			int(global_position.z / grid_size)
-		)
-	
-	print("STALKER: Activated - The harvest begins...")
+			grid_position = Vector2i(
+				int(global_position.x / grid_size),
+				int(global_position.z / grid_size)
+			)
 
 func is_stalker_active() -> bool:
 	return is_activated

@@ -23,7 +23,6 @@ var dr_amundsen_quotes = [
 var death_type = ""
 
 func _ready() -> void:
-	print("DeathScreen: Starting with death type: ", death_type)
 	
 	# Check if all nodes exist
 	if not death_reason_label:

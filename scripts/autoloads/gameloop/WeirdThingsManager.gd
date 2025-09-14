@@ -8,6 +8,7 @@ var _item_manager: Node
 
 var _active_weird_effects: Dictionary = {}
 var _effect_timers: Dictionary = {}
+var _collected_weird_things: Array[String] = []  # Track collected weird things
 
 const WEIRD_EFFECT_DURATION: float = 5.0
 
@@ -225,10 +226,22 @@ func _connect_to_events() -> void:
 	_message_bus.item_collected.connect(_on_item_collected)
 	_message_bus.game_started.connect(_on_game_started)
 
+func get_collected_count() -> int:
+	"""
+	Get the number of weird things collected this run
+	
+	@return: Number of weird things collected
+	"""
+	return _collected_weird_things.size()
+
 func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
 	"""Handle item collection to check for weird objects"""
 	var item_info: Dictionary = _item_manager.get_item_info(item_id)
 	if item_info.get("category", "") == "weird_objects":
+		# Track the collection
+		if not _collected_weird_things.has(item_id):
+			_collected_weird_things.append(item_id)
+		
 		trigger_weird_effect(item_id, tile_pos)
 		_message_bus.emit_event("weird_thing_collected", [item_id, tile_pos, item_info.get("effects", {})])
 
@@ -236,3 +249,4 @@ func _on_game_started() -> void:
 	"""Reset weird effects for new game"""
 	_active_weird_effects.clear()
 	_effect_timers.clear()
+	_collected_weird_things.clear()

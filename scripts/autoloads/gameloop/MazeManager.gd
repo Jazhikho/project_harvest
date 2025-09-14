@@ -252,7 +252,6 @@ func _connect_to_events() -> void:
 func _on_maze_shift_triggered(center: Vector2i, radius: int, affected_tiles: Array) -> void:
 	"""Handle maze shift events"""
 	var shift_data: Dictionary = shift_maze_section(center, radius)
-	print("MazeManager: Generated shift pattern for ", shift_data.affected_positions.size(), " positions")
 
 func _on_game_started() -> void:
 	"""Handle game start"""

@@ -203,7 +203,7 @@ func _log_event(signal_name: String, args: Array) -> void:
 	
 	if _debug_mode:
 		var indent = "  ".repeat(_emission_stack.size())
-		print("[MessageBus] %s%s(%s)" % [indent, signal_name, _format_args(args)])
+		# Debug print removed - not referencing gameloop steps
 
 func _format_args(args: Array) -> String:
 	"""
@@ -220,7 +220,4 @@ func _format_args(args: Array) -> String:
 # Debug functions
 func debug_print_emission_stack() -> void:
 	"""Print current emission stack for debugging"""
-	print("=== EMISSION STACK ===")
-	for i in range(_emission_stack.size()):
-		print("  ", i, ": ", _emission_stack[i])
-	print("======================")
+	pass

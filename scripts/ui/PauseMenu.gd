@@ -53,12 +53,8 @@ func _on_settings_pressed():
 
 func _on_main_menu_pressed():
 	# Show confirmation dialog
-	print("PauseMenu: Main menu button pressed")
 	if main_menu_dialog:
-		print("PauseMenu: Showing main menu dialog")
 		main_menu_dialog.popup_centered()
-	else:
-		print("PauseMenu: ERROR - main_menu_dialog is null!")
 
 func _on_quit_pressed():
 	# Show confirmation dialog
@@ -66,7 +62,6 @@ func _on_quit_pressed():
 		quit_dialog.popup_centered()
 
 func _on_quit_confirmed():
-	print("PauseMenu: Quit confirmed, terminating subject")
 	
 	# Record death at current position before quitting
 	var game_director = get_node_or_null("/root/GameDirector")
@@ -86,7 +81,6 @@ func _on_quit_confirmed():
 		get_tree().quit()
 
 func _on_main_menu_confirmed():
-	print("PauseMenu: Main menu confirmed, emitting signal")
 	# The GameController will handle the actual scene transition and death recording
 	emit_signal("main_menu_requested")
 

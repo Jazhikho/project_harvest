@@ -17,12 +17,10 @@ func _ready():
 
 func _demonstrate_settings_access():
 	"""Show how to access individual settings"""
-	print("=== SETTINGS ACCESS EXAMPLES ===")
 	
 	# Get the settings manager
 	var settings_manager = get_node("/root/SettingsManager")
 	if not settings_manager:
-		print("SettingsManager not found!")
 		return
 	
 	# Access individual settings
@@ -30,20 +28,16 @@ func _demonstrate_settings_access():
 	var player_speed = settings_manager.get_player_speed()
 	var sanity_max = settings_manager.get_sanity_max()
 	
-	print("Tile Size: ", tile_size)
-	print("Player Speed: ", player_speed)
-	print("Sanity Max: ", sanity_max)
+	pass
 	
 	# Access settings by name
 	var maze_size = settings_manager.get_setting("maze_size")
 	var watcher_spawn_rate = settings_manager.get_watcher_spawn_rate(50)  # For 50 sanity
 	
-	print("Maze Size: ", maze_size)
-	print("Watcher Spawn Rate at 50 sanity: ", watcher_spawn_rate)
+	pass
 
 func _demonstrate_settings_modification():
 	"""Show how to modify settings at runtime"""
-	print("\n=== SETTINGS MODIFICATION EXAMPLES ===")
 	
 	var settings_manager = get_node("/root/SettingsManager")
 	if not settings_manager:
@@ -52,19 +46,18 @@ func _demonstrate_settings_modification():
 	# Modify individual settings
 	var success = settings_manager.update_setting("player_movement_speed", 6.0)
 	if success:
-		print("Successfully updated player movement speed to 6.0")
+		pass
 	else:
-		print("Failed to update player movement speed")
+		pass
 	
 	# Modify multiple settings
 	settings_manager.update_setting("tile_size", 25.0)
 	settings_manager.update_setting("maze_shift_interval_normal", 45.0)
 	
-	print("Updated tile size and maze shift interval")
+	pass
 
 func _demonstrate_helper_functions():
 	"""Show how to use helper functions for common operations"""
-	print("\n=== HELPER FUNCTIONS EXAMPLES ===")
 	
 	var settings_manager = get_node("/root/SettingsManager")
 	if not settings_manager:
@@ -75,31 +68,28 @@ func _demonstrate_helper_functions():
 	var grid_pos = settings_manager.get_grid_position_from_world(world_pos)
 	var back_to_world = settings_manager.get_tile_world_position(grid_pos)
 	
-	print("World Position: ", world_pos)
-	print("Grid Position: ", grid_pos)
-	print("Back to World: ", back_to_world)
+	pass
 	
 	# Handle world wrapping
 	var wrapped_pos = settings_manager.get_wrapped_position(Vector2i(15, 12))
-	print("Wrapped Position (15, 12): ", wrapped_pos)
+	pass
 	
 	# Get sanity-based spawn rates
 	for sanity in [100, 75, 50, 25, 0]:
 		var spawn_rate = settings_manager.get_watcher_spawn_rate(sanity)
-		print("Sanity ", sanity, ": Watcher spawn rate = ", spawn_rate)
+		pass
 
 func _on_settings_changed(setting_name: String, new_value):
 	"""Handle settings change events"""
-	print("Setting '", setting_name, "' changed to: ", new_value)
 	
 	# You can react to specific setting changes here
 	match setting_name:
 		"player_movement_speed":
-			print("Player speed changed - updating movement system")
+			pass
 		"tile_size":
-			print("Tile size changed - may need to regenerate maze")
+			pass
 		"sanity_max":
-			print("Sanity max changed - updating UI")
+			pass
 
 # Example of connecting to settings change events
 func _connect_to_settings_events():

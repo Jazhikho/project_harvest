@@ -60,7 +60,6 @@ func add_item(item_id: String) -> bool:
 	if _message_bus:
 		_message_bus.emit_event("inventory_changed", [inventory.duplicate(), [item_id], []])
 	
-	print("PlayerInventory: Added '%s' (%d/%d)" % [item_id, inventory.size(), max_inventory_size])
 	return true
 
 func remove_item(item_id: String) -> bool:
@@ -83,7 +82,6 @@ func remove_item(item_id: String) -> bool:
 	if _message_bus:
 		_message_bus.emit_event("inventory_changed", [inventory.duplicate(), [], [item_id]])
 	
-	print("PlayerInventory: Removed '%s' (%d/%d)" % [item_id, inventory.size(), max_inventory_size])
 	return true
 
 func has_item(item_id: String) -> bool:
@@ -159,7 +157,7 @@ func clear_inventory() -> void:
 	if _message_bus:
 		_message_bus.emit_event("inventory_changed", [[], [], old_inventory])
 	
-	print("PlayerInventory: Cleared all items")
+	pass
 
 func load_from_backpack(backpack_inventory: Array) -> int:
 	"""
@@ -182,7 +180,6 @@ func load_from_backpack(backpack_inventory: Array) -> int:
 			3.0, 1
 		])
 	
-	print("PlayerInventory: Loaded %d/%d items from backpack" % [loaded_count, backpack_inventory.size()])
 	return loaded_count
 
 func get_items_by_category(category: String) -> Array[String]:

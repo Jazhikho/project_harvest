@@ -103,7 +103,7 @@ func play_sound_2d(sound_path: String, bus: String = "SFX") -> AudioStreamPlayer
 	player.stream = audio_stream
 	player.bus = bus
 	
-	# Add to scene tree temporarily
+	# Add to scene tree
 	get_tree().current_scene.add_child(player)
 	player.play()
 	
@@ -135,7 +135,7 @@ func play_sound_3d(sound_path: String, position: Vector3, bus: String = "SFX") -
 	player.bus = bus
 	player.global_position = position
 	
-	# Add to scene tree temporarily
+	# Add to scene tree
 	get_tree().current_scene.add_child(player)
 	player.play()
 	
@@ -156,7 +156,7 @@ func stop_all_sounds_on_bus(bus_name: String) -> void:
 	
 	# This is a simplified approach - in a full implementation,
 	# you'd track active players and stop them individually
-	AudioServer.set_bus_volume_db(bus_idx, -80.0)  # Mute temporarily
+	AudioServer.set_bus_volume_db(bus_idx, -80.0)  # Mute
 	await get_tree().process_frame
 	set_bus_volume(bus_name, get_bus_volume(bus_name))  # Restore volume
 

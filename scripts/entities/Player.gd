@@ -11,6 +11,8 @@ extends CharacterBody3D
 # Flashlight system
 var flashlight_battery: float
 var flashlight_enabled: bool = true
+var flashlight_battery_died: bool = false  # Track if battery died (for one-time sanity loss)
+var darkness_timer: float = 0.0  # Timer for darkness sanity drain
 
 # Component references
 @onready var camera: Camera3D = $Camera3D
@@ -64,7 +66,7 @@ func _connect_to_events() -> void:
 	_message_bus.game_ended.connect(_on_game_ended)
 
 func _notification(what: int) -> void:
-	"""Handle window focus notifications"""
+	"""Handle window focus notifications and quit requests"""
 	if what == NOTIFICATION_APPLICATION_FOCUS_IN:
 		# Recapture mouse when window regains focus
 		if mouse_captured:
@@ -73,22 +75,21 @@ func _notification(what: int) -> void:
 		# Release mouse when window loses focus to prevent it getting stuck
 		if mouse_captured:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	elif what == NOTIFICATION_WM_CLOSE_REQUEST:
+		# Handle force quit scenarios - record as death
+		_handle_force_quit()
 
 func _input(event: InputEvent) -> void:
 	# Handle mouse recapture on click when mouse is visible
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE and mouse_captured:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-			print("Player: Mouse recaptured via click")
 			return
 	
-	# Debug mode toggle with Tab
+	# Debug mode toggle
 	if event is InputEventKey and event.pressed and event.keycode == KEY_TAB:
 		debug_mode = !debug_mode
-		if debug_mode:
-			_show_message("DEBUG MODE ENABLED")
-		else:
-			_show_message("DEBUG MODE DISABLED")
+		# Debug messages removed - not referencing gameloop steps
 		return
 	
 	if not mouse_captured:
@@ -103,7 +104,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
 		_try_interact()
 	
-	# Debug sanity controls (only in debug mode)
+	# Debug sanity controls
 	if debug_mode and event is InputEventKey and event.pressed:
 		if event.keycode >= KEY_0 and event.keycode <= KEY_9:
 			var digit = event.keycode - KEY_0
@@ -113,7 +114,7 @@ func _input(event: InputEvent) -> void:
 				var current_sanity = state_manager.get_state("sanity")
 				var delta = new_sanity - current_sanity
 				state_manager.modify_sanity(delta)
-				_show_message("DEBUG: Sanity set to %d%%" % new_sanity)
+				# Debug message removed - not referencing gameloop steps
 	
 	if event.is_action_pressed("ui_cancel"):
 		mouse_captured = !mouse_captured
@@ -142,7 +143,7 @@ func _handle_movement(delta: float) -> void:
 	var input_dir: Vector3 = Vector3.ZERO
 	
 	if debug_mode:
-		# Debug flight mode
+		# Flight mode
 		if Input.is_action_pressed("move_forward"):
 			input_dir -= transform.basis.z
 		if Input.is_action_pressed("move_back"):
@@ -286,8 +287,29 @@ func _update_flashlight(delta: float) -> void:
 		flashlight_battery = max(0.0, flashlight_battery - flashlight_drain_rate * delta)
 		
 		if flashlight_battery <= 0.0:
+			# One-time sanity loss when battery dies
+			if not flashlight_battery_died:
+				flashlight_battery_died = true
+				var state_manager = get_node_or_null("/root/GameStateManager")
+				if state_manager:
+					state_manager.modify_sanity(-10)
+					_show_message("Flashlight battery died! The darkness feels oppressive...")
+				else:
+					_show_message("Flashlight battery died!")
+			
 			_toggle_flashlight()
-			_show_message("Flashlight battery died!")
+	
+	# Handle darkness sanity drain (1 sanity per 15 seconds when flashlight is off)
+	if not flashlight_enabled or flashlight_battery <= 0.0:
+		darkness_timer += delta
+		if darkness_timer >= 15.0:  # 15 seconds
+			darkness_timer = 0.0
+			var state_manager = get_node_or_null("/root/GameStateManager")
+			if state_manager:
+				state_manager.modify_sanity(-1)
+	else:
+		# Reset timer when flashlight is on
+		darkness_timer = 0.0
 	
 	_update_flashlight_state()
 
@@ -321,6 +343,18 @@ func _show_message(text: String) -> void:
 	"""
 	_message_bus.emit_event("notification_requested", [text, 3.0, 1])
 
+func _handle_force_quit() -> void:
+	"""
+	Handle force quit scenarios by recording death
+	"""
+	# Trigger death with force quit cause
+	die("Force Quit")
+	
+	# Also record death in SaveManager for persistent tracking
+	var save_manager = get_node_or_null("/root/SaveManager")
+	if save_manager and save_manager.has_method("record_death"):
+		save_manager.record_death()
+
 func take_damage(amount: int, source: String = "") -> void:
 	"""
 	Take damage and potentially die
@@ -339,7 +373,6 @@ func die(cause: String) -> void:
 	
 	@param cause: Cause of death
 	"""
-	print("Player: Death triggered - ", cause)
 	
 	# Prevent multiple death triggers
 	if health <= -100:  # Already dead
@@ -416,7 +449,7 @@ func get_health() -> int:
 	"""Get current health"""
 	return health
 
-func is_looking_at_position(target_position: Vector3, fov_degrees: float = 90.0) -> bool:
+func is_looking_at_position(target_position: Vector3, fov_degrees: float = 180.0) -> bool:
 	"""
 	Check if player is looking at a specific world position
 	

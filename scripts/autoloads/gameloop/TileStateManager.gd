@@ -74,9 +74,7 @@ func _find_player() -> void:
 	if players.size() > 0:
 		_player_node = players[0]
 		_last_player_position = _player_node.global_position
-		print("TileStateManager: Found player at ", _last_player_position)
 	else:
-		print("TileStateManager: Player not found yet, will retry...")
 		# Retry in a moment
 		await get_tree().create_timer(0.5).timeout
 		_find_player()
@@ -118,7 +116,6 @@ func _check_player_tile_position() -> void:
 		# Additional cooldown check
 		var current_time = Time.get_unix_time_from_system()
 		if current_time - _last_transition_time >= _transition_cooldown:
-			print("TileStateManager: Player moved from ", _current_player_tile, " to ", closest_tile_pos)
 			_execute_tile_transition(closest_tile_pos)
 
 func register_tile(tile_node: Node3D, position: Vector2i, initial_state: TileState = TileState.INACTIVE) -> void:
@@ -139,7 +136,6 @@ func register_tile(tile_node: Node3D, position: Vector2i, initial_state: TileSta
 	_active_tiles[position] = tile_data
 	_setup_tile_for_state(tile_node, position, initial_state)
 	
-	print("TileStateManager: Registered tile at ", position, " with state ", _get_state_name(initial_state))
 
 func set_tile_state(position: Vector2i, new_state: TileState) -> bool:
 	"""
@@ -164,7 +160,6 @@ func set_tile_state(position: Vector2i, new_state: TileState) -> bool:
 	
 	_setup_tile_for_state(tile_data.node, position, new_state)
 	
-	print("TileStateManager: Tile at ", position, " changed from ", _get_state_name(old_state), " to ", _get_state_name(new_state))
 	
 	# Emit state change event (but avoid recursive loops)
 	call_deferred("_emit_state_change_event", tile_data.node, position, _get_state_name(old_state), _get_state_name(new_state))
@@ -234,9 +229,6 @@ func _execute_tile_transition(new_tile_position: Vector2i) -> void:
 	"""
 	var old_tile_position = _current_player_tile
 	
-	print("TileStateManager: === TILE TRANSITION ===")
-	print("  From: ", old_tile_position)
-	print("  To: ", new_tile_position)
 	
 	_last_transition_time = Time.get_unix_time_from_system()
 	_previous_player_tile = _current_player_tile
@@ -245,6 +237,13 @@ func _execute_tile_transition(new_tile_position: Vector2i) -> void:
 	# Update state manager's tracking
 	if _state_manager:
 		_state_manager.set_state("current_tile_position", new_tile_position)
+		
+		# Increment tiles explored counter (only for new tiles, not revisits)
+		if old_tile_position != Vector2i(-1000, -1000):  # Not initial spawn
+			var current_tiles_explored = _state_manager.get_state("tiles_explored")
+			if current_tiles_explored == null:
+				current_tiles_explored = 0
+			_state_manager.set_state("tiles_explored", current_tiles_explored + 1)
 	
 	# Update tile states
 	_update_tile_states_for_transition(old_tile_position, new_tile_position)
@@ -255,15 +254,12 @@ func _execute_tile_transition(new_tile_position: Vector2i) -> void:
 	
 	# Emit transition events
 	if new_tile_node and _player_node:
-		print("  Emitting tile_entered event")
 		_message_bus.emit_event("tile_entered", [new_tile_node, new_tile_position, _player_node])
 	
 	_message_bus.emit_event("player_moved", [old_tile_position, new_tile_position])
 	
 	# Queue TileManager notification to prevent stack overflow
-	print("  Queueing tile notification for spawning")
 	_queue_tile_notification(new_tile_position)
-	print("========================")
 
 func _queue_tile_notification(position: Vector2i) -> void:
 	"""
@@ -280,7 +276,6 @@ func _process_tile_notification(tile_position: Vector2i) -> void:
 	
 	@param tile_position: Position to notify TileManager about
 	"""
-	print("TileStateManager: Processing tile notification for ", tile_position)
 	if _tile_manager and _tile_manager.has_method("on_player_entered_tile"):
 		_tile_manager.on_player_entered_tile(tile_position)
 
@@ -291,7 +286,6 @@ func _update_tile_states_for_transition(old_pos: Vector2i, new_pos: Vector2i) ->
 	@param old_pos: Previous tile position
 	@param new_pos: New tile position
 	"""
-	print("TileStateManager: Updating tile states for transition")
 	
 	# Set new tile as active
 	set_tile_state(new_pos, TileState.ACTIVE)
@@ -326,9 +320,13 @@ func cleanup_tile(position: Vector2i) -> void:
 	@param position: Position of tile to cleanup
 	"""
 	if _active_tiles.has(position):
-		_remove_transition_detector(position)
+		var tile_data = _active_tiles[position]
+		var tile_node = tile_data.get("node", null)
+		
+		# Safely remove transition detector
+		if is_instance_valid(tile_node):
+			_remove_transition_detector(position)
 		_active_tiles.erase(position)
-		print("TileStateManager: Cleaned up tile at ", position)
 
 func get_tile_state(position: Vector2i) -> TileState:
 	"""
@@ -396,7 +394,6 @@ func _connect_to_events() -> void:
 
 func _on_game_started() -> void:
 	"""Handle game start"""
-	print("TileStateManager: Game started")
 	_find_player()
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:
@@ -408,26 +405,15 @@ func _on_game_ended(cause: String, data: Dictionary) -> void:
 
 func _on_player_spawned(player: Node3D) -> void:
 	"""Handle player spawn"""
-	print("TileStateManager: Player spawned")
 	_player_node = player
 	_last_player_position = player.global_position
 
 # Debug functions
 func debug_print_tile_states() -> void:
 	"""Debug function to print all tile states"""
-	print("=== TILE STATE DEBUG ===")
-	print("Current player tile: ", _current_player_tile)
-	print("Previous player tile: ", _previous_player_tile)
-	print("Player world position: ", _last_player_position if _player_node else "No player")
-	for pos in _active_tiles.keys():
-		var tile_data = _active_tiles[pos]
-		print("  ", pos, ": ", _get_state_name(tile_data.state), " (world: ", tile_data.node.global_position if is_instance_valid(tile_data.node) else "invalid", ")")
-	print("========================")
+	pass
 
 func force_check_transition() -> void:
 	"""Force a transition check (for debugging)"""
-	print("TileStateManager: Forcing transition check")
 	if _player_node:
 		_check_player_tile_position()
-	else:
-		print("  No player node to check")

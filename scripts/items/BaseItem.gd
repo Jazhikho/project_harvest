@@ -153,8 +153,6 @@ func _trigger_pickup(collector: Node3D) -> void:
 	
 	# Visual pickup effect
 	_play_pickup_effect()
-	
-	print("BaseItem: Collected %s (%s)" % [item_name, item_id])
 
 func _play_pickup_sound() -> void:
 	"""Play pickup sound effect"""
@@ -244,14 +242,3 @@ func get_pickup_prompt_text() -> String:
 
 # Debug methods
 
-func debug_print_item_info() -> void:
-	"""Print debug information about this item"""
-	print("=== ITEM DEBUG: %s ===" % name)
-	print("  ID: %s" % item_id)
-	print("  Name: %s" % get_item_name())
-	print("  Description: %s" % item_description)
-	print("  Position: %s" % global_position)
-	print("  Collected: %s" % _is_collected)
-	print("  Auto pickup: %s" % auto_pickup)
-	print("  Pickup sound: %s" % pickup_sound)
-	print("========================")

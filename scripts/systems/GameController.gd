@@ -9,8 +9,6 @@ var game_paused = false
 var inventory_open = false
 
 func _ready():
-	# Start with fade in
-	fade_in()
 	
 	# Connect signals
 	if pause_menu:
@@ -24,11 +22,22 @@ func _ready():
 	# IMPORTANT: Trigger initial tile generation after scene is fully loaded
 	call_deferred("_initialize_game")
 
+	# Start with fade in
+	fade_in()
+	
+
+func _notification(what: int) -> void:
+	"""Handle window close requests as death events"""
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		# Record death before quitting
+		_terminate_subject("Force Quit")
+		# Allow the quit to proceed after recording death
+		get_tree().quit()
+
 func _initialize_game():
 	
 	var tile_manager = get_node_or_null("/root/TileManager")
 	if tile_manager and tile_manager.has_method("initialize_game_tiles"):
-		print("GameController: Telling TileManager to initialize game tiles")
 		tile_manager.initialize_game_tiles()
 	# Make sure MessageBus knows game started
 	var message_bus = get_node_or_null("/root/MessageBus")
@@ -66,7 +75,7 @@ func toggle_pause():
 	game_paused = !game_paused
 	pause_menu.visible = game_paused
 	get_tree().paused = game_paused
-	get_node("/root/TileManager").debug_check_start_tile()
+	pass
 	
 	if game_paused:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -91,7 +100,6 @@ func _on_inventory_closed():
 	get_tree().paused = false
 
 func _on_main_menu_requested():
-	print("GameController: Main menu requested, terminating subject")
 	# Record death before leaving
 	_terminate_subject("Abandoned")
 	
@@ -101,7 +109,6 @@ func _on_main_menu_requested():
 	SceneManager.load_main_menu()
 
 func _on_quit_requested():
-	print("GameController: Quit requested, terminating subject")
 	# Record death and show death screen
 	_terminate_subject("Terminated")
 	
@@ -136,13 +143,11 @@ func fade_out():
 	var tween = create_tween()
 	tween.tween_property(fade_rect, "color:a", 1.0, 0.5)
 
-func _on_player_died(cause: String, position: Vector2i, death_data: Dictionary):
+func _on_player_died(cause: String, death_position: Vector2i, death_data: Dictionary):
 	"""Handle player death event from MessageBus"""
-	print("GameController: Player died - %s at %s" % [cause, position])
 	trigger_death(cause)
 
 func trigger_death(death_type: String):
-	print("GameController: Triggering death screen for: ", death_type)
 	
 	# Make sure game isn't paused
 	get_tree().paused = false

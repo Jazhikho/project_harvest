@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://b0nvjxcqa47ui"]
+
+[ext_resource type="PackedScene" uid="uid://bvk2lc8jdxr01" path="res://assets/models/8x1CornTile.glb" id="1_hi4sc"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hi4sc"]
+size = Vector3(8, 2.75, 1)
+
+[node name="8x1CornTile" instance=ExtResource("1_hi4sc")]
+
+[node name="2x1" parent="." index="0"]
+transform = Transform3D(8, 0, 0, 0, 0.8, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.375, 0)
+shape = SubResource("BoxShape3D_hi4sc")

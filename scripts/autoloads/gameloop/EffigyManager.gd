@@ -13,12 +13,6 @@ var _next_effigy_id: int = 0
 
 # Effigy scenes and stages
 var _effigy_scene_path: String = "res://scenes/entities/effigy.tscn"
-var _effigy_stages: Array[String] = [
-	"res://assets/models/effigy_stage1.tscn",
-	"res://assets/models/effigy_stage2.tscn", 
-	"res://assets/models/effigy_stage3.tscn",
-	"res://assets/models/effigy_stage4.tscn"
-]
 
 func _ready() -> void:
 	name = "EffigyManager"
@@ -55,7 +49,6 @@ func spawn_effigy_at_death_location(death_data: Dictionary) -> Node3D:
 	
 	# Don't spawn multiple effigies at same location
 	if _active_effigies.has(position):
-		print("EffigyManager: Effigy already exists at ", position)
 		return _active_effigies[position]
 	
 	# Create effigy
@@ -87,7 +80,6 @@ func spawn_effigy_at_death_location(death_data: Dictionary) -> Node3D:
 	# Emit spawn event
 	_message_bus.emit_event("entity_spawned", ["effigy", effigy, world_pos])
 	
-	print("EffigyManager: Spawned effigy at %s (cause: %s)" % [position, cause])
 	return effigy
 
 func _create_effigy_node(position: Vector2i, cause: String, inventory: Array) -> Node3D:
@@ -134,7 +126,7 @@ func _create_placeholder_effigy() -> Node3D:
 	# Add mesh - scarecrow-like appearance
 	var mesh_instance = MeshInstance3D.new()
 	var mesh = CapsuleMesh.new()
-	mesh.height = 2.0
+	mesh.height = 1.8
 	mesh.radius = 0.3
 	mesh_instance.mesh = mesh
 	
@@ -149,7 +141,7 @@ func _create_placeholder_effigy() -> Node3D:
 	# Add collision for interaction
 	var collision = CollisionShape3D.new()
 	var shape = CapsuleShape3D.new()
-	shape.height = 2.0
+	shape.height = 1.8
 	shape.radius = 0.3
 	collision.shape = shape
 	effigy.add_child(collision)
@@ -157,7 +149,6 @@ func _create_placeholder_effigy() -> Node3D:
 	# Position slightly above ground
 	mesh_instance.position.y = 1.0
 	
-	print("EffigyManager: Created placeholder effigy")
 	return effigy
 
 func update_effigy_stages_for_sanity(sanity: int) -> void:
@@ -195,7 +186,6 @@ func _update_effigy_stage(effigy: Node3D, position: Vector2i, sanity: int) -> vo
 			# Fallback: modify appearance directly
 			_apply_stage_appearance(effigy, stage)
 		
-		print("EffigyManager: Updated effigy at %s to stage %d (sanity: %d)" % [position, stage, sanity])
 
 func _calculate_stage_for_sanity(sanity: int) -> int:
 	"""
@@ -205,9 +195,9 @@ func _calculate_stage_for_sanity(sanity: int) -> int:
 	@param sanity: Current sanity level
 	@return: Stage number (1-4)
 	"""
-	if sanity >= 70:
+	if sanity >= 90:
 		return 1  # Normal scarecrow
-	elif sanity >= 50:
+	elif sanity >= 70:
 		return 2  # Slightly unsettling
 	elif sanity >= 40:
 		return 3  # Clearly wrong
@@ -260,7 +250,6 @@ func cleanup_old_effigies(max_age_seconds: float = 300.0) -> void:
 	
 	for position in positions_to_remove:
 		remove_effigy(position)
-		print("EffigyManager: Cleaned up old effigy at ", position)
 
 func remove_effigy(position: Vector2i) -> bool:
 	"""
@@ -282,7 +271,6 @@ func remove_effigy(position: Vector2i) -> bool:
 	if is_instance_valid(effigy):
 		effigy.queue_free()
 	
-	print("EffigyManager: Removed effigy at ", position)
 	return true
 
 func get_effigy_at_position(position: Vector2i) -> Node3D:
@@ -349,7 +337,6 @@ func _on_player_died(cause: String, position: Vector2i, data: Dictionary) -> voi
 	"""Handle player death - record for future effigy spawning"""
 	# The actual effigy will be spawned in the next run when SpawnManager
 	# processes the death location and spawns a backpack
-	print("EffigyManager: Player death recorded at %s (cause: %s)" % [position, cause])
 
 func _on_entity_spawned(entity_type: String, entity_node: Node3D, position: Vector3) -> void:
 	"""Handle entity spawning - check if it's a backpack spawn that needs an effigy"""
@@ -365,34 +352,22 @@ func _on_entity_spawned(entity_type: String, entity_node: Node3D, position: Vect
 				effigy.global_position = effigy_pos
 
 func _on_game_started() -> void:
-	"""Handle game start - cleanup old effigies, prepare for new run"""
+	"""Game start cleanup in case something was missed last run"""
 	cleanup_old_effigies(0.0)  # Remove all existing effigies
 	_next_effigy_id = 0
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:
 	"""Handle game end - cleanup"""
-	# Effigies persist between runs, so don't clean up here
+	cleanup_old_effigies(0.0)
 	pass
 
 # Debug functions
 
 func debug_print_effigies() -> void:
 	"""Print debug info about all active effigies"""
-	print("=== EFFIGY MANAGER DEBUG ===")
-	print("Active effigies: %d" % _active_effigies.size())
-	for position in _active_effigies.keys():
-		var effigy = _active_effigies[position]
-		var data = _effigy_data.get(position, {})
-		if is_instance_valid(effigy):
-			var stage = effigy.get_meta("current_stage", 1)
-			var cause = data.get("cause", "unknown")
-			print("  %s: Stage %d, Cause: %s, Pos: %s" % [position, stage, cause, effigy.global_position])
-		else:
-			print("  %s: INVALID" % position)
-	print("============================")
+	pass
 
 func force_update_all_stages() -> void:
 	"""Force update all effigy stages (for debugging)"""
 	var current_sanity = _state_manager.get_state("sanity")
 	update_effigy_stages_for_sanity(current_sanity)
-	print("EffigyManager: Force updated all effigy stages for sanity %d" % current_sanity)

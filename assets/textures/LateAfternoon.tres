@@ -1,0 +1,6 @@
+[gd_resource type="PanoramaSkyMaterial" load_steps=2 format=3 uid="uid://biufw7aq5egvb"]
+
+[ext_resource type="Texture2D" uid="uid://cobe1yg0mkran" path="res://assets/textures/mealie_road_4k.exr" id="1_wyqtw"]
+
+[resource]
+panorama = ExtResource("1_wyqtw")

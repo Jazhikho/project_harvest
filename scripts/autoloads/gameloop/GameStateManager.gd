@@ -12,6 +12,7 @@ var _state := {
 	"player_position": Vector2i.ZERO,
 	"current_tile_id": "",
 	"current_tile_position": Vector2i.ZERO,
+	"tiles_explored": 0,
 	"game_active": false,
 	"run_data": {},
 	"death_locations": [],
@@ -108,7 +109,6 @@ func modify_sanity(delta: int) -> int:
 		
 		# Trigger death if sanity reaches 0
 		if new_sanity <= 0:
-			print("GameStateManager: Sanity reached 0, triggering fragmentation")
 			_message_bus.emit_event("player_died", ["Fragmented", _state.current_tile_position, {"sanity_death": true}])
 	
 	return new_sanity
@@ -134,87 +134,9 @@ func has_flag(flag: String) -> bool:
 	"""
 	return _state.flags.get(flag, false)
 
-func add_to_inventory(item_id: String) -> bool:
-	"""
-	Add item to inventory if not already present
-	DEPRECATED: Use PlayerInventory autoload instead
-	
-	@param item_id: Item identifier to add
-	@return: True if item was added (wasn't already present)
-	"""
-	push_warning("GameStateManager.add_to_inventory() is deprecated. Use PlayerInventory.add_item() instead.")
-	
-	var player_inventory = get_node_or_null("/root/PlayerInventory")
-	if player_inventory and player_inventory.has_method("add_item"):
-		return player_inventory.add_item(item_id)
-	
-	# Fallback to old behavior if PlayerInventory not available
-	if item_id in _state.inventory:
-		return false
-	
-	var old_inventory: Array = _state.inventory.duplicate()
-	_state.inventory.append(item_id)
-	_state.collected_items.append(item_id)
-	
-	_message_bus.emit_event("inventory_changed", [_state.inventory, [item_id], []])
-	_log_state_change("inventory", old_inventory, _state.inventory)
-	
-	return true
+## DEPRECATED METHOD REMOVED - Use PlayerInventory.add_item() instead
 
-func remove_from_inventory(item_id: String) -> bool:
-	"""
-	Remove item from inventory
-	DEPRECATED: Use PlayerInventory autoload instead
-	
-	@param item_id: Item identifier to remove
-	@return: True if item was removed (was present)
-	"""
-	push_warning("GameStateManager.remove_from_inventory() is deprecated. Use PlayerInventory.remove_item() instead.")
-	
-	var player_inventory = get_node_or_null("/root/PlayerInventory")
-	if player_inventory and player_inventory.has_method("remove_item"):
-		return player_inventory.remove_item(item_id)
-	
-	# Fallback to old behavior
-	if item_id not in _state.inventory:
-		return false
-	
-	var old_inventory: Array = _state.inventory.duplicate()
-	_state.inventory.erase(item_id)
-	
-	_message_bus.emit_event("inventory_changed", [_state.inventory, [], [item_id]])
-	_log_state_change("inventory", old_inventory, _state.inventory)
-	
-	return true
-
-func has_item(item_id: String) -> bool:
-	"""
-	Check if item is in inventory
-	DEPRECATED: Use PlayerInventory autoload instead
-	
-	@param item_id: Item identifier to check
-	@return: True if item is in inventory
-	"""
-	var player_inventory = get_node_or_null("/root/PlayerInventory")
-	if player_inventory and player_inventory.has_method("has_item"):
-		return player_inventory.has_item(item_id)
-	
-	# Fallback to state data
-	return item_id in _state.inventory
-
-func get_inventory() -> Array:
-	"""
-	Get current inventory
-	DEPRECATED: Use PlayerInventory autoload instead
-	
-	@return: Array of item identifiers in inventory
-	"""
-	var player_inventory = get_node_or_null("/root/PlayerInventory")
-	if player_inventory and player_inventory.has_method("get_inventory"):
-		return player_inventory.get_inventory()
-	
-	# Fallback to state data
-	return _state.inventory.duplicate()
+## DEPRECATED INVENTORY METHODS REMOVED - Use PlayerInventory autoload instead
 
 func record_death_location(position: Vector2i, cause: String) -> void:
 	"""
@@ -233,13 +155,11 @@ func record_death_location(position: Vector2i, cause: String) -> void:
 	# Special handling for start tile (0,0) - distribute inventory to adjacent tiles
 	var final_position = position
 	if position == Vector2i.ZERO and not current_inventory.is_empty():
-		print("GameStateManager: Death on start tile - distributing inventory to adjacent tiles")
 		var adjacent_positions = [
 			Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
 		]
 		# Pick a random adjacent tile for the backpack
 		final_position = adjacent_positions[randi() % adjacent_positions.size()]
-		print("  Inventory will spawn at adjacent tile: %s" % final_position)
 	
 	var death_data := {
 		"position": final_position,
@@ -289,6 +209,7 @@ func reset_for_new_run() -> void:
 	_state.player_position = Vector2i.ZERO
 	_state.current_tile_id = ""
 	_state.current_tile_position = Vector2i.ZERO
+	_state.tiles_explored = 0
 	_state.puzzle_progress.clear()
 	_initialize_run_data()
 	
@@ -401,7 +322,6 @@ func _log_state_change(key: String, old_value: Variant, new_value: Variant) -> v
 	@param old_value: Previous value
 	@param new_value: New value
 	"""
-	print("[StateManager] %s: %s -> %s" % [key, str(old_value), str(new_value)])
 
 # === EVENT HANDLERS ===
 
@@ -420,7 +340,7 @@ func _on_player_died(cause: String, position: Vector2i, data: Dictionary) -> voi
 	record_death_location(position, cause)
 
 func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
-	add_to_inventory(item_id)
+	# Just track the collection count - PlayerInventory handles the actual inventory
 	_state.run_data.items_collected += 1
 
 func _on_tile_entered(tile_node: Node3D, position: Vector2i, player: Node3D) -> void:

@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://dxq10h1o2g1nw"]
+
+[ext_resource type="PackedScene" uid="uid://b0vbr2seksq48" path="res://assets/models/Ground.glb" id="1_g6p4a"]
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_babgt"]
+
+[node name="Ground" instance=ExtResource("1_g6p4a")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+shape = SubResource("WorldBoundaryShape3D_babgt")

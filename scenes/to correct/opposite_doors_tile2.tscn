@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=3 uid="uid://c2a3b4c5d6e7f"]
 
-[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_e6iyi"]
+[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_g4jjb"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ota3w"]
 albedo_color = Color(0.336608, 0.336608, 0.336608, 1)
@@ -13,39 +13,41 @@ size = Vector2(20, 20)
 size = Vector3(20, 0.1, 20)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall2"]
-size = Vector3(20, 2, 1)
+size = Vector3(5, 2, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall2"]
-size = Vector3(20, 2, 1)
+size = Vector3(5, 2, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_interior1"]
-size = Vector3(2.5, 2, 3.5)
+size = Vector3(2, 2, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_interior1"]
-size = Vector3(2.5, 2, 3.5)
+size = Vector3(2, 2, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_interior2"]
-size = Vector3(1.5, 2, 2.5)
+size = Vector3(1, 2, 3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_interior2"]
-size = Vector3(1.5, 2, 2.5)
+size = Vector3(1, 2, 3)
 
 [sub_resource type="BoxMesh" id="BoxMesh_interior3"]
-size = Vector3(4, 2, 1.5)
+size = Vector3(4, 2, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_interior3"]
-size = Vector3(4, 2, 1.5)
+size = Vector3(4, 2, 1)
 
 [node name="OppositeDoorsEW1" type="Node3D"]
-script = ExtResource("1_e6iyi")
+script = ExtResource("1_g4jjb")
 
 [node name="Maze" type="Node3D" parent="."]
 
 [node name="Doors" type="Node3D" parent="Maze"]
 
-[node name="ItemSpawn" type="Node3D" parent="Maze"]
+[node name="SDoor" type="Marker3D" parent="Maze/Doors"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -9.5, 1, 0)
 
-[node name="EntitySpawn" type="Node3D" parent="Maze"]
+[node name="NDoor" type="Marker3D" parent="Maze/Doors"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.5, 1, 0)
 
 [node name="Floor" type="MeshInstance3D" parent="Maze"]
 mesh = SubResource("PlaneMesh_e6iyi")
@@ -60,7 +62,7 @@ shape = SubResource("BoxShape3D_e6iyi")
 [node name="AllWalls" type="Node3D" parent="Maze/Maze"]
 
 [node name="NorthWall" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 1, 5.5)
 mesh = SubResource("BoxMesh_wall2")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/NorthWall"]
@@ -68,8 +70,17 @@ mesh = SubResource("BoxMesh_wall2")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/NorthWall/StaticBody3D"]
 shape = SubResource("BoxShape3D_wall2")
 
+[node name="NorthWall2" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1, 5.5)
+mesh = SubResource("BoxMesh_wall2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/NorthWall2"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/NorthWall2/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall2")
+
 [node name="SouthWall" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -9.5)
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -7.5, 1, -3.5)
 mesh = SubResource("BoxMesh_wall2")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SouthWall"]
@@ -77,8 +88,53 @@ mesh = SubResource("BoxMesh_wall2")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/SouthWall/StaticBody3D"]
 shape = SubResource("BoxShape3D_wall2")
 
+[node name="SouthWall2" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 7.5, 1, -3.5)
+mesh = SubResource("BoxMesh_wall2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SouthWall2"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/SouthWall2/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall2")
+
+[node name="SouthWall6" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -1.5, 1, -6.25)
+mesh = SubResource("BoxMesh_wall2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SouthWall6"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/SouthWall6/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall2")
+
+[node name="SouthWall3" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 6.5, 1, 4.5)
+mesh = SubResource("BoxMesh_wall2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SouthWall3"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/SouthWall3/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall2")
+
+[node name="SouthWall4" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -6.5, 1, 3.5)
+mesh = SubResource("BoxMesh_wall2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SouthWall4"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/SouthWall4/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall2")
+
+[node name="SouthWall5" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -4.5, 1, -4.5)
+mesh = SubResource("BoxMesh_wall2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/SouthWall5"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/SouthWall5/StaticBody3D"]
+shape = SubResource("BoxShape3D_wall2")
+
 [node name="Interior1" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.75, 1, -3.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1, -1.5)
 mesh = SubResource("BoxMesh_interior1")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior1"]
@@ -86,8 +142,53 @@ mesh = SubResource("BoxMesh_interior1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior1/StaticBody3D"]
 shape = SubResource("BoxShape3D_interior1")
 
+[node name="Interior10" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 3.5, 1, -7)
+mesh = SubResource("BoxMesh_interior1")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior10"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior10/StaticBody3D"]
+shape = SubResource("BoxShape3D_interior1")
+
+[node name="Interior5" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, 5.5)
+mesh = SubResource("BoxMesh_interior1")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior5"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior5/StaticBody3D"]
+shape = SubResource("BoxShape3D_interior1")
+
+[node name="Interior4" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1, -1.5)
+mesh = SubResource("BoxMesh_interior1")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior4"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior4/StaticBody3D"]
+shape = SubResource("BoxShape3D_interior1")
+
+[node name="Interior6" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1, -5.5)
+mesh = SubResource("BoxMesh_interior1")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior6"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior6/StaticBody3D"]
+shape = SubResource("BoxShape3D_interior1")
+
+[node name="Interior7" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1, -4.25)
+mesh = SubResource("BoxMesh_interior1")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior7"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior7/StaticBody3D"]
+shape = SubResource("BoxShape3D_interior1")
+
 [node name="Interior2" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.25, 1, 2.75)
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -8.5, 1, 1.5)
 mesh = SubResource("BoxMesh_interior2")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior2"]
@@ -96,7 +197,7 @@ mesh = SubResource("BoxMesh_interior2")
 shape = SubResource("BoxShape3D_interior2")
 
 [node name="Interior3" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 5.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, 1.5)
 mesh = SubResource("BoxMesh_interior3")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior3"]
@@ -104,8 +205,57 @@ mesh = SubResource("BoxMesh_interior3")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior3/StaticBody3D"]
 shape = SubResource("BoxShape3D_interior3")
 
-[node name="WDoor" type="Marker3D" parent="Maze/Doors"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, -9.5)
+[node name="Interior9" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, -7.5)
+mesh = SubResource("BoxMesh_interior3")
 
-[node name="EDoor" type="Marker3D" parent="Maze/Doors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior9"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior9/StaticBody3D"]
+shape = SubResource("BoxShape3D_interior3")
+
+[node name="Interior8" type="MeshInstance3D" parent="Maze/Maze/AllWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, -6.5)
+mesh = SubResource("BoxMesh_interior3")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/AllWalls/Interior8"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/AllWalls/Interior8/StaticBody3D"]
+shape = SubResource("BoxShape3D_interior3")
+
+[node name="ItemSpawn" type="Node3D" parent="Maze"]
+
+[node name="ItemPoint" type="Marker3D" parent="Maze/ItemSpawn"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.25, 3)
+
+[node name="ItemPoint2" type="Marker3D" parent="Maze/ItemSpawn"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0.25, -6)
+
+[node name="ItemPoint3" type="Marker3D" parent="Maze/ItemSpawn"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -3, 0.25, -3)
+
+[node name="ItemPoint4" type="Marker3D" parent="Maze/ItemSpawn"]
+transform = Transform3D(-0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, -0.5, 6, 0.25, -5.5)
+
+[node name="ItemPoint5" type="Marker3D" parent="Maze/ItemSpawn"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.25, -4.25)
+
+[node name="ItemPoint6" type="Marker3D" parent="Maze/ItemSpawn"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.25, -0.5)
+
+[node name="EntitySpawn" type="Node3D" parent="Maze"]
+
+[node name="EntityPoint" type="Marker3D" parent="Maze/EntitySpawn"]
+transform = Transform3D(-0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, -0.866025, 4.75, 0.25, 4.25)
+
+[node name="EntityPoint2" type="Marker3D" parent="Maze/EntitySpawn"]
+transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 3, 0.25, -5)
+
+[node name="EntityPoint3" type="Marker3D" parent="Maze/EntitySpawn"]
+transform = Transform3D(-1.49012e-08, 0, 1, 0, 1, 0, -1, 0, -1.49012e-08, -3.5, 0.25, 4.25)
+
+[node name="EntityPoint5" type="Marker3D" parent="Maze/EntitySpawn"]
+transform = Transform3D(-1.49012e-08, 0, 1, 0, 1, 0, -1, 0, -1.49012e-08, -0.25, 0.25, -2.75)
+
+[node name="EntityPoint4" type="Marker3D" parent="Maze/EntitySpawn"]
+transform = Transform3D(-7.25216e-08, 0, -1, 0, 1, 0, 1, 0, -7.25216e-08, -5, 0.25, 1.5)
