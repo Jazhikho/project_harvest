@@ -348,10 +348,10 @@ func activate():
 		patrol_center = global_position
 		
 		# Update grid position
-			grid_position = Vector2i(
-				int(global_position.x / grid_size),
-				int(global_position.z / grid_size)
-			)
+		grid_position = Vector2i(
+			int(global_position.x / grid_size),
+			int(global_position.z / grid_size)
+		)
 
 func is_stalker_active() -> bool:
 	return is_activated
