@@ -63,6 +63,10 @@ signal notification_requested(message: String, duration: float, priority: int)
 signal screen_effect_requested(effect_type: String, duration: float, intensity: float)
 signal dialogue_started(dialogue_id: String, speaker: String)
 signal dialogue_ended(dialogue_id: String)
+signal show_interaction_prompt(message: String, target: Node3D)
+signal hide_interaction_prompt(target: Node3D)
+signal narration_requested(text: String, duration: float)
+signal note_unlocked(note_id: String)  
 
 # === SETTINGS EVENTS ===
 signal setting_changed(category: String, key: String, old_value: Variant, new_value: Variant)

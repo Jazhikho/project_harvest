@@ -1,37 +1,5 @@
-[gd_scene load_steps=5 format=3 uid="uid://g1mgjuahlsdr"]
+[gd_scene load_steps=2 format=3 uid="uid://g1mgjuahlsdr"]
 
-[ext_resource type="Script" uid="uid://c85axd4pqt5of" path="res://scripts/entities/Stalker.gd" id="1_stalker_script"]
-[ext_resource type="PackedScene" uid="uid://siycmahep8ln" path="res://assets/models/stalker.glb" id="2_stalker_model"]
+[ext_resource type="PackedScene" uid="uid://siycmahep8ln" path="res://assets/models/stalker.glb" id="1_g01db"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
-radius = 0.6
-height = 2.2
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_2"]
-radius = 7.5
-height = 15.0
-
-[node name="Stalker" type="CharacterBody3D"]
-collision_layer = 2
-script = ExtResource("1_stalker_script")
-
-[node name="stalker2" parent="." instance=ExtResource("2_stalker_model")]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
-shape = SubResource("CapsuleShape3D_1")
-
-[node name="DetectionArea" type="Area3D" parent="."]
-collision_layer = 0
-
-[node name="DetectionShape" type="CollisionShape3D" parent="DetectionArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
-shape = SubResource("CapsuleShape3D_2")
-
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
-attenuation_model = 2
-max_distance = 30.0
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
-visible = false
+[node name="stalker2" instance=ExtResource("1_g01db")]

@@ -14,6 +14,9 @@ var _message_bus: Node
 var _item_manager: Node
 var _state_manager: Node
 
+# UI references
+var inventory_ui: Control = null
+
 func _ready() -> void:
 	name = "PlayerInventory"
 	add_to_group("core_systems")
@@ -44,6 +47,8 @@ func add_item(item_id: String) -> bool:
 	
 	if item_id in inventory:
 		# Item already exists, don't add duplicate
+		if _message_bus:
+			_message_bus.emit_event("notification_requested", ["You already have this item", 2.0, 1])
 		return false
 	
 	inventory.append(item_id)
@@ -101,16 +106,32 @@ func get_puzzle_pieces() -> Array[String]:
 	"""
 	var pieces: Array[String] = []
 	
-	if _item_manager and _item_manager.has_method("get_category_items"):
-		var puzzle_items = _item_manager.get_category_items("puzzle_pieces")
+	if _item_manager and _item_manager.has_method("is_puzzle_piece"):
 		for item in inventory:
-			if item in puzzle_items:
+			if _item_manager.is_puzzle_piece(item):
 				pieces.append(item)
 	else:
 		# Fallback to string matching
 		for item in inventory:
-			if "puzzle" in item.to_lower() or "piece" in item.to_lower():
+			if "puzzle" in item.to_lower() and "piece" in item.to_lower():
 				pieces.append(item)
+	
+	return pieces
+
+func get_puzzle_pieces_for_puzzle(puzzle_id: String) -> Array[String]:
+	"""
+	Get puzzle pieces in inventory for a specific puzzle
+	
+	@param puzzle_id: Puzzle identifier
+	@return: Array of puzzle piece IDs for this puzzle
+	"""
+	var pieces: Array[String] = []
+	
+	if _item_manager and _item_manager.has_method("get_puzzle_pieces_for_puzzle"):
+		var all_pieces = _item_manager.get_puzzle_pieces_for_puzzle(puzzle_id)
+		for piece in all_pieces:
+			if has_item(piece):
+				pieces.append(piece)
 	
 	return pieces
 
@@ -156,8 +177,6 @@ func clear_inventory() -> void:
 	
 	if _message_bus:
 		_message_bus.emit_event("inventory_changed", [[], [], old_inventory])
-	
-	pass
 
 func load_from_backpack(backpack_inventory: Array) -> int:
 	"""
@@ -201,12 +220,72 @@ func get_items_by_category(category: String) -> Array[String]:
 	
 	return categorized_items
 
-# Event handlers
+# === UI INTEGRATION ===
+
+func show_inventory_ui() -> void:
+	"""Show the inventory UI"""
+	if not inventory_ui:
+		inventory_ui = preload("res://scenes/ui/InventoryUI.tscn").instantiate()
+		get_tree().current_scene.add_child(inventory_ui)
+		# Connect UI signals
+		inventory_ui.item_selected.connect(_on_item_selected_for_inspection)
+		inventory_ui.item_selected_for_placement.connect(_on_item_selected_for_placement)
+	
+	inventory_ui.show_inventory(inventory)
+
+func hide_inventory_ui() -> void:
+	"""Hide the inventory UI"""
+	if inventory_ui:
+		inventory_ui.hide_inventory()
+
+func show_item_inspection(item_id: String) -> void:
+	"""Show item inspection view"""
+	if not inventory_ui:
+		show_inventory_ui()
+	
+	inventory_ui.show_inspection(item_id)
+
+# === EVENT HANDLERS ===
 
 func _on_item_collected_external(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
 	"""Handle external item collection events"""
 	if collector and collector.is_in_group("player"):
-		add_item(item_id)
+		if add_item(item_id):
+			# Show immediate inspection with proper pause/mouse handling
+			_show_auto_inspection(item_id)
+
+func _show_auto_inspection(item_id: String) -> void:
+	"""Show auto-inspection when item is collected"""
+	if not inventory_ui:
+		inventory_ui = preload("res://scenes/ui/InventoryUI.tscn").instantiate()
+		get_tree().current_scene.add_child(inventory_ui)
+		# Connect UI signals
+		inventory_ui.item_selected.connect(_on_item_selected_for_inspection)
+		inventory_ui.item_selected_for_placement.connect(_on_item_selected_for_placement)
+		inventory_ui.closed.connect(_on_auto_inspection_closed)
+	
+	# Set mouse visible and pause for inspection
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	get_tree().paused = true
+	
+	inventory_ui.show_inspection(item_id)
+	
+func _on_auto_inspection_closed() -> void:
+	"""Handle auto-inspection being closed"""
+	# Return mouse to captured and unpause
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	get_tree().paused = false
+
+func _on_item_selected_for_inspection(item_id: String) -> void:
+	"""Handle item selected for inspection from UI"""
+	show_item_inspection(item_id)
+
+func _on_item_selected_for_placement(item_id: String) -> void:
+	"""Handle item selected for puzzle placement"""
+	# This will be called by puzzle platforms when they need an item
+	# The item is still in inventory until successfully placed
+	if _message_bus:
+		_message_bus.emit_event("item_selected_for_placement", [item_id])
 
 func _on_game_started() -> void:
 	"""Handle game start - clear inventory for new run"""

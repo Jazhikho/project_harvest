@@ -3,6 +3,7 @@ extends Node
 ## Simplified to focus only on audio functionality, settings delegated to SettingsManager
 
 var _message_bus: Node
+var _music_player: AudioStreamPlayer  # Added for background music
 
 # Audio bus management
 var _audio_buses: Dictionary = {
@@ -164,6 +165,47 @@ func _connect_to_settings() -> void:
 	"""Connect to settings events after SettingsManager is ready"""
 	if _message_bus and _message_bus.has_signal("setting_changed"):
 		_message_bus.connect_event("setting_changed", _on_setting_changed)
+
+func play_music(music_path: String, fade_duration: float = 1.0) -> void:
+	"""Play background music with an optional fade-in."""
+	if _music_player and is_instance_valid(_music_player):
+		_music_player.queue_free()
+
+	_music_player = AudioStreamPlayer.new()
+	_music_player.bus = "Music"
+	add_child(_music_player)
+	
+	_music_player.stream = load(music_path)
+	_music_player.play()
+	
+	# Fade in logic (if fade_duration > 0)
+	if fade_duration > 0:
+		var initial_volume = get_bus_volume("Music")
+		_set_music_volume(0.0) # Start from mute
+		var tween = create_tween()
+		tween.tween_method(_set_music_volume, 0.0, initial_volume, fade_duration)
+		tween.set_trans(Tween.TRANS_LINEAR)
+
+func fade_out_music(fade_duration: float = 1.0) -> Signal:
+	"""Fade out background music and stop it. Returns a signal that emits when the tween is finished."""
+	if _music_player and is_instance_valid(_music_player) and _music_player.is_playing():
+		var current_volume = get_bus_volume("Music")
+		var tween = create_tween()
+		tween.tween_method(_set_music_volume, current_volume, 0.0, fade_duration)
+		tween.set_trans(Tween.TRANS_LINEAR)
+		tween.finished.connect(_on_music_fade_out_finished)
+		return tween.finished
+	
+	var timer = get_tree().create_timer(0)
+	return timer.timeout
+
+func _on_music_fade_out_finished() -> void:
+	if is_instance_valid(_music_player):
+		_music_player.stop()
+		_music_player.queue_free()
+
+func _set_music_volume(volume: float) -> void:
+	set_bus_volume("Music", volume)
 
 func _on_setting_changed(category: String, key: String, old_value: Variant, new_value: Variant) -> void:
 	"""Handle settings changes from SettingsManager"""

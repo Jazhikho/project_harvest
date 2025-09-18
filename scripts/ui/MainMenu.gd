@@ -1,5 +1,10 @@
 extends Control
 
+var _message_bus: Node
+var _settings_manager: Node
+var _audio_manager: Node
+var _scene_manager: Node
+
 # References to UI elements
 @onready var start_button = $MenuContainer/ButtonContainer/StartButton
 @onready var continue_button = $MenuContainer/ButtonContainer/ContinueButton
@@ -7,6 +12,8 @@ extends Control
 @onready var credits_panel = $CreditsPanel
 @onready var confirm_dialog = $ConfirmDialog
 @onready var menu_container = $MenuContainer
+@onready var settings_button = $MenuContainer/ButtonContainer/SettingsButton
+@onready var credits_button = $MenuContainer/ButtonContainer/CreditsButton
 
 # Audio sliders
 @onready var master_slider = $SettingsPanel/SettingsContainer/MasterVolume/Slider
@@ -18,6 +25,11 @@ extends Control
 @onready var sfx_value_label = $SettingsPanel/SettingsContainer/SFXVolume/Value
 
 func _ready():
+	_message_bus = get_node("/root/MessageBus")
+	_settings_manager = get_node("/root/SettingsManager")
+	_audio_manager = get_node("/root/AudioManager")
+	_scene_manager = get_node("/root/SceneManager")
+	
 	# Check for existing save data
 	_check_save_data()
 	# Load settings
@@ -29,14 +41,16 @@ func _ready():
 	# Set initial focus
 	start_button.grab_focus()
 
+	call_deferred("_play_menu_music")
+
+func _play_menu_music() -> void:
+	_audio_manager.play_music("res://assets/audio/Project_Harvest_Main_Theme.ogg", 0.0)
+
 func _check_save_data():
 	# Check if save file exists
-	if SaveManager.has_save_data():
-		continue_button.disabled = false
-		start_button.text = "NEW GAME"
-	else:
-		continue_button.disabled = true
-		start_button.text = "START"
+	var has_save = SaveManager.has_save_data()
+	continue_button.disabled = !has_save
+	start_button.text = "NEW GAME" if has_save else "START"
 
 func _detect_input_device():
 	# Auto-detect input device for control hints
@@ -81,20 +95,33 @@ func _update_volume_labels():
 # Button Signals
 func _on_start_pressed():
 	if SaveManager.has_save_data():
-		# Ask for confirmation to overwrite save
-		confirm_dialog.dialog_text = "Starting a new game will delete your current progress. Continue?"
-		confirm_dialog.confirmed.connect(_start_new_game)
-		confirm_dialog.popup_centered()
+		# Show confirmation dialog
+		var dialog = ConfirmationDialog.new()
+		dialog.title = "New Game"
+		dialog.dialog_text = "Starting a new game will delete existing save data. Are you sure?"
+		dialog.get_ok_button().text = "Yes"
+		dialog.add_cancel_button("No")
+		dialog.confirmed.connect(_start_new_game)
+		add_child(dialog)
+		dialog.popup_centered()
 	else:
 		_start_new_game()
 
 func _start_new_game():
+	var music_fade_finished = _audio_manager.fade_out_music(1.0)
+	var ui_fade_finished = _fade_out_ui(1.0)
+	await music_fade_finished
+	await ui_fade_finished
 	SaveManager.delete_save()
-	SceneManager.load_game_scene()
+	_scene_manager.load_game_scene()
 
 func _on_continue_pressed():
+	var music_fade_finished = _audio_manager.fade_out_music(1.0)
+	var ui_fade_finished = _fade_out_ui(1.0)
+	await music_fade_finished
+	await ui_fade_finished
 	SaveManager.load_game()
-	SceneManager.load_game_scene()
+	_scene_manager.load_game_scene()
 
 func _on_settings_pressed():
 	menu_container.visible = false
@@ -102,8 +129,8 @@ func _on_settings_pressed():
 	master_slider.grab_focus()
 
 func _on_credits_pressed():
-	menu_container.visible = false
-	credits_panel.visible = true
+	# Open credits screen
+	pass
 
 func _on_quit_pressed():
 	get_tree().quit()
@@ -158,3 +185,14 @@ func _input(event):
 			_on_settings_back_pressed()
 		elif credits_panel.visible:
 			_on_credits_back_pressed()
+
+func _fade_out_ui(duration: float) -> Signal:
+	var tween = create_tween()
+	tween.tween_method(
+		func(value): menu_container.modulate.a = value,
+		1.0,
+		0.0,
+		duration
+	)
+	tween.set_trans(Tween.TRANS_LINEAR)
+	return tween.finished

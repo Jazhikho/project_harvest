@@ -21,10 +21,21 @@ func _ready():
 	
 	# IMPORTANT: Trigger initial tile generation after scene is fully loaded
 	call_deferred("_initialize_game")
+	
+	get_tree().get_root().focus_entered.connect(_on_window_focus_entered)
+	get_tree().get_root().focus_exited.connect(_on_window_focus_exited)
 
 	# Start with fade in
 	fade_in()
 	
+func _on_window_focus_entered():
+	"""Recapture mouse when window regains focus"""
+	if not game_paused and not inventory_open:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+func _on_window_focus_exited():
+	"""Release mouse when window loses focus"""
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 func _notification(what: int) -> void:
 	"""Handle window close requests as death events"""
@@ -60,44 +71,90 @@ func _initialize_game():
 			tile_manager._spawn_tile_connections(start_tile, Vector2i(0, 0))
 		else:
 			push_error("GameController: Start tile not found!")
+			
+func _verify_mouse_capture():
+	"""Verify mouse is actually captured, force it if not"""
+	if not game_paused and not inventory_open:
+		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
+			print("Mouse not captured, forcing capture...")
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func _input(event):
-	# Inventory takes priority over pause
-	if event.is_action_pressed("inventory") and not game_paused:
-		toggle_inventory()
+	# Debug: Test narration system with T key
+	if event is InputEventKey and event.pressed and event.keycode == KEY_T:
+		var narrative_system = get_node_or_null("/root/NarrativeSystem")
+		if narrative_system and narrative_system.has_method("test_narration"):
+			narrative_system.test_narration()
+		get_viewport().set_input_as_handled()
 		return
 	
-	# Only allow pause if inventory isn't open
-	if event.is_action_pressed("ui_cancel") and not inventory_open and not game_paused:
-		toggle_pause()
-
+	# Inventory takes priority over pause
+	if event.is_action_pressed("inventory"):
+		if not game_paused:
+			toggle_inventory()
+			get_viewport().set_input_as_handled()
+		return
+	
+	# Handle ESC - if inventory is open, let it handle it first
+	if event.is_action_pressed("ui_cancel"):
+		if inventory_open:
+			# Let the inventory handle it, don't do anything here
+			get_viewport().set_input_as_handled()
+			return
+		elif not game_paused:
+			toggle_pause()
+			get_viewport().set_input_as_handled()
+	
 func toggle_pause():
 	game_paused = !game_paused
 	pause_menu.visible = game_paused
 	get_tree().paused = game_paused
-	pass
 	
 	if game_paused:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		pause_menu.show_menu()
 	else:
+		# Wait for pause state to fully clear before capturing mouse
+		await get_tree().process_frame
+		await get_tree().process_frame  # Wait 2 frames to be sure
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		
+func _force_mouse_capture():
+	"""Force mouse capture with multiple attempts"""
+	if not game_paused and not inventory_open:
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)  # Reset first
+		await get_tree().process_frame  # Wait a frame
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)  # Then capture
+		
+		# Double-check after another frame
+		await get_tree().process_frame
+		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func toggle_inventory():
 	inventory_open = !inventory_open
 	get_tree().paused = inventory_open
 	
 	if inventory_open:
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		inventory_ui.show_inventory()
 	else:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		inventory_ui.hide_inventory()
+		# Force mouse capture after a brief delay
+		call_deferred("_ensure_mouse_captured")
 
 func _on_resume_requested():
 	toggle_pause()
+	# Ensure mouse is captured after resume
+	call_deferred("_ensure_mouse_captured")
 
 func _on_inventory_closed():
 	inventory_open = false
 	get_tree().paused = false
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	# Force mouse capture after a brief delay
+	call_deferred("_ensure_mouse_captured")
 
 func _on_main_menu_requested():
 	# Record death before leaving
@@ -162,3 +219,8 @@ func trigger_death(death_type: String):
 	fade_out()
 	await get_tree().create_timer(0.5).timeout
 	SceneManager.load_death_screen(death_type)
+
+func _ensure_mouse_captured():
+	"""Ensure mouse is captured for gameplay"""
+	if not game_paused and not inventory_open:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

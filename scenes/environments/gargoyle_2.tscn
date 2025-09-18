@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://cgtirix8vft6s"]
+
+[ext_resource type="PackedScene" uid="uid://dxjkiahuo2oq3" path="res://assets/models/gargoyle2.glb" id="1_uviy4"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_10b8g"]
+radius = 1.75
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_c215d"]
+size = Vector3(1, 2.5, 1.125)
+
+[node name="gargoyle2" instance=ExtResource("1_uviy4")]
+
+[node name="Area3D" type="Area3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.337865, 0.00664137, 0.0658254)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.374635, 0.881641, -0.00917456)
+shape = SubResource("CylinderShape3D_10b8g")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30073, 0.0132827, 0.131651)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.300365, 1.24336, -0.0783254)
+shape = SubResource("BoxShape3D_c215d")

@@ -43,10 +43,10 @@ This document provides complete attribution for all assets used in Project Harve
 **Attribution:** "Lite Halloween pack models by Animpic POLY, licensed under Standard License (purchased 2025)"
 
 ### Low Poly Skeleton
-**Source:** Free Asset  
+**Source:** Sketchfab 
 **Creator:** Samy Belaloui  
 **License:** Creative Commons Attribution (CC Attribution)  
-**Website:** [Asset Source]
+**Website:** https://sketchfab.com/
 
 **Assets Used:**
 - `assets/models/low_poly_skeleton.glb` - Low poly skeleton model for horror elements
@@ -54,10 +54,10 @@ This document provides complete attribution for all assets used in Project Harve
 **Attribution:** "Low Poly Skeleton by Samy Belaloui is licensed under Creative Commons Attribution"
 
 ### Key
-**Source:** Free Asset  
+**Source:** Sketchfab 
 **Creator:** yomans  
 **License:** Creative Commons Attribution (CC Attribution)  
-**Website:** [Asset Source]
+**Website:** https://sketchfab.com/
 
 **Assets Used:**
 - `assets/models/key.fbx` - Key model for gameplay elements
@@ -130,6 +130,17 @@ This document provides complete attribution for all assets used in Project Harve
 
 **Attribution:** "Crow by Alexei Ostapenko is licensed under Creative Commons Attribution"
 
+### Crow (Alternative)
+**Source:** Sketchfab  
+**Creator:** zixisun02  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/crow_zixisun02.gltf` - Crow model for environmental details (9MB, glTF format)
+
+**Attribution:** "Crow by zixisun02 is licensed under Creative Commons Attribution"
+
 ### Music Box
 **Source:** Sketchfab  
 **Creator:** claravnelson  
@@ -174,6 +185,61 @@ This document provides complete attribution for all assets used in Project Harve
 
 **Attribution:** "Anubis bible by Errlatte is licensed under Creative Commons Attribution"
 
+### Gargoyle
+**Source:** Sketchfab  
+**Creator:** Cat O.  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/gargoyle.dae` - Gargoyle statue model for environmental details (53MB, DAE format)
+
+**Attribution:** "Gargoyle by Cat O. is licensed under Creative Commons Attribution"
+
+### Photogrammetry Gargoyle Statue
+**Source:** Sketchfab  
+**Creator:** JacksonMGB  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/photogrammetry_gargoyle_statue.obj` - Photogrammetry gargoyle statue model for environmental details (22MB, OBJ format)
+
+**Attribution:** "Photogrammetry Gargoyle Statue by JacksonMGB is licensed under Creative Commons Attribution"
+
+### Altar
+**Source:** Sketchfab  
+**Creator:** BunQuest  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/altar.obj` - Altar model for environmental details (168KB, OBJ format)
+
+**Attribution:** "altar by BunQuest is licensed under Creative Commons Attribution"
+
+### Low Poly Brazier
+**Source:** Sketchfab  
+**Creator:** Art Is Scary  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/low_poly_brazier.fbx` - Low poly brazier model for environmental details (54KB, FBX format)
+
+**Attribution:** "Low Poly Brazier by Art Is Scary is licensed under Creative Commons Attribution"
+
+### Low Poly: Dead Tree
+**Source:** Sketchfab 
+**Creator:** ClintonAbbott.Art  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/low_poly_dead_tree.glb` - Low poly dead tree model for environmental details
+
+**Attribution:** "Low Poly: Dead Tree by ClintonAbbott.Art is licensed under Creative Commons Attribution"
+
 ---
 
 ## Textures
@@ -193,6 +259,92 @@ This document provides complete attribution for all assets used in Project Harve
   - `Foliage003_4K-PNG.usdc` - USD material file
 
 **Attribution:** "Foliage003 texture by AmbientCG, licensed under CC0. Available at https://ambientcg.com/"
+
+### Rock 032
+**Source:** AmbientCG (https://ambientcg.com/)  
+**License:** CC0 (Creative Commons Zero) - Public Domain  
+**Website:** https://ambientcg.com/view?id=Rock032  
+**Tags:** Cliff, Gray, Light, Rock, Stone  
+**Downloads:** 42,913 total (169 last week)  
+**Technique:** Procedural  
+**Release Date:** 2020-03-29
+
+**Assets Used:**
+- `assets/textures/Rock032/` - Complete rock texture set including:
+  - `Rock032_1K-JPG.zip` - 1K resolution in JPG format (9 MB)
+  - `Rock032_2K-JPG.zip` - 2K resolution in JPG format (30 MB)
+  - `Rock032_4K-JPG.zip` - 4K resolution in JPG format (115 MB)
+  - `Rock032_8K-JPG.zip` - 8K resolution in JPG format (448 MB)
+  - `Rock032_1K-PNG.zip` - 1K resolution in PNG format (17 MB)
+  - `Rock032_2K-PNG.zip` - 2K resolution in PNG format (65 MB)
+  - `Rock032_4K-PNG.zip` - 4K resolution in PNG format (252 MB)
+  - `Rock032_8K-PNG.zip` - 8K resolution in PNG format (977 MB)
+
+**Attribution:** "Rock032 texture by AmbientCG, licensed under CC0. Available at https://ambientcg.com/view?id=Rock032"
+
+### Bark 006
+**Source:** AmbientCG (https://ambientcg.com/)  
+**License:** CC0 (Creative Commons Zero) - Public Domain  
+**Website:** https://ambientcg.com/view?id=Bark006  
+**Tags:** Bark, Brown, Dark, Tree, Wood  
+**Downloads:** 39,947 total (66 Last Week)  
+**Technique:** Approximation  
+**Release Date:** 2019-03-29
+
+**Assets Used:**
+- `assets/textures/Bark006/` - Complete bark texture set including:
+  - `Bark006_1K-JPG.zip` - 1K resolution in JPG format (9 MB)
+  - `Bark006_2K-JPG.zip` - 2K resolution in JPG format (28 MB)
+  - `Bark006_4K-JPG.zip` - 4K resolution in JPG format (85 MB)
+  - `Bark006_8K-JPG.zip` - 8K resolution in JPG format (308 MB)
+  - `Bark006_1K-PNG.zip` - 1K resolution in PNG format (17 MB)
+  - `Bark006_2K-PNG.zip` - 2K resolution in PNG format (63 MB)
+  - `Bark006_4K-PNG.zip` - 4K resolution in PNG format (230 MB)
+  - `Bark006_8K-PNG.zip` - 8K resolution in PNG format (559 MB)
+
+**Attribution:** "Bark006 texture by AmbientCG, licensed under CC0. Available at https://ambientcg.com/view?id=Bark006"
+
+### Lava 002
+**Source:** AmbientCG (https://ambientcg.com/)  
+**License:** CC0 (Creative Commons Zero) - Public Domain  
+**Website:** https://ambientcg.com/view?id=Lava002  
+**Tags:** Fire, Lava, Magma, Vulcan  
+**Downloads:** 14,372 total (76 Last Week)  
+**Technique:** Procedural  
+**Release Date:** 2019-12-10
+
+**Assets Used:**
+- `assets/textures/Lava002/` - Complete lava texture set including:
+  - `Lava002_1K-JPG.zip` - 1K resolution in JPG format (9 MB)
+  - `Lava002_2K-JPG.zip` - 2K resolution in JPG format (32 MB)
+  - `Lava002_4K-JPG.zip` - 4K resolution in JPG format (119 MB)
+  - `Lava002_8K-JPG.zip` - 8K resolution in JPG format (475 MB)
+  - `Lava002_1K-PNG.zip` - 1K resolution in PNG format (17 MB)
+  - `Lava002_2K-PNG.zip` - 2K resolution in PNG format (65 MB)
+  - `Lava002_4K-PNG.zip` - 4K resolution in PNG format (255 MB)
+  - `Lava002_8K-PNG.zip` - 8K resolution in PNG format (1008 MB)
+
+**Attribution:** "Lava002 texture by AmbientCG, licensed under CC0. Available at https://ambientcg.com/view?id=Lava002"
+
+### Metal029
+**Source:** AmbientCG (https://ambientcg.com/)  
+**License:** CC0 (Creative Commons Zero) - Public Domain  
+**Website:** https://ambientcg.com/view?id=Metal029
+
+**Assets Used:**
+- `assets/textures/Metal029/` - Complete metal texture set including various resolution variants in JPG and PNG formats
+
+**Attribution:** "Metal029 texture by AmbientCG, licensed under CC0. Available at https://ambientcg.com/view?id=Metal029"
+
+### Metal007
+**Source:** AmbientCG (https://ambientcg.com/)  
+**License:** CC0 (Creative Commons Zero) - Public Domain  
+**Website:** https://ambientcg.com/view?id=Metal007
+
+**Assets Used:**
+- `assets/textures/Metal007/` - Complete metal texture set including various resolution variants in JPG and PNG formats
+
+**Attribution:** "Metal007 texture by AmbientCG, licensed under CC0. Available at https://ambientcg.com/view?id=Metal007"
 
 ### Corn Textures
 **Source:** Generated with GPT-5  
@@ -254,19 +406,6 @@ This document provides complete attribution for all assets used in Project Harve
 
 ## Audio
 
-### Sound Effects
-**Source:** Stability AI - Stable Audio 1.0  
-**License:** Stable Audio Community License  
-**Creator:** Generated using Stability AI's Stable Audio 1.0 model  
-**Website:** https://stability.ai/
-
-**Assets Used:**
-- `resources/audio/cawing cros.mp3` - Crow cawing sound effect
-- `resources/audio/ComfyUI_00006_.mp3` - Generated ambient sound
-- `resources/audio/ComfyUI_00012_.mp3` - Generated ambient sound  
-- `resources/audio/cornrustle.mp3` - Corn rustling sound effect
-- `resources/audio/is that the wind.mp3` - Wind ambient sound
-
 ### Voice Audio
 **Source:** SampleFocus (https://samplefocus.com/)  
 **Creator:** Nightmare Oliveira  
@@ -277,9 +416,120 @@ This document provides complete attribution for all assets used in Project Harve
 
 **Attribution:** "Voice sample by Nightmare Oliveira, available at SampleFocus (https://samplefocus.com/)"
 
-**Attribution:** "Audio generated using Stability AI's Stable Audio 1.0 under the Stable Audio Community License"
+### ElevenLabs Generated Audio
+**Source:** ElevenLabs  
+**License:** Standard License  
+**Creator:** Generated using ElevenLabs AI voice generation  
+**Website:** https://elevenlabs.io/
 
-**License Details:** The Stable Audio Community License allows for non-commercial use. For commercial distribution, verify current licensing terms at https://stability.ai/
+**Assets Used:**
+- `assets/audio/Architects_Maze_2025-09-16T005759.mp3` - Architects Maze theme (MP3)
+- `assets/audio/Architects_Maze_2025-09-16T005759.wav` - Architects Maze theme (WAV)
+- `assets/audio/heart_beating_fast-1757981842277.wav` - Heart beating fast sound effect
+- `assets/audio/HighTension.wav` - High tension ambient sound
+- `assets/audio/Hymn_of_the_Echoes_2025-09-16T010929.mp3` - Hymn of the Echoes theme (MP3)
+- `assets/audio/Hymn_of_the_Echoes_2025-09-16T010929.wav` - Hymn of the Echoes theme (WAV)
+- `assets/audio/Project_Harvest_Main_Theme_2025-09-16T010403.mp3` - Main theme (MP3)
+- `assets/audio/Project_Harvest_Main_Theme_2025-09-16T010403.wav` - Main theme (WAV)
+- `assets/audio/The_Effigys_Theme_2025-09-16T005207.mp3` - Effigys theme (MP3)
+- `assets/audio/The_Effigys_Theme_2025-09-16T005207.wav` - Effigys theme (WAV)
+- `assets/audio/The_Stalkers_Theme_2025-09-16T004308.mp3` - Stalkers theme (MP3)
+- `assets/audio/The_Stalkers_Theme_2025-09-16T004308.wav` - Stalkers theme (WAV)
+- `assets/audio/Who_Am_I_in_the_Cornfield_2025-09-16T001117.wav` - Who Am I in the Cornfield (version 1)
+- `assets/audio/Who_Am_I_in_the_Cornfield_2025-09-16T002405.wav` - Who Am I in the Cornfield (version 2)
+- `assets/audio/Who_Am_I_in_the_Cornfield_2025-09-16T002405 (1).wav` - Who Am I in the Cornfield (version 3)
+
+**Attribution:** "Audio generated using ElevenLabs under Standard License"
+
+**License Details:** Generated content under ElevenLabs Standard License. Verify current licensing terms at https://elevenlabs.io/ for commercial use requirements.
+
+### Freesound.org Audio Assets
+**Source:** Freesound.org  
+**License:** Various (CC0, CC Attribution 3.0, CC Attribution 4.0)  
+**Website:** https://freesound.org/
+
+**Assets Used:**
+
+#### Footstep and Movement Sounds
+- `assets/audio/352870__potatokingxii__footsteps-dirt-gravel.wav` - Footsteps on dirt and gravel sound effect
+  - **Creator:** PotatokingXII
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/352870/
+
+- `assets/audio/595095__allen2001__shoes-dragging-on-gravel-owi.wav` - Shoes dragging on gravel sound effect
+  - **Creator:** Allen2001
+  - **License:** Attribution 3.0
+  - **URL:** https://freesound.org/s/595095/
+
+#### Environmental Ambient Sounds
+- `assets/audio/324140__klankbeeld__woods-farmland-fall-02-151003_0801.flac` - Woods farmland fall ambient sound
+  - **Creator:** klankbeeld
+  - **License:** Attribution 4.0
+  - **URL:** https://freesound.org/s/324140/
+
+- `assets/audio/324118__klankbeeld__woods-farmland-fall-01-151003_0801.flac` - Woods farmland fall ambient sound
+  - **Creator:** klankbeeld
+  - **License:** Attribution 4.0
+  - **URL:** https://freesound.org/s/324118/
+
+- `assets/audio/246244__klankbeeld__maize-corn-in-wind-140903_0392.wav` - Maize corn in wind ambient sound
+  - **Creator:** klankbeeld
+  - **License:** Attribution 4.0
+  - **URL:** https://freesound.org/s/246244/
+
+#### Crow and Bird Sounds
+- `assets/audio/763093__nekoloca__crows.mp3` - Crow sounds
+  - **Creator:** nekoloca
+  - **License:** Attribution 4.0
+  - **URL:** https://freesound.org/s/763093/
+
+- `assets/audio/194949__soundmary__crows-or-rooks.mp3` - Crow or rook sounds
+  - **Creator:** soundmary
+  - **License:** Attribution 4.0
+  - **URL:** https://freesound.org/s/194949/
+
+- `assets/audio/180733__jamesrodavidson__location-crows-nr.wav` - Location crow sounds
+  - **Creator:** jamesrodavidson
+  - **License:** Attribution 3.0
+  - **URL:** https://freesound.org/s/180733/
+
+#### Whispering and Horror Sounds
+- `assets/audio/764307__shangusburger__crwdquiet_active-whispering_shanevincent_gsc24_spacedomni-mk012.wav` - Quiet active whispering sound
+  - **Creator:** ShangusBurger
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/764307/
+
+- `assets/audio/193809__geoneo0__four_voices_whispering_4.wav` - Four voices whispering
+  - **Creator:** geoneo0
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/193809/
+
+- `assets/audio/759855__hetzz__whispers-in-the-abyss-a-journey-through-haunted-shadows.mp3` - Whispers in haunted shadows
+  - **Creator:** hetzz
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/759855/
+
+- `assets/audio/423869__belarathbone__whispers-schizophrenic-or-ghost-like-voices.wav` - Schizophrenic or ghost-like whispers
+  - **Creator:** belarathbone
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/423869/
+
+- `assets/audio/316797__dimbark1__ghostly-whispers.wav` - Ghostly whispering sounds
+  - **Creator:** dimbark1
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/316797/
+
+- `assets/audio/446083__sophiemezam__whispers.wav` - Whispering sounds
+  - **Creator:** SophieMezaM
+  - **License:** Attribution 3.0
+  - **URL:** https://freesound.org/s/446083/
+
+**Attribution:** "Audio assets sourced from Freesound.org (https://freesound.org/) with individual creator attributions as specified above."
+
+**License Details:** 
+- CC0 (Creative Commons Zero) assets are in the public domain and can be used freely
+- CC Attribution 3.0/4.0 assets require attribution to the creator and allow commercial use
+- Always verify current license terms at Freesound.org before commercial distribution
 
 ---
 
@@ -368,25 +618,23 @@ This document provides complete attribution for all assets used in Project Harve
 Assets under CC0 are released into the public domain and can be used for any purpose without attribution required (though attribution is appreciated).
 
 **Applicable Assets:**
-- AmbientCG foliage textures
+- AmbientCG foliage textures (Foliage003)
+- AmbientCG rock textures (Rock032)
+- AmbientCG bark textures (Bark006)
+- AmbientCG lava textures (Lava002)
+- AmbientCG metal textures (Metal029, Metal007)
 - Poly Haven HDRI environments
-
-### Stable Audio Community License
-Audio assets generated with Stability AI's Stable Audio are subject to their community license terms.
-
-**Applicable Assets:**
-- All audio files in `resources/audio/`
-
-**Important:** Verify current license terms at https://stability.ai/ before commercial use.
+- Freesound.org assets by ShangusBurger, geoneo0, hetzz, belarathbone, dimbark1
 
 ### Standard License (Commercial)
-Assets purchased under standard license terms from Animpic POLY.
+Assets purchased under standard license terms from various providers.
 
 **Applicable Assets:**
-- Animpic POLY Farm Pack models
-- Animpic POLY Lite Halloween Pack models
+- Animpic POLY Farm Pack models (purchased 2025)
+- Animpic POLY Lite Halloween Pack models (purchased 2025)
+- ElevenLabs generated audio files (Standard License)
 
-**Important:** These assets are licensed for commercial use as per the standard license terms purchased in 2025.
+**Important:** These assets are licensed for commercial use as per their respective standard license terms.
 
 ### Creative Commons Attribution (CC Attribution)
 Assets under CC Attribution require attribution to the creator and allow commercial use.
@@ -394,6 +642,14 @@ Assets under CC Attribution require attribution to the creator and allow commerc
 **Applicable Assets:**
 - Low Poly Skeleton by Samy Belaloui
 - Key by yomans
+- Gargoyle by Cat O.
+- Photogrammetry Gargoyle Statue by JacksonMGB
+- Altar by BunQuest
+- Low Poly Brazier by Art Is Scary
+- Low Poly: Dead Tree by ClintonAbbott.Art
+- Freesound.org assets by klankbeeld (Attribution 4.0)
+- Freesound.org assets by nekoloca, soundmary (Attribution 4.0)
+- Freesound.org assets by PotatokingXII, Allen2001, jamesrodavidson, SophieMezaM (Attribution 3.0)
 
 **Important:** Must credit the creator as specified in the attribution requirements.
 

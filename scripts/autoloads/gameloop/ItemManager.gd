@@ -1,24 +1,29 @@
 extends Node
-## Manages item definitions, availability, and effects
-## Handles item data loading and gameplay logic
+## Manages item definitions for notes and puzzle pieces
+## Handles item data loading and spawning logic
 
 var _item_definitions := {}
 var _item_categories := {
 	"notes": [],
-	"weird_objects": [],
 	"puzzle_pieces": [],
-	"consumables": []
+	# "weird_objects": [],  # GHOSTED - Keep for future use
+	# "consumables": []      # GHOSTED - Keep for future use
 }
 
 var _spawn_rules := {}
 var _item_effects := {}
-var _unlocked_notes := []
 
 var _message_bus: Node
 var _state_manager: Node
 
+# Puzzle piece tracking - which pieces belong to which puzzle
+var _puzzle_pieces := {
+	"puzzle_1": ["puzzle_1_piece_1", "puzzle_1_piece_2", "puzzle_1_piece_3"],
+	"puzzle_2": ["puzzle_2_piece_1", "puzzle_2_piece_2", "puzzle_2_piece_3", "puzzle_2_piece_4"],
+	"puzzle_3": ["puzzle_3_piece_1", "puzzle_3_piece_2", "puzzle_3_piece_3", "puzzle_3_piece_4", "puzzle_3_piece_5"]
+}
+
 const ITEM_DATA_PATH := "res://data/items.json"
-const MAX_UNLOCKED_NOTES := 5
 
 func _ready() -> void:
 	name = "ItemManager"
@@ -40,7 +45,7 @@ func _initialize() -> void:
 func _load_item_definitions() -> void:
 	"""Load item definitions from JSON data file"""
 	if not FileAccess.file_exists(ITEM_DATA_PATH):
-		push_error("ItemManager: items.json not found at " + ITEM_DATA_PATH)
+		push_warning("ItemManager: items.json not found, using defaults")
 		_create_default_definitions()
 		return
 	
@@ -81,28 +86,35 @@ func _process_item_data(data: Dictionary) -> void:
 		_spawn_rules[item_id] = item.get("spawn_rules", {})
 		_item_effects[item_id] = item.get("effects", {})
 	
-	_unlocked_notes = _item_categories.notes.slice(0, min(3, _item_categories.notes.size()))
+	# Sort notes by ID to ensure consistent ordering
+	_item_categories.notes.sort()
 
 func _create_default_definitions() -> void:
 	"""Create minimal default item definitions as fallback"""
-	var default_items := [
-		{
-			"id": "note_1",
+	var default_items := []
+	
+	# Create default research notes (1-30)
+	for i in range(1, 31):
+		default_items.append({
+			"id": "note_%d" % i,
 			"category": "notes",
-			"name": "Research Note",
-			"description": "A hastily written note",
+			"name": "Research Note #%d" % i,
+			"description": "Dr. Amundsen's research documentation",
 			"spawn_rules": {"weight": 1.0},
 			"effects": {"sanity_delta": -5}
-		},
-		{
-			"id": "doll_1",
-			"category": "weird_objects",
-			"name": "Porcelain Doll",
-			"description": "Its eyes seem to follow you",
-			"spawn_rules": {"weight": 1.0},
-			"effects": {"sanity_delta": -10}
-		}
-	]
+		})
+	
+	# Create default puzzle pieces
+	for puzzle_id in _puzzle_pieces:
+		for piece_id in _puzzle_pieces[puzzle_id]:
+			default_items.append({
+				"id": piece_id,
+				"category": "puzzle_pieces",
+				"name": "Puzzle Piece",
+				"description": "A piece of the larger puzzle",
+				"spawn_rules": {"weight": 0.8},
+				"effects": {}
+			})
 	
 	var data := {"items": default_items}
 	_process_item_data(data)
@@ -112,15 +124,24 @@ func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 	Check if item can spawn in given context
 	
 	@param item_id: Item identifier to check
-	@param context: Spawning context with tile_position, is_permanent, etc.
+	@param context: Spawning context with tile_position, etc.
 	@return: True if item can spawn
 	"""
 	if item_id not in _spawn_rules:
 		return false
 	
-	if item_id in _state_manager.get_state("collected_items"):
-		return false
+	# Check if already collected
+	var player_inventory = get_node_or_null("/root/PlayerInventory")
+	if player_inventory and player_inventory.has_method("has_item"):
+		if player_inventory.has_item(item_id):
+			return false
 	
+	# For notes, check if it's in the unlocked list
+	if item_id in _item_categories.notes:
+		if not _state_manager.is_note_unlocked(item_id):
+			return false
+	
+	# Check spawn rules
 	var rules: Dictionary = _spawn_rules[item_id]
 	var state: Dictionary = _state_manager.get_state()
 	
@@ -132,17 +153,13 @@ func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 	
 	if rules.has("required_flags"):
 		for flag in rules.required_flags:
-			if not _state_manager.has_flag(flag):
+			if not _state_manager.has_event_flag(flag):
 				return false
 	
 	if rules.has("forbidden_flags"):
 		for flag in rules.forbidden_flags:
-			if _state_manager.has_flag(flag):
+			if _state_manager.has_event_flag(flag):
 				return false
-	
-	if item_id in _item_categories.notes:
-		if item_id not in _unlocked_notes:
-			return false
 	
 	return true
 
@@ -155,12 +172,39 @@ func get_spawnable_items(context: Dictionary) -> Array[Dictionary]:
 	"""
 	var spawnable: Array[Dictionary] = []
 	
-	for item_id in _item_definitions:
-		if can_item_spawn(item_id, context):
-			var weight: float = _spawn_rules[item_id].get("weight", 1.0)
-			spawnable.append({"item_id": item_id, "weight": weight})
+	# Get spawnable notes (only from unlocked list)
+	var unlocked_notes = _state_manager.get_unlocked_notes()
+	for note_id in unlocked_notes:
+		if can_item_spawn(note_id, context):
+			var weight: float = _spawn_rules[note_id].get("weight", 1.0)
+			spawnable.append({"item_id": note_id, "weight": weight})
+	
+	# Get spawnable puzzle pieces
+	for piece_id in _get_available_puzzle_pieces():
+		if can_item_spawn(piece_id, context):
+			var weight: float = _spawn_rules[piece_id].get("weight", 1.0)
+			spawnable.append({"item_id": piece_id, "weight": weight})
 	
 	return spawnable
+
+func _get_available_puzzle_pieces() -> Array[String]:
+	"""
+	Get puzzle pieces that haven't been collected
+	
+	@return: Array of available puzzle piece IDs
+	"""
+	var available: Array[String] = []
+	var player_inventory = get_node_or_null("/root/PlayerInventory")
+	
+	for puzzle_id in _puzzle_pieces:
+		for piece_id in _puzzle_pieces[puzzle_id]:
+			if player_inventory and player_inventory.has_method("has_item"):
+				if not player_inventory.has_item(piece_id):
+					available.append(piece_id)
+			else:
+				available.append(piece_id)
+	
+	return available
 
 func select_random_item(spawnable_items: Array[Dictionary]) -> String:
 	"""
@@ -197,19 +241,18 @@ func apply_item_effects(item_id: String) -> void:
 	
 	var effects: Dictionary = _item_effects[item_id]
 	
+	# Apply sanity effects
 	if effects.has("sanity_delta"):
 		_state_manager.modify_sanity(effects.sanity_delta)
 	
+	# Set event flags
 	if effects.has("set_flags"):
 		for flag in effects.set_flags:
-			_state_manager.set_flag(flag, true)
+			_state_manager.set_event_flag(flag, true)
 	
 	if effects.has("unset_flags"):
 		for flag in effects.unset_flags:
-			_state_manager.set_flag(flag, false)
-	
-	if item_id in _item_categories.notes:
-		_unlock_next_note(item_id)
+			_state_manager.set_event_flag(flag, false)
 
 func get_item_info(item_id: String) -> Dictionary:
 	"""
@@ -224,30 +267,68 @@ func get_category_items(category: String) -> Array:
 	"""
 	Get all items in a category
 	
-	@param category: Category name (notes, weird_objects, puzzle_pieces, consumables)
+	@param category: Category name (notes, puzzle_pieces)
 	@return: Array of item IDs in category
 	"""
 	return _item_categories.get(category, []).duplicate()
 
-func _unlock_next_note(collected_note_id: String) -> void:
+func get_puzzle_pieces_for_puzzle(puzzle_id: String) -> Array[String]:
 	"""
-	Unlock next note when one is collected
+	Get all piece IDs for a specific puzzle
 	
-	@param collected_note_id: ID of note that was collected
+	@param puzzle_id: Puzzle identifier
+	@return: Array of piece IDs for this puzzle
 	"""
-	var note_index: int = _item_categories.notes.find(collected_note_id)
-	if note_index < 0:
-		return
+	return _puzzle_pieces.get(puzzle_id, []).duplicate()
+
+func is_puzzle_piece(item_id: String) -> bool:
+	"""
+	Check if an item is a puzzle piece
 	
-	var all_notes: Array = _item_categories.notes
-	var next_index := _unlocked_notes.size()
+	@param item_id: Item identifier to check
+	@return: True if item is a puzzle piece
+	"""
+	return item_id in _item_categories.puzzle_pieces
+
+func get_puzzle_for_piece(piece_id: String) -> String:
+	"""
+	Get which puzzle a piece belongs to
 	
-	if next_index < all_notes.size() and all_notes[next_index] not in _unlocked_notes:
-		_unlocked_notes.append(all_notes[next_index])
+	@param piece_id: Puzzle piece identifier
+	@return: Puzzle ID or empty string if not found
+	"""
+	for puzzle_id in _puzzle_pieces:
+		if piece_id in _puzzle_pieces[puzzle_id]:
+			return puzzle_id
+	return ""
+
+func get_puzzle_completion(puzzle_id: String) -> Dictionary:
+	"""
+	Get completion status for a puzzle
+	
+	@param puzzle_id: Puzzle identifier
+	@return: Dictionary with total pieces and found pieces
+	"""
+	var player_inventory = get_node_or_null("/root/PlayerInventory")
+	var total_pieces: int = _puzzle_pieces.get(puzzle_id, []).size()
+	var found_pieces: int = 0
+	
+	if player_inventory and player_inventory.has_method("has_item"):
+		for piece_id in _puzzle_pieces.get(puzzle_id, []):
+			if player_inventory.has_item(piece_id):
+				found_pieces += 1
+	
+	return {
+		"puzzle_id": puzzle_id,
+		"total_pieces": total_pieces,
+		"found_pieces": found_pieces,
+		"completed": found_pieces >= total_pieces
+	}
 
 func reset_for_new_run() -> void:
 	"""Reset item availability for new game run"""
-	_unlocked_notes = _item_categories.notes.slice(0, min(3, _item_categories.notes.size()))
+	# Note unlocking is handled by GameStateManager
+	pass
 
 func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""
@@ -255,7 +336,35 @@ func _connect_to_events() -> void:
 	_message_bus.game_started.connect(_on_game_started)
 
 func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
+	"""Handle item collection"""
 	apply_item_effects(item_id)
+	
+	# Note unlocking is now handled by GameStateManager
 
 func _on_game_started() -> void:
+	"""Handle game start"""
 	reset_for_new_run()
+
+# ===== GHOSTED WEIRD OBJECTS CODE - Keep for future use =====
+"""
+func apply_weird_object_effects(item_id: String) -> void:
+	# Weird objects cause significant sanity loss
+	var sanity_loss := 0
+	match item_id:
+		"porcelain_doll":
+			sanity_loss = 15
+		"music_box":
+			sanity_loss = 12
+		"mirror_fragment":
+			sanity_loss = 7
+		_:
+			sanity_loss = 10
+	
+	_state_manager.modify_sanity(-sanity_loss)
+	
+	# Trigger weird effects via WeirdThingsManager
+	var weird_manager = get_node_or_null("/root/WeirdThingsManager")
+	if weird_manager and weird_manager.has_method("trigger_weird_effect"):
+		var tile_pos = _state_manager.get_state("current_tile_position")
+		weird_manager.trigger_weird_effect(item_id, tile_pos)
+"""

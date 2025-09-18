@@ -40,6 +40,7 @@ PlayerInventory="*res://scripts/systems/PlayerInventory.gd"
 TileStateManager="*res://scripts/autoloads/gameloop/TileStateManager.gd"
 EnemyManager="*res://scripts/autoloads/gameloop/EnemyManager.gd"
 EffigyManager="*res://scripts/autoloads/gameloop/EffigyManager.gd"
+NarrativeSystem="*res://scripts/autoloads/gameloop/NarrativeSystem.gd"
 
 [debug]
 

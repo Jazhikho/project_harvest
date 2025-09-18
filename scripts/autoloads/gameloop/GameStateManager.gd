@@ -17,7 +17,12 @@ var _state := {
 	"run_data": {},
 	"death_locations": [],
 	"collected_items": [],
-	"spawned_items": {}
+	"spawned_items": {},
+	"event_flags": {},  # NEW: Event progression tracking
+	"completed_puzzles": [],  # NEW: Completed puzzle list
+	"unlocked_notes": [],  # NEW: Available note sequence
+	"current_note_index": 0,  # NEW: Next note to unlock
+	"story_progress": 0  # NEW: Overall story progression (0-100)
 }
 
 var _state_history: Array[Dictionary] = []
@@ -26,6 +31,18 @@ var _message_bus: Node
 
 const MAX_SANITY := 100
 const MIN_SANITY := 0
+const INITIAL_NOTES_AVAILABLE := 5  # First 5 notes are available at start
+const TOTAL_STORY_NOTES := 30  # Total research notes in sequence
+
+# Story progression flags - these control major story beats
+const STORY_FLAGS := {
+	"intro_complete": 1,
+	"first_puzzle_complete": 10,
+	"second_puzzle_complete": 20,
+	"third_puzzle_complete": 30,
+	"truth_revealed": 40,
+	"ending_unlocked": 50
+}
 
 func _ready() -> void:
 	name = "GameStateManager"
@@ -41,6 +58,7 @@ func _initialize() -> void:
 	
 	_connect_to_events()
 	_initialize_run_data()
+	_initialize_note_system()
 
 func _connect_to_events() -> void:
 	"""Connect to relevant MessageBus events"""
@@ -134,9 +152,202 @@ func has_flag(flag: String) -> bool:
 	"""
 	return _state.flags.get(flag, false)
 
-## DEPRECATED METHOD REMOVED - Use PlayerInventory.add_item() instead
+# === NEW EVENT FLAG SYSTEM ===
 
-## DEPRECATED INVENTORY METHODS REMOVED - Use PlayerInventory autoload instead
+func set_event_flag(flag_name: String, value: bool = true) -> void:
+	"""
+	Set an event progression flag
+	
+	@param flag_name: Event flag identifier
+	@param value: Boolean value to set
+	"""
+	var old_value: bool = _state.event_flags.get(flag_name, false)
+	if old_value != value:
+		_state.event_flags[flag_name] = value
+		_log_state_change("event_flag:" + flag_name, old_value, value)
+		
+		# Check for story progression updates
+		_check_story_progression()
+		
+		# Notify other systems of event flag changes
+		if _message_bus:
+			_message_bus.emit_event("event_flag_changed", [flag_name, value])
+
+func has_event_flag(flag_name: String) -> bool:
+	"""
+	Check if an event flag is set
+	
+	@param flag_name: Event flag identifier to check
+	@return: True if flag is set and true
+	"""
+	return _state.event_flags.get(flag_name, false)
+
+func get_event_flags() -> Dictionary:
+	"""
+	Get all event flags
+	
+	@return: Dictionary of all event flags
+	"""
+	return _state.event_flags.duplicate()
+
+# === PUZZLE SYSTEM ===
+
+func get_puzzle_progress(puzzle_id: String) -> int:
+	"""
+	Get progress for a specific puzzle (number of pieces placed)
+	
+	@param puzzle_id: Puzzle identifier
+	@return: Number of pieces placed (0 if not started)
+	"""
+	return _state.puzzle_progress.get(puzzle_id, 0)
+
+func set_puzzle_progress(puzzle_id: String, pieces_placed: int) -> void:
+	"""
+	Set progress for a specific puzzle
+	
+	@param puzzle_id: Puzzle identifier  
+	@param pieces_placed: Number of pieces placed
+	"""
+	var old_progress: int = _state.puzzle_progress.get(puzzle_id, 0)
+	if old_progress != pieces_placed:
+		_state.puzzle_progress[puzzle_id] = pieces_placed
+		_log_state_change("puzzle:" + puzzle_id, old_progress, pieces_placed)
+		
+		# Notify puzzle progress change
+		if _message_bus:
+			_message_bus.emit_event("puzzle_progress_changed", [puzzle_id, pieces_placed, old_progress])
+
+func complete_puzzle(puzzle_id: String) -> void:
+	"""
+	Mark a puzzle as completed
+	
+	@param puzzle_id: Puzzle identifier to complete
+	"""
+	if puzzle_id not in _state.completed_puzzles:
+		_state.completed_puzzles.append(puzzle_id)
+		
+		# Set event flag for puzzle completion
+		set_event_flag(puzzle_id + "_complete", true)
+		
+		# Check if all puzzles are completed
+		if _state.completed_puzzles.size() >= 3:  # Assuming 3 total puzzles
+			set_event_flag("all_puzzles_complete", true)
+			_update_story_progress(STORY_FLAGS.ending_unlocked)
+
+func is_puzzle_completed(puzzle_id: String) -> bool:
+	"""
+	Check if a puzzle is completed
+	
+	@param puzzle_id: Puzzle identifier to check
+	@return: True if puzzle is completed
+	"""
+	return puzzle_id in _state.completed_puzzles
+
+func get_completed_puzzles() -> Array[String]:
+	"""
+	Get list of completed puzzles
+	
+	@return: Array of completed puzzle IDs
+	"""
+	var result: Array[String] = []
+	result.assign(_state.completed_puzzles.duplicate())
+	return result
+
+# === NOTE SEQUENCE SYSTEM ===
+
+func _initialize_note_system() -> void:
+	"""Initialize the note unlocking system"""
+	# Generate initial available notes (note_1 through note_5)
+	_state.unlocked_notes.clear()
+	for i in range(1, INITIAL_NOTES_AVAILABLE + 1):
+		_state.unlocked_notes.append("note_%d" % i)
+	
+	_state.current_note_index = INITIAL_NOTES_AVAILABLE
+
+func unlock_next_note() -> String:
+	"""
+	Unlock the next note in sequence when one is collected
+	
+	@return: ID of newly unlocked note, or empty string if none to unlock
+	"""
+	if _state.current_note_index < TOTAL_STORY_NOTES:
+		_state.current_note_index += 1
+		var next_note_id := "note_%d" % _state.current_note_index
+		
+		if next_note_id not in _state.unlocked_notes:
+			_state.unlocked_notes.append(next_note_id)
+			
+			# Notify systems that a new note is available
+			if _message_bus:
+				_message_bus.emit_event("note_unlocked", [next_note_id])
+			
+			return next_note_id
+	
+	return ""
+
+func get_unlocked_notes() -> Array[String]:
+	"""
+	Get list of currently unlocked notes
+	
+	@return: Array of unlocked note IDs
+	"""
+	var result: Array[String] = []
+	result.assign(_state.unlocked_notes.duplicate())
+	return result
+
+func is_note_unlocked(note_id: String) -> bool:
+	"""
+	Check if a specific note is unlocked and available for spawning
+	
+	@param note_id: Note identifier to check
+	@return: True if note is unlocked
+	"""
+	return note_id in _state.unlocked_notes
+
+# === STORY PROGRESSION ===
+
+func _update_story_progress(new_progress: int) -> void:
+	"""
+	Update overall story progress
+	
+	@param new_progress: New progress value (0-100)
+	"""
+	if new_progress > _state.story_progress:
+		var old_progress: int = _state.story_progress
+		_state.story_progress = new_progress
+		
+		if _message_bus:
+			_message_bus.emit_event("story_progress_changed", [old_progress, new_progress])
+
+func _check_story_progression() -> void:
+	"""Check event flags and update story progression accordingly"""
+	# Check major story beats
+	if has_event_flag("first_puzzle_complete") and _state.story_progress < STORY_FLAGS.first_puzzle_complete:
+		_update_story_progress(STORY_FLAGS.first_puzzle_complete)
+	
+	if has_event_flag("second_puzzle_complete") and _state.story_progress < STORY_FLAGS.second_puzzle_complete:
+		_update_story_progress(STORY_FLAGS.second_puzzle_complete)
+	
+	if has_event_flag("third_puzzle_complete") and _state.story_progress < STORY_FLAGS.third_puzzle_complete:
+		_update_story_progress(STORY_FLAGS.third_puzzle_complete)
+
+func get_story_progress() -> int:
+	"""
+	Get current story progress
+	
+	@return: Story progress value (0-100)
+	"""
+	return _state.story_progress
+
+func can_access_ending() -> bool:
+	"""
+	Check if player can access the ending
+	
+	@return: True if all requirements for ending are met
+	"""
+	return has_event_flag("all_puzzles_complete") and _state.story_progress >= STORY_FLAGS.ending_unlocked
+
+# === EXISTING METHODS (unchanged) ===
 
 func record_death_location(position: Vector2i, cause: String) -> void:
 	"""
@@ -211,6 +422,14 @@ func reset_for_new_run() -> void:
 	_state.current_tile_position = Vector2i.ZERO
 	_state.tiles_explored = 0
 	_state.puzzle_progress.clear()
+	
+	# Reset event flags but preserve story progression across runs
+	_state.event_flags.clear()
+	_state.completed_puzzles.clear()
+	
+	# Reset note system
+	_initialize_note_system()
+	
 	_initialize_run_data()
 	
 	_message_bus.emit_event("inventory_changed", [[], [], []])
@@ -274,6 +493,14 @@ func _validate_state_change(key: String, value: Variant) -> bool:
 			return value is Dictionary
 		"game_active":
 			return value is bool
+		"event_flags":
+			return value is Dictionary
+		"completed_puzzles":
+			return value is Array
+		"unlocked_notes":
+			return value is Array
+		"story_progress":
+			return value is int and value >= 0 and value <= 100
 		_:
 			return true
 
@@ -322,6 +549,7 @@ func _log_state_change(key: String, old_value: Variant, new_value: Variant) -> v
 	@param old_value: Previous value
 	@param new_value: New value
 	"""
+	pass
 
 # === EVENT HANDLERS ===
 
@@ -340,8 +568,12 @@ func _on_player_died(cause: String, position: Vector2i, data: Dictionary) -> voi
 	record_death_location(position, cause)
 
 func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
-	# Just track the collection count - PlayerInventory handles the actual inventory
+	# Track the collection count
 	_state.run_data.items_collected += 1
+	
+	# If it's a note, unlock the next one
+	if item_id.begins_with("note_"):
+		unlock_next_note()
 
 func _on_tile_entered(tile_node: Node3D, position: Vector2i, player: Node3D) -> void:
 	_state.current_tile_position = position
@@ -350,5 +582,5 @@ func _on_tile_entered(tile_node: Node3D, position: Vector2i, player: Node3D) -> 
 	_state.run_data.tiles_visited += 1
 
 func _on_puzzle_completed(puzzle_id: String, tile_pos: Vector2i, reward: Dictionary) -> void:
-	_state.puzzle_progress[puzzle_id] = "completed"
+	complete_puzzle(puzzle_id)
 	_state.run_data.puzzles_completed += 1

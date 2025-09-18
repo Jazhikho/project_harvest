@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://caxfd4ay7tmd1"]
+
+[ext_resource type="PackedScene" uid="uid://ba3m84vo7qc1j" path="res://assets/models/flagfound.glb" id="1_rmlrq"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_pi1fg"]
+radius = 1.5
+
+[node name="flagfound" instance=ExtResource("1_rmlrq")]
+
+[node name="BHPS_49StarFlag_VR" parent="." index="0"]
+transform = Transform3D(0.0103309, 0, 0, 0, 0.012, 0, 0, 0, 0.00772883, -0.1, 0, 0)
+
+[node name="Area3D" type="Area3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.337865, 0.00664137, 0.0658254)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3375, 0.875, -0.075)
+shape = SubResource("CylinderShape3D_pi1fg")

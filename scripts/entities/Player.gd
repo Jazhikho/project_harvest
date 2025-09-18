@@ -92,7 +92,7 @@ func _input(event: InputEvent) -> void:
 		# Debug messages removed - not referencing gameloop steps
 		return
 	
-	if not mouse_captured:
+	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		return
 	
 	if event is InputEventMouseMotion:

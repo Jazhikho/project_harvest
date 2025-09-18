@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://dyd7pqqsfdktc"]
+
+[ext_resource type="PackedScene" uid="uid://b753cm6gtlc1c" path="res://assets/models/note3.glb" id="1_uarqq"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_x6w51"]
+height = 1.0
+radius = 1.375
+
+[node name="note3" instance=ExtResource("1_uarqq")]
+
+[node name="SM_A4_paper" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Area3D" type="Area3D" parent="." index="1"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CylinderShape3D_x6w51")

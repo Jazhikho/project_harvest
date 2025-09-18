@@ -4,21 +4,25 @@ extends RigidBody3D
 
 class_name BaseItem
 
-# Item configuration
+# Item configuration - set these in child classes or in the editor
 @export var item_id: String = ""
 @export var item_name: String = ""
 @export var item_description: String = ""
-@export var auto_pickup: bool = true
 @export var pickup_sound: String = ""
 
-# Pickup area reference
-var pickup_area: Area3D
+# Node references
+@onready var pickup_area: Area3D = $PickupArea
+@onready var mesh_instance: MeshInstance3D = $MeshInstance3D
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D
+
+# System references
 var _message_bus: Node
 var _player_inventory: Node
 
 # Pickup state
 var _is_collected: bool = false
 var _pickup_tween: Tween
+var _player_in_range: bool = false
 
 func _ready() -> void:
 	# Validate configuration
@@ -26,94 +30,91 @@ func _ready() -> void:
 		push_error("BaseItem: item_id not set for %s" % name)
 		return
 	
-	# Set metadata for SpawnManager compatibility
+	# Set metadata for systems
 	set_meta("item_id", item_id)
 	set_meta("is_collectible", true)
+	set_meta("is_interactable", true)
+	add_to_group("interactable_items")
 	
-	# Set collision properties
-	CollisionHelper.setup_item_collision(self)
-	
-	# Find or create pickup area
-	_setup_pickup_area()
-	
-	# Connect to systems
+	# Initialize systems
 	call_deferred("_initialize_systems")
 	
-	# Visual setup
+	# Connect pickup area signals
+	_connect_pickup_signals()
+	
+	# Setup visual effects
 	_setup_visual_effects()
+	
+	# Call custom initialization
+	_on_item_ready()
 
 func _initialize_systems() -> void:
 	"""Initialize connections to game systems"""
 	_message_bus = get_node_or_null("/root/MessageBus")
 	_player_inventory = get_node_or_null("/root/PlayerInventory")
+	
+	if not _message_bus:
+		push_error("BaseItem: MessageBus not found")
+	if not _player_inventory:
+		push_error("BaseItem: PlayerInventory not found")
 
-func _setup_pickup_area() -> void:
-	"""Setup or find pickup collision area"""
-	pickup_area = get_node_or_null("PickupArea") as Area3D
-	
-	if not pickup_area:
-		# Create pickup area if it doesn't exist
-		pickup_area = Area3D.new()
-		pickup_area.name = "PickupArea"
-		add_child(pickup_area)
-		
-		# Create collision shape
-		var collision = CollisionShape3D.new()
-		collision.name = "PickupCollision"
-		var shape = SphereShape3D.new()
-		shape.radius = 1.0
-		collision.shape = shape
-		pickup_area.add_child(collision)
-		
-	# Set collision layers
-	CollisionHelper.setup_pickup_area(pickup_area)
-	
-	# Connect pickup signals
-	if not pickup_area.body_entered.is_connected(_on_pickup_area_entered):
-		pickup_area.body_entered.connect(_on_pickup_area_entered.bind())
-	if not pickup_area.body_exited.is_connected(_on_pickup_area_exited):
-		pickup_area.body_exited.connect(_on_pickup_area_exited.bind())
+func _connect_pickup_signals() -> void:
+	"""Connect pickup area signals"""
+	if pickup_area:
+		if not pickup_area.body_entered.is_connected(_on_player_entered_range):
+			pickup_area.body_entered.connect(_on_player_entered_range)
+		if not pickup_area.body_exited.is_connected(_on_player_exited_range):
+			pickup_area.body_exited.connect(_on_player_exited_range)
 
 func _setup_visual_effects() -> void:
 	"""Setup visual effects for the item"""
 	# Add subtle floating animation
-	if auto_pickup:
-		_start_floating_animation()
+	_start_floating_animation()
+	
+	# Set initial physics state
+	gravity_scale = 0.0
+	freeze = true
 
 func _start_floating_animation() -> void:
 	"""Start subtle floating animation"""
-	var start_y = position.y
+	if not mesh_instance:
+		return
+		
+	var start_pos = mesh_instance.position
 	
 	var tween = create_tween()
 	tween.set_loops()
-	tween.tween_property(self, "position:y", start_y + 0.2, 1.0)
-	tween.tween_property(self, "position:y", start_y - 0.2, 1.0)
+	tween.tween_property(mesh_instance, "position:y", start_pos.y + 0.15, 1.5)
+	tween.tween_property(mesh_instance, "position:y", start_pos.y - 0.15, 1.5)
 
-func _on_pickup_area_entered(body: Node3D) -> void:
-	"""Handle pickup area collision - now shows interaction prompt instead of auto-pickup"""
+func _on_player_entered_range(body: Node3D) -> void:
+	"""Show interaction prompt when player enters range"""
 	if _is_collected or not body.is_in_group("player"):
 		return
 	
-	# OLD AUTO-PICKUP CODE (commented out as requested):
-	# if auto_pickup:
-	#	_trigger_pickup(body)
+	_player_in_range = true
 	
-	# NEW INTERACTION-BASED PICKUP:
-	# Show interaction prompt to player
+	# Show interaction prompt
 	if _message_bus:
-		_message_bus.emit_event("show_interaction_prompt", ["Pickup " + display_name, self])
+		var prompt_text = get_pickup_prompt_text()
+		_message_bus.emit_event("show_interaction_prompt", [prompt_text, self])
 
-func _on_pickup_area_exited(body: Node3D) -> void:
-	"""Handle player leaving pickup area"""
+func _on_player_exited_range(body: Node3D) -> void:
+	"""Hide interaction prompt when player leaves range"""
 	if body.is_in_group("player"):
+		_player_in_range = false
+		
 		# Hide interaction prompt
 		if _message_bus:
 			_message_bus.emit_event("hide_interaction_prompt", [self])
 
 func interact() -> bool:
 	"""Called when player interacts with this item"""
+	if not _player_in_range or _is_collected:
+		return false
+	
 	var player = get_tree().get_first_node_in_group("player")
-	if player and not _is_collected:
+	if player:
 		_trigger_pickup(player)
 		return true
 	return false
@@ -147,9 +148,16 @@ func _trigger_pickup(collector: Node3D) -> void:
 	if state_manager:
 		tile_pos = state_manager.get_state("current_tile_position")
 	
+	# Hide interaction prompt
+	if _message_bus:
+		_message_bus.emit_event("hide_interaction_prompt", [self])
+	
 	# Emit collection event
 	if _message_bus:
 		_message_bus.emit_event("item_collected", [item_id, collector, tile_pos])
+	
+	# Call custom collection handler
+	_on_item_collected(collector)
 	
 	# Visual pickup effect
 	_play_pickup_effect()
@@ -166,9 +174,6 @@ func _play_pickup_sound() -> void:
 
 func _play_pickup_effect() -> void:
 	"""Play visual pickup effect and remove item"""
-	# Disable physics
-	freeze = true
-	
 	# Disable pickup area
 	if pickup_area:
 		pickup_area.set_deferred("monitoring", false)
@@ -182,7 +187,7 @@ func _play_pickup_effect() -> void:
 	# Remove after animation
 	_pickup_tween.tween_callback(queue_free)
 
-# Public API
+# === PUBLIC API ===
 
 func get_item_id() -> String:
 	"""Get item identifier"""
@@ -201,7 +206,7 @@ func is_collected() -> bool:
 	return _is_collected
 
 func force_pickup(collector: Node3D) -> void:
-	"""Force pickup regardless of auto_pickup setting"""
+	"""Force pickup regardless of distance"""
 	_trigger_pickup(collector)
 
 func set_pickup_enabled(enabled: bool) -> void:
@@ -209,36 +214,46 @@ func set_pickup_enabled(enabled: bool) -> void:
 	if pickup_area:
 		pickup_area.monitoring = enabled
 
-# Override in child classes for special behavior
+func update_visual(mesh: Mesh, material: Material = null) -> void:
+	"""
+	Update item visual appearance
+	
+	@param mesh: New mesh to display
+	@param material: Optional material to apply
+	"""
+	if mesh_instance:
+		mesh_instance.mesh = mesh
+		if material:
+			mesh_instance.material_override = material
+
+# === OVERRIDE POINTS FOR CHILD CLASSES ===
+
+func _on_item_ready() -> void:
+	"""
+	Called after base initialization - override in child classes
+	"""
+	pass
 
 func _on_item_collected(collector: Node3D) -> void:
 	"""
-	Called after successful collection
-	Override in child classes for special effects
+	Called after successful collection - override in child classes
 	
 	@param collector: Node that collected the item
 	"""
 	pass
 
-func _on_pickup_failed(collector: Node3D, reason: String) -> void:
-	"""
-	Called when pickup fails (e.g., inventory full)
-	Override in child classes for feedback
-	
-	@param collector: Node that attempted pickup
-	@param reason: Reason for failure
-	"""
-	if _message_bus:
-		_message_bus.emit_event("notification_requested", ["Cannot pickup %s: %s" % [get_item_name(), reason], 2.0, 1])
-
 func get_pickup_prompt_text() -> String:
 	"""
-	Get text to show when player can pick up item
-	Override in child classes for custom prompts
+	Get text to show when player can pick up item - override in child classes
 	
 	@return: Prompt text
 	"""
 	return "Press E to pick up %s" % get_item_name()
 
-# Debug methods
-
+func get_item_color() -> Color:
+	"""
+	Get color for item visual - override in child classes
+	
+	@return: Color for the item
+	"""
+	return Color.WHITE

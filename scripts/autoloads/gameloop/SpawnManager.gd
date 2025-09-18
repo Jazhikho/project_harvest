@@ -235,7 +235,7 @@ func _get_item_color(item_id: String) -> Color:
 
 func _setup_item_collision(item_node: Node3D) -> void:
 	"""
-	Setup collision detection for item pickup
+	Setup collision detection for item interaction prompts (not auto-pickup)
 	
 	@param item_node: Item node to setup collision for
 	"""
@@ -243,16 +243,23 @@ func _setup_item_collision(item_node: Node3D) -> void:
 	var collision := CollisionShape3D.new()
 	var shape := SphereShape3D.new()
 	
-	shape.radius = 0.5
+	shape.radius = 0.8  # Slightly larger for interaction detection
 	collision.shape = shape
 	
 	item_node.add_child(area)
 	area.add_child(collision)
+	area.name = "InteractionArea"
 	
 	area.collision_layer = 0
-	area.collision_mask = 1
+	area.collision_mask = 1  # Player layer
 	
-	area.body_entered.connect(_on_item_pickup.bind(item_node))
+	# Connect to interaction detection, not auto-pickup
+	area.body_entered.connect(_on_item_interaction_enter.bind(item_node))
+	area.body_exited.connect(_on_item_interaction_exit.bind(item_node))
+	
+	# Make sure the item node can be interacted with
+	item_node.set_meta("is_interactable", true)
+	item_node.add_to_group("interactable_items")
 
 func _spawn_backpack_at_death(tile_node: Node3D, death_data: Dictionary, spawn_points: Array[Vector3]) -> Array[Vector3]:
 	"""
@@ -426,12 +433,12 @@ func _spawn_entities(tile_node: Node3D, context: Dictionary, spawn_points: Array
 	
 	return spawned_entities
 
-func _on_item_pickup(body: Node3D, item_node: Node3D) -> void:
+func _on_item_interaction_enter(body: Node3D, item_node: Node3D) -> void:
 	"""
-	Handle item pickup collision
+	Show interaction prompt when player approaches item
 	
-	@param body: Body that entered collision
-	@param item_node: Item that was touched
+	@param body: Body that entered (should be player)
+	@param item_node: Item node player is near
 	"""
 	if not body.is_in_group("player"):
 		return
@@ -440,10 +447,23 @@ func _on_item_pickup(body: Node3D, item_node: Node3D) -> void:
 	if item_id.is_empty():
 		return
 	
-	var tile_pos: Vector2i = _state_manager.get_state("current_tile_position")
-	_message_bus.emit_event("item_collected", [item_id, body, tile_pos])
+	# Show interaction prompt via NarrationSystem
+	if _message_bus:
+		_message_bus.emit_event("show_interaction_prompt", [item_id, item_node])
+
+func _on_item_interaction_exit(body: Node3D, item_node: Node3D) -> void:
+	"""
+	Hide interaction prompt when player leaves item area
 	
-	item_node.queue_free()
+	@param body: Body that exited (should be player)
+	@param item_node: Item node player left
+	"""
+	if not body.is_in_group("player"):
+		return
+	
+	# Hide interaction prompt
+	if _message_bus:
+		_message_bus.emit_event("hide_interaction_prompt", [item_node])
 
 func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""
