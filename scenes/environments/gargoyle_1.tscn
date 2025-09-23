@@ -1,25 +1,40 @@
-[gd_scene load_steps=4 format=3 uid="uid://cpjs4arkauvsd"]
+[gd_scene load_steps=6 format=3 uid="uid://cpjs4arkauvsd"]
 
 [ext_resource type="PackedScene" uid="uid://cswvxbu1b1184" path="res://assets/models/gargoyle1.glb" id="1_el0yt"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_hvo7f"]
-size = Vector3(2.875, 2.5, 2.5)
+[ext_resource type="Script" uid="uid://bs2qgf7apmtgx" path="res://scripts/environments/ObjectsBase.gd" id="2_j2slm"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_jhrpq"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_pi1fg"]
 radius = 3.125
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_hvo7f"]
+size = Vector3(2.875, 2.5, 2.5)
+
 [node name="gargoyle1" instance=ExtResource("1_el0yt")]
+script = ExtResource("2_j2slm")
+display_name = "Gargoyle"
+interact_toast_text = "There's some writing here..."
+toast_seconds = 5.0
+consume_item_on_success = false
+show_toast_on_success = false
+success_toast_text = ""
+show_toast_on_fail = false
+fail_toast_text = ""
 
 [node name="Area3D" type="Area3D" parent="." index="1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.337865, 0.00664137, 0.0658254)
+collision_layer = 16
+script = ExtResource("3_jhrpq")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.275, 1.25, -0.2)
-shape = SubResource("BoxShape3D_hvo7f")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.374635, 0.881641, -0.00917441)
+shape = SubResource("CylinderShape3D_pi1fg")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." index="2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30073, 0.0132827, 0.131651)
+collision_layer = 16
+collision_mask = 55
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3375, 0.875, -0.075)
-shape = SubResource("CylinderShape3D_pi1fg")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.237865, 1.24336, -0.265826)
+shape = SubResource("BoxShape3D_hvo7f")

@@ -1,0 +1,113 @@
+{
+  "sequences": {
+	"intro": [
+	  { "text": "Where... where am I? A corn maze? But how did I get here?" },
+	  { "text": "Wait... the farm. I remember the farm. I was just... somewhere else. But where?" },
+	  { "text": "Maybe it's a dream. Maybe I'm just crazy. Or maybe...just temporary amnesia?" },
+	  { "text": "Whatever it is, I need to get out of here." },
+	  { "text": "It's just a corn maze, right? Corn mazes are supposed to be fun. Let me just find the exit, and I can figure things out later" }
+	]
+  },
+  "toasts": {
+	"continue_toast_1": {
+	  "text": "How did I get here? I was just... somewhere else. But where?",
+	  "seconds": 5.0
+	},
+	"continue_toast_2": {
+	  "text": "The maze again. It's always the maze. How many times have I been here?",
+	  "seconds": 5.0
+	},
+	"continue_toast_3": {
+	  "text": "I died, didn't I? But I'm back. Did I just dream it?",
+	  "seconds": 5.0
+	},
+	"continue_toast_4": {
+	  "text": "The corn whispers my name. No, not my name. I don't know. Who am I?",
+	  "seconds": 5.0
+	},
+	"continue_toast_5": {
+	  "text": "Hey! I'm in a corn maze! This should be fun!",
+	  "seconds": 5.0
+	},
+	"flashlight_after_3m": {
+	  "text": "It's getting dark. I should probably find the exit. Glad I brought a flashlight.",
+	  "seconds": 5.0
+	},
+	"entered_effigy_area": {
+	  "text": "Rope. Burlap. A shape pretending to be a person. Someone wanted me to see this.",
+	  "seconds": 5.0
+	},
+	"weird_thing_found": {
+	  "text": "Another trinket. Another whisper in my handwriting. How many versions of me are here?",
+	  "seconds": 5.0
+	},
+	"effigy_stage1_seen": {
+	  "text": "Hah. A scarecrow. Cute.",
+	  "seconds": 5.0
+	},
+	"effigy_stage2_seen": {
+	  "text": "Did the scarecrow... change? No, it's just my imagination.",
+	  "seconds": 5.0
+	},
+	"effigy_stage3_seen": {
+	  "text": "No. It's definitely changed. I swear it's watching me, following me.",
+	  "seconds": 5.0
+	},
+	"effigy_stage4_seen": {
+	  "text": "What the... Its coming for me!",
+	  "seconds": 5.0
+	},
+	"item_broken_glass": {
+	  "text": "Sharp glass. Reflects a face that might be mine.",
+	  "seconds": 4.0
+	},
+	"item_holy_book": {
+	  "text": "A holy book. Someone prayed here. It didn't help them.",
+	  "seconds": 4.0
+	},
+	"item_flag": {
+	  "text": "An old flag. Symbols of a world outside the maze.",
+	  "seconds": 4.0
+	},
+	"item_phone": {
+	  "text": "A dead phone. No signal. No one to call. No one who'd answer.",
+	  "seconds": 4.0
+	},
+	"sanity_90": {
+	  "text": "Something feels off about this place...",
+	  "seconds": 3.0
+	},
+	"sanity_80": {
+	  "text": "The corn is too tall. The paths are too narrow.",
+	  "seconds": 3.0
+	},
+	"sanity_70": {
+	  "text": "I'm being watched. I know I'm being watched.",
+	  "seconds": 3.0
+	},
+	"sanity_60": {
+	  "text": "The scarecrows... they're not where they were before.",
+	  "seconds": 3.0
+	},
+	"sanity_50": {
+	  "text": "I need to get out. Now. Something's very wrong here.",
+	  "seconds": 3.0
+	},
+	"sanity_40": {
+	  "text": "They're moving. I see them moving when I'm not looking!",
+	  "seconds": 3.0
+	},
+	"sanity_30": {
+	  "text": "Can't think straight. The whispers are so loud!",
+	  "seconds": 3.0
+	},
+	"sanity_20": {
+	  "text": "No no no no no! They're coming for me!",
+	  "seconds": 3.0
+	},
+	"sanity_10": {
+	  "text": "I'm becoming one of them. I can feel it happening!",
+	  "seconds": 3.0
+	}
+  }
+}

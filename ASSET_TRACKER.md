@@ -240,6 +240,54 @@ This document provides complete attribution for all assets used in Project Harve
 
 **Attribution:** "Low Poly: Dead Tree by ClintonAbbott.Art is licensed under Creative Commons Attribution"
 
+### Flashlight
+**Source:** Sketchfab  
+**Creator:** donnichols  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/flashlight.glb` - Flashlight model for gameplay elements (7MB, GLB format with 2k texture size)
+
+**Attribution:** "Flashlight by donnichols is licensed under Creative Commons Attribution"
+
+### PB153 Notebook Low
+**Source:** Sketchfab  
+**Creator:** SCANIMATE.IO  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/pb153_notebook_low.glb` - PB153 Notebook Low model for environmental details (3MB, GLB format with 1k texture size)
+
+**Attribution:** "PB153 Notebook Low by SCANIMATE.IO is licensed under Creative Commons Attribution"
+
+### Pocket Watch
+**Source:** Virtual Museums of Małopolska  
+**Creator:** Virtual Museums of Małopolska  
+**License:** CC0 Public Domain  
+**Website:** https://muzea.malopolska.pl/en/objects-list/2742
+
+**Assets Used:**
+- `assets/models/pocket_watch.glb` - Pocket watch model for environmental details (12MB, GLB format with 1k texture size)
+- Alternative sizes available: 41MB (4k texture), 100MB (8k texture)
+
+**Historical Context:** Attributed to Jean-Antoine Lépine (1720-1814), early 19th century, Paris, from Jagiellonian University Museum Collegium Maius. Inventory number: 1726; 1439/V
+
+**Attribution:** "Pocket watch by Virtual Museums of Małopolska is licensed under CC0 Public Domain. Available at https://muzea.malopolska.pl/en/objects-list/2742"
+
+### Pirate Coin
+**Source:** Sketchfab  
+**Creator:** Aoerchemix  
+**License:** Creative Commons Attribution (CC Attribution)  
+**Website:** https://sketchfab.com/
+
+**Assets Used:**
+- `assets/models/pirate_coin.glb` - Pirate coin model for gameplay elements (3MB, GLB format with 1k texture size)
+- Alternative size available: 16MB (4k texture size)
+
+**Attribution:** "Pirate Coin by Aoerchemix is licensed under Creative Commons Attribution"
+
 ---
 
 ## Textures
@@ -624,6 +672,7 @@ Assets under CC0 are released into the public domain and can be used for any pur
 - AmbientCG lava textures (Lava002)
 - AmbientCG metal textures (Metal029, Metal007)
 - Poly Haven HDRI environments
+- Pocket Watch by Virtual Museums of Małopolska
 - Freesound.org assets by ShangusBurger, geoneo0, hetzz, belarathbone, dimbark1
 
 ### Standard License (Commercial)
@@ -647,6 +696,9 @@ Assets under CC Attribution require attribution to the creator and allow commerc
 - Altar by BunQuest
 - Low Poly Brazier by Art Is Scary
 - Low Poly: Dead Tree by ClintonAbbott.Art
+- Flashlight by donnichols
+- PB153 Notebook Low by SCANIMATE.IO
+- Pirate Coin by Aoerchemix
 - Freesound.org assets by klankbeeld (Attribution 4.0)
 - Freesound.org assets by nekoloca, soundmary (Attribution 4.0)
 - Freesound.org assets by PotatokingXII, Allen2001, jamesrodavidson, SophieMezaM (Attribution 3.0)

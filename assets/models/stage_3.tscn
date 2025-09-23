@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://twgsxg8mfb6i"]
+
+[ext_resource type="PackedScene" uid="uid://tj2t4odvqga3" path="res://assets/models/effigy3.glb" id="1_y464u"]
+
+[node name="effigy3" instance=ExtResource("1_y464u")]

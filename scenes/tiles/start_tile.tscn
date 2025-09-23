@@ -1,17 +1,22 @@
-[gd_scene load_steps=10 format=3 uid="uid://c5yqrv82hov2i"]
+[gd_scene load_steps=13 format=3 uid="uid://c5yqrv82hov2i"]
 
-[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_xuooa"]
+[ext_resource type="Script" uid="uid://bdjvo81edohmu" path="res://scripts/tiles/StartTile.gd" id="1_xuooa"]
 [ext_resource type="PackedScene" uid="uid://t2ahnvllm6bf" path="res://scenes/environments/11x_1_corn_tile.tscn" id="2_60arg"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_fko6s"]
-[ext_resource type="PackedScene" uid="uid://dxrwt86snuv1a" path="res://scenes/environments/3x1_corn_tile.tscn" id="2_wg00r"]
 [ext_resource type="PackedScene" uid="uid://baktq46848232" path="res://scenes/environments/6x1_corn_tile.tscn" id="3_du45t"]
 [ext_resource type="PackedScene" uid="uid://bfmwipk4hpnoc" path="res://scenes/environments/5x1_corn_tile.tscn" id="4_qlonk"]
 [ext_resource type="PackedScene" uid="uid://b0nvjxcqa47ui" path="res://scenes/environments/8x1_corn_tile.tscn" id="6_xh5ey"]
 [ext_resource type="PackedScene" uid="uid://572iojnx3jma" path="res://scenes/environments/4x1_corn_tile.tscn" id="7_bsa85"]
 [ext_resource type="PackedScene" uid="uid://dh2ksygtyattj" path="res://scenes/environments/2x1_corn_tile.tscn" id="8_aq4jt"]
+[ext_resource type="Script" uid="uid://bslkfjq217ygu" path="res://scripts/tiles/ItemSpawn.gd" id="9_0mysc"]
+[ext_resource type="PackedScene" uid="uid://c5rjon02p04c" path="res://scenes/entities/effigy.tscn" id="9_fs0kh"]
+[ext_resource type="PackedScene" uid="uid://cfysh2178e3rc" path="res://scenes/misc/backpack.tscn" id="10_ij6o6"]
+[ext_resource type="Script" uid="uid://d1kulb6h8r3lq" path="res://scripts/tiles/EntitySpawn.gd" id="10_slt4u"]
 
 [node name="StartTile" type="Node3D"]
 script = ExtResource("1_xuooa")
+effigy_path = NodePath("Objects/Effigy")
+backpack_path = NodePath("Objects/backpack")
 
 [node name="Maze" type="Node3D" parent="."]
 
@@ -29,14 +34,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 1.75, -9)
 [node name="2x1CornTile3" parent="Maze/Maze" instance=ExtResource("8_aq4jt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 1.75, -5)
 
-[node name="3x1CornTile" parent="Maze/Maze" instance=ExtResource("2_wg00r")]
-transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, -12, 1.75, 0)
-
 [node name="4x1CornTile" parent="Maze/Maze" instance=ExtResource("7_bsa85")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -4, 1.75, -7.5)
 
 [node name="5x1CornTile" parent="Maze/Maze" instance=ExtResource("4_qlonk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 1.75, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 1.75, 8)
 
 [node name="5x1CornTile2" parent="Maze/Maze" instance=ExtResource("4_qlonk")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -2, 1.75, -3)
@@ -59,6 +61,9 @@ transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0.5, 1
 [node name="11x1CornTile" parent="Maze/Maze" instance=ExtResource("2_60arg")]
 transform = Transform3D(1.31134e-07, 0, 1, 0, 1, 0, -1, 0, 1.31134e-07, -7, 1.75, 5)
 
+[node name="11x1CornTile2" parent="Maze/Maze" instance=ExtResource("2_60arg")]
+transform = Transform3D(1.31134e-07, 0, 1, 0, 1, 0, -1, 0, 1.31134e-07, -13, 1.75, 3)
+
 [node name="Doors" type="Node3D" parent="Maze"]
 
 [node name="NDoor" type="Marker3D" parent="Maze/Doors"]
@@ -70,5 +75,23 @@ transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, 
 [node name="EDoor" type="Marker3D" parent="Maze/Doors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
 
+[node name="ItemSpawn" type="Node3D" parent="Maze"]
+script = ExtResource("9_0mysc")
+max_active = 2
+
+[node name="EntitySpawn" type="Node3D" parent="Maze"]
+script = ExtResource("10_slt4u")
+
 [node name="PlayerStart" type="Marker3D" parent="."]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -5, 1, -0.5)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -5, 1, 6)
+
+[node name="Objects" type="Node3D" parent="."]
+visible = false
+
+[node name="Effigy" parent="Objects" instance=ExtResource("9_fs0kh")]
+transform = Transform3D(1.06066, 0, 1.06066, 0, 1.5, 0, -1.06066, 0, 1.06066, -6.25, 0, -1.25)
+visible = false
+
+[node name="backpack" parent="Objects" instance=ExtResource("10_ij6o6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.25, 0, 0.25)
+visible = false

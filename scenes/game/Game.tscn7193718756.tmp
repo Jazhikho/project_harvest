@@ -1,0 +1,158 @@
+[gd_scene load_steps=23 format=3 uid="uid://0atthfte3o13"]
+
+[ext_resource type="PackedScene" uid="uid://c5yqrv82hov2i" path="res://scenes/tiles/start_tile.tscn" id="1_start_tile"]
+[ext_resource type="PackedScene" uid="uid://b2djga0bpmfs7" path="res://scenes/entities/player.tscn" id="2_player"]
+[ext_resource type="Script" uid="uid://h3dp65gy6hmq" path="res://scripts/systems/GameController.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="4"]
+[ext_resource type="Script" uid="uid://cqcmqlkjrddqa" path="res://scripts/systems/TimeOfDayController.gd" id="4_365ku"]
+[ext_resource type="Shader" uid="uid://c71dha5rynbn0" path="res://assets/textures/sky.gdshader" id="4_gg4pt"]
+[ext_resource type="PackedScene" uid="uid://5m8oiae77mxv" path="res://scenes/ui/InventoryUI.tscn" id="5"]
+[ext_resource type="Texture2D" uid="uid://cobe1yg0mkran" path="res://assets/textures/mealie_road_4k.exr" id="5_qf6a8"]
+[ext_resource type="Texture2D" uid="uid://c0nsssaorny41" path="res://assets/textures/EveningSkyHDRI040A_16K-HDR.exr" id="6_56wml"]
+[ext_resource type="Script" uid="uid://d1e228uwxk8yh" path="res://scripts/gameloop/EnemyManager.gd" id="10_07vrc"]
+[ext_resource type="Script" uid="uid://bmugfp6o4kyot" path="res://scripts/gameloop/SanityManager.gd" id="13_6k07o"]
+[ext_resource type="Script" uid="uid://bk578kmmh5437" path="res://scripts/gameloop/SpawnManager.gd" id="14_7st5e"]
+[ext_resource type="Script" uid="uid://lpi2vrlc3pd3" path="res://scripts/gameloop/TileStateManager.gd" id="15_olhyc"]
+[ext_resource type="Script" uid="uid://bg770el3d553r" path="res://scripts/gameloop/TileManager.gd" id="16_ib0i5"]
+[ext_resource type="AudioStream" uid="uid://dk38i5nulmvpx" path="res://assets/audio/Corn.ogg" id="16_vj8ay"]
+[ext_resource type="Script" uid="uid://cn14s0ccpsrwp" path="res://scripts/gameloop/ItemManager.gd" id="17_y8ug0"]
+[ext_resource type="Script" uid="uid://djc5g655mds1s" path="res://scripts/gameloop/JournalManager.gd" id="18_bqmam"]
+[ext_resource type="Script" uid="uid://bfgqjmxnrqhx3" path="res://scripts/gameloop/NarrativeSystem.gd" id="19_narrative"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wnrko"]
+shader = ExtResource("4_gg4pt")
+shader_parameter/hdr_day = ExtResource("5_qf6a8")
+shader_parameter/hdr_dusk = ExtResource("6_56wml")
+shader_parameter/blend = 0.0
+shader_parameter/rot = 0.0
+
+[sub_resource type="Sky" id="Sky_wnrko"]
+sky_material = SubResource("ShaderMaterial_wnrko")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+background_color = Color(0.2, 0.3, 0.4, 1)
+sky = SubResource("Sky_wnrko")
+ambient_light_source = 3
+ambient_light_color = Color(0.6, 0.7, 0.8, 1)
+ambient_light_energy = 0.0
+tonemap_exposure = 0.2
+fog_enabled = true
+fog_light_color = Color(0.5, 0.5, 0.6, 1)
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.01
+volumetric_fog_albedo = Color(1, 0.909804, 0.870588, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gg4pt"]
+shader = ExtResource("4_gg4pt")
+shader_parameter/blend = 0.0
+shader_parameter/rot = 0.0
+
+[node name="Game" type="Node3D"]
+script = ExtResource("3")
+
+[node name="GameControllers" type="Node" parent="."]
+
+[node name="EnemyManager" type="Node" parent="GameControllers"]
+script = ExtResource("10_07vrc")
+
+[node name="SanityManager" type="Node" parent="GameControllers"]
+script = ExtResource("13_6k07o")
+
+[node name="TileStateManager" type="Node" parent="GameControllers"]
+script = ExtResource("15_olhyc")
+
+[node name="TileManager" type="Node" parent="GameControllers"]
+script = ExtResource("16_ib0i5")
+tile_size_meters = null
+load_radius_tiles = null
+tile_scenes_by_mask = null
+
+[node name="SpawnManager" type="Node" parent="GameControllers"]
+script = ExtResource("14_7st5e")
+
+[node name="ItemManager" type="Node" parent="GameControllers"]
+script = ExtResource("17_y8ug0")
+
+[node name="JournalManager" type="Node" parent="GameControllers"]
+script = ExtResource("18_bqmam")
+
+[node name="NarrativeSystem" type="Node" parent="GameControllers"]
+script = ExtResource("19_narrative")
+
+[node name="MazeContainer" type="Node3D" parent="."]
+
+[node name="StartTile" parent="MazeContainer" instance=ExtResource("1_start_tile")]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, 6)
+
+[node name="Environment" type="Node3D" parent="."]
+
+[node name="Sun" type="DirectionalLight3D" parent="Environment"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 5, 8.75)
+light_color = Color(1, 0.901961, 0.784314, 1)
+light_energy = 2.0
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
+environment = SubResource("Environment_1")
+
+[node name="TimeOfDayController" type="Node" parent="Environment" node_paths=PackedStringArray("sun", "world_env")]
+script = ExtResource("4_365ku")
+sun = NodePath("../Sun")
+world_env = NodePath("../WorldEnvironment")
+sky_mat = SubResource("ShaderMaterial_gg4pt")
+duration_sec = 300.0
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Environment"]
+stream = ExtResource("16_vj8ay")
+volume_db = -18.0
+autoplay = true
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="PauseMenu" parent="UI" instance=ExtResource("4")]
+visible = false
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InventoryUI" parent="UI" instance=ExtResource("5")]
+visible = false
+
+[node name="NarrativePanel" type="PanelContainer" parent="UI"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -450.0
+offset_top = -200.0
+offset_right = 450.0
+offset_bottom = -50.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/NarrativePanel"]
+layout_mode = 2
+
+[node name="Text" type="RichTextLabel" parent="UI/NarrativePanel/VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="Continue" type="Button" parent="UI/NarrativePanel/VBoxContainer"]
+layout_mode = 2
+text = "Continue"
+
+[node name="TransitionLayer" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="FadeRect" type="ColorRect" parent="TransitionLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="TransitionLayer"]

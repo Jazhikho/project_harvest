@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://1d5vd145abxc"]
-
-[ext_resource type="PackedScene" uid="uid://cio7w0oqwg3hw" path="res://assets/models/flag.glb" id="1_0q7i7"]
-
-[node name="flag" instance=ExtResource("1_0q7i7")]
-
-[node name="BHPS_49StarFlag_VR" parent="." index="0"]
-transform = Transform3D(0.300167, 0.000975883, -0.0130417, -0.0045023, 0.127034, -0.360245, 0.00373831, 0.0746377, 0.613312, 0, 5.22066, -0.751778)

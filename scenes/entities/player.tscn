@@ -1,11 +1,32 @@
-[gd_scene load_steps=3 format=3 uid="uid://b2djga0bpmfs7"]
+[gd_scene load_steps=16 format=3 uid="uid://b2djga0bpmfs7"]
 
 [ext_resource type="Script" uid="uid://bd6i85w34p2be" path="res://scripts/entities/Player.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://d16caxlshlqwx" path="res://scripts/entities/PlayerLogic/flashlight.gd" id="2_5u6hq"]
+[ext_resource type="Script" uid="uid://b8llm01nr3otu" path="res://scripts/entities/sight_ray.gd" id="2_08t41"]
+[ext_resource type="Script" uid="uid://dxo2syf6a6tsx" path="res://scripts/entities/PlayerLogic/playerAudio.gd" id="3_d4qa6"]
+[ext_resource type="AudioStream" uid="uid://c8eb66vn6mnx4" path="res://assets/audio/whispers.ogg" id="4_n5sgd"]
+[ext_resource type="AudioStream" uid="uid://die1gqocil6rs" path="res://assets/audio/whispers1.ogg" id="5_5ki56"]
+[ext_resource type="AudioStream" uid="uid://cay4afojgq03u" path="res://assets/audio/heartbeat.ogg" id="6_dnykm"]
+[ext_resource type="AudioStream" uid="uid://l3vdvtk7nhu6" path="res://assets/audio/whispers2.ogg" id="6_saib0"]
+[ext_resource type="AudioStream" uid="uid://donucdt1axyo5" path="res://assets/audio/whispers3.ogg" id="7_ogpgs"]
+[ext_resource type="Script" uid="uid://dy00usmu7n5p2" path="res://scripts/entities/PlayerLogic/InteractionController.gd" id="8_dnykm"]
+[ext_resource type="AudioStream" uid="uid://oyp5ln71g5mx" path="res://assets/audio/whispers4.ogg" id="8_spk56"]
+[ext_resource type="AudioStream" uid="uid://1cu7jfgnuomh" path="res://assets/audio/walking.ogg" id="9_5ki56"]
+[ext_resource type="AudioStream" uid="uid://sk3fri0larry" path="res://assets/audio/sprinting.ogg" id="10_saib0"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pqjxn"]
 radius = 0.4
 
-[node name="Player" type="CharacterBody3D"]
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_dnykm"]
+streams_count = 5
+stream_0/stream = ExtResource("4_n5sgd")
+stream_1/stream = ExtResource("5_5ki56")
+stream_2/stream = ExtResource("6_saib0")
+stream_3/stream = ExtResource("7_ogpgs")
+stream_4/stream = ExtResource("8_spk56")
+
+[node name="Player" type="CharacterBody3D" groups=["player"]]
+collision_mask = 62
 script = ExtResource("1_player")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -25,6 +46,37 @@ shadow_blur = 0.3
 spot_range = 22.0
 spot_attenuation = 1.4
 spot_angle = 30.0
+script = ExtResource("2_5u6hq")
 
-[node name="FlashlightMesh" type="MeshInstance3D" parent="Camera3D"]
-visible = false
+[node name="Audio" type="Node" parent="."]
+script = ExtResource("3_d4qa6")
+whispers_gap_min = 30.0
+whispers_gap_max = 60.0
+
+[node name="Whispers" type="AudioStreamPlayer3D" parent="Audio"]
+stream = SubResource("AudioStreamRandomizer_dnykm")
+volume_db = -30.0
+
+[node name="Walking" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("9_5ki56")
+
+[node name="Sprinting" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("10_saib0")
+
+[node name="Heart" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("6_dnykm")
+parameters/looping = true
+
+[node name="SightRay" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+collision_mask = 51
+script = ExtResource("2_08t41")
+role = 1
+eye_path = NodePath("../Eyes")
+forward_node_path = NodePath("../Eyes")
+
+[node name="Eyes" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.706925, 0.000614583)
+
+[node name="InteractionController" type="Node" parent="."]
+script = ExtResource("8_dnykm")

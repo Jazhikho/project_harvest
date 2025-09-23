@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://vu4cqxlw4rbg"]
+
+[ext_resource type="PackedScene" uid="uid://ddycxtrodaxjd" path="res://assets/models/gate.glb" id="1_ahd7w"]
+[ext_resource type="Script" uid="uid://bofhncfscab6c" path="res://scripts/environments/FinalGate.gd" id="2_sqrjw"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_fkwno"]
+[ext_resource type="Script" uid="uid://dopn3hjbif1co" path="res://scripts/environments/GateAudio.gd" id="4_od0np"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sqrjw"]
+size = Vector3(0.25, 2.75, 6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_algbx"]
+size = Vector3(2.5, 2.75, 6)
+
+[node name="gate" instance=ExtResource("1_ahd7w")]
+script = ExtResource("2_sqrjw")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="3"]
+collision_layer = 16
+collision_mask = 37
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.025, 1.375, 0)
+shape = SubResource("BoxShape3D_sqrjw")
+
+[node name="Area3D" type="Area3D" parent="." index="4"]
+collision_layer = 16
+script = ExtResource("3_fkwno")
+kind = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.875, 0)
+shape = SubResource("BoxShape3D_algbx")
+
+[node name="Audio" type="Node" parent="." index="5"]
+script = ExtResource("4_od0np")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Audio" index="0"]
+
+[node name="AudioStreamPlayer3D2" type="AudioStreamPlayer3D" parent="Audio" index="1"]
+
+[node name="AudioStreamPlayer3D3" type="AudioStreamPlayer3D" parent="Audio" index="2"]

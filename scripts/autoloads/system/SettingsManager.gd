@@ -27,15 +27,11 @@ var _settings: Dictionary = {
 	}
 }
 
-# Default values for reset
-var _defaults: Dictionary
-
 const SETTINGS_FILE_PATH: String = "user://settings.json"
 
 func _ready() -> void:
 	name = "SettingsManager"
 	add_to_group("core_systems")
-	_defaults = _settings.duplicate(true)
 	call_deferred("_initialize")
 
 func _initialize() -> void:
@@ -87,7 +83,7 @@ func set_setting(category: String, key: String, value: Variant) -> bool:
 	
 	var old_value = _settings[category][key]
 	if old_value == value:
-		return false  # No change needed
+		return false # No change needed
 	
 	_settings[category][key] = value
 	_apply_setting(category, key, value)
@@ -106,11 +102,8 @@ func reset_category(category: String) -> bool:
 	@param category: Category to reset
 	@return: True if category was reset
 	"""
-	if not _defaults.has(category):
-		push_error("SettingsManager: Cannot reset unknown category '%s'" % category)
-		return false
-	
-	_settings[category] = _defaults[category].duplicate(true)
+
+	_settings[category] = _settings[category].duplicate(true)
 	_apply_category_settings(category)
 	_save_settings()
 	
@@ -121,7 +114,7 @@ func reset_category(category: String) -> bool:
 
 func reset_all_settings() -> void:
 	"""Reset all settings to defaults"""
-	_settings = _defaults.duplicate(true)
+	_settings = _settings.duplicate(true)
 	_apply_all_settings()
 	_save_settings()
 	
@@ -249,16 +242,7 @@ func _load_settings() -> void:
 		push_warning("SettingsManager: Invalid settings file format")
 
 func _merge_settings(loaded_settings: Dictionary) -> void:
-	"""
-	Merge loaded settings with current defaults
-	
-	@param loaded_settings: Settings loaded from file
-	"""
-	for category in loaded_settings:
-		if _settings.has(category):
-			for key in loaded_settings[category]:
-				if _settings[category].has(key):
-					_settings[category][key] = loaded_settings[category][key]
+	_settings.merge(loaded_settings, true)
 
 # Public API for UI systems
 

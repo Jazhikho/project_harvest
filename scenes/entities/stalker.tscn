@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://g1mgjuahlsdr"]
-
-[ext_resource type="PackedScene" uid="uid://siycmahep8ln" path="res://assets/models/stalker.glb" id="1_g01db"]
-
-[node name="stalker2" instance=ExtResource("1_g01db")]

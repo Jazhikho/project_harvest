@@ -1,7 +1,10 @@
-[gd_scene load_steps=10 format=4 uid="uid://c7bo77odjfbss"]
+[gd_scene load_steps=14 format=4 uid="uid://c7bo77odjfbss"]
 
 [ext_resource type="PackedScene" uid="uid://dm3iqe4e36na4" path="res://assets/models/broken_glass2.glb" id="1_xyb2q"]
 [ext_resource type="Material" uid="uid://dwwaufshot28e" path="res://assets/textures/glass.tres" id="2_gk4dq"]
+[ext_resource type="Script" uid="uid://yc2v1m8c4ohx" path="res://scripts/items/BaseItem.gd" id="2_r2ntj"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_gk4dq"]
+[ext_resource type="Script" uid="uid://c7qjis2op04mi" path="res://scripts/items/ItemDrop.gd" id="5_kex0g"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_m2pek"]
 _surfaces = [{
@@ -102,7 +105,13 @@ shadow_mesh = SubResource("ArrayMesh_hmqjc")
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_xyb2q"]
 radius = 1.375
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_xyb2q"]
+size = Vector3(1, 0.25, 1)
+
 [node name="broken_glass2" instance=ExtResource("1_xyb2q")]
+script = ExtResource("2_r2ntj")
+item_id = &"broken_glass_2"
+display_name = "Glass Shards (Curved)"
 
 [node name="Cube_001_cell_004_cell" parent="." index="0"]
 transform = Transform3D(0.28, 0, 0, 0, 1, 0, 0, 0, 0.42, -0.0943617, 0.0061372, 0.0301226)
@@ -118,7 +127,21 @@ mesh = SubResource("ArrayMesh_kex0g")
 
 [node name="Area3D" type="Area3D" parent="." index="3"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.337865, 0.00664137, 0.0658254)
+collision_layer = 8
+collision_mask = 33
+script = ExtResource("3_gk4dq")
+kind = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3375, 0.875, -0.075)
 shape = SubResource("CylinderShape3D_xyb2q")
+
+[node name="RigidBody3D" type="RigidBody3D" parent="." index="4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.337865, 0.00664137, 0.0658254)
+collision_layer = 8
+collision_mask = 32
+script = ExtResource("5_kex0g")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.125, 0)
+shape = SubResource("BoxShape3D_xyb2q")

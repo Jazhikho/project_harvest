@@ -1,23 +1,33 @@
-[gd_scene load_steps=4 format=3 uid="uid://cfjbmrppn8dad"]
+[gd_scene load_steps=6 format=3 uid="uid://cfjbmrppn8dad"]
 
 [ext_resource type="PackedScene" uid="uid://dul4uo71by1l8" path="res://assets/models/altar.glb" id="1_kw7pr"]
+[ext_resource type="Script" uid="uid://bs2qgf7apmtgx" path="res://scripts/environments/ObjectsBase.gd" id="2_coth8"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_q8ky5"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_sqay7"]
 height = 0.875
 radius = 0.75
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_kw7pr"]
-radius = 1.75
+radius = 2.26318
 
 [node name="altar" instance=ExtResource("1_kw7pr")]
+script = ExtResource("2_coth8")
+display_name = "Altar"
+accepts_items = ["flag", "phone", "holy_book"]
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+collision_layer = 16
+collision_mask = 63
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5625, 0)
 shape = SubResource("CylinderShape3D_sqay7")
 
 [node name="Area3D" type="Area3D" parent="." index="2"]
+collision_layer = 16
+script = ExtResource("3_q8ky5")
+kind = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

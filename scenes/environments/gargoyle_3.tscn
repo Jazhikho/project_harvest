@@ -1,6 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://b1uuox01ohviu"]
+[gd_scene load_steps=6 format=3 uid="uid://b1uuox01ohviu"]
 
 [ext_resource type="PackedScene" uid="uid://j1gxxp5jx7r" path="res://assets/models/gargoyle3.glb" id="1_kx7x7"]
+[ext_resource type="Script" uid="uid://bs2qgf7apmtgx" path="res://scripts/environments/ObjectsBase.gd" id="2_gkpeq"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_r1lqv"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_10b8g"]
 radius = 1.75
@@ -9,12 +11,23 @@ radius = 1.75
 size = Vector3(1, 2.5, 1.125)
 
 [node name="gargoyle3" instance=ExtResource("1_kx7x7")]
+script = ExtResource("2_gkpeq")
+display_name = "Gargoyle"
+interact_toast_text = "There's some writing here..."
+toast_seconds = 3.0
+consume_item_on_success = false
+show_toast_on_success = false
+success_toast_text = ""
+show_toast_on_fail = false
+fail_toast_text = ""
 
 [node name="GargLP" parent="." index="0"]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 
 [node name="Area3D" type="Area3D" parent="." index="1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.337865, 0.00664137, 0.0658254)
+collision_layer = 16
+script = ExtResource("3_r1lqv")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.374635, 0.881641, -0.00917456)
@@ -22,6 +35,8 @@ shape = SubResource("CylinderShape3D_10b8g")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." index="2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30073, 0.0132827, 0.131651)
+collision_layer = 16
+collision_mask = 55
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.237865, 1.24336, -0.0158255)

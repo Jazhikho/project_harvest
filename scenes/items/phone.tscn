@@ -1,18 +1,40 @@
-[gd_scene load_steps=3 format=3 uid="uid://b258gcrtdta5h"]
+[gd_scene load_steps=7 format=3 uid="uid://b258gcrtdta5h"]
 
 [ext_resource type="PackedScene" uid="uid://bpikxmgbffkgq" path="res://assets/models/phone.glb" id="1_t25ek"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="2_7cisq"]
+[ext_resource type="Script" uid="uid://yc2v1m8c4ohx" path="res://scripts/items/BaseItem.gd" id="2_t4pqi"]
+[ext_resource type="Script" uid="uid://c7qjis2op04mi" path="res://scripts/items/ItemDrop.gd" id="3_yuc68"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_x6w51"]
 height = 1.0
 radius = 1.375
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_t25ek"]
+size = Vector3(0.195923, 0.0371094, 0.367992)
+
 [node name="phone" instance=ExtResource("1_t25ek")]
+script = ExtResource("2_t4pqi")
+item_id = &"phone"
+display_name = "Broken Phone"
 
 [node name="Sketchfab_model" parent="." index="0"]
 transform = Transform3D(0.6, 0, 0, 0, 0.424264, 0.424264, 0, -0.424264, 0.424264, 0, -0.175, 0.1625)
 
 [node name="Area3D" type="Area3D" parent="." index="1"]
+collision_layer = 8
+collision_mask = 33
+script = ExtResource("2_7cisq")
+kind = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("CylinderShape3D_x6w51")
+
+[node name="RigidBody3D" type="RigidBody3D" parent="." index="2"]
+collision_layer = 8
+collision_mask = 32
+script = ExtResource("3_yuc68")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00262451, 0.0078125, -0.0224323)
+shape = SubResource("BoxShape3D_t25ek")

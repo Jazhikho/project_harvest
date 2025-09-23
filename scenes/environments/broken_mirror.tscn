@@ -1,7 +1,9 @@
-[gd_scene load_steps=11 format=4 uid="uid://vgktbniibi0f"]
+[gd_scene load_steps=13 format=4 uid="uid://vgktbniibi0f"]
 
 [ext_resource type="PackedScene" uid="uid://cdpl1g3bvyaav" path="res://assets/models/BrokenMirror.glb" id="1_symtb"]
+[ext_resource type="Script" uid="uid://bs2qgf7apmtgx" path="res://scripts/environments/ObjectsBase.gd" id="2_i4br2"]
 [ext_resource type="Material" uid="uid://dwwaufshot28e" path="res://assets/textures/glass.tres" id="2_j8jtu"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="4_ll1cr"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_on80k"]
 resource_name = "Material.002"
@@ -106,10 +108,13 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_dv8o3")
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_p7k4c"]
-radius = 1.0
+radius = 2.0874
 
 [node name="BrokenMirror" instance=ExtResource("1_symtb")]
 transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 0, 0, 0)
+script = ExtResource("2_i4br2")
+display_name = "Broken Mirror"
+accepts_items = ["broken_glass_1", "broken_glass_2", "broken_glass_3"]
 
 [node name="quadro finito colorato" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.625, 0)
@@ -128,6 +133,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.5, 0, -2.625, 0.0375)
 mesh = SubResource("ArrayMesh_q5lml")
 
 [node name="Area3D" type="Area3D" parent="." index="4"]
+collision_layer = 16
+script = ExtResource("4_ll1cr")
+kind = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.25)

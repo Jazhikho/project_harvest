@@ -1,0 +1,40 @@
+[gd_scene load_steps=7 format=3 uid="uid://b4etelaf4h13t"]
+
+[ext_resource type="PackedScene" uid="uid://bb8ii5q4yjnvh" path="res://assets/models/coin.glb" id="1_t5tvb"]
+[ext_resource type="Script" uid="uid://yc2v1m8c4ohx" path="res://scripts/items/BaseItem.gd" id="2_bu6xi"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="2_w04hd"]
+[ext_resource type="Script" uid="uid://c7qjis2op04mi" path="res://scripts/items/ItemDrop.gd" id="4_21atp"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_t5tvb"]
+height = 2.25
+radius = 2.25
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_t5tvb"]
+size = Vector3(0.4, 0.05, 0.4)
+
+[node name="coin" instance=ExtResource("1_t5tvb")]
+script = ExtResource("2_bu6xi")
+item_id = &"symbol_coin"
+display_name = "Old Coin"
+
+[node name="Sketchfab_model" parent="." index="0"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+
+[node name="Area3D" type="Area3D" parent="." index="1"]
+collision_layer = 8
+collision_mask = 33
+script = ExtResource("2_w04hd")
+kind = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CylinderShape3D_t5tvb")
+
+[node name="RigidBody3D" type="RigidBody3D" parent="." index="2"]
+collision_layer = 8
+collision_mask = 32
+script = ExtResource("4_21atp")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.49012e-08, 0.025, 1.49012e-08)
+shape = SubResource("BoxShape3D_t5tvb")

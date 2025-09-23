@@ -1,0 +1,40 @@
+[gd_scene load_steps=7 format=3 uid="uid://b2xiofalti8wi"]
+
+[ext_resource type="PackedScene" uid="uid://dcpt6cmu6kore" path="res://assets/models/notebook.glb" id="1_rv26w"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="2_t6egc"]
+[ext_resource type="Script" uid="uid://yc2v1m8c4ohx" path="res://scripts/items/BaseItem.gd" id="2_w0861"]
+[ext_resource type="Script" uid="uid://c7qjis2op04mi" path="res://scripts/items/ItemDrop.gd" id="4_87xq3"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_t6egc"]
+height = 2.25
+radius = 2.5
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_61d4a"]
+size = Vector3(0.45, 0.125, 0.65)
+
+[node name="notebook" instance=ExtResource("1_rv26w")]
+script = ExtResource("2_w0861")
+item_id = &"symbol_ticket"
+display_name = "Blank Planner"
+
+[node name="Sketchfab_model" parent="." index="0"]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+
+[node name="Area3D" type="Area3D" parent="." index="1"]
+collision_layer = 8
+collision_mask = 33
+script = ExtResource("2_t6egc")
+kind = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CylinderShape3D_t6egc")
+
+[node name="RigidBody3D" type="RigidBody3D" parent="." index="2"]
+collision_layer = 8
+collision_mask = 48
+script = ExtResource("4_87xq3")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00100006, 0.0625, -0.025)
+shape = SubResource("BoxShape3D_61d4a")

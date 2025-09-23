@@ -62,11 +62,10 @@ func _on_quit_pressed():
 		quit_dialog.popup_centered()
 
 func _on_quit_confirmed():
-	
 	# Record death at current position before quitting
 	var game_director = get_node_or_null("/root/GameDirector")
 	if game_director and game_director.has_method("end_game"):
-		var state_manager = get_node_or_null("/root/GameStateManager")
+		var state_manager = get_node_or_null("/root/SaveManager")
 		var current_pos = Vector2i.ZERO
 		if state_manager:
 			current_pos = state_manager.get_state("current_tile_position")

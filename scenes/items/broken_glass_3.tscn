@@ -1,7 +1,10 @@
-[gd_scene load_steps=14 format=4 uid="uid://dd4tpsuod44km"]
+[gd_scene load_steps=18 format=4 uid="uid://dd4tpsuod44km"]
 
 [ext_resource type="PackedScene" uid="uid://c5ku0gtxot1el" path="res://assets/models/broken_glass3.glb" id="1_h64ad"]
+[ext_resource type="Script" uid="uid://yc2v1m8c4ohx" path="res://scripts/items/BaseItem.gd" id="2_dox1w"]
 [ext_resource type="Material" uid="uid://dwwaufshot28e" path="res://assets/textures/glass.tres" id="2_g678u"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_g678u"]
+[ext_resource type="Script" uid="uid://c7qjis2op04mi" path="res://scripts/items/ItemDrop.gd" id="5_dk4vh"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_fkjc4"]
 _surfaces = [{
@@ -166,7 +169,13 @@ shadow_mesh = SubResource("ArrayMesh_vhitv")
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_78ukr"]
 radius = 1.375
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_h64ad"]
+size = Vector3(1, 0.25, 1)
+
 [node name="broken_glass3" instance=ExtResource("1_h64ad")]
+script = ExtResource("2_dox1w")
+item_id = &"broken_glass_3"
+display_name = "Glass Shards (Fragments)"
 
 [node name="Cube_001_cell_003_cell_003" parent="." index="0"]
 transform = Transform3D(0.6, 0, 0, 0, 1, 0, 0, 0, 0.3, 0.0378638, 0.0242681, 0.328312)
@@ -190,7 +199,20 @@ mesh = SubResource("ArrayMesh_0wdjw")
 
 [node name="Area3D" type="Area3D" parent="." index="5"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.337865, 0.00664137, 0.0658254)
+collision_layer = 8
+collision_mask = 33
+script = ExtResource("3_g678u")
+kind = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3375, 0.875, -0.075)
 shape = SubResource("CylinderShape3D_78ukr")
+
+[node name="RigidBody3D" type="RigidBody3D" parent="." index="6"]
+collision_layer = 8
+collision_mask = 32
+script = ExtResource("5_dk4vh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.125, 0)
+shape = SubResource("BoxShape3D_h64ad")

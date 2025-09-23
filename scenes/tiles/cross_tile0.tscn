@@ -1,7 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://byd3xgytq3x2d"]
+[gd_scene load_steps=12 format=3 uid="uid://byd3xgytq3x2d"]
 
-[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_swik0"]
+[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/Tile.gd" id="1_swik0"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_8ex31"]
+[ext_resource type="Script" uid="uid://bslkfjq217ygu" path="res://scripts/tiles/ItemSpawn.gd" id="2_hd4v3"]
+[ext_resource type="Script" uid="uid://d1kulb6h8r3lq" path="res://scripts/tiles/EntitySpawn.gd" id="3_md3bj"]
 [ext_resource type="PackedScene" uid="uid://dh2ksygtyattj" path="res://scenes/environments/2x1_corn_tile.tscn" id="3_qintg"]
 [ext_resource type="PackedScene" uid="uid://b0nvjxcqa47ui" path="res://scenes/environments/8x1_corn_tile.tscn" id="4_muce3"]
 [ext_resource type="PackedScene" uid="uid://2x2ikr7uqa8" path="res://scenes/environments/9x_1_corn_tile.tscn" id="5_aysf4"]
@@ -10,8 +12,9 @@
 [ext_resource type="PackedScene" uid="uid://bfmwipk4hpnoc" path="res://scenes/environments/5x1_corn_tile.tscn" id="8_5mayw"]
 [ext_resource type="PackedScene" uid="uid://baktq46848232" path="res://scenes/environments/6x1_corn_tile.tscn" id="9_7ov3w"]
 
-[node name="CrossTile1" type="Node3D"]
+[node name="CrossTile0" type="Node3D"]
 script = ExtResource("1_swik0")
+tile_id = &"cross_tile_0"
 
 [node name="Maze" type="Node3D" parent="."]
 
@@ -30,6 +33,7 @@ transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, 
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.5)
 
 [node name="ItemSpawn" type="Node3D" parent="Maze"]
+script = ExtResource("2_hd4v3")
 
 [node name="ItemPoint" type="Marker3D" parent="Maze/ItemSpawn"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.25, 0.25, 6.5)
@@ -53,6 +57,7 @@ transform = Transform3D(-0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, -0.5, 0.75, 0.
 transform = Transform3D(-0.5, 0, 0.866025, -0.836516, -0.258819, -0.482963, 0.224144, -0.965926, 0.12941, -8.25, 0.25, -8.25)
 
 [node name="EntitySpawn" type="Node3D" parent="Maze"]
+script = ExtResource("3_md3bj")
 
 [node name="EntityPoint" type="Marker3D" parent="Maze/EntitySpawn"]
 transform = Transform3D(1, 0, 3.57628e-07, 0, 1, 0, -3.57628e-07, 0, 1, -6.25, 0.25, -4.5)

@@ -1,18 +1,40 @@
-[gd_scene load_steps=3 format=3 uid="uid://dnuhi7eoa0d7q"]
+[gd_scene load_steps=7 format=3 uid="uid://dnuhi7eoa0d7q"]
 
 [ext_resource type="PackedScene" uid="uid://ci5t875huwn4m" path="res://assets/models/HolyBook.glb" id="1_ymmvt"]
+[ext_resource type="Script" uid="uid://yc2v1m8c4ohx" path="res://scripts/items/BaseItem.gd" id="2_atjtk"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="2_gtqx7"]
+[ext_resource type="Script" uid="uid://c7qjis2op04mi" path="res://scripts/items/ItemDrop.gd" id="4_chxms"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_gtqx7"]
 height = 1.0
 radius = 1.375
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_ymmvt"]
+size = Vector3(0.497498, 0.0632324, 0.502869)
+
 [node name="HolyBook" instance=ExtResource("1_ymmvt")]
+script = ExtResource("2_atjtk")
+item_id = &"holy_book"
+display_name = "Holy Book"
 
 [node name="polySurface9" parent="." index="0"]
 transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, 0, -0.0375, 0)
 
 [node name="Area3D" type="Area3D" parent="." index="1"]
+collision_layer = 8
+collision_mask = 33
+script = ExtResource("2_gtqx7")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("CylinderShape3D_gtqx7")
+
+[node name="RigidBody3D" type="RigidBody3D" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.028395, 0)
+collision_layer = 8
+collision_mask = 32
+script = ExtResource("4_chxms")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0157776, 0.0223389, -0.0162048)
+shape = SubResource("BoxShape3D_ymmvt")

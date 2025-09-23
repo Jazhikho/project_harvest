@@ -1,376 +1,254 @@
-extends BaseEntity
-## Effigy Entity - Sanity-dependent stalking behavior
-## Moves differently based on player sanity level and visibility
-## Refactored to use GameConstants, BaseEntity, and simplified methods
+# Effigy.gd (trimmed to essentials)
+extends CharacterBody3D
+class_name Effigy
 
-@export var turn_speed: float = 999.0  # Instant turning
-@export var follow_speed_base: float = 0.5  # Very slow base speed
+# Movement tuning
+@export var turn_speed: float = 999.0
+@export var follow_speed_base: float = 0.5
 @export var follow_speed_half: float = 0.7
 @export var follow_speed_full: float = 1.0
-@export var stop_distance: float = 1.5  # Distance to maintain from player
-@export var visibility_check_interval: float = 0.1  # How often to check if player is looking
-@export var camera_path: NodePath
+@export var stop_distance: float = 1.5
 
-# Stage references
+# Visibility polling
+@export var visibility_check_interval: float = 0.1
+
+# Optional direct player reference; else found by group "player"
+@export var player_path: NodePath = NodePath("")
+
+# Stages
 @onready var stage1: Node3D = $Stage1
 @onready var stage2: Node3D = $Stage2
 @onready var stage3: Node3D = $Stage3
 @onready var stage4: Node3D = $Stage4
 
-# Detection area reference
+# Areas and audio
 @onready var detection_area: Area3D = $DetectionArea
+@onready var audio_move: AudioStreamPlayer3D = $AudioStreamPlayer3D
 
-# State tracking
-var current_sanity: int = GameConstants.MAX_SANITY
+# Signals
+signal stage_changed(stage: int)
+
+# State
+var player: Node3D = null
+var current_sanity: int = 100
 var current_stage: int = 1
+var follow_speed: float = 0.5
 var is_player_looking: bool = false
-var last_visibility_check: float = 0.0
-var can_move: bool = false
-var target_position: Vector3
-var is_following: bool = false
 var player_in_detection_range: bool = false
-
-# Movement state
-var follow_speed: float
-var last_player_position: Vector3
+var is_following: bool = false
+var _vis_accum: float = 0.0
 
 func _ready() -> void:
-	entity_type = GameConstants.ENEMY_TYPE_EFFIGY
-	name = "Effigy"
-	add_to_group("enemies")
-	add_to_group("effigies")
-	
-	# Setup collision layers properly
-	CollisionHelper.setup_entity_collision(self)
-	
-	# Initialize stages - only stage 1 visible initially
-	_setup_stages()
-	
-	follow_speed = follow_speed_base
-	
-	# Connect detection area signals
-	if detection_area:
-		detection_area.body_entered.connect(_on_detection_area_entered)
-		detection_area.body_exited.connect(_on_detection_area_exited)
-	else:
-		push_error("Effigy: Detection area not found!")
-	
-	# Call parent _ready
-	super()
+	_resolve_player()
+	_connect_signals()
+	_setup_stages_initial()
 
-func _setup_stages() -> void:
-	"""Setup stage visibility"""
-	if stage1: stage1.visible = true
-	if stage2: stage2.visible = false
-	if stage3: stage3.visible = false
-	if stage4: stage4.visible = false
-
-func _initialize_entity() -> void:
-	"""Initialize effigy-specific behavior"""
-	_connect_to_events()
-	
-	# Get initial sanity level
-	current_sanity = get_current_sanity()
+	var sm: Node = get_node_or_null("/root/SaveManager")
+	if sm != null and sm.has_method("get_state"):
+		var s: Variant = sm.call("get_state", "sanity")
+		if typeof(s) == TYPE_INT:
+			current_sanity = int(s)
 	_update_behavior_for_sanity()
-	
-	# Set initial active state based on sanity
-	set_entity_active(true)
-
-func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
-	if _message_bus:
-		if not _message_bus.sanity_changed.is_connected(_on_sanity_changed):
-			_message_bus.sanity_changed.connect(_on_sanity_changed)
-		if not _message_bus.game_ended.is_connected(_on_game_ended):
-			_message_bus.game_ended.connect(_on_game_ended)
 
 func _physics_process(delta: float) -> void:
-	if not player or not is_active:
+	if player == null:
 		return
-	
-	# Only check visibility if player is in detection range
-	if player_in_detection_range:
-		_check_player_visibility(delta)
-		_update_behavior(delta)
-		
-		# ALL actions only when player is NOT looking
-		if can_move:  # can_move = NOT is_player_looking
-			# Always turn toward player when not being watched (regardless of following)
-			_turn_toward_player()
-			
-			if is_following:
-				# Move toward player when following and not being watched
-				_move_toward_player(delta)
-			else:
-				# Just turning, not moving - but still need to apply the turn
-				velocity.x = 0.0
-				velocity.z = 0.0
-				move_and_slide()  # Apply the movement with gravity
-		else:
-			# Player is looking - FREEZE completely (but keep gravity)
-			velocity.x = 0.0
-			velocity.z = 0.0
-			move_and_slide()  # Apply movement with gravity
+
+	_vis_accum += delta
+	if _vis_accum >= visibility_check_interval:
+		_vis_accum = 0.0
+		is_player_looking = _query_player_visibility()
+
+	if not player_in_detection_range or is_player_looking:
+		_stop_horizontal_motion()
+		_apply_move_and_audio(false)
+		return
+
+	_turn_toward_player(delta)
+	_update_following_flag()
+	if is_following:
+		_move_toward_player(delta)
+		_apply_move_and_audio(true)
 	else:
-		# Player not in detection range - stop horizontal movement but keep gravity
-		velocity.x = 0.0
-		velocity.z = 0.0
-		move_and_slide()
+		_stop_horizontal_motion()
+		_apply_move_and_audio(false)
 
-func _check_player_visibility(delta: float) -> void:
-	"""Check if player is looking at the effigy"""
-	last_visibility_check += delta
-	
-	if last_visibility_check >= visibility_check_interval:
-		last_visibility_check = 0.0
-		
-		var was_looking = is_player_looking
-		
-		if player.has_method("is_looking_at_position"):
-			is_player_looking = player.is_looking_at_position(global_position)
-		else:
-			is_player_looking = _manual_visibility_check()
-		
-		# Emit events when visibility state changes
-		if was_looking != is_player_looking:
-			if _message_bus:
-				if is_player_looking:
-					_message_bus.emit_event("player_looking_at", [self, "effigy"])
-					_message_bus.emit_event("visibility_changed", [self, true, player])
-				else:
-					_message_bus.emit_event("player_looked_away", [self, "effigy"])
-					_message_bus.emit_event("visibility_changed", [self, false, player])
+func _resolve_player() -> void:
+	if player_path != NodePath(""):
+		player = get_node_or_null(player_path) as Node3D
+	if player == null:
+		player = get_tree().get_first_node_in_group("player") as Node3D
+	if player == null:
+		push_error("Effigy: player not found (need group 'player' or set player_path).")
 
-func _manual_visibility_check() -> bool:
-	"""Manual visibility check using raycasting and angle checking"""
-	if not is_player_valid():
+func _connect_signals() -> void:
+	if detection_area != null:
+		detection_area.connect("body_entered", Callable(self, "_on_detection_area_entered"))
+		detection_area.connect("body_exited", Callable(self, "_on_detection_area_exited"))
+
+	var sm: Node = get_node_or_null("/root/SaveManager")
+	if sm != null and sm.has_signal("sanity_changed"):
+		sm.connect("sanity_changed", Callable(self, "_on_sanity_changed"))
+
+func _setup_stages_initial() -> void:
+	if stage1 != null: stage1.visible = true
+	if stage2 != null: stage2.visible = false
+	if stage3 != null: stage3.visible = false
+	if stage4 != null: stage4.visible = false
+	follow_speed = follow_speed_base
+
+func _query_player_visibility() -> bool:
+	# Preferred: ask the Player’s API
+	if player != null and player.has_method("can_see_node"):
+		var v: Variant = player.call("can_see_node", self)
+		if typeof(v) == TYPE_BOOL:
+			return bool(v)
+
+	# Fallback: angle + ray from active camera (optional safety net)
+	var cam: Camera3D = _get_player_camera()
+	if cam == null:
 		return false
-	
-	var player_camera = _get_player_camera()
-	if not player_camera:
-		return false
-	
-	# Use the same logic as the player's is_looking_at_position method
-	var to_target = (global_position - player_camera.global_position).normalized()
-	var camera_forward = -player_camera.global_transform.basis.z
-	
-	# Check if effigy is within field of view (90 degrees default)
-	var dot_product = camera_forward.dot(to_target)
-	var angle = acos(clamp(dot_product, -1.0, 1.0))
-	var fov_radians = deg_to_rad(90.0) 
-	
+	var to_here: Vector3 = (global_position - cam.global_position).normalized()
+	var forward: Vector3 = -cam.global_transform.basis.z
+	var dotv: float = forward.dot(to_here)
+	var fov_radians: float = deg_to_rad(90.0)
+	var angle: float = acos(clamp(dotv, -1.0, 1.0))
 	if angle > fov_radians:
 		return false
-	
-	# Raycast to check if there are obstacles blocking view
-	var space_state = get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(
-		player_camera.global_position,
-		global_position
-	)
-	query.exclude = [player]  # Exclude player from raycast
-	CollisionHelper.setup_visibility_raycast(query)
-	
-	var result = space_state.intersect_ray(query)
-	
-	# If ray hits something before reaching effigy, not visible
-	if not result.is_empty():
-		var hit_distance = player_camera.global_position.distance_to(result.position)
-		var effigy_distance = player_camera.global_position.distance_to(global_position)
-		
-		# Allow small margin for floating point precision
-		return hit_distance >= (effigy_distance - 0.1)
-	
-	return true
+	var space := get_world_3d().direct_space_state
+	var query := PhysicsRayQueryParameters3D.create(cam.global_position, global_position)
+	query.exclude = [player]
+	var result := space.intersect_ray(query)
+	if result.is_empty():
+		return true
+	var hit_pos: Vector3 = result["position"]
+	var hit_d: float = cam.global_position.distance_to(hit_pos)
+	var eff_d: float = cam.global_position.distance_to(global_position)
+	if hit_d >= eff_d - 0.1:
+		return true
+	return false
 
 func _get_player_camera() -> Camera3D:
-	var cam: Camera3D = null
-	if camera_path != NodePath() and is_instance_valid(player):
-		cam = player.get_node_or_null(camera_path)
-	if cam == null and is_instance_valid(player):
-		cam = player.get_node_or_null("Camera3D")  # fallback if you really have that node
-	if cam == null:
-		cam = get_viewport().get_camera_3d()  # the active 3D camera
-	if cam == null:
-		push_warning("Effigy: No active Camera3D found.")
-	return cam
+	if player == null:
+		return null
+	var cam: Camera3D = player.get_node_or_null("Camera3D") as Camera3D
+	if cam != null:
+		return cam
+	return get_viewport().get_camera_3d()
 
-
-func _update_behavior(delta: float) -> void:
-	"""Update effigy behavior based on sanity level"""
-	if not is_player_valid():
-		return
-	
-	var player_moved = _check_player_movement()
-	
-	# Effigy can only move/turn when player is NOT looking at it
-	can_move = not is_player_looking
-	
-	_update_following_behavior()
-
-func _check_player_movement() -> bool:
-	"""Check if player has moved since last update"""
-	var current_player_pos = player.global_position
-	var moved = last_player_position.distance_to(current_player_pos) > 0.1
-	
-	if moved:
-		last_player_position = current_player_pos
-	
-	return moved
-
-func _orientation_allows_follow() -> bool:
-	# Forward is -Z in Godot. Dot >= 0 means within ±90°
-	var player_forward = -player.global_transform.basis.z
-	var player_to_effigy = (global_position - player.global_position).normalized()
-	return player_forward.dot(player_to_effigy) < 0.0
-
-func _update_following_behavior() -> void:
-	"""Update following behavior based on sanity levels"""
-	var was_following = is_following
-	
-	# Determine if effigy should follow based on sanity
-	# Above 80: No following, just watching/turning
-	# 60-80: Follow at slow speed
-	# 40-60: Follow at medium speed  
-	# Below 40: Follow at max speed
-	if current_sanity < GameConstants.SANITY_THRESHOLD_HIGH \
-		and player_in_detection_range \
-		and _orientation_allows_follow():
-		is_following = true
-		_emit_detection_event_if_needed(was_following)
-	else:
-		is_following = false
-		_emit_lost_player_event_if_needed(was_following)
-
-func _emit_detection_event_if_needed(was_following: bool) -> void:
-	"""Emit detection event when starting to follow"""
-	if not was_following and is_following and _message_bus:
-		var distance = get_distance_to_player()
-		_message_bus.emit_event("entity_detected_player", ["effigy", self, distance])
-
-func _emit_lost_player_event_if_needed(was_following: bool) -> void:
-	"""Emit lost player event when stopping follow"""
-	if was_following and not is_following and _message_bus:
-		_message_bus.emit_event("entity_lost_player", ["effigy", self])
-
-func _turn_toward_player() -> void:
-	"""Turn to face player - only happens when player is NOT looking"""
-	if not player: return
-	var dir = (player.global_position - global_position).normalized()
-	var target_yaw = atan2(dir.x, dir.z)
-	rotation.y = lerp_angle(rotation.y, target_yaw, clamp(turn_speed * get_physics_process_delta_time(), 0.0, 1.0))
-
-func _move_toward_player(delta: float) -> void:
-	"""Move toward player at appropriate speed - only when player is NOT looking"""
-	if not player:
-		velocity.x = 0.0
-		velocity.z = 0.0
-		return
-	
-	var distance_to_player = global_position.distance_to(player.global_position)
-	
-	# Stop if too close
-	if distance_to_player <= stop_distance:
-		velocity.x = 0.0
-		velocity.z = 0.0
-		return
-	
-	# Calculate movement direction (keep Y unchanged for gravity)
-	var direction = (player.global_position - global_position)
-	direction.y = 0  # Don't affect vertical movement
-	direction = direction.normalized()
-	
-	# Apply horizontal movement only (preserve Y velocity for gravity)
-	velocity.x = direction.x * follow_speed
-	velocity.z = direction.z * follow_speed
-	
-	# Move and allow slide (clipping through walls is now a feature)
-	move_and_slide()
-
-func _update_behavior_for_sanity() -> void:
-	"""Update behavior and appearance based on current sanity"""
-	var new_stage = _calculate_stage_for_sanity(current_sanity)
-	
-	if new_stage != current_stage:
-		_change_stage(new_stage)
-	
-	# Update follow speed based on sanity thresholds
-	# Speed increases as sanity drops
-	if current_sanity >= GameConstants.SANITY_THRESHOLD_HIGH:  # Above 80
-		# No following, speed doesn't matter but set to base
-		follow_speed = 0.0  # Don't move at all
-	elif current_sanity >= GameConstants.SANITY_THRESHOLD_MEDIUM:  # 60-80
-		follow_speed = follow_speed_base  # 0.5 - slowest following
-	elif current_sanity >= GameConstants.SANITY_THRESHOLD_LOW:  # 40-60
-		follow_speed = follow_speed_half  # 0.7 - medium speed
-	else:  # Below 40
-		follow_speed = follow_speed_full  # 1.0 - max speed
-
-func _calculate_stage_for_sanity(sanity: int) -> int:
-	"""Calculate which stage should be active for given sanity level"""
-	return GameConstants.sanity_to_stage(sanity)
-
-func _change_stage(new_stage: int) -> void:
-	"""Change visible stage model"""
-	var old_stage = current_stage
-	
-	# Hide all stages
-	if stage1: stage1.visible = false
-	if stage2: stage2.visible = false
-	if stage3: stage3.visible = false
-	if stage4: stage4.visible = false
-	
-	# Show appropriate stage
-	match new_stage:
-		1:
-			if stage1: stage1.visible = true
-		2:
-			if stage2: stage2.visible = true
-		3:
-			if stage3: stage3.visible = true
-		4:
-			if stage4: stage4.visible = true
-	
-	current_stage = new_stage
-	
-	# Emit stage change event
-	if _message_bus and old_stage != new_stage:
-		_message_bus.emit_event("entity_stage_changed", ["effigy", self, old_stage, new_stage])
-	
-
-# Detection Area Signal Handlers
-func _on_detection_area_entered(body: Node3D) -> void:
-	if body == player or body.is_in_group("player"):
-		player_in_detection_range = true
-
-func _on_detection_area_exited(body: Node3D) -> void:
-	if body == player or body.is_in_group("player"):
-		player_in_detection_range = false
-		is_following = false
-		velocity = Vector3.ZERO
-		if is_player_looking and _message_bus:
-			_message_bus.emit_event("player_looked_away", [self, "effigy"])
-			_message_bus.emit_event("visibility_changed", [self, false, player])
-		is_player_looking = false
-
-# Event handlers
-func _on_sanity_changed(old_value: int, new_value: int, delta: int) -> void:
-	"""Handle sanity level changes"""
+# Sanity -> stage and speed
+func _on_sanity_changed(_old_value: int, new_value: int, _delta: int) -> void:
 	current_sanity = new_value
 	_update_behavior_for_sanity()
 
-func _on_game_ended(cause: String, data: Dictionary) -> void:
-	"""Handle game end"""
-	is_following = false
-	can_move = false
-	player_in_detection_range = false
+func _update_behavior_for_sanity() -> void:
+	var new_stage: int = GameConstants.sanity_to_stage(current_sanity)
+	if new_stage != current_stage:
+		_change_stage(new_stage)
+
+	if current_sanity >= GameConstants.SANITY_THRESHOLD_HIGH:
+		follow_speed = 0.0
+	elif current_sanity >= GameConstants.SANITY_THRESHOLD_MEDIUM:
+		follow_speed = follow_speed_base
+	elif current_sanity >= GameConstants.SANITY_THRESHOLD_LOW:
+		follow_speed = follow_speed_half
+	else:
+		follow_speed = follow_speed_full
+
+func _change_stage(new_stage: int) -> void:
+	if stage1 != null: stage1.visible = false
+	if stage2 != null: stage2.visible = false
+	if stage3 != null: stage3.visible = false
+	if stage4 != null: stage4.visible = false
+
+	if new_stage == 1:
+		if stage1 != null: stage1.visible = true
+	elif new_stage == 2:
+		if stage2 != null: stage2.visible = true
+	elif new_stage == 3:
+		if stage3 != null: stage3.visible = true
+	else:
+		if stage4 != null: stage4.visible = true
+
+	current_stage = new_stage
+	emit_signal("stage_changed", current_stage)
+
+# Following logic
+func _update_following_flag() -> void:
+	var allow_follow: bool = false
+	if current_sanity < GameConstants.SANITY_THRESHOLD_HIGH:
+		if player_in_detection_range:
+			if _orientation_allows_follow():
+				allow_follow = true
+	is_following = allow_follow
+
+func _orientation_allows_follow() -> bool:
+	if player == null:
+		return false
+	var player_forward: Vector3 = -player.global_transform.basis.z
+	var player_to_effigy: Vector3 = (global_position - player.global_position).normalized()
+	var d: float = player_forward.dot(player_to_effigy)
+	if d < 0.0:
+		return true
+	return false
+
+# Movement helpers
+func _turn_toward_player(delta: float) -> void:
+	if player == null:
+		return
+	var to_player: Vector3 = (player.global_position - global_position).normalized()
+	var target_yaw: float = atan2(to_player.x, to_player.z)
+	var t: float = turn_speed * delta
+	if t > 1.0:
+		t = 1.0
+	rotation.y = lerp_angle(rotation.y, target_yaw, t)
+
+func _move_toward_player(_delta: float) -> void:
+	if player == null:
+		_stop_horizontal_motion()
+		return
+	var dist: float = global_position.distance_to(player.global_position)
+	if dist <= stop_distance:
+		_stop_horizontal_motion()
+		move_and_slide()
+		return
+	var dir: Vector3 = player.global_position - global_position
+	dir.y = 0.0
+	dir = dir.normalized()
+	velocity.x = dir.x * follow_speed
+	velocity.z = dir.z * follow_speed
+	move_and_slide()
+
+func _stop_horizontal_motion() -> void:
+	velocity.x = 0.0
+	velocity.z = 0.0
+	move_and_slide()
+
+func _apply_move_and_audio(moving: bool) -> void:
+	if audio_move == null:
+		return
+	if moving:
+		if not audio_move.playing:
+			audio_move.play()
+	else:
+		if audio_move.playing:
+			audio_move.stop()
+
+# Proximity handlers
+func _on_detection_area_entered(body: Node) -> void:
+	if body.is_in_group("player"):
+		player_in_detection_range = true
+
+func _on_detection_area_exited(body: Node) -> void:
+	if body.is_in_group("player"):
+		player_in_detection_range = false
+		is_following = false
+		_stop_horizontal_motion()
+		_apply_move_and_audio(false)
 
 # Public API
-func get_current_stage() -> int:
-	"""Get current stage number"""
+func get_stage() -> int:
 	return current_stage
 
-# is_active property inherited from BaseEntity
-# Use set_entity_active(bool) to change state with proper event emission
-
-# get_distance_to_player() inherited from BaseEntity
+func get_current_stage() -> int:
+	return current_stage

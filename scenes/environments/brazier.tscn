@@ -1,22 +1,33 @@
-[gd_scene load_steps=4 format=3 uid="uid://c84sbeompcbqe"]
+[gd_scene load_steps=6 format=3 uid="uid://c84sbeompcbqe"]
 
 [ext_resource type="PackedScene" uid="uid://c2x68r123pxn" path="res://assets/models/brazier.glb" id="1_c0ehu"]
+[ext_resource type="Script" uid="uid://bs2qgf7apmtgx" path="res://scripts/environments/ObjectsBase.gd" id="2_di8ko"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_5erp5"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_j6r4q"]
-height = 1.4375
+height = 1.39014
+radius = 0.387207
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_c0ehu"]
-radius = 1.0
+radius = 1.51514
 
 [node name="brazier" instance=ExtResource("1_c0ehu")]
+script = ExtResource("2_di8ko")
+display_name = "Brazier"
+accepts_items = ["flag", "holy_book", "phone"]
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." index="4"]
+collision_layer = 16
+collision_mask = 55
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.59375, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.617432, 0)
 shape = SubResource("CylinderShape3D_j6r4q")
 
 [node name="Area3D" type="Area3D" parent="." index="5"]
+collision_layer = 16
+script = ExtResource("3_5erp5")
+kind = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

@@ -1,9 +1,6 @@
 extends Control
 
-var _message_bus: Node
-var _settings_manager: Node
-var _audio_manager: Node
-var _scene_manager: Node
+# Autoloads are globally accessible, no need to store references
 
 # References to UI elements
 @onready var start_button = $MenuContainer/ButtonContainer/StartButton
@@ -14,6 +11,7 @@ var _scene_manager: Node
 @onready var menu_container = $MenuContainer
 @onready var settings_button = $MenuContainer/ButtonContainer/SettingsButton
 @onready var credits_button = $MenuContainer/ButtonContainer/CreditsButton
+@onready var credits_back_button = $CreditsPanel/CreditsContainer/CreditsBackButton
 
 # Audio sliders
 @onready var master_slider = $SettingsPanel/SettingsContainer/MasterVolume/Slider
@@ -25,26 +23,15 @@ var _scene_manager: Node
 @onready var sfx_value_label = $SettingsPanel/SettingsContainer/SFXVolume/Value
 
 func _ready():
-	_message_bus = get_node("/root/MessageBus")
-	_settings_manager = get_node("/root/SettingsManager")
-	_audio_manager = get_node("/root/AudioManager")
-	_scene_manager = get_node("/root/SceneManager")
-	
-	# Check for existing save data
 	_check_save_data()
-	# Load settings
 	_load_settings()
-	
-	# Detect input device
 	_detect_input_device()
-
-	# Set initial focus
 	start_button.grab_focus()
 
 	call_deferred("_play_menu_music")
 
 func _play_menu_music() -> void:
-	_audio_manager.play_music("res://assets/audio/Project_Harvest_Main_Theme.ogg", 0.0)
+	AudioManager.play_music("res://assets/audio/Project_Harvest_Main_Theme.ogg", 0.0)
 
 func _check_save_data():
 	# Check if save file exists
@@ -71,7 +58,7 @@ func _load_settings():
 	
 	if AudioManager:
 		master_vol = AudioManager.get_bus_volume("Master")
-		music_vol = AudioManager.get_bus_volume("Music") 
+		music_vol = AudioManager.get_bus_volume("Music")
 		sfx_vol = AudioManager.get_bus_volume("SFX")
 	
 	# Set slider values
@@ -108,20 +95,23 @@ func _on_start_pressed():
 		_start_new_game()
 
 func _start_new_game():
-	var music_fade_finished = _audio_manager.fade_out_music(1.0)
+	var music_fade_finished = AudioManager.fade_out_music(1.0)
 	var ui_fade_finished = _fade_out_ui(1.0)
 	await music_fade_finished
 	await ui_fade_finished
+
 	SaveManager.delete_save()
-	_scene_manager.load_game_scene()
+	SaveManager._reset_save_data()
+
+	SceneManager.start_new_game()
 
 func _on_continue_pressed():
-	var music_fade_finished = _audio_manager.fade_out_music(1.0)
+	var music_fade_finished = AudioManager.fade_out_music(1.0)
 	var ui_fade_finished = _fade_out_ui(1.0)
 	await music_fade_finished
 	await ui_fade_finished
-	SaveManager.load_game()
-	_scene_manager.load_game_scene()
+	get_tree().set_meta("load_from_save", true)
+	SceneManager.start_new_game()
 
 func _on_settings_pressed():
 	menu_container.visible = false
@@ -129,8 +119,9 @@ func _on_settings_pressed():
 	master_slider.grab_focus()
 
 func _on_credits_pressed():
-	# Open credits screen
-	pass
+	menu_container.visible = false
+	credits_panel.visible = true
+	credits_back_button.grab_focus()
 
 func _on_quit_pressed():
 	get_tree().quit()
@@ -138,7 +129,6 @@ func _on_quit_pressed():
 func _notification(what: int) -> void:
 	"""Handle window close requests"""
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		# In main menu, just quit normally - no active game to record death for
 		get_tree().quit()
 
 # Settings Panel Signals

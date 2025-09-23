@@ -20,10 +20,12 @@ var dr_amundsen_quotes = [
 @onready var fade_rect = get_node_or_null("FadeRect")
 @onready var quit_dialog = get_node_or_null("QuitConfirmDialog")
 
-var death_type = ""
+var death_type: String
 
 func _ready() -> void:
-	
+	death_type = str(get_tree().get_meta("death_type", "unknown"))
+	get_tree().set_meta("death_type", null)
+
 	# Check if all nodes exist
 	if not death_reason_label:
 		push_error("DeathScreen: death_reason_label not found!")
@@ -35,11 +37,11 @@ func _ready() -> void:
 		push_error("DeathScreen: tiles_label not found!")
 	if not collectibles_label:
 		push_error("DeathScreen: collectibles_label not found!")
-	
+
 	# Set quote if available
 	if quote_label:
 		quote_label.text = dr_amundsen_quotes[randi() % dr_amundsen_quotes.size()]
-	
+
 	# Set death reason if available
 	if death_reason_label:
 		match death_type:
@@ -61,6 +63,10 @@ func _ready() -> void:
 				death_reason_label.text = "HARVESTED"
 				if quote_label:
 					quote_label.text = "\"Welcome to the collection.\" - Dr. Amundsen"
+				# Change continue button text for harvest ending
+				var continue_button = get_node_or_null("Panel/VBoxContainer/ButtonContainer/ContinueButton")
+				if continue_button:
+					continue_button.text = "VIEW CREDITS"
 			_:
 				death_reason_label.text = "LOST FOREVER"
 	
@@ -80,9 +86,18 @@ func _update_stats():
 	var collectibles = 0
 	
 	if save_manager and save_manager.save_data:
-		time_played = save_manager.save_data.get("time_played", 0.0)
-		tiles = save_manager.save_data.get("tiles_explored", 0)
-		collectibles = save_manager.save_data.get("collectibles", []).size()
+		# Use last run data specifically for death screen
+		time_played = save_manager.save_data.get("last_run_time", 0.0)
+		tiles = save_manager.save_data.get("last_run_tiles", 0)
+		collectibles = save_manager.save_data.get("last_run_items", 0)
+		
+		# Fallback to old fields if last_run data doesn't exist
+		if time_played == 0.0:
+			time_played = save_manager.save_data.get("time_played", 0.0)
+		if tiles == 0:
+			tiles = save_manager.save_data.get("tiles_explored", 0)
+		if collectibles == 0:
+			collectibles = save_manager.save_data.get("collectibles", []).size()
 	
 	var minutes = int(time_played / 60)
 	var seconds = int(time_played) % 60
@@ -95,7 +110,7 @@ func _update_stats():
 		tiles_label.text = "Tiles Explored: %d" % tiles
 	
 	if collectibles_label:
-		collectibles_label.text = "Collectibles Found: %d" % collectibles
+		collectibles_label.text = "Items Collected: %d" % collectibles
 
 func fade_in():
 	if not fade_rect:
@@ -106,22 +121,34 @@ func fade_in():
 	tween.tween_property(fade_rect, "color:a", 0.0, 1.0)
 
 func _on_continue_pressed():
-	var save_manager = get_node_or_null("/root/SaveManager")
-	if save_manager:
-		save_manager.record_death()
-	
+	#var save_manager = get_node_or_null("/root/SaveManager")
+	#if save_manager:
+		#save_manager.record_death()
+
 	if fade_rect:
 		var tween = create_tween()
 		tween.tween_property(fade_rect, "color:a", 1.0, 0.5)
 		await tween.finished
 	else:
 		await get_tree().create_timer(0.5).timeout
-	
-	var scene_manager = get_node_or_null("/root/SceneManager")
-	if scene_manager:
-		scene_manager.load_game_scene()
+
+	# Check if this was a harvest ending
+	if death_type == "Harvested":
+		# Show credits scene
+		var scene_manager = get_node_or_null("/root/SceneManager")
+		if scene_manager and scene_manager.has_method("load_credits"):
+			scene_manager.load_credits()
+		else:
+			# Fallback to main menu if credits scene not available
+			print("DeathScreen: Credits scene not available, loading main menu")
+			scene_manager.load_main_menu() if scene_manager else get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
 	else:
-		get_tree().change_scene_to_file("res://scenes/game/Game.tscn")
+		# Normal death - return to game
+		var scene_manager = get_node_or_null("/root/SceneManager")
+		if scene_manager:
+			scene_manager.load_game_scene()
+		else:
+			get_tree().change_scene_to_file("res://scenes/game/Game.tscn")
 
 func _on_quit_pressed():
 	if quit_dialog:

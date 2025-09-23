@@ -1,69 +1,112 @@
 extends BaseItem
-## Research Note - Collectible notes that provide lore and sanity loss
-## Based on items.json note entries
+class_name NoteItem
+## NoteItem
+## Journal-only pickup. Does NOT touch Inventory. Matches BaseItem's interact signature.
+
+@export var note_id: StringName = &"note_001"
+@export var journal_autoload_path: NodePath = NodePath("/root/Journal")
+@export var message_bus_path: NodePath = NodePath("/root/MessageBus")
+
+@export var show_toast_on_pickup: bool = true
+@export var toast_seconds: float = 2.0
+
+var _save: Node = null
+var _journal: Node = null
+var _pickup_sfx: AudioStreamPlayer3D = null
+
+# ----------------------------
+# Internal helpers (first)
+# ----------------------------
+
+func _resolve_refs() -> void:
+	if has_node("/root/SaveManager"):
+		_save = get_node("/root/SaveManager")
+	if journal_autoload_path != NodePath(""):
+		_journal = get_node_or_null(journal_autoload_path)
+	if message_bus_path != NodePath(""):
+		_bus = get_node_or_null(message_bus_path)
+
+	# These NodePaths are expected to exist in BaseItem (area_path, pickup_sfx_path, body_path)
+	_area = get_node_or_null(area_path) as Area3D
+	_pickup_sfx = get_node_or_null(pickup_sfx_path) as AudioStreamPlayer3D
+	_body = get_node_or_null(body_path) as RigidBody3D
+
+func _already_collected() -> bool:
+	if _save == null:
+		return false
+	if not _save.has_method("has_note_collected"):
+		return false
+	var v: bool = _save.call("has_note_collected", note_id)
+	return v
+
+func _mark_collected() -> void:
+	if _save == null:
+		return
+	if _save.has_method("add_note_collected"):
+		_save.call("add_note_collected", note_id)
+
+func _add_to_journal() -> void:
+	if _journal == null:
+		return
+	if _journal.has_method("add_note"):
+		_journal.call("add_note", note_id)
+	elif _journal.has_method("add_entry"):
+		_journal.call("add_entry", note_id)
+
+func _emit_bus_event() -> void:
+	if _bus == null:
+		return
+	if _bus.has_method("emit_event"):
+		_bus.call("emit_event", &"note_collected", [{"note_id": String(note_id), "item_id": String(item_id)}])
+	elif _bus.has_signal("note_collected"):
+		_bus.emit_signal("note_collected", {"note_id": String(note_id), "item_id": String(item_id)})
+
+func _play_pickup() -> void:
+	if _pickup_sfx != null:
+		_pickup_sfx.play()
+
+func _sleep_body() -> void:
+	if _body == null:
+		return
+	_body.can_sleep = true
+	_body.sleeping = true
+
+# ----------------------------
+# Lifecycle / API
+# ----------------------------
 
 func _ready() -> void:
-	# Set default properties for research notes
-	if item_name.is_empty():
-		item_name = "Research Note"
-	if item_description.is_empty():
-		item_description = "Dr. A's research notes"
-	
-	pickup_sound = "res://assets/audio/effects/paper_pickup.ogg"
-	
-	super._ready()
+	_resolve_refs()
+	# If the note was already collected on a previous run, delete the shell.
+	if _already_collected():
+		queue_free()
 
-func _on_item_collected(collector: Node3D) -> void:
-	"""Handle research note collection effects"""
-	super._on_item_collected(collector)
-	
-	# Research notes cause sanity loss
-	var sanity_manager = get_node_or_null("/root/SanityManager")
-	if sanity_manager and sanity_manager.has_method("apply_sanity_loss"):
-		var sanity_loss = _get_sanity_loss_for_note()
-		sanity_manager.apply_sanity_loss("research_note", sanity_loss, global_position)
-	
-	# Show note content
-	_display_note_content()
+func interact(by: Node) -> void:
+	# Must match parent: interact(Node) -> void
+	# If already collected or about to be collected, bail early after cleanup.
+	if _already_collected():
+		return
 
-func _get_sanity_loss_for_note() -> int:
-	"""Get sanity loss amount based on note type"""
-	# Different note types cause different sanity loss
-	match item_id:
-		"note_1":
-			return 5
-		"note_2":
-			return 7
-		_:
-			return 5  # Default
+	_disable_interaction()  # from BaseItem
+	_play_pickup()
+	_sleep_body()
 
-func _display_note_content() -> void:
-	"""Display the note content to player"""
-	var note_text = _get_note_text()
-	
-	if _message_bus and not note_text.is_empty():
-		_message_bus.emit_event("note_shown", [item_id, note_text])
-		_message_bus.emit_event("notification_requested", ["Found research note...", 2.0, 1])
+	_add_to_journal()
+	_mark_collected()
+	_emit_bus_event()
 
-func _get_note_text() -> String:
-	"""Get the text content of this note"""
-	# This would normally come from events.json via EventManager
-	var event_manager = get_node_or_null("/root/EventManager")
-	if event_manager and event_manager.has_method("get_event_data"):
-		var notes_data = event_manager.get_event_data("dr_a_logs")
-		for note in notes_data:
-			if note.get("id", "") == item_id:
-				return note.get("text", "")
-	
-	# Fallback text
-	match item_id:
-		"note_1":
-			return "Identity is the only prison worth escaping. Laughter at the entrance improves yield; hope sweetens the harvest."
-		"note_2":
-			return "Residual consciousness clings to corridors. A chorus is more tunable than a soloist."
-		_:
-			return "Dr. Amundsen's research notes... the handwriting seems familiar."
+	if show_toast_on_pickup and has_node("/root/NarrativeSystem"):
+		var ns: Node = get_node("/root/NarrativeSystem")
+		if ns.has_method("trigger_custom_narration"):
+			var title: String = display_name if display_name != "" else String(note_id)
+			ns.call("trigger_custom_narration", "Journal updated: " + title, toast_seconds, "hint")
 
-func get_pickup_prompt_text() -> String:
-	"""Custom prompt for research notes"""
-	return "Press E to read research note"
+	var sm := get_node_or_null("/root/SanityManager")
+	if sm != null and sm.has_method("apply_sanity_loss"):
+		sm.call("apply_sanity_loss", "note_read", 1, global_transform.origin)
+	else:
+		var sv := get_node_or_null("/root/SaveManager")
+		if sv != null and sv.has_method("modify_sanity"):
+			sv.call("modify_sanity", -1)
+
+	queue_free()

@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3 uid="uid://ebulq3pcjcnd"]
+
+[ext_resource type="PackedScene" uid="uid://cqcmne08iurar" path="res://assets/models/well.glb" id="1_ol60k"]
+[ext_resource type="Script" uid="uid://bs2qgf7apmtgx" path="res://scripts/environments/ObjectsBase.gd" id="2_chu4v"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_kw27f"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ol60k"]
+size = Vector3(2, 2.75, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2m0o2"]
+size = Vector3(2, 2.75, 1.25)
+
+[node name="well" instance=ExtResource("1_ol60k")]
+script = ExtResource("2_chu4v")
+display_name = "Whispering Well"
+accepts_items = ["symbol_coin", "symbol_ticket", "symbol_watch"]
+
+[node name="Water" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="2"]
+collision_layer = 16
+collision_mask = 33
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("BoxShape3D_ol60k")
+
+[node name="Area3D" type="Area3D" parent="." index="3"]
+collision_layer = 16
+collision_mask = 33
+script = ExtResource("3_kw27f")
+kind = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 1.625)
+shape = SubResource("BoxShape3D_2m0o2")

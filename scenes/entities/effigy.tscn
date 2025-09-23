@@ -1,16 +1,27 @@
-[gd_scene load_steps=6 format=3 uid="uid://c5rjon02p04c"]
+[gd_scene load_steps=12 format=3 uid="uid://c5rjon02p04c"]
 
 [ext_resource type="Script" uid="uid://bdnkng8cyyvbu" path="res://scripts/entities/Effigy.gd" id="1_effigy_script"]
 [ext_resource type="PackedScene" uid="uid://bv3mdg4yo4aqv" path="res://assets/models/stage_1.tscn" id="4_stage3"]
+[ext_resource type="PackedScene" uid="uid://twgsxg8mfb6i" path="res://assets/models/stage_3.tscn" id="4_w53tp"]
 [ext_resource type="PackedScene" uid="uid://b37apb738anqx" path="res://assets/models/stage_2.tscn" id="5_stage4"]
+[ext_resource type="PackedScene" uid="uid://c2vjv405slg18" path="res://assets/models/stage_4.tscn" id="5_vrxgt"]
+[ext_resource type="Script" uid="uid://b8llm01nr3otu" path="res://scripts/entities/sight_ray.gd" id="6_vrxgt"]
+[ext_resource type="Script" uid="uid://dy455g8y0jqpj" path="res://scripts/entities/EffigyLogic/sanity_drain_area.gd" id="7_05frr"]
+[ext_resource type="AudioStream" uid="uid://dr1hqge7ib4ek" path="res://assets/audio/dragging.ogg" id="8_gmsgx"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.245965
 height = 1.75
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_rlyf0"]
-size = Vector3(20, 2, 20)
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_w53tp"]
+radius = 10.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_sanity_drain"]
+radius = 2.0
 
 [node name="Effigy" type="CharacterBody3D"]
+collision_layer = 5
+collision_mask = 51
 script = ExtResource("1_effigy_script")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -18,27 +29,41 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 shape = SubResource("CapsuleShape3D_1")
 
 [node name="Stage1" parent="." instance=ExtResource("4_stage3")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 
 [node name="Stage2" parent="." instance=ExtResource("5_stage4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 visible = false
 
-[node name="Stage3" parent="." instance=ExtResource("4_stage3")]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, -0.5, 0)
+[node name="Stage3" parent="." instance=ExtResource("4_w53tp")]
 visible = false
 
-[node name="Stage4" parent="." instance=ExtResource("5_stage4")]
-transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, -0.25, 0)
+[node name="Stage4" parent="." instance=ExtResource("5_vrxgt")]
 visible = false
 
 [node name="DetectionArea" type="Area3D" parent="."]
-collision_layer = 0
+collision_layer = 4
 
 [node name="DetectionShape" type="CollisionShape3D" parent="DetectionArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-shape = SubResource("BoxShape3D_rlyf0")
+shape = SubResource("CylinderShape3D_w53tp")
+
+[node name="SightRay" type="RayCast3D" parent="."]
+collision_mask = 51
+script = ExtResource("6_vrxgt")
+role = 1
+eye_path = NodePath("../Eyes")
+forward_node_path = NodePath("../Eyes")
+
+[node name="Eyes" type="Marker3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.65693, 0.375615)
+
+[node name="SanityDrainArea" type="Area3D" parent="."]
+collision_layer = 4
+script = ExtResource("7_05frr")
+
+[node name="SanityDrainShape" type="CollisionShape3D" parent="SanityDrainArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("SphereShape3D_sanity_drain")
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
-max_distance = 20.0
+stream = ExtResource("8_gmsgx")

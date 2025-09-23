@@ -1,15 +1,20 @@
-[gd_scene load_steps=7 format=3 uid="uid://8vap4fxs1jin"]
+[gd_scene load_steps=12 format=3 uid="uid://8vap4fxs1jin"]
 
-[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_a4ctc"]
+[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/Tile.gd" id="1_1bjqq"]
+[ext_resource type="Script" uid="uid://bslkfjq217ygu" path="res://scripts/tiles/ItemSpawn.gd" id="2_3unix"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_gbpo1"]
 [ext_resource type="PackedScene" uid="uid://dxrwt86snuv1a" path="res://scenes/environments/3x1_corn_tile.tscn" id="3_kvrai"]
+[ext_resource type="Script" uid="uid://d1kulb6h8r3lq" path="res://scripts/tiles/EntitySpawn.gd" id="3_t0wye"]
 [ext_resource type="PackedScene" uid="uid://gkb1m13l00g5" path="res://scenes/environments/1x1_corn_tile.tscn" id="4_ay174"]
 [ext_resource type="PackedScene" uid="uid://y3n3yl83883f" path="res://scenes/environments/tree.tscn" id="5_hedg3"]
 [ext_resource type="PackedScene" uid="uid://vgktbniibi0f" path="res://scenes/environments/broken_mirror.tscn" id="6_1bjqq"]
+[ext_resource type="Script" uid="uid://i8nxu7251731" path="res://scripts/tiles/PuzzleProgress.gd" id="7_nod86"]
+[ext_resource type="PackedScene" uid="uid://cfjbmrppn8dad" path="res://scenes/environments/altar.tscn" id="8_kvrai"]
+[ext_resource type="Script" uid="uid://d1onnf2ddgv4p" path="res://scripts/tiles/PuzzleKeyCheck.gd" id="10_d7mi2"]
 
 [node name="CrowsParliament" type="Node3D"]
-script = ExtResource("1_a4ctc")
-is_permanent = true
+script = ExtResource("1_1bjqq")
+tile_id = &"crows_parliament"
 
 [node name="Maze" type="Node3D" parent="."]
 
@@ -19,8 +24,10 @@ is_permanent = true
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.5, 1, 0)
 
 [node name="ItemSpawn" type="Node3D" parent="Maze"]
+script = ExtResource("2_3unix")
 
 [node name="EntitySpawn" type="Node3D" parent="Maze"]
+script = ExtResource("3_t0wye")
 
 [node name="Ground" parent="Maze" instance=ExtResource("2_gbpo1")]
 
@@ -102,6 +109,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, -9.5)
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -9.5, 1.75, 0)
 
 [node name="Objects" type="Node3D" parent="Maze"]
+script = ExtResource("7_nod86")
+puzzle_id = &"crows_parliament"
 
 [node name="tree" parent="Maze/Objects" instance=ExtResource("5_hedg3")]
 transform = Transform3D(1, 0, 0, 0, 1.25235, 0, 0, 0, 1.1796, -6.02758, 0.0246854, 0.409755)
@@ -120,3 +129,9 @@ transform = Transform3D(0.232003, 0, -0.972715, 0, 0.898317, 0, 0.972715, 0, 0.2
 
 [node name="BrokenMirror" parent="Maze/Objects" instance=ExtResource("6_1bjqq")]
 transform = Transform3D(-0.155291, 0, 0.579555, 0, 0.6, 0, -0.579555, 0, -0.155291, -5.75, 0, 0.75)
+
+[node name="KeyCheck" type="Node3D" parent="."]
+script = ExtResource("10_d7mi2")
+
+[node name="altar" parent="KeyCheck" instance=ExtResource("8_kvrai")]
+transform = Transform3D(1.00244, 0, 0, 0, 1.00244, 0, 0, 0, 1.00244, 7.0798, 0, -2.91204)

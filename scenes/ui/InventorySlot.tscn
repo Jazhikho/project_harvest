@@ -1,0 +1,36 @@
+[gd_scene load_steps=3 format=3 uid="uid://c6c8w7a2w3x8y"]
+
+[ext_resource type="Script" path="res://scripts/ui/InventorySlot.gd" id="1_abcde"]
+
+[sub_resource type="World3D" id="World3D_fghij"]
+
+[node name="InventorySlot" type="PanelContainer"]
+custom_minimum_size = Vector2(120, 120)
+script = ExtResource("1_abcde")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+layout_mode = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+world_3d = SubResource("World3D_fghij")
+size = Vector2i(112, 112)
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
+projection = 1
+size = 2.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 2, 2)
+shadow_enabled = true
+
+[node name="ItemModel" type="Node3D" parent="SubViewportContainer/SubViewport"]
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 2
+focus_mode = 0
+flat = true
