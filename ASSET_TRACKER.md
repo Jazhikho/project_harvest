@@ -572,6 +572,44 @@ This document provides complete attribution for all assets used in Project Harve
   - **License:** Attribution 3.0
   - **URL:** https://freesound.org/s/446083/
 
+#### Metal and Mechanical Sounds
+- `assets/audio/Foley_Gate_Metal_Squeak_Stereo.wav` - Metal gate squeak sound effect
+  - **Creator:** Nox_Sound
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/566398/
+
+- `assets/audio/Old_Padlock.wav` - Old padlock sound effect
+  - **Creator:** LampEight
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/277155/
+
+- `assets/audio/Pad_lock.wav` - Pad lock sound effect
+  - **Creator:** merc7477
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/762784/
+
+- `assets/audio/VSH-12-fist-thump-metal_pipe-short.wav` - Fist thump on metal pipe sound
+  - **Creator:** newagesoup
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/369111/
+
+#### Impact and Kicking Sounds
+- `assets/audio/Shed_Kicking.wav` - Shed kicking sound effect
+  - **Creator:** Hitrison
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/149812/
+
+#### Rustling and Paper Sounds
+- `assets/audio/rustling_paper.wav` - Rustling paper sound effect
+  - **Creator:** keweldog
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/181774/
+
+- `assets/audio/Clothes_Rustles.wav` - Clothes rustling sound effect
+  - **Creator:** njjjjjjjjjjjjjjjjjjjjjjjj
+  - **License:** Creative Commons 0
+  - **URL:** https://freesound.org/s/566193/
+
 **Attribution:** "Audio assets sourced from Freesound.org (https://freesound.org/) with individual creator attributions as specified above."
 
 **License Details:** 
@@ -734,3 +772,48 @@ AI-generated assets (textures, code assistance) should comply with the respectiv
 For questions about asset usage or licensing, contact: [Your Contact Information]
 
 **Disclaimer:** This attribution tracker is maintained to the best of our knowledge. Always verify license terms directly with asset creators for commercial or sensitive applications.
+
+---
+
+## Potentially Missing Attributions
+
+The following assets are present in the project but may need proper attribution. Please verify their sources:
+
+### Audio Files (Potential Missing Attributions)
+**Note:** These files appear to be custom/original content, but verification is recommended:
+
+#### Original/Project Audio
+- `assets/audio/Corn.ogg` - Corn rustling sound effect
+- `assets/audio/whispers.ogg` - Whispering sound effect
+- `assets/audio/whispers1.ogg` - Whispering sound effect variant 1
+- `assets/audio/whispers2.ogg` - Whispering sound effect variant 2
+- `assets/audio/whispers3.ogg` - Whispering sound effect variant 3
+- `assets/audio/whispers4.ogg` - Whispering sound effect variant 4
+- `assets/audio/heartbeat.ogg` - Heartbeat sound effect
+- `assets/audio/walking.ogg` - Walking sound effect
+- `assets/audio/sprinting.ogg` - Sprinting sound effect
+- `assets/audio/dragging.ogg` - Dragging sound effect
+- `assets/audio/crows_1.ogg` - Crow sound effect
+- `assets/audio/gateopen.ogg` - Gate opening sound effect
+- `assets/audio/itempickup.ogg` - Item pickup sound effect
+- `assets/audio/kick.ogg` - Kicking sound effect
+- `assets/audio/notepickup.ogg` - Note pickup sound effect
+- `assets/audio/padlock.ogg` - Padlock sound effect
+- `assets/audio/stilllocked.ogg` - Still locked sound effect
+
+**Recommendation:** Verify these are original creations or properly attribute external sources if applicable.
+
+### Scene References
+The following scene files reference "Sketchfab_model" nodes, which may indicate external model usage:
+- `scenes/items/symbol_coin.tscn` - Contains Sketchfab_model node
+- `scenes/items/symbol_ticket.tscn` - Contains Sketchfab_model node  
+- `scenes/items/phone.tscn` - Contains Sketchfab_model node
+
+**Recommendation:** Verify these models are properly attributed or are original creations.
+
+---
+
+**Action Required:** Please review the above assets and either:
+1. Confirm they are original creations
+2. Add proper attribution for external sources
+3. Remove from project if attribution cannot be verified
