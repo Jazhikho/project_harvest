@@ -8,12 +8,12 @@ var _spawn_manager: Node
 var _tile_state_manager: Node
 
 # Tile tracking
-var _active_tiles: Dictionary = {}  # Vector2i -> Node3D
-var _permanent_tiles: Dictionary = {}  # Vector2i -> Node3D
-var _puzzle_tiles: Dictionary = {}  # Vector2i -> puzzle_id
+var _active_tiles: Dictionary = {} # Vector2i -> Node3D
+var _permanent_tiles: Dictionary = {} # Vector2i -> Node3D
+var _puzzle_tiles: Dictionary = {} # Vector2i -> puzzle_id
 
 # Connection tracking - prevents respawning
-var _established_connections: Dictionary = {}  # "pos1_pos2" -> true
+var _established_connections: Dictionary = {} # "pos1_pos2" -> true
 
 # Tile scenes
 var _available_tile_scenes: Array[String] = []
@@ -22,9 +22,15 @@ var _final_tile_scene: String = "res://scenes/tiles/final_event_tile.tscn"
 
 # Initialization flag
 var _start_tile_initialized: bool = false
+var _permanent_tile_positions: Dictionary = {} # scene_path -> Vector2i (first spawn position)
+var _permanent_tile_instances: Dictionary = {} # Vector2i -> scene_path (current instances)
+
+# Forbidden zone for permanent tiles (1,1) to (-1,-1)
+const FORBIDDEN_MIN: Vector2i = Vector2i(-1, -1)
+const FORBIDDEN_MAX: Vector2i = Vector2i(1, 1)
 
 # Door constants
-enum DoorDirection { NORTH = 1, EAST = 2, SOUTH = 4, WEST = 8 }
+enum DoorDirection {NORTH = 1, EAST = 2, SOUTH = 4, WEST = 8}
 
 const TILE_SIZE: float = 20.0
 
@@ -206,54 +212,126 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 	
 	for door_direction in available_doors:
 		var raw_connecting_pos: Vector2i = _get_connecting_position(source_pos, door_direction)
-		var connecting_pos: Vector2i = _apply_world_wrapping(raw_connecting_pos)
+		var wrapped_connecting_pos: Vector2i = _apply_world_wrapping(raw_connecting_pos)
 		
+		print("TileManager: Checking connection from ", source_pos, " ", _get_direction_name(door_direction), 
+			  " to raw: ", raw_connecting_pos, " wrapped: ", wrapped_connecting_pos)
 		
-		# Skip if connection already established
-		if _is_connection_established(source_pos, connecting_pos):
+		# Skip if connection already established (use wrapped position for check)
+		if _is_connection_established(source_pos, wrapped_connecting_pos):
 			continue
 		
-		# Step 5a: Check for permanent tile at wrapped position first
-		if _has_permanent_tile_at(connecting_pos):
-			_establish_connection(source_pos, connecting_pos)
+		# Check if tile already exists at wrapped position (including permanent tiles)
+		if _active_tiles.has(wrapped_connecting_pos) and is_instance_valid(_active_tiles[wrapped_connecting_pos]):
+			var existing_tile: Node3D = _active_tiles[wrapped_connecting_pos]
+			
+			# If it's a permanent tile, rotate it to connect
+			if existing_tile.has_method("is_tile_permanent") and existing_tile.is_tile_permanent():
+				_rotate_permanent_tile_to_connect(existing_tile, door_direction)
+			
+			_establish_connection(source_pos, wrapped_connecting_pos)
+			_tile_state_manager.set_tile_state(wrapped_connecting_pos, _tile_state_manager.TileState.CONNECTING)
 			continue
-		
-		# Skip if tile already exists
-		if _active_tiles.has(connecting_pos) and is_instance_valid(_active_tiles[connecting_pos]):
-			_establish_connection(source_pos, connecting_pos)
-			# Make sure existing tile is set to connecting state
-			_tile_state_manager.set_tile_state(connecting_pos, _tile_state_manager.TileState.CONNECTING)
-			continue
-		elif _active_tiles.has(connecting_pos):
+		elif _active_tiles.has(wrapped_connecting_pos):
 			# Clean up invalid reference
-			_active_tiles.erase(connecting_pos)
+			_active_tiles.erase(wrapped_connecting_pos)
 		
-		# IMPORTANT: Don't create a new tile at (0, 0) if we already have the start tile there
-		if connecting_pos == Vector2i(0, 0):
-			# The start tile should already be registered if it exists
-			if _active_tiles.has(Vector2i(0, 0)):
-				_establish_connection(source_pos, connecting_pos)
-				_tile_state_manager.set_tile_state(connecting_pos, _tile_state_manager.TileState.CONNECTING)
-				continue
+		# Check for permanent tile that should spawn at wrapped position
+		var permanent_scene_at_pos: String = _get_permanent_tile_at_position(wrapped_connecting_pos)
+		if not permanent_scene_at_pos.is_empty():
+			# Spawn the permanent tile
+			var permanent_tile: Node3D = _spawn_permanent_tile(permanent_scene_at_pos, wrapped_connecting_pos, source_tile, door_direction)
+			if permanent_tile:
+				_establish_connection(source_pos, wrapped_connecting_pos)
+			continue
 		
-		# Step 5b: Create random tile if no permanent tile exists
-		var new_tile: Node3D = _create_random_tile(connecting_pos)
+		# Allow normal tiles at (0,0) if start tile is gone
+		if wrapped_connecting_pos == Vector2i(0, 0):
+			# Check if start tile still exists
+			if _active_tiles.has(Vector2i(0, 0)) and is_instance_valid(_active_tiles[Vector2i(0, 0)]):
+				var tile_at_origin: Node3D = _active_tiles[Vector2i(0, 0)]
+				# Check if it's actually the start tile
+				var scene_path: String = tile_at_origin.get_meta("scene_path", "")
+				if scene_path == _start_tile_scene or tile_at_origin.name == "StartTile":
+					_establish_connection(source_pos, wrapped_connecting_pos)
+					_tile_state_manager.set_tile_state(wrapped_connecting_pos, _tile_state_manager.TileState.CONNECTING)
+					continue
+			# Start tile is gone, (0,0) is free for normal tiles
+		
+		# Create random tile if no permanent tile exists
+		var new_tile: Node3D = _create_random_tile_with_permanent_check(wrapped_connecting_pos)
 		if not new_tile:
 			continue
 		
 		# Setup tile orientation and position
 		_align_tiles(source_tile, new_tile, door_direction)
-		_register_tile(new_tile, connecting_pos)
+		_register_tile(new_tile, wrapped_connecting_pos)
 		
 		# Register with TileStateManager as connecting
-		_tile_state_manager.register_tile(new_tile, connecting_pos, _tile_state_manager.TileState.CONNECTING)
+		_tile_state_manager.register_tile(new_tile, wrapped_connecting_pos, _tile_state_manager.TileState.CONNECTING)
 		
 		# Establish the connection
-		_establish_connection(source_pos, connecting_pos)
+		_establish_connection(source_pos, wrapped_connecting_pos)
 		
 		# Emit tile generated event for spawn processing
-		_message_bus.emit_event("tile_generated", [new_tile, connecting_pos, {}])
+		_message_bus.emit_event("tile_generated", [new_tile, wrapped_connecting_pos, {}])
 		
+func _rotate_permanent_tile_to_connect(permanent_tile: Node3D, approaching_from_direction: int) -> void:
+	"""
+	Rotate an existing permanent tile to connect with the approaching tile
+	
+	@param permanent_tile: The permanent tile to rotate
+	@param approaching_from_direction: The direction we're approaching FROM (need opposite door)
+	"""
+	# Calculate the opposite direction (where permanent tile needs a door)
+	var required_door_direction: int = _get_opposite_direction(approaching_from_direction)
+	
+	print("TileManager: Need to rotate permanent tile ", permanent_tile.name, 
+		  " to have door facing ", _get_direction_name(required_door_direction))
+	
+	# Get the permanent tile's available doors in their ORIGINAL orientations
+	if not permanent_tile.has_method("door_markers"):
+		# Try to detect doors if not already done
+		if permanent_tile.has_method("detect_doors"):
+			permanent_tile.detect_doors()
+	
+	# Find which original door can be rotated to face the required direction
+	var best_rotation: int = -1
+	
+	# Check all possible doors on the permanent tile
+	var door_found: bool = false
+	for check_direction in [DoorDirection.NORTH, DoorDirection.EAST, DoorDirection.SOUTH, DoorDirection.WEST]:
+		if permanent_tile.has_method("has_door") and permanent_tile.has_door(check_direction):
+			# This door exists, check how many rotations needed
+			for rotation_steps in range(4):
+				var rotated_direction: int = _get_door_after_rotation(check_direction, rotation_steps)
+				if rotated_direction == required_door_direction:
+					best_rotation = rotation_steps
+					door_found = true
+					print("TileManager: Found door at ", _get_direction_name(check_direction), 
+						  " that needs ", rotation_steps, " rotations")
+					break
+		
+		if door_found:
+			break
+	
+	# Apply the rotation if we found a valid orientation
+	if best_rotation != -1:
+		var current_rotation: int = 0
+		if permanent_tile.has_method("get_current_rotation"):
+			current_rotation = permanent_tile.get_current_rotation()
+		
+		if current_rotation != best_rotation:
+			print("TileManager: Rotating permanent tile from rotation ", current_rotation, 
+				  " to ", best_rotation)
+			
+			if permanent_tile.has_method("set_tile_rotation"):
+				permanent_tile.set_tile_rotation(best_rotation)
+			else:
+				permanent_tile.rotation.y = best_rotation * PI / 2
+	else:
+		push_warning("TileManager: Could not find valid rotation for permanent tile ", 
+					 permanent_tile.name, " to connect from ", _get_direction_name(approaching_from_direction))
 
 func _is_connection_established(pos1: Vector2i, pos2: Vector2i) -> bool:
 	"""
@@ -390,22 +468,22 @@ func _apply_world_wrapping(position: Vector2i) -> Vector2i:
 	@param position: Raw grid position
 	@return: Wrapped position within 7x7 grid
 	"""
-	var wrapped_pos = position
+	var wrapped_pos: Vector2i = position
 	
-	# Wrap X coordinate: -3 to 3
-	if wrapped_pos.x > 3:
-		wrapped_pos.x = -3 + (wrapped_pos.x - 4)
-	elif wrapped_pos.x < -3:
-		wrapped_pos.x = 3 + (wrapped_pos.x + 4)
+	# Wrap X coordinate: -3 to 3 (7 total positions)
+	while wrapped_pos.x > 3:
+		wrapped_pos.x -= 7
+	while wrapped_pos.x < -3:
+		wrapped_pos.x += 7
 	
-	# Wrap Y coordinate: -3 to 3  
-	if wrapped_pos.y > 3:
-		wrapped_pos.y = -3 + (wrapped_pos.y - 4)
-	elif wrapped_pos.y < -3:
-		wrapped_pos.y = 3 + (wrapped_pos.y + 4)
+	# Wrap Y coordinate: -3 to 3 (7 total positions)
+	while wrapped_pos.y > 3:
+		wrapped_pos.y -= 7
+	while wrapped_pos.y < -3:
+		wrapped_pos.y += 7
 	
 	if wrapped_pos != position:
-		pass
+		print("TileManager: World wrapped position from ", position, " to ", wrapped_pos)
 	
 	return wrapped_pos
 
@@ -638,3 +716,224 @@ func force_cleanup_debug() -> void:
 func debug_check_start_tile() -> void:
 	"""Debug function to check start tile status"""
 	pass
+
+func _create_random_tile_with_permanent_check(grid_pos: Vector2i) -> Node3D:
+	"""
+	Create a random tile at position, checking if it should be permanent
+	
+	@param grid_pos: Grid position for tile
+	@return: Created tile or null
+	"""
+	if _available_tile_scenes.is_empty():
+		push_error("TileManager: No available tile scenes")
+		return null
+	
+	# Check if should spawn final tile
+	if _state_manager.has_flag("final_event_available") and randf() < 0.5:
+		return _create_tile_from_scene(_final_tile_scene, grid_pos)
+	
+	# Select random scene
+	var random_scene: String = _available_tile_scenes[randi() % _available_tile_scenes.size()]
+	
+	# Create the tile
+	var new_tile: Node3D = _create_tile_from_scene(random_scene, grid_pos)
+	if not new_tile:
+		return null
+	
+	# Check if this tile is permanent
+	if new_tile.has_method("is_tile_permanent") and new_tile.is_tile_permanent():
+		# Check if this permanent tile can spawn here
+		if not _can_permanent_tile_spawn_at(grid_pos):
+			print("TileManager: Permanent tile ", random_scene, " cannot spawn at ", grid_pos, " (forbidden zone)")
+			new_tile.queue_free()
+			# Try another random non-permanent tile
+			return _create_random_tile(grid_pos)
+		
+		# Check if this permanent tile has already spawned elsewhere
+		if _permanent_tile_positions.has(random_scene):
+			var original_pos: Vector2i = _permanent_tile_positions[random_scene]
+			print("TileManager: Permanent tile ", random_scene, " already spawned at ", original_pos, ", cannot spawn at ", grid_pos)
+			new_tile.queue_free()
+			# Try another random tile
+			return _create_random_tile(grid_pos)
+		
+		# This is the first spawn of this permanent tile - record it
+		_permanent_tile_positions[random_scene] = grid_pos
+		_permanent_tile_instances[grid_pos] = random_scene
+		print("TileManager: Permanent tile ", random_scene, " first spawn at ", grid_pos)
+	
+	return new_tile
+
+func _get_permanent_tile_at_position(position: Vector2i) -> String:
+	"""
+	Check if a permanent tile should exist at this position
+	
+	@param position: Grid position to check
+	@return: Scene path of permanent tile that should be here, or empty string
+	"""
+	# Check if we have a permanent tile instance recorded at this exact position
+	if _permanent_tile_instances.has(position):
+		return _permanent_tile_instances[position]
+	
+	# Check all permanent tiles to see if any should appear at this wrapped position
+	for scene_path in _permanent_tile_positions:
+		var original_position: Vector2i = _permanent_tile_positions[scene_path]
+		
+		# Check if this position is a wrapped version of the original
+		if _are_positions_equivalent_with_wrapping(position, original_position):
+			return scene_path
+	
+	return ""
+
+func _are_positions_equivalent_with_wrapping(pos1: Vector2i, pos2: Vector2i) -> bool:
+	"""
+	Check if two positions are equivalent considering world wrapping
+	
+	@param pos1: First position
+	@param pos2: Second position  
+	@return: True if positions are the same considering wrapping
+	"""
+	# Positions are equivalent if they differ by multiples of 7
+	var diff_x: int = abs(pos1.x - pos2.x)
+	var diff_y: int = abs(pos1.y - pos2.y)
+	
+	return (diff_x % 7 == 0) and (diff_y % 7 == 0)
+
+func _can_permanent_tile_spawn_at(position: Vector2i) -> bool:
+	"""
+	Check if a permanent tile is allowed to spawn at this position
+	Permanent tiles cannot spawn in the area from (1,1) to (-1,-1)
+	
+	@param position: Position to check
+	@return: True if permanent tiles can spawn here
+	"""
+	# Check if position is in forbidden zone
+	if position.x >= FORBIDDEN_MIN.x and position.x <= FORBIDDEN_MAX.x and \
+	   position.y >= FORBIDDEN_MIN.y and position.y <= FORBIDDEN_MAX.y:
+		return false
+	
+	return true
+
+func _spawn_permanent_tile(scene_path: String, grid_pos: Vector2i, source_tile: Node3D, door_direction: int) -> Node3D:
+	"""
+	Spawn a specific permanent tile at position
+	
+	@param scene_path: Path to the permanent tile scene
+	@param grid_pos: Position to spawn at
+	@param source_tile: Tile we're connecting from
+	@param door_direction: Direction we're connecting from
+	@return: Spawned tile or null
+	"""
+	print("TileManager: Spawning permanent tile ", scene_path, " at ", grid_pos)
+	
+	var permanent_tile: Node3D = _create_tile_from_scene(scene_path, grid_pos)
+	if not permanent_tile:
+		return null
+	
+	# Permanent tiles must rotate to connect
+	_align_tiles_with_rotation_requirement(source_tile, permanent_tile, door_direction)
+	
+	# Register the tile
+	_register_tile(permanent_tile, grid_pos)
+	_permanent_tile_instances[grid_pos] = scene_path
+	
+	# Register with TileStateManager as connecting
+	_tile_state_manager.register_tile(permanent_tile, grid_pos, _tile_state_manager.TileState.CONNECTING)
+	
+	# Emit tile generated event
+	_message_bus.emit_event("tile_generated", [permanent_tile, grid_pos, {}])
+	
+	return permanent_tile
+
+func _align_tiles_with_rotation_requirement(source_tile: Node3D, target_tile: Node3D, door_direction: int) -> void:
+	"""
+	Align tiles ensuring the target (permanent) tile rotates to connect properly
+	
+	@param source_tile: Source tile with door
+	@param target_tile: Target tile to align (will be rotated)
+	@param door_direction: Direction of connecting door from source
+	"""
+	# Calculate the opposite direction (where target needs a door)
+	var required_door_direction: int = _get_opposite_direction(door_direction)
+	
+	# Find which door on the target tile should connect
+	if target_tile.has_method("get_available_doors"):
+		var target_doors: Dictionary = target_tile.get_available_doors()
+		
+		# Find a door that can be rotated to match the required direction
+		var best_rotation: int = -1
+		var best_door: int = -1
+		
+		for original_door_dir in target_doors:
+			# Calculate how many rotations needed to align this door
+			for rotation_steps in range(4):
+				var rotated_dir: int = _get_door_after_rotation(original_door_dir, rotation_steps)
+				if rotated_dir == required_door_direction:
+					best_rotation = rotation_steps
+					best_door = original_door_dir
+					break
+			
+			if best_rotation != -1:
+				break
+		
+		# Apply the rotation
+		if best_rotation != -1:
+			print("TileManager: Rotating permanent tile ", target_tile.name, " by ", best_rotation, " steps")
+			if target_tile.has_method("set_tile_rotation"):
+				target_tile.set_tile_rotation(best_rotation)
+			else:
+				target_tile.rotation.y = best_rotation * PI / 2
+	
+	# Position target tile
+	var source_center: Vector3 = source_tile.position
+	var offset: float = TILE_SIZE
+	
+	match door_direction:
+		DoorDirection.NORTH:
+			target_tile.position = Vector3(source_center.x + offset, source_center.y, source_center.z)
+		DoorDirection.EAST:
+			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z + offset)
+		DoorDirection.SOUTH:
+			target_tile.position = Vector3(source_center.x - offset, source_center.y, source_center.z)
+		DoorDirection.WEST:
+			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
+
+func _get_opposite_direction(direction: int) -> int:
+	"""
+	Get the opposite door direction
+	
+	@param direction: Original direction
+	@return: Opposite direction
+	"""
+	match direction:
+		DoorDirection.NORTH: return DoorDirection.SOUTH
+		DoorDirection.EAST: return DoorDirection.WEST
+		DoorDirection.SOUTH: return DoorDirection.NORTH
+		DoorDirection.WEST: return DoorDirection.EAST
+		_: return DoorDirection.NORTH
+
+func _get_door_after_rotation(original_door: int, rotation_steps: int) -> int:
+	"""
+	Get what door direction becomes after rotation (counter-clockwise)
+	
+	@param original_door: Original door direction
+	@param rotation_steps: Number of 90-degree rotations
+	@return: New door direction
+	"""
+	var door_index: int = _door_to_index(original_door)
+	var new_index: int = (door_index - rotation_steps + 4) % 4
+	return _index_to_door_enum(new_index)
+
+func _index_to_door_enum(index: int) -> int:
+	"""
+	Convert index back to door enum
+	
+	@param index: Index (0-3)
+	@return: Door direction enum
+	"""
+	match index:
+		0: return DoorDirection.NORTH
+		1: return DoorDirection.EAST
+		2: return DoorDirection.SOUTH
+		3: return DoorDirection.WEST
+		_: return DoorDirection.NORTH
