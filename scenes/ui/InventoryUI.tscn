@@ -98,7 +98,7 @@ size_flags_vertical = 3
 stretch = true
 
 [node name="Viewport" type="SubViewport" parent="InspectPanel/VBoxContainer/ViewportContainer"]
-transparent_bg = true
+transparent_bg = false
 handle_input_locally = false
 size = Vector2i(2, 2)
 render_target_update_mode = 0
@@ -118,11 +118,6 @@ text = "Item description here"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="InspectPanel/VBoxContainer"]
 layout_mode = 2
-
-[node name="CombineButton" type="Button" parent="InspectPanel/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "COMBINE WITH..."
 
 [node name="BackButton" type="Button" parent="InspectPanel/VBoxContainer/HBoxContainer"]
 layout_mode = 2
