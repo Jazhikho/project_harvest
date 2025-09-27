@@ -13,6 +13,7 @@ size = Vector3(0.497498, 0.0632324, 0.502869)
 
 [node name="HolyBook" instance=ExtResource("1_ymmvt")]
 script = ExtResource("2_atjtk")
+item_id = "holy_book"
 display_name = "Holy Book"
 
 [node name="polySurface9" parent="." index="0"]

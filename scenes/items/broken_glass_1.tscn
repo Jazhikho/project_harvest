@@ -141,6 +141,7 @@ size = Vector3(1, 0.25, 1)
 
 [node name="broken_glass1" instance=ExtResource("1_v3q63")]
 script = ExtResource("2_v3q63")
+item_id = "broken_glass_1"
 display_name = "Glass Shards (Jagged)"
 
 [node name="Cube_001_cell_005_cell_001" parent="." index="0"]

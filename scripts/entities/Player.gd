@@ -194,7 +194,15 @@ func _check_interactions() -> void:
 	var result: Dictionary = space_state.intersect_ray(query)
 	if result and result.has("collider"):
 		var collider: Node = result.collider
-		_show_interaction_prompt(collider)
+		
+		# Check parent if this is a collision body
+		var check_node: Node = collider
+		if collider is CollisionObject3D:
+			var parent_node = collider.get_parent()
+			if parent_node and (parent_node.has_meta("is_collectible") or parent_node.has_method("get_pickup_prompt_text")):
+				check_node = parent_node
+		
+		_show_interaction_prompt(check_node)
 
 func _try_interact() -> void:
 	"""Attempt to interact with object in front of player"""
@@ -208,7 +216,15 @@ func _try_interact() -> void:
 	var result: Dictionary = space_state.intersect_ray(query)
 	if result and result.has("collider"):
 		var collider: Node = result.collider
-		_interact_with_object(collider)
+		
+		# Check if collider has a parent that's a BaseItem
+		var parent_node: Node = collider.get_parent()
+		if parent_node and parent_node.has_method("interact"):
+			# Call the interact method directly
+			parent_node.interact()
+		else:
+			# Try old interaction system
+			_interact_with_object(collider)
 
 func _interact_with_object(obj: Node) -> void:
 	"""
@@ -221,23 +237,35 @@ func _interact_with_object(obj: Node) -> void:
 	if state_manager:
 		current_tile = state_manager.get_state("current_tile_position")
 	
+	# Check the parent node first if this is a collision body
+	var check_node: Node = obj
+	if obj is CollisionObject3D:
+		var parent_node = obj.get_parent()
+		if parent_node and parent_node.has_meta("is_collectible"):
+			check_node = parent_node
+	
 	# Handle item collection
-	if obj.has_meta("is_collectible"):
-		var item_id: String = obj.get_meta("item_id", "")
-		if not item_id.is_empty():
-			_message_bus.emit_event("item_collected", [item_id, self, current_tile])
-			return
+	if check_node.has_meta("is_collectible"):
+		# Try to call interact method if available
+		if check_node.has_method("interact"):
+			check_node.interact()
+		else:
+			# Fallback to event system
+			var item_id: String = check_node.get_meta("item_id", "")
+			if not item_id.is_empty():
+				_message_bus.emit_event("item_collected", [item_id, self, current_tile])
+		return
 	
 	# Handle backpack interaction
-	if obj.has_meta("is_backpack"):
-		var inventory: Array = obj.get_meta("inventory", [])
+	if check_node.has_meta("is_backpack"):
+		var inventory: Array = check_node.get_meta("inventory", [])
 		_collect_backpack_contents(inventory)
-		obj.queue_free()
+		check_node.queue_free()
 		return
 	
 	# Handle puzzle interaction
-	if obj.has_meta("is_puzzle"):
-		var puzzle_id: String = obj.get_meta("puzzle_id", "")
+	if check_node.has_meta("is_puzzle"):
+		var puzzle_id: String = check_node.get_meta("puzzle_id", "")
 		_message_bus.emit_event("puzzle_started", [puzzle_id, current_tile])
 		return
 	

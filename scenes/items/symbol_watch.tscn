@@ -13,7 +13,7 @@ size = Vector3(0.35, 0.075, 0.5)
 
 [node name="pocketwatch" instance=ExtResource("1_pecso")]
 script = ExtResource("2_tch1n")
-item_id = "pocket_"
+item_id = "symbol_watch"
 display_name = "Pocket Watch"
 
 [node name="Object_2 Remeshed" parent="." index="0"]

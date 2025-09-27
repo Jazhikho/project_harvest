@@ -13,6 +13,7 @@ size = Vector3(0.45, 0.125, 0.65)
 
 [node name="notebook" instance=ExtResource("1_rv26w")]
 script = ExtResource("2_w0861")
+item_id = "symbol_ticket"
 display_name = "Blank Planner"
 
 [node name="Sketchfab_model" parent="." index="0"]

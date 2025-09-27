@@ -173,6 +173,7 @@ size = Vector3(1, 0.25, 1)
 
 [node name="broken_glass3" instance=ExtResource("1_h64ad")]
 script = ExtResource("2_dox1w")
+item_id = "broken_glass_3"
 display_name = "Glass Shards (Fragments)"
 
 [node name="Cube_001_cell_003_cell_003" parent="." index="0"]

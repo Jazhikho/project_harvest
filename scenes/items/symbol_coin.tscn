@@ -13,6 +13,7 @@ size = Vector3(0.4, 0.05, 0.4)
 
 [node name="coin" instance=ExtResource("1_t5tvb")]
 script = ExtResource("2_bu6xi")
+item_id = "symbol_coin"
 display_name = "Old Coin"
 
 [node name="Sketchfab_model" parent="." index="0"]

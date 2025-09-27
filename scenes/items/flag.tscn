@@ -12,6 +12,7 @@ size = Vector3(1, 0.0517578, 1)
 
 [node name="flag" instance=ExtResource("1_rmlrq")]
 script = ExtResource("2_qe2ye")
+item_id = "flag"
 display_name = "Tattered Flag"
 
 [node name="BHPS_49StarFlag_VR" parent="." index="0"]

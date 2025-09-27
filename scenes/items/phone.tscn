@@ -13,6 +13,7 @@ size = Vector3(0.195923, 0.0371094, 0.367992)
 
 [node name="phone" instance=ExtResource("1_t25ek")]
 script = ExtResource("2_t4pqi")
+item_id = "phone"
 display_name = "Broken Phone"
 
 [node name="Sketchfab_model" parent="." index="0"]
