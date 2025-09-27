@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://chwvk4ss5vpx3"]
+
+[ext_resource type="PackedScene" uid="uid://dmhv2qb8pklr3" path="res://assets/models/journal.glb" id="1_2q8mr"]
+[ext_resource type="Script" uid="uid://yc2v1m8c4ohx" path="res://scripts/items/BaseItem.gd" id="2_hr5uk"]
+
+[node name="journal" instance=ExtResource("1_2q8mr")]
+script = ExtResource("2_hr5uk")
+item_id = &"journal"
+display_name = "Research Journal"
+body_path = NodePath(".")

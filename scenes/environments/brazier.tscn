@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3 uid="uid://c84sbeompcbqe"]
+
+[ext_resource type="PackedScene" uid="uid://c2x68r123pxn" path="res://assets/models/brazier.glb" id="1_c0ehu"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_j6r4q"]
+height = 1.39014
+radius = 0.387207
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_c0ehu"]
+radius = 1.51514
+
+[node name="brazier" instance=ExtResource("1_c0ehu")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="4"]
+collision_layer = 16
+collision_mask = 55
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.617432, 0)
+shape = SubResource("CylinderShape3D_j6r4q")
+
+[node name="Area3D" type="Area3D" parent="." index="5"]
+collision_layer = 16
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_c0ehu")

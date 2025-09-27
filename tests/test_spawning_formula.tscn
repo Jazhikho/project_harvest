@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bqm4r0qs5uj1n"]
+
+[ext_resource type="Script" path="res://tests/test_spawning_formula.gd" id="1_3jx8v"]
+
+[node name="SpawningFormulaTest" type="Node"]
+script = ExtResource("1_3jx8v")

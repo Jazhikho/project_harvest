@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://iktgwd2fp8q8"]
+
+[ext_resource type="PackedScene" uid="uid://dxck4rb2aplni" path="res://assets/models/pocketwatch.glb" id="1_pecso"]
+[ext_resource type="Script" uid="uid://yc2v1m8c4ohx" path="res://scripts/items/BaseItem.gd" id="2_tch1n"]
+[ext_resource type="AudioStream" uid="uid://b114rubm08u6e" path="res://assets/audio/itempickup.ogg" id="5_abihr"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_42fnp"]
+height = 2.375
+radius = 1.75
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pecso"]
+size = Vector3(0.35, 0.075, 0.5)
+
+[node name="pocketwatch" instance=ExtResource("1_pecso")]
+script = ExtResource("2_tch1n")
+item_id = "pocket_"
+display_name = "Pocket Watch"
+
+[node name="Object_2 Remeshed" parent="." index="0"]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+
+[node name="Area3D" type="Area3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+collision_layer = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9375, 0)
+shape = SubResource("CylinderShape3D_42fnp")
+
+[node name="RigidBody3D" type="RigidBody3D" parent="." index="2"]
+collision_layer = 8
+collision_mask = 48
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.49012e-08, 0.0375, -0.025)
+shape = SubResource("BoxShape3D_pecso")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="." index="3"]
+stream = ExtResource("5_abihr")

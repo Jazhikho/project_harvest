@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://bv3mdg4yo4aqv"]
+
+[ext_resource type="PackedScene" path="res://assets/models/effigy.glb" id="1_t178k"]
+
+[node name="Stage1" instance=ExtResource("1_t178k")]

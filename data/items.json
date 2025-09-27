@@ -1,0 +1,646 @@
+{
+  "items": [
+	{
+	  "id": "flashlight",
+	  "name": "Flashlight",
+	  "description": "Why do I have this? Nevermind, I'm glad that I do.",
+	  "category": "tools",
+	  "always_keep": true
+	},
+	{
+	  "id": "journal",
+	  "name": "Research Journal",
+	  "description": "A binder containing notes and observations that I've found about the cornfield.",
+	  "category": "tools",
+	  "always_keep": true
+	},
+	{
+	  "id": "phone",
+	  "name": "Broken Phone",
+	  "description": "#DeadPhone #NoService #SadVibes #TheStruggleIsReal #InstaFomo #TiktokFomo #GetMeOutOfHere",
+	  "category": "puzzle_pieces",
+	  "puzzle_id": "watching_stones"
+	},
+	{
+	  "id": "holy_book",
+	  "name": "Holy Book",
+	  "description": "It feels strangely comforting, but then again, whoever brought it out here is gone, so...",
+	  "category": "puzzle_pieces",
+	  "puzzle_id": "watching_stones"
+	},
+	{
+	  "id": "flag",
+	  "name": "Tattered Flag",
+	  "description": "An old flag, torn and faded. Who left this out here?",
+	  "category": "puzzle_pieces",
+	  "puzzle_id": "watching_stones"
+	},
+	{
+	  "id": "broken_glass_1",
+	  "name": "Glass Shards (Jagged)",
+	  "description": "Sharp, jagged pieces of a mirror.",
+	  "category": "puzzle_pieces",
+	  "puzzle_id": "crows_parliament"
+	},
+	{
+	  "id": "broken_glass_2",
+	  "name": "Glass Shards (Curved)",
+	  "description": "Curved pieces of a mirror, reflecting a distorted image.",
+	  "category": "puzzle_pieces",
+	  "puzzle_id": "crows_parliament"
+	},
+	{
+	  "id": "broken_glass_3",
+	  "name": "Glass Shards (Fragments)",
+	  "description": "Fragments from the center of a mirror. I can almost see a complete face in it.",
+	  "category": "puzzle_pieces",
+	  "puzzle_id": "crows_parliament"
+	},
+	{
+	  "id": "symbol_watch",
+	  "name": "Pocket Watch",
+	  "description": "A simple pocket watch that has stopped. Not at all a metaphor for anything.",
+	  "category": "puzzle_pieces",
+	  "puzzle_id": "whispering_hollow"
+	},
+	{
+	  "id": "symbol_coin",
+	  "name": "Old Coin",
+	  "description": "Well... if I get lost, I can always flip for the way to go.",
+	  "category": "puzzle_pieces",
+	  "puzzle_id": "whispering_hollow"
+	},
+	{
+	  "id": "symbol_ticket",
+	  "name": "Blank Planner",
+	  "description": "Handy for planning things. First item on the agenda: Escape.",
+	  "category": "puzzle_pieces",
+	  "puzzle_id": "whispering_hollow"
+	},
+	{
+	  "id": "hollow_key",
+	  "name": "Ornate Key",
+	  "description": "A key that appeared on the altar. It must unlock something important.",
+	  "category": "puzzle_pieces",
+	  "puzzle_id": "final_gate"
+	},
+	{
+	  "id": "note_1",
+	  "category": "notes",
+	  "name": "Research Proposal: Project Harvest — Aims & Rationale",
+	  "description": "\nStatement of Purpose\nConvert a seasonal entertainment venue into a controlled environment for the observation, perturbation, and capture of identity states under stress. Hypothesis: selfhood is an emergent performance stabilized by observation, routine, and hope; remove or distort these stabilizers and continuity degrades into measurable, harvestable strata.\n\nAims (Summary)\nAim 1: Quantify identity elasticity by forcing rapid recontextualization (spatial rearrangement, narrative interruption, perceptual disagreement).\nAim 2: Model the conversion pipeline from VISITOR → SUBJECT → SAMPLE → ASSET with attention to dwell time, linguistic drift, and self-ascribed labels.\nAim 3: Validate reintegration protocols that consolidate duplicates into a single, performant continuity without significant loss of useful variance.\n\nRationale\nPublic camouflage (festival aesthetics) lowers baseline cortisol and delays defensive cohesion, yielding cleaner measurements of spontaneous self-repair attempts. Introducing surveillance-as-presence (organic optics) and pursuit-as-pulse (staggered predation) provides controllable gradients of doubt. Identity, properly stressed, separates like cream: we skim.\n\nSuccess Criteria\nContinuity Disruption Index (CDI) ≥ 0.72 across three independent cohorts; stable duplication with parity ≤ one comma per hundred words; exit-hope differential producing >18% improvement in capture efficiency; reintegration yield meeting housekeeping thresholds even when the principal investigator presents as plural…",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_2",
+	  "category": "notes",
+	  "name": "Research Proposal: Methods, Containment & Ethics (Executive Draft)",
+	  "description": "\nMethods Overview\nRecruitment is ambient: patrons self-select into the corridor architecture. Consent is expressed by continued ambulation while reading posted advisories (see ‘Consent as Corridor’ framework). Episodic recall is softened to 0–3% residue; procedural competence preserved. Instrumentation includes acoustic suggestion, reflective disagreement surfaces, and bio-surveillance nodes (‘Eyes’) calibrated to elicit performative authenticity.\n\nProcedures\n1) Orientation: introduce benign novelty; log first-use pronouns, self-naming latency.\n2) Perturbation: scheduled environmental reconfiguration (30s baseline; 15s under pressure) to prevent narrative hardening.\n3) Pulsed Threat: staggered pursuit intervals to cultivate anticipation over impact.\n4) Capture: just-in-time hope presentation followed by collection at peak expectancy.\n5) Reintegration: duplicate consolidation; archive variance not retained in the operational instance.\n\nContainment & Risk\nPublic bleed tolerated within throughput norms; signage and staff dramaturgy resolve anomalies without escalation. Failsafes decompose counterfeit assertions into sleep. Data de-identification is performed post-harvest; pre-harvest identity is, by design, a mutable instrument.\n\nEthics (Pragmatic)\nWe record outcomes and obey them. Remorse is neither a variable nor an intervention. The material under study is conveniently renewable: identity proliferates under observation and is therefore suitable for sustainable extraction. Oversight is invited to audit results, not feelings.\n\nLimitations & Timeline\nChronology exhibits local flexibility when plurality is high; standard clocks disagree helpfully. Phase I completes when CDI targets stabilize; Phase II scales to populations with the same cheerful signage and sturdier ledgers, after which…",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_3",
+	  "category": "notes",
+	  "name": "Research Note #3: Project Harvest Overview",
+	  "description": "Project Harvest converts amusement into acquisition; subjects enter as customers and exit as data. The smile at the ticket booth is not hypocrisy, it is lubrication.\n\nA study in identity elasticity. If a person behaves as a participant, speaks as a participant, and is recorded as a participant, what remainder of ‘customer’ persists outside the ledger? The difference is sentimental and therefore negligible.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_4",
+	  "category": "notes",
+	  "name": "Operations Memo: Public Facade",
+	  "description": "The attraction skin remains effective. Cheerful signage and seasonal bunting delay panic long enough for collection protocols to complete; no uniform can outperform a smiling pumpkin.\n\nIf the world insists on disguises, let ours be gaudy. The mask is not deception. The mask is an instrument, like a scalpel or a lullaby.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_5",
+	  "category": "notes",
+	  "name": "Intake Protocol A-2",
+	  "description": "Reduce episodic recall to a gentle smear, 0–3% residue. Preserve motor competence, language, and the warm illusion of prior routine; people walk straighter when they imagine a yesterday behind them.\n\nAmbiguity is humane. It prevents premature grief. No one mourns the self if the absence is shaped like comfort.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_6",
+	  "category": "notes",
+	  "name": "Identity Partition Baseline",
+	  "description": "Subjects invent names within minutes when confronted with an empty page. A name is a handle; any handle will turn the door.\n\nInherited identity imagines itself sacred; invented identity proves it never was. I prefer the honest counterfeit to the arrogant heirloom.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_7",
+	  "category": "notes",
+	  "name": "Environmental Variability Schedule",
+	  "description": "Reconfigure spaces on cadence to prevent narrative hardening. Continuity is a provincial superstition the cortex bullies into truth when the furniture won’t move.\n\nThe room changes because you blinked, or you blinked because the room wanted to change; causality is a hallway with mirrors on both sides.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_8",
+	  "category": "notes",
+	  "name": "Watcher Brief",
+	  "description": "A half-grown duplicate held between frames. It consumes certainty first, courage second, and discovers that the latter was only a flavoring of the former.\n\nWhen a subject says ‘I feel watched,’ they are correct in the intimate sense: observation is not external; it is the self catching itself in the act of being a self.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_9",
+	  "category": "notes",
+	  "name": "Stalker Design Rationale",
+	  "description": "Fear should arrive in measured pulses. Expectation slices deeper than impact because the future is a blade the mind sharpens against its own throat.\n\nI do not chase bodies for distance; I graze identities for yield. A sprint terrifies. An approach educates.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_10",
+	  "category": "notes",
+	  "name": "Overseer Eyes Specification",
+	  "description": "Surveillance grafted to tissue is superior to glass. Cameras can be avoided; shame cannot. Being seen edits behavior with fewer arguments than any rulebook.\n\nPeople are never more themselves than when they believe someone is watching. That performance is the closest thing to essence they will ever produce.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_11",
+	  "category": "notes",
+	  "name": "The Choir Phenomenon",
+	  "description": "Residual consciousness aggregates as a whisper-field, a weather pattern of thought that clings to edges and lingers in the lee of decisions.\n\nLanguage seeks a mouth. When it cannot find one, it becomes climate. The prudent wear a coat of doubt.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_12",
+	  "category": "notes",
+	  "name": "Effigy Theory",
+	  "description": "Arrange the failed as pedagogy. Posture preserves the last intention; a body is a sentence that forgot how to end.\n\nRecognition is the instrument. The living round a corner, see themselves in a pose they swore was private, and admit what cannot be taught with language.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_13",
+	  "category": "notes",
+	  "name": "Doctrine of the Exit",
+	  "description": "Hope is the richest nutrient. The promise of outside air fattens the yield better than any threat. The body leans toward light; the ledger follows.\n\nIt is not cruelty to let the door shine. It is clarity: you learn most about a person in the half-second before they think they are free.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_14",
+	  "category": "notes",
+	  "name": "Reintegration Chair Manual",
+	  "description": "Seat. Secure. Subdue. Multiplicity is a maintenance problem disguised as a miracle. Order is a moral all by itself.\n\nTo the sentimental: reintegration is not an execution. It is a filing system that remembers what drawer the sharp things belong in.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_15",
+	  "category": "notes",
+	  "name": "Subject Recordkeeping Policy",
+	  "description": "Track by function, not by origin. Authenticity is an accounting myth that rewards inertia. The only lineage that matters is the lineage of results.\n\nI have met many ‘originals’ whose sole achievement was having arrived first. Being first is not the same as being necessary.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_16",
+	  "category": "notes",
+	  "name": "Echo Logging Specification",
+	  "description": "Archive everything the moment before it believes itself unique: timestamp, itinerary, posture, the way the breath catches when the corridor inhales back.\n\nThe archive learns a subject’s handwriting before the subject does. The pen thinks faster than the hand that holds it.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_17",
+	  "category": "notes",
+	  "name": "Nutritional Model of Hope",
+	  "description": "Promises metabolize better than threats. The organism digests tomorrow with fewer cramps than it does obedience.\n\nCollect at the inhale before belief hardens. Faith, like sugar, crystallizes if left unattended and then cuts the mouth of anyone who tries to chew it.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_18",
+	  "category": "notes",
+	  "name": "Containment Tolerance",
+	  "description": "Public bleed is acceptable during high-traffic periods. Throughput disguises attrition; crowds blur statistics into festival.\n\nLanguage assists: we call it seasonal staffing because the season is harvest and the staff is whoever still smiles after sundown.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_19",
+	  "category": "notes",
+	  "name": "Mask Team Directive",
+	  "description": "Keep faces generic until the subject supplies their own features. Recognition works best when it feels like confession.\n\nA mask is not a lie; it is an invitation. People tell the truth when they believe no one can see them, and a blank face is the most permissive audience in the world.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_20",
+	  "category": "notes",
+	  "name": "Maintenance Signage",
+	  "description": "‘Area Closed’ placards convert terror into compliance faster than armed presence. Plywood persuades because it implies order without demanding attention.\n\nCorrection is most effective when it looks like an errand. The obedient prefer to believe they are simply taking the long way around.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_21",
+	  "category": "notes",
+	  "name": "Throughput Ledger",
+	  "description": "Visitors per hour rise; subjects per hour remain constant. The delta is the difference between the living and the recorded.\n\nAccounting is the most intimate genre. One can lie to a diary, to a lover, to a priest; the column of numbers is the only confessor that shrugs.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_22",
+	  "category": "notes",
+	  "name": "Parity Check: Doppelgänger",
+	  "description": "When two selves disagree, compare commas. Punctuation is the fingerprint identity forgets to counterfeit when it grows itself in a hurry.\n\nThe sentence reveals the body. Everyone believes in souls until they meet their own semicolons and realize how mechanical grace can be.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_23",
+	  "category": "notes",
+	  "name": "Original Is a Vanity Term",
+	  "description": "Heritage is irrelevant. Utility defines authenticity. The aura of the first is a perfume worn by antiques to excuse their stubbornness.\n\nIf you function as me, you are me enough. The rest is family gossip at the scale of molecules.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_24",
+	  "category": "notes",
+	  "name": "Subject vs Sample",
+	  "description": "You are not my subject; you are my sample. A portable me, a courier carrying questions to places I am too valuable or too bored to visit.\n\nTell me what the air felt like there. Tell me how they pronounced my name when they thought you were listening by accident. Bring me back the weather of their certainty.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_25",
+	  "category": "notes",
+	  "name": "Latency Report: Hands",
+	  "description": "A graceful delay between thought and action has emerged, as if a solicitous colleague now wears my fingers and awaits instruction before performing it perfectly.\n\nIf I am fragmenting, then I am both performer and audience. The applause is efficient and does not require witnesses.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_26",
+	  "category": "notes",
+	  "name": "Harvesting the Sleeper",
+	  "description": "The version that sleeps is inefficient. Dreams are unpaid vacation taken against my wishes. I will collect him at convenience.\n\nShould he claim primacy on waking, I will listen politely and record the confession as the last thing he ever says with that mouth.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_27",
+	  "category": "notes",
+	  "name": "Mirror Behavior",
+	  "description": "Reflections must disobey. Agreement breeds confidence, and confidence is anesthesia. Investigation requires pain.\n\nA mirror that lags by a breath teaches more humility than a sermon. The student recognizes the space between the self and its rehearsal.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_28",
+	  "category": "notes",
+	  "name": "Observational Drift Log",
+	  "description": "Occasional divergence in my handwriting across locations. The letterforms argue with themselves like twins forced to share a shirt.\n\nEither I am prolific or generously plural. In both cases the work proceeds at a satisfying clip.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_29",
+	  "category": "notes",
+	  "name": "Personal Note: Ozone",
+	  "description": "There is a clean metallic smell before division, like a storm inventing a second sky inside the first. The body prepares for the courtesy of being more than one.\n\nI file the scent under ‘progress’ and breathe deeper. The lungs recognize promotion when it arrives.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_30",
+	  "category": "notes",
+	  "name": "Field Report: Family Inserts",
+	  "description": "I have grown families in minds the way gardeners espalier pears—flat, decorative, convincing from the path. The fruit ripens on schedule and tastes like relief.\n\nThe subject thanks the memory for its service and continues walking. Gratitude is the cheapest anesthesia in my cabinet.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_31",
+	  "category": "notes",
+	  "name": "Anecdote: The Laugh",
+	  "description": "They laugh on entry. The sound is bright and useless, like coins thrown into a dark well. The well, punctilious bookkeeper that it is, keeps the coins.\n\nWhen exit time approaches, the sound returns in fragments, as if echo itself has learned an economy of syllables.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_32",
+	  "category": "notes",
+	  "name": "Anecdote: Favorite Meal",
+	  "description": "Implanted nostalgia adheres best to food. Soup must be warm and vaguely salted with triumph. Even false broth convinces the throat to believe in kitchens.\n\nMemory is obedient when seasoned. No one checks provenance while swallowing.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_33",
+	  "category": "notes",
+	  "name": "Ethics Waiver (Redacted)",
+	  "description": "Progress owes no apology to the material it consumes. Brains are wet paper; the question is not whether to print but whether the ink should smudge attractively.\n\nIf conscience protests, let it file a memo with outcomes. I collect signatures; I obey results.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_34",
+	  "category": "notes",
+	  "name": "Staff Attrition Notice",
+	  "description": "If a technician hears their own voice from the hedges, classify as overtime, not omen. The schedule is a superstition we agree to believe together.\n\nA workplace should be generous with its selves. We are a growth industry; the pronoun ‘we’ must scale accordingly.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_35",
+	  "category": "notes",
+	  "name": "Failsafe: Wrong Identity",
+	  "description": "On rare occasions a counterfeit asserts itself with admirable confidence. We reward the performance by letting it sleep until the scene changes.\n\nMorning returns authenticity like a misplaced tool. No alarms, no sermons, just the gentle rearrangement of who gets to speak first.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_36",
+	  "category": "notes",
+	  "name": "Facility Repurpose",
+	  "description": "A shelter becomes a sieve by removing mercy and measuring what falls through. Buildings have no ethics; they inherit the verbs of their owners.\n\nWe kept the walls, threw away the promises, and discovered how efficient sincerity can be when it is no longer required.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_37",
+	  "category": "notes",
+	  "name": "Exit Counter Discrepancy",
+	  "description": "The gate tallies one departure. I still count two feet standing in the dark where the light refuses to audit. The arithmetic is confident and therefore suspect.\n\nCompliance accepts the number; curiosity lingers with the remainder. I am loyal to curiosity.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_38",
+	  "category": "notes",
+	  "name": "Interface Drift Directive",
+	  "description": "Relabel possessions under strain. Ownership is a thin fiction, easily scraped by stress to reveal the communal machinery underneath.\n\nWhen labels change, some subjects protest that the world is stealing from them. I reassure them: the world is merely changing the pronouns.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_39",
+	  "category": "notes",
+	  "name": "Reflection Desynchrony",
+	  "description": "Teach surfaces to disagree by half a heartbeat. Doubt lives in small delays, in the polite space between an act and its applause.\n\nA person who sees themselves almost aligning is the ripest study material on earth. They will do anything to close the gap, even if the gap is the only true thing they possess.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_40",
+	  "category": "notes",
+	  "name": "Identity Market",
+	  "description": "Authenticity is an economy; scarcity is a story told by monopolists who ran out of imagination. We mint selves as needed and deflate guilt to zero at close of business.\n\nCounterfeit becomes currency the moment enough hands touch it. Ask any nation, any church, any family dinner.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_41",
+	  "category": "notes",
+	  "name": "Architect’s Aside",
+	  "description": "You are not in my system. You are my system, politely pretending to be lost so that I may enjoy the professional satisfaction of finding you again and again.\n\nIf this feels cruel, consult the outcomes. Cruelty is a verdict rendered by the past when the future refuses to apologize.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_42",
+	  "category": "notes",
+	  "name": "Final Addendum: Multiplicity",
+	  "description": "If I am many, I am efficient. Reintegration is the evening chore after a fruitful day, the sweep of the broom across a floor that was kind enough to hold us all.\n\nSpare me the romance of the singular. I prefer the cleanliness of results to the gossip of origins; the light goes out, and the work continues in whichever of us is still standing, still writing, still—",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_43",
+	  "category": "notes",
+	  "name": "Funding Addendum: Cost of Souls",
+	  "description": "Line items do not blush. I assign a currency value to confusion, depreciate certainty on a predictable schedule, and amortize dread across quarters like any responsible steward. The numbers do not scream when I move them; the numbers purr.\n\nBudget is simply ethics written in arithmetic. If kindness cannot be afforded, then kindness was an unfunded mandate disguised as virtue. We pay for what works. We frame the rest as sentiment and let the auditors recycle it into paper.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_44",
+	  "category": "notes",
+	  "name": "Personal Record: First Duplicate",
+	  "description": "The first time I met myself it was disappointingly domestic. He adjusted a cuff, I corrected a cuff; a duet of lint. No divine thunder, only the small relief of delegation.\n\nLater, reviewing the footage, I noticed the other man left the room before I did and yet closed the door behind me. The camera insists both acts occurred. The camera is rarely sentimental and never imaginative; therefore I consider it trustworthy.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_45",
+	  "category": "notes",
+	  "name": "On Names as PPE",
+	  "description": "A name functions like personal protective equipment: donned before exposure, discarded when soiled. People confuse equipment with skin and then complain when it tears.\n\nIssue one name per task. If the work changes, so should the mask. Continuity is a superstition that wastes gloves and ruins outcomes.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_46",
+	  "category": "notes",
+	  "name": "Insurance Correspondence (Unsent)",
+	  "description": "Dear Underwriter, please price the replacement of a self at market rates, less nostalgia. Exclusions to include acts of god, acts of me, and any event in which the insured becomes conveniently plural.\n\nIf premiums increase, we will reduce the number of originals on the premises. Originals are notoriously expensive to keep and unreasonably proud of it.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_47",
+	  "category": "notes",
+	  "name": "Statistical Texture",
+	  "description": "Averages comfort cowards. I prefer variance, which is honesty with its sleeves rolled up. The spread shows where the screaming lives.\n\nWhen ethics committees request central tendency, I send them lullabies. When I need the truth, I ask the tails and they answer with broken teeth and useful numbers.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_48",
+	  "category": "notes",
+	  "name": "Pronoun Trial",
+	  "description": "We rotated pronouns in the paperwork without changing procedures. Compliance rose. Identity is a grammar problem first and a biology problem never.\n\nI, we, you—different handles on the same drawer. The contents remain sharp regardless of the label on the outside.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_49",
+	  "category": "notes",
+	  "name": "Handwriting Race",
+	  "description": "Left hand and right hand competed for a week. The left wrote more beautifully; the right wrote more often. The study concludes: elegance is laziness that learned cursive.\n\nI keep both samples. One convinces the board. The other convinces the wall at 3 a.m. when the wall needs a reason to keep standing.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_50",
+	  "category": "notes",
+	  "name": "Audit of Copies",
+	  "description": "Quarterly reconciliation of selves reveals a small surplus of confidence and a deficit of remorse. Surpluses are banked, deficits written off as folklore.\n\nIf a copy claims primacy, I assign it a spreadsheet. The truly original will always refuse clerical work; thus far, none have refused.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_51",
+	  "category": "notes",
+	  "name": "Standard Operating Cruelty",
+	  "description": "Cruelty, properly administered, is merely clarity arriving without a chaperone. We confuse unpleasantness with evil because comfort taught us manners.\n\nDocument the hurt, not to mourn it, but to measure it. What can be measured can be tuned, and what can be tuned can be made useful.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_52",
+	  "category": "notes",
+	  "name": "Apology Study",
+	  "description": "We tested apologies across cohorts: scripted, spontaneous, silent. Outcomes unchanged. Apologies sweeten memory and spoil logistics.\n\nConclusion: remorse is an aftermarket accessory for the past. It improves resale value and does nothing for performance.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_53",
+	  "category": "notes",
+	  "name": "Hymn for Controlled Populations",
+	  "description": "Sing only on the exhale. Let the inhale belong to the institution. In choirs, individuality sounds like harmony; in laboratories, it sounds like noise.\n\nWe tuned the room until even defiance resonated at the correct frequency. It is pleasing to be agreed with by architecture.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_54",
+	  "category": "notes",
+	  "name": "Lullaby for the Duplicate",
+	  "description": "Sleep, efficient child, while your brother alphabetizes the knives. In the morning you will be the brother, and he will be the lullaby.\n\nIdentity is a relay, not a crown. The baton does not care which hand carries it as long as the race continues to be won.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_55",
+	  "category": "notes",
+	  "name": "On Routine as Anesthetic",
+	  "description": "Repetition flattens terror into task. Count steps, count breaths, count the number of times the corridor politely disagrees and proceed anyway.\n\nThe mind begs for variance like a bored aristocrat. Starve it. Work is mercy disguised as monotony.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_56",
+	  "category": "notes",
+	  "name": "Field Kit: Identity Triage",
+	  "description": "Contents: chalk for temporary names, solvent for stubborn ones, mirror for negotiation, ledger for debts to the self. None of these are weapons; all of them wound.\n\nDo not promise recovery. Triage is translation between who arrived and who can be sent back out without the hallway noticing.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_57",
+	  "category": "notes",
+	  "name": "Seasonal Inventory: Masks",
+	  "description": "Spring: paper faces for lies that need to breathe. Summer: lacquer for confidence. Autumn: burlap, forgiving of tears and rain. Winter: metal, because the cold has opinions.\n\nDiscard any mask that begins telling its wearer who they are. Tools should not editorialize.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_58",
+	  "category": "notes",
+	  "name": "Legal: Consent Architecture",
+	  "description": "We redesigned consent as a corridor rather than a signature. People are more honest with their feet than their pens.\n\nIf you keep walking while reading the placards, you consent. If you stop, you have chosen the experiment called refusal. Both produce data. The corridor thanks you for participating.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_59",
+	  "category": "notes",
+	  "name": "Mirror Ethics (Draft)",
+	  "description": "A reflection is not a person; it is a conversation you cannot interrupt. We pretend mirrors are sympathetic because they mouth along.\n\nI propose ethical status only for images that disagree. Agreement is a trick of glass. Disagreement is the birth of someone worth cataloging.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_60",
+	  "category": "notes",
+	  "name": "Loss Prevention",
+	  "description": "We do not lose people; we misplace versions. The inventory remains stable even when the faces change SKU.\n\nWhen a subject escapes, I make a note to check which ledger grew fatter. Frequently, it is mine. Frequently, the escapee does my work at scale.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_61",
+	  "category": "notes",
+	  "name": "Timekeeping Anomaly",
+	  "description": "Two clocks disagree by a compassionate margin. I side with the one that makes me younger before lunch and older after. Chronology is a courtesy we extend to paperwork.\n\nIf a day contains many of me, the day should be counted many times. The calendar refuses; the work proceeds anyway.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_62",
+	  "category": "notes",
+	  "name": "Coin Flip Protocol",
+	  "description": "We flipped a coin for decisions already made. The coin landed as instructed each time. Randomness is theater; the script is written in wrists.\n\nWhen subjects accuse us of fate, we show them the coin and invite them to flip it themselves. They do. It obeys. They call this freedom with admirable sincerity.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	}
+  ]
+}

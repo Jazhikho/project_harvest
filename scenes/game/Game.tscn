@@ -1,0 +1,116 @@
+[gd_scene load_steps=15 format=3 uid="uid://0atthfte3o13"]
+
+[ext_resource type="PackedScene" uid="uid://c5yqrv82hov2i" path="res://scenes/tiles/start_tile.tscn" id="1_start_tile"]
+[ext_resource type="PackedScene" uid="uid://b2djga0bpmfs7" path="res://scenes/entities/player.tscn" id="2_player"]
+[ext_resource type="Script" uid="uid://h3dp65gy6hmq" path="res://scripts/systems/GameController.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="4"]
+[ext_resource type="Script" uid="uid://cqcmqlkjrddqa" path="res://scripts/systems/TimeOfDayController.gd" id="4_365ku"]
+[ext_resource type="Shader" uid="uid://c71dha5rynbn0" path="res://assets/textures/sky.gdshader" id="4_gg4pt"]
+[ext_resource type="PackedScene" uid="uid://5m8oiae77mxv" path="res://scenes/ui/InventoryUI.tscn" id="5"]
+[ext_resource type="Texture2D" uid="uid://cobe1yg0mkran" path="res://assets/textures/mealie_road_4k.exr" id="5_qf6a8"]
+[ext_resource type="Texture2D" uid="uid://c0nsssaorny41" path="res://assets/textures/EveningSkyHDRI040A_16K-HDR.exr" id="6_56wml"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wnrko"]
+shader = ExtResource("4_gg4pt")
+shader_parameter/hdr_day = ExtResource("5_qf6a8")
+shader_parameter/hdr_dusk = ExtResource("6_56wml")
+shader_parameter/blend = 0.0
+shader_parameter/rot = 0.0
+
+[sub_resource type="Sky" id="Sky_wnrko"]
+sky_material = SubResource("ShaderMaterial_wnrko")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+background_color = Color(0.2, 0.3, 0.4, 1)
+sky = SubResource("Sky_wnrko")
+ambient_light_source = 3
+ambient_light_color = Color(0.6, 0.7, 0.8, 1)
+ambient_light_energy = 0.0
+tonemap_exposure = 0.2
+fog_enabled = true
+fog_light_color = Color(0.5, 0.5, 0.6, 1)
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.01
+volumetric_fog_albedo = Color(1, 0.909804, 0.870588, 1)
+
+[sub_resource type="Shader" id="Shader_gg4pt"]
+code = "shader_type sky;
+
+uniform sampler2D hdr_day  : source_color;
+uniform sampler2D hdr_dusk : source_color;
+uniform float blend    : hint_range(0.0, 1.0) = 0.0; // 0=day, 1=dusk
+uniform float exposure = 1.0;
+uniform float rot_y    = 0.0; // radians around Y
+
+vec2 dir_to_equirect(vec3 d) {
+    float c = cos(rot_y), s = sin(rot_y);
+    vec3 r = vec3(c*d.x + s*d.z, d.y, -s*d.x + c*d.z);
+    float phi   = atan(r.z, r.x);                    // -pi..pi
+    float theta = acos(clamp(r.y, -1.0, 1.0));       // 0..pi
+    return vec2(phi / (2.0*PI) + 0.5, theta / PI);   // 0..1
+}
+
+void sky() {
+    vec3 dir = normalize(SKY_COORDS);   // SKY_COORDS is vec3 in sky shaders
+    vec2 uv  = dir_to_equirect(dir);
+
+    vec3 a = texture(hdr_day,  uv).rgb;
+    vec3 b = texture(hdr_dusk, uv).rgb;
+
+    COLOR = vec4(mix(a, b, blend) * exposure, 1.0);
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gg4pt"]
+shader = SubResource("Shader_gg4pt")
+
+[node name="Game" type="Node3D"]
+script = ExtResource("3")
+
+[node name="MazeContainer" type="Node3D" parent="."]
+
+[node name="StartTile" parent="MazeContainer" instance=ExtResource("1_start_tile")]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, -0.5)
+
+[node name="Environment" type="Node3D" parent="."]
+
+[node name="Sun" type="DirectionalLight3D" parent="Environment"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 5, 8.75)
+light_color = Color(1, 0.901961, 0.784314, 1)
+light_energy = 2.0
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
+environment = SubResource("Environment_1")
+
+[node name="TimeOfDayController" type="Node" parent="Environment" node_paths=PackedStringArray("sun", "world_env")]
+script = ExtResource("4_365ku")
+sun = NodePath("../Sun")
+world_env = NodePath("../WorldEnvironment")
+sky_mat = SubResource("ShaderMaterial_gg4pt")
+duration_sec = 300.0
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="PauseMenu" parent="UI" instance=ExtResource("4")]
+visible = false
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InventoryUI" parent="UI" instance=ExtResource("5")]
+visible = false
+
+[node name="TransitionLayer" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="FadeRect" type="ColorRect" parent="TransitionLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="TransitionLayer"]

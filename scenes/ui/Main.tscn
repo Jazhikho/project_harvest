@@ -1,0 +1,374 @@
+[gd_scene load_steps=2 format=3 uid="uid://bsj660auwdaqv"]
+
+[ext_resource type="Script" uid="uid://d144pi0dbujmr" path="res://scripts/ui/MainMenu.gd" id="1_0ay0p"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_0ay0p")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.05, 0.05, 1)
+
+[node name="MenuContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -200.0
+offset_right = 200.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="MenuContainer"]
+layout_mode = 2
+text = "PROJECT HARVEST"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Subtitle" type="Label" parent="MenuContainer"]
+layout_mode = 2
+text = "A WALKING NIGHTMARE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Spacer1" type="Control" parent="MenuContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="ButtonContainer" type="VBoxContainer" parent="MenuContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StartButton" type="Button" parent="MenuContainer/ButtonContainer"]
+custom_minimum_size = Vector2(400, 50)
+layout_mode = 2
+text = "START"
+
+[node name="ContinueButton" type="Button" parent="MenuContainer/ButtonContainer"]
+custom_minimum_size = Vector2(400, 50)
+layout_mode = 2
+disabled = true
+text = "CONTINUE"
+
+[node name="SettingsButton" type="Button" parent="MenuContainer/ButtonContainer"]
+custom_minimum_size = Vector2(400, 50)
+layout_mode = 2
+text = "SETTINGS"
+
+[node name="CreditsButton" type="Button" parent="MenuContainer/ButtonContainer"]
+custom_minimum_size = Vector2(400, 50)
+layout_mode = 2
+text = "CREDITS"
+
+[node name="QuitButton" type="Button" parent="MenuContainer/ButtonContainer"]
+custom_minimum_size = Vector2(400, 50)
+layout_mode = 2
+text = "QUIT"
+
+[node name="VersionLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -30.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "v1.0"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="SettingsPanel" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SettingsContainer" type="VBoxContainer" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SettingsTitle" type="Label" parent="SettingsPanel/SettingsContainer"]
+layout_mode = 2
+text = "SETTINGS"
+horizontal_alignment = 1
+
+[node name="MasterVolume" type="HBoxContainer" parent="SettingsPanel/SettingsContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingsPanel/SettingsContainer/MasterVolume"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Master Volume:"
+
+[node name="Slider" type="HSlider" parent="SettingsPanel/SettingsContainer/MasterVolume"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Value" type="Label" parent="SettingsPanel/SettingsContainer/MasterVolume"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "100%"
+
+[node name="MusicVolume" type="HBoxContainer" parent="SettingsPanel/SettingsContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingsPanel/SettingsContainer/MusicVolume"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Music Volume:"
+
+[node name="Slider" type="HSlider" parent="SettingsPanel/SettingsContainer/MusicVolume"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Value" type="Label" parent="SettingsPanel/SettingsContainer/MusicVolume"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "100%"
+
+[node name="SFXVolume" type="HBoxContainer" parent="SettingsPanel/SettingsContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingsPanel/SettingsContainer/SFXVolume"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "SFX Volume:"
+
+[node name="Slider" type="HSlider" parent="SettingsPanel/SettingsContainer/SFXVolume"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Value" type="Label" parent="SettingsPanel/SettingsContainer/SFXVolume"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "100%"
+
+[node name="Spacer" type="Control" parent="SettingsPanel/SettingsContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="ResetDataButton" type="Button" parent="SettingsPanel/SettingsContainer"]
+layout_mode = 2
+text = "RESET ALL DATA"
+
+[node name="BackButton" type="Button" parent="SettingsPanel/SettingsContainer"]
+layout_mode = 2
+text = "BACK"
+
+[node name="CreditsPanel" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CreditsContainer" type="VBoxContainer" parent="CreditsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CreditsTitle" type="Label" parent="CreditsPanel/CreditsContainer"]
+layout_mode = 2
+text = "CREDITS"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CreditsPanel/CreditsContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CreditsText" type="RichTextLabel" parent="CreditsPanel/CreditsContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "[center][b]PROJECT HARVEST[/b]
+A Walking Nightmare
+
+[b]DEVELOPMENT TEAM[/b]
+
+[b]Christopher B. Del Gesso[/b]
+Lead Developer, Game Designer, Programmer
+3D Artist, Audio Designer, Writer
+
+[b]TECHNOLOGY[/b]
+
+[b]Game Engine[/b]
+Godot Engine 4.x
+Godot Development Team
+
+[b]Programming Languages[/b]
+GDScript
+C# (where applicable)
+
+[b]3D MODELS & ASSETS[/b]
+
+[b]Animpic POLY[/b]
+Farm Pack - Corn stalks, well, environmental props
+Lite Halloween Pack - Scarecrow, graves, bags, rocks
+Standard License (purchased 2025)
+
+[b]Samy Belaloui[/b]
+Low Poly Skeleton model
+Creative Commons Attribution
+
+[b]yomans[/b]
+Key model
+Creative Commons Attribution
+
+[b]TEXTURES & MATERIALS[/b]
+
+[b]AmbientCG[/b]
+Foliage003 texture set (4K)
+CC0 License - Public Domain
+https://ambientcg.com/
+
+[b]Poly Haven[/b]
+Mealie Road HDRI environment
+Greg Zaal
+CC0 License - Public Domain
+https://polyhaven.com/
+
+[b]OpenAI GPT-5[/b]
+Corn texture generation
+Custom corn leaf and stalk materials
+
+[b]AUDIO[/b]
+
+[b]Original Compositions[/b]
+Christopher B. Del Gesso
+- Atmospheric soundscapes
+- Environmental audio design
+- Horror ambience
+
+[b]Sound Effects[/b]
+Christopher B. Del Gesso
+- Custom corn rustling
+- Wind effects
+- Environmental audio
+
+[b]CONCEPT ART & DESIGN[/b]
+
+[b]Project Harvest Development[/b]
+Christopher B. Del Gesso
+- Main concept art
+- Character designs
+- Environmental concepts
+- UI/UX design
+
+[b]AI-Generated Assets[/b]
+OpenAI GPT-5
+- Effigy concept designs
+- Additional texture work
+- Creative consultation
+
+[b]SPECIAL THANKS[/b]
+
+[b]Family & Support[/b]
+Sarrah - For unwavering support and belief
+Dawn - For encouragement and family support
+The Del Gesso Family - For believing in this project
+
+[b]Academic Support[/b]
+Lindenwood University
+Professor Ben Fulcher
+GAM56800: Game Development Course
+
+[b]Beta Testing[/b]
+[Space reserved for future beta testers]
+
+[b]Additional Thanks[/b]
+The Godot community for excellent documentation
+Open source contributors who made this possible
+All the creators of the free assets used in this project
+
+[b]DEDICATION[/b]
+
+This game is dedicated to Jeri
+You will be remembered
+
+[b]© 2025 Christopher B. Del Gesso
+All rights reserved[/b][/center]"
+fit_content = true
+
+[node name="CreditsBackButton" type="Button" parent="CreditsPanel/CreditsContainer"]
+layout_mode = 2
+text = "BACK"
+
+[node name="ConfirmDialog" type="ConfirmationDialog" parent="."]
+initial_position = 2
+size = Vector2i(400, 150)
+dialog_text = "Are you sure you want to reset all progress?"
+
+[connection signal="pressed" from="MenuContainer/ButtonContainer/StartButton" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="MenuContainer/ButtonContainer/ContinueButton" to="." method="_on_continue_pressed"]
+[connection signal="pressed" from="MenuContainer/ButtonContainer/SettingsButton" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="MenuContainer/ButtonContainer/CreditsButton" to="." method="_on_credits_pressed"]
+[connection signal="pressed" from="MenuContainer/ButtonContainer/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="value_changed" from="SettingsPanel/SettingsContainer/MasterVolume/Slider" to="." method="_on_master_volume_changed"]
+[connection signal="value_changed" from="SettingsPanel/SettingsContainer/MusicVolume/Slider" to="." method="_on_music_volume_changed"]
+[connection signal="value_changed" from="SettingsPanel/SettingsContainer/SFXVolume/Slider" to="." method="_on_sfx_volume_changed"]
+[connection signal="pressed" from="SettingsPanel/SettingsContainer/ResetDataButton" to="." method="_on_reset_data_pressed"]
+[connection signal="pressed" from="SettingsPanel/SettingsContainer/BackButton" to="." method="_on_settings_back_pressed"]
+[connection signal="pressed" from="CreditsPanel/CreditsContainer/CreditsBackButton" to="." method="_on_credits_back_pressed"]
+[connection signal="confirmed" from="ConfirmDialog" to="." method="_on_confirm_reset"]

@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://baktq46848232"]
+
+[ext_resource type="PackedScene" uid="uid://3o1ack5rxymp" path="res://assets/models/6x1CornTile.glb" id="1_b5q2x"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b5q2x"]
+size = Vector3(6, 2.75, 1)
+
+[node name="6x1CornTile" instance=ExtResource("1_b5q2x")]
+
+[node name="2x1" parent="." index="0"]
+transform = Transform3D(6, 0, 0, 0, 0.8, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.375, 0)
+shape = SubResource("BoxShape3D_b5q2x")

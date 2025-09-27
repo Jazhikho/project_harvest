@@ -1,0 +1,45 @@
+[gd_scene load_steps=8 format=3 uid="uid://dyd7pqqsfdktc"]
+
+[ext_resource type="PackedScene" uid="uid://b753cm6gtlc1c" path="res://assets/models/note3.glb" id="1_uarqq"]
+[ext_resource type="Script" uid="uid://c7fnp4wiwr4eu" path="res://scripts/items/ResearchNote.gd" id="2_ptrjg"]
+[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_2y0us"]
+[ext_resource type="Script" uid="uid://c7qjis2op04mi" path="res://scripts/items/ItemDrop.gd" id="4_ndo4v"]
+[ext_resource type="AudioStream" uid="uid://texbcivbs3x4" path="res://assets/audio/notepickup.ogg" id="5_2y0us"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_x6w51"]
+height = 1.0
+radius = 1.375
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_uarqq"]
+size = Vector3(0.35, 0.1, 0.225)
+
+[node name="note3" instance=ExtResource("1_uarqq")]
+script = ExtResource("2_ptrjg")
+note_id = &"note_003"
+display_name = "Research Memo"
+pickup_sfx_path = NodePath("AudioStreamPlayer3D")
+
+[node name="SM_A4_paper" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Area3D" type="Area3D" parent="." index="1"]
+collision_layer = 8
+script = ExtResource("3_2y0us")
+kind = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CylinderShape3D_x6w51")
+
+[node name="RigidBody3D" type="RigidBody3D" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.025, 0)
+collision_layer = 8
+collision_mask = 48
+script = ExtResource("4_ndo4v")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.49012e-08, 0.05, 0.0125)
+shape = SubResource("BoxShape3D_uarqq")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="." index="3"]
+stream = ExtResource("5_2y0us")

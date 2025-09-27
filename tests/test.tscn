@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://cvwdajlg5io6u"]
+
+[ext_resource type="PackedScene" uid="uid://dtkjjh5mhxesh" path="res://assets/models/cornstalk.tscn" id="1_37kl0"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15451, 1.88686)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.257538, 0.966268, 0, -0.966268, 0.257538, 0, 4.72143, 5.64591)
+light_energy = 4.0
+
+[node name="cornstalk" parent="." instance=ExtResource("1_37kl0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100.033)
