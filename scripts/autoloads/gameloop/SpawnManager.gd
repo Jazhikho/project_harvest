@@ -9,7 +9,7 @@ var _state_manager: Node
 var _spawn_history := {}
 
 const ITEM_SPAWN_CHANCE := 0.10  # 10% chance per spawn point
-const MAX_ITEMS_PER_TILE := 2
+const MAX_ITEMS_PER_TILE := 4
 
 func _ready() -> void:
 	name = "SpawnManager"
@@ -119,7 +119,6 @@ func _spawn_items(tile_node: Node3D, context: Dictionary, spawn_points: Array[Ve
 	var shuffled_points := spawn_points.duplicate()
 	shuffled_points.shuffle()
 	
-	
 	for i in range(shuffled_points.size()):
 		var spawn_point = shuffled_points[i]
 		
@@ -155,21 +154,89 @@ func _spawn_item_visual(tile_node: Node3D, item_id: String, position: Vector3) -
 	@param position: World position to spawn at
 	@return: True if spawned successfully
 	"""
-	var item_scene_path := "res://scenes/items/%s.tscn" % item_id
-	print("item path is %s", item_scene_path)
+	# Get item info to check category
+	var item_info: Dictionary = _item_manager.get_item_info(item_id)
+	var item_category: String = item_info.get("category", "")
+	
+	# Special handling for notes
+	if item_category == "notes":
+		return _spawn_note_visual(tile_node, item_id, position, item_info)
+	
+	# Regular item spawning
+	var item_scene_path: String = "res://scenes/items/%s.tscn" % item_id
+	print("item path is %s" % item_scene_path)
 	if not FileAccess.file_exists(item_scene_path):
 		_spawn_placeholder_item(tile_node, item_id, position)
 		return true
 	
-	var item_scene := load(item_scene_path) as PackedScene
+	var item_scene: PackedScene = load(item_scene_path) as PackedScene
 	if not item_scene:
 		_spawn_placeholder_item(tile_node, item_id, position)
 		return true
 	
-	var item_instance := item_scene.instantiate()
+	var item_instance: Node3D = item_scene.instantiate()
 	tile_node.add_child(item_instance)
 	item_instance.global_position = position
 	item_instance.set_meta("item_id", item_id)
+	
+	return true
+
+func _spawn_note_visual(tile_node: Node3D, note_id: String, position: Vector3, note_info: Dictionary) -> bool:
+	"""
+	Create visual representation of a research note using random note scene
+	
+	@param tile_node: Parent tile node
+	@param note_id: Note identifier
+	@param position: World position to spawn at
+	@param note_info: Note configuration data
+	@return: True if spawned successfully
+	"""
+	# Array of available note visual scenes
+	var note_scene_paths: Array[String] = [
+		"res://scenes/notes/note_1.tscn",
+		"res://scenes/notes/note_2.tscn",
+		"res://scenes/notes/note_3.tscn",
+		"res://scenes/notes/note_4.tscn"
+	]
+	
+	# Pick a random note scene
+	var random_index: int = randi() % note_scene_paths.size()
+	var chosen_scene_path: String = note_scene_paths[random_index]
+	
+	print("SpawnManager: Spawning note '%s' using scene %s" % [note_id, chosen_scene_path])
+	
+	# Load the chosen note scene
+	var note_scene: PackedScene = load(chosen_scene_path) as PackedScene
+	if not note_scene:
+		push_error("SpawnManager: Failed to load note scene: %s" % chosen_scene_path)
+		_spawn_placeholder_item(tile_node, note_id, position)
+		return false
+	
+	# Create the note instance
+	var note_instance: Node3D = note_scene.instantiate()
+	
+	var has_research_script: bool = note_instance.has_method("_get_note_text")
+	
+	# Check if it needs the ResearchNote script
+	if not note_instance.has_method("_get_note_text"):
+		var research_note_script: Script = load("res://scripts/items/ResearchNote.gd")
+		if research_note_script:
+			note_instance.set_script(research_note_script)
+	
+	note_instance.item_id = note_id
+	print("note has id: ", note_id)
+	note_instance.item_name = note_info.get("name", "Research Note")
+	note_instance.item_description = note_info.get("description", "")
+	note_instance.display_name = note_info.get("name", "Research Note")
+	note_instance.auto_pickup = false  # Notes require interaction
+
+	# Set required metadata
+	note_instance.set_meta("item_id", note_id)
+	note_instance.set_meta("is_collectible", true)
+	
+	# Add to tile and position
+	tile_node.add_child(note_instance)
+	note_instance.global_position = position
 	
 	return true
 
@@ -364,33 +431,17 @@ func _spawn_entities(tile_node: Node3D, context: Dictionary, spawn_points: Array
 	var current_sanity: int = _state_manager.get_state("sanity")
 	var tiles_explored_value = _state_manager.get_state("tiles_explored")
 	var tiles_explored: int = tiles_explored_value if tiles_explored_value != null else 0
-	var weird_things_collected: int = 0
-	
-	# Check with WeirdThingsManager if available
-	var weird_things_manager = get_node_or_null("/root/WeirdThingsManager")
-	if weird_things_manager and weird_things_manager.has_method("get_collected_count"):
-		weird_things_collected = weird_things_manager.get_collected_count()
-	
+	var weird_things_collected: int = 1
 	
 	# Calculate spawn chance
 	var spawn_chance: float = _calculate_entity_spawn_chance(current_sanity, tiles_explored, weird_things_collected)
 	
 	# Determine which entity to spawn
-	var entity_type: String = ""
-	
-	# Stalker only spawns if player has collected at least 2 weird things and explored at least 8 tiles
-	if weird_things_collected >= 2 and tiles_explored >= 8:
-		# 70% chance for Stalker, 30% for Effigy
-		entity_type = "stalker" if randf() < 0.7 else "effigy"
-	else:
-		# Only Effigy can spawn early
-		entity_type = "effigy"
-	
+	var entity_type: String = "effigy"
 	
 	# Try to spawn entity
 	var spawn_point = spawn_points[randi() % spawn_points.size()]
 	var roll = randf()
-	
 	
 	if roll < spawn_chance:
 		

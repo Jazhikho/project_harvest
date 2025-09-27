@@ -15,7 +15,7 @@ var _message_bus: Node
 var _state_manager: Node
 
 const ITEM_DATA_PATH := "res://data/items.json"
-const MAX_UNLOCKED_NOTES := 5
+const MAX_UNLOCKED_NOTES := 10
 
 func _ready() -> void:
 	name = "ItemManager"

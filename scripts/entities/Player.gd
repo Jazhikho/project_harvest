@@ -182,12 +182,12 @@ func _handle_movement(delta: float) -> void:
 			move_and_slide()
 
 func _check_interactions() -> void:
-	"""Check for nearby interactive objects"""
-	# Cast ray to check for interactables
+	"""Check for nearby interactive objects using both raycast and area detection"""
+	# First try precise raycast
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		camera.global_position,
-		camera.global_position - camera.global_transform.basis.z * 2.0
+		camera.global_position - camera.global_transform.basis.z * 3.0  # Increased from 2.0
 	)
 	CollisionHelper.setup_interaction_raycast(query)
 	
@@ -203,13 +203,47 @@ func _check_interactions() -> void:
 				check_node = parent_node
 		
 		_show_interaction_prompt(check_node)
+		return
+	
+	# Fallback: Check for items in a radius around the player
+	_check_nearby_items_fallback()
+	
+func _check_nearby_items_fallback() -> void:
+	"""Fallback method to detect items in a sphere around the player"""
+	var interaction_radius: float = 2.5
+	var items_in_range: Array = []
+	
+	# Check all nodes in the collectibles group
+	for node in get_tree().get_nodes_in_group("collectibles"):
+		if not is_instance_valid(node):
+			continue
+			
+		var distance: float = global_position.distance_to(node.global_position)
+		if distance <= interaction_radius:
+			items_in_range.append({"node": node, "distance": distance})
+	
+	# Also check for items that might not be in the group but have the meta
+	for node in get_tree().get_nodes_in_group("items"):
+		if not is_instance_valid(node):
+			continue
+			
+		if node.has_meta("is_collectible"):
+			var distance: float = global_position.distance_to(node.global_position)
+			if distance <= interaction_radius:
+				items_in_range.append({"node": node, "distance": distance})
+	
+	# Sort by distance and show prompt for closest
+	if not items_in_range.is_empty():
+		items_in_range.sort_custom(func(a, b): return a.distance < b.distance)
+		_show_interaction_prompt(items_in_range[0].node)
 
 func _try_interact() -> void:
-	"""Attempt to interact with object in front of player"""
+	"""Attempt to interact with object in front of player - more forgiving detection"""
+	# First try: Precise raycast
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		camera.global_position,
-		camera.global_position - camera.global_transform.basis.z * 2.0
+		camera.global_position - camera.global_transform.basis.z * 3.0  # Increased range
 	)
 	CollisionHelper.setup_interaction_raycast(query)
 	
@@ -220,11 +254,51 @@ func _try_interact() -> void:
 		# Check if collider has a parent that's a BaseItem
 		var parent_node: Node = collider.get_parent()
 		if parent_node and parent_node.has_method("interact"):
-			# Call the interact method directly
 			parent_node.interact()
+			return
 		else:
 			# Try old interaction system
 			_interact_with_object(collider)
+			return
+	
+	# Second try: Sphere cast for items near the player
+	var items_to_check: Array = []
+	
+	# Collect all potential items
+	for node in get_tree().get_nodes_in_group("collectibles"):
+		if is_instance_valid(node):
+			var distance: float = global_position.distance_to(node.global_position)
+			if distance <= 2.5:  # Within interaction range
+				items_to_check.append({"node": node, "distance": distance})
+	
+	# Also check nodes with collectible meta
+	for child in get_tree().current_scene.get_children():
+		_check_node_for_items_recursive(child, items_to_check)
+	
+	# Try to interact with the closest item
+	if not items_to_check.is_empty():
+		items_to_check.sort_custom(func(a, b): return a.distance < b.distance)
+		var closest_item: Node = items_to_check[0].node
+		
+		if closest_item.has_method("interact"):
+			print("Player: Interacting with nearby item: ", closest_item.name)
+			closest_item.interact()
+		elif closest_item.has_meta("is_collectible"):
+			_interact_with_object(closest_item)
+
+func _check_node_for_items_recursive(node: Node, items_array: Array) -> void:
+	"""Recursively check nodes for collectible items"""
+	if not is_instance_valid(node):
+		return
+	
+	if node.has_meta("is_collectible") or node.has_method("interact"):
+		if node is Node3D:
+			var distance: float = global_position.distance_to(node.global_position)
+			if distance <= 2.5:
+				items_array.append({"node": node, "distance": distance})
+	
+	for child in node.get_children():
+		_check_node_for_items_recursive(child, items_array)
 
 func _interact_with_object(obj: Node) -> void:
 	"""

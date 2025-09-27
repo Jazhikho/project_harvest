@@ -50,21 +50,28 @@ func _setup_pickup_area() -> void:
 	pickup_area = get_node_or_null("PickupArea") as Area3D
 	
 	if not pickup_area:
+		pickup_area = get_node_or_null("Area3D") as Area3D  # Also check for generic Area3D
+	
+	if not pickup_area:
 		# Create pickup area if it doesn't exist
 		pickup_area = Area3D.new()
 		pickup_area.name = "PickupArea"
 		add_child(pickup_area)
 		
-		# Create collision shape
-		var collision = CollisionShape3D.new()
+		# Create larger collision shape for easier pickup
+		var collision: CollisionShape3D = CollisionShape3D.new()
 		collision.name = "PickupCollision"
-		var shape = SphereShape3D.new()
-		shape.radius = 1.0
+		var shape: SphereShape3D = SphereShape3D.new()
+		shape.radius = 2.0  # Increased from 1.0 for easier detection
 		collision.shape = shape
 		pickup_area.add_child(collision)
-		
+	
 	# Set collision layers
 	CollisionHelper.setup_pickup_area(pickup_area)
+	
+	# Add to groups for easier detection
+	add_to_group("collectibles")
+	add_to_group("items")
 	
 	# Connect pickup signals
 	if not pickup_area.body_entered.is_connected(_on_pickup_area_entered):

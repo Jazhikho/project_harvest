@@ -69,22 +69,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.75, 1.5)
 [node name="ItemSpawn" type="Node3D" parent="Maze"]
 
 [node name="ItemPoint" type="Marker3D" parent="Maze/ItemSpawn"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 3)
 
 [node name="ItemPoint2" type="Marker3D" parent="Maze/ItemSpawn"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0.25, -0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0.5, -0.5)
 
 [node name="ItemPoint3" type="Marker3D" parent="Maze/ItemSpawn"]
-transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -1.5, 0.25, 7.5)
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -1.5, 0.5, 7.5)
 
 [node name="ItemPoint4" type="Marker3D" parent="Maze/ItemSpawn"]
-transform = Transform3D(-0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, -0.5, 2.25, 0.25, 4.25)
+transform = Transform3D(-0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, -0.5, 2.25, 0.5, 4.25)
 
 [node name="ItemPoint5" type="Marker3D" parent="Maze/ItemSpawn"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.75, 0.25, 0.75)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.75, 0.5, 0.75)
 
 [node name="ItemPoint6" type="Marker3D" parent="Maze/ItemSpawn"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0.25, -5.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0.5, -5.5)
 
 [node name="EntitySpawn" type="Node3D" parent="Maze"]
 
