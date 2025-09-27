@@ -93,6 +93,10 @@ func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 		if item_id not in _unlocked_notes:
 			return false
 	
+	if SaveManager.has_method("is_puzzle_item_used"):
+		if SaveManager.is_puzzle_item_used(item_id):
+			return false
+	
 	return true
 
 func get_spawnable_items(context: Dictionary) -> Array[Dictionary]:
