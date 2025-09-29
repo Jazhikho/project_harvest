@@ -50,7 +50,7 @@ func _setup_pickup_area() -> void:
 	pickup_area = get_node_or_null("PickupArea") as Area3D
 	
 	if not pickup_area:
-		pickup_area = get_node_or_null("Area3D") as Area3D  # Also check for generic Area3D
+		pickup_area = get_node_or_null("Area3D") as Area3D # Also check for generic Area3D
 	
 	if not pickup_area:
 		# Create pickup area if it doesn't exist
@@ -62,7 +62,7 @@ func _setup_pickup_area() -> void:
 		var collision: CollisionShape3D = CollisionShape3D.new()
 		collision.name = "PickupCollision"
 		var shape: SphereShape3D = SphereShape3D.new()
-		shape.radius = 2.0  # Increased from 1.0 for easier detection
+		shape.radius = 2.0 # Increased from 1.0 for easier detection
 		collision.shape = shape
 		pickup_area.add_child(collision)
 	
@@ -91,8 +91,8 @@ func _start_floating_animation() -> void:
 	
 	var tween = create_tween()
 	tween.set_loops()
-	tween.tween_property(self, "position:y", start_y + 0.2, 1.0)
-	tween.tween_property(self, "position:y", start_y - 0.2, 1.0)
+	tween.tween_property(self, "position:y", start_y + 0.5, 1.0)
+	tween.tween_property(self, "position:y", start_y, 1.0)
 
 func _on_pickup_area_entered(body: Node3D) -> void:
 	"""Handle pickup area collision - now shows interaction prompt instead of auto-pickup"""
