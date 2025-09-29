@@ -10,9 +10,10 @@ extends CharacterBody3D
 
 # Flashlight system
 var flashlight_battery: float
-var flashlight_enabled: bool = true
-var flashlight_battery_died: bool = false  # Track if battery died (for one-time sanity loss)
-var darkness_timer: float = 0.0  # Timer for darkness sanity drain
+var flashlight_enabled: bool = false
+var flashlight_battery_died: bool = false # Track if battery died (for one-time sanity loss)
+var darkness_timer: float = 0.0 # Timer for darkness sanity drain
+var game_timer: float = 0.0 # Total game time elapsed
 
 # Component references
 @onready var camera: Camera3D = $Camera3D
@@ -108,7 +109,7 @@ func _input(event: InputEvent) -> void:
 	if debug_mode and event is InputEventKey and event.pressed:
 		if event.keycode >= KEY_0 and event.keycode <= KEY_9:
 			var digit = event.keycode - KEY_0
-			var new_sanity = digit * 10  # 0 = 0%, 1 = 10%, etc.
+			var new_sanity = digit * 10 # 0 = 0%, 1 = 10%, etc.
 			var state_manager = get_node_or_null("/root/GameStateManager")
 			if state_manager:
 				var current_sanity = state_manager.get_state("sanity")
@@ -126,10 +127,11 @@ func _handle_mouse_look(relative_motion: Vector2) -> void:
 	
 	@param relative_motion: Mouse movement delta
 	"""
-	camera.rotation.x = clamp(camera.rotation.x - relative_motion.y * mouse_sensitivity, -PI/2, PI/2)
+	camera.rotation.x = clamp(camera.rotation.x - relative_motion.y * mouse_sensitivity, -PI / 2, PI / 2)
 	rotation.y -= relative_motion.x * mouse_sensitivity
 
 func _physics_process(delta: float) -> void:
+	game_timer += delta
 	_handle_movement(delta)
 	_update_flashlight(delta)
 	_check_interactions()
@@ -187,7 +189,7 @@ func _check_interactions() -> void:
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		camera.global_position,
-		camera.global_position - camera.global_transform.basis.z * 3.0  # Increased from 2.0
+		camera.global_position - camera.global_transform.basis.z * 3.0 # Increased from 2.0
 	)
 	CollisionHelper.setup_interaction_raycast(query)
 	
@@ -243,7 +245,7 @@ func _try_interact() -> void:
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		camera.global_position,
-		camera.global_position - camera.global_transform.basis.z * 3.0  # Increased range
+		camera.global_position - camera.global_transform.basis.z * 3.0 # Increased range
 	)
 	CollisionHelper.setup_interaction_raycast(query)
 	
@@ -268,7 +270,7 @@ func _try_interact() -> void:
 	for node in get_tree().get_nodes_in_group("collectibles"):
 		if is_instance_valid(node):
 			var distance: float = global_position.distance_to(node.global_position)
-			if distance <= 2.5:  # Within interaction range
+			if distance <= 2.5: # Within interaction range
 				items_to_check.append({"node": node, "distance": distance})
 	
 	# Also check nodes with collectible meta
@@ -395,22 +397,25 @@ func _update_flashlight(delta: float) -> void:
 				var state_manager = get_node_or_null("/root/GameStateManager")
 				if state_manager:
 					state_manager.modify_sanity(-10)
-					_show_message("Flashlight battery died! The darkness feels oppressive...")
-				else:
-					_show_message("Flashlight battery died!")
 			
 			_toggle_flashlight()
 	
+	# Auto-toggle flashlight on when grace period ends (3 minutes)
+	if game_timer >= 180.0 and not flashlight_enabled and flashlight_battery > 0.0:
+		flashlight_enabled = true
+		_update_flashlight_state()
+	
 	# Handle darkness sanity drain (1 sanity per 15 seconds when flashlight is off)
-	if not flashlight_enabled or flashlight_battery <= 0.0:
+	# Only start draining sanity after 3 minutes (180 seconds) of game time
+	if game_timer >= 180.0 and (not flashlight_enabled or flashlight_battery <= 0.0):
 		darkness_timer += delta
-		if darkness_timer >= 15.0:  # 15 seconds
+		if darkness_timer >= 15.0: # 15 seconds
 			darkness_timer = 0.0
 			var state_manager = get_node_or_null("/root/GameStateManager")
 			if state_manager:
 				state_manager.modify_sanity(-1)
 	else:
-		# Reset timer when flashlight is on
+		# Reset timer when flashlight is on or before grace period
 		darkness_timer = 0.0
 	
 	_update_flashlight_state()
@@ -477,10 +482,10 @@ func die(cause: String) -> void:
 	"""
 	
 	# Prevent multiple death triggers
-	if health <= -100:  # Already dead
+	if health <= -100: # Already dead
 		return
 	
-	health = -100  # Mark as dead
+	health = -100 # Mark as dead
 	
 	var state_manager = get_node_or_null("/root/GameStateManager")
 	var current_tile = Vector2i.ZERO
@@ -563,12 +568,12 @@ func is_looking_at_position(target_position: Vector3, fov_degrees: float = 180.0
 		return false
 	
 	var to_target = (target_position - camera.global_position).normalized()
-	var camera_forward = -camera.global_transform.basis.z
+	var camera_forward = - camera.global_transform.basis.z
 	
 	# Check if target is within field of view
 	var dot_product = camera_forward.dot(to_target)
 	var angle = acos(clamp(dot_product, -1.0, 1.0))
-	var fov_radians = deg_to_rad(fov_degrees * 0.5)  # Half FOV for comparison
+	var fov_radians = deg_to_rad(fov_degrees * 0.5) # Half FOV for comparison
 	
 	if angle > fov_radians:
 		return false

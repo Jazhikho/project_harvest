@@ -25,6 +25,3 @@ shadow_blur = 0.3
 spot_range = 22.0
 spot_attenuation = 1.4
 spot_angle = 30.0
-
-[node name="FlashlightMesh" type="MeshInstance3D" parent="Camera3D"]
-visible = false

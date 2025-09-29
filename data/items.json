@@ -81,7 +81,7 @@
 	  "id": "hollow_key",
 	  "name": "Ornate Key",
 	  "description": "A key that appeared on the altar. It must unlock something important.",
-	  "category": "puzzle_pieces",
+	  "category": "special",
 	  "puzzle_id": "final_gate"
 	},
 	{
