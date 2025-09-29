@@ -84,18 +84,28 @@ func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 	@param context: Spawning context with tile_position, is_permanent, etc.
 	@return: True if item can spawn
 	"""	
-	if item_id in _state_manager.get_state("collected_items"):
-		return false
-
-	var state: Dictionary = _state_manager.get_state()
+	# Check if already collected in THIS RUN
+	var collected_items: Array = _state_manager.get_state("collected_items")
+	if collected_items == null:
+		collected_items = []
 	
+	# Notes can only be collected once per run
 	if item_id in _item_categories.notes:
+		if item_id in collected_items:
+			return false
+		# Also check if note is unlocked
 		if item_id not in _unlocked_notes:
 			return false
+	else:
+		# Non-note items: check if already collected this run
+		if item_id in collected_items:
+			return false
 	
+	# Special items that shouldn't spawn randomly
 	if item_id in ["hollow_key", "flashlight", "journal"]:
 		return false
 	
+	# Check if puzzle item has been used (persistent across runs)
 	if SaveManager.has_method("is_puzzle_item_used"):
 		if SaveManager.is_puzzle_item_used(item_id):
 			return false
@@ -211,6 +221,60 @@ func _connect_to_events() -> void:
 
 func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
 	apply_item_effects(item_id)
+	mark_item_collected(item_id)
+	_cleanup_duplicate_items(item_id)
+	
+func mark_item_collected(item_id: String) -> void:
+	"""
+	Mark an item as collected in the current run
+	
+	@param item_id: Item identifier that was collected
+	"""
+	var collected_items: Array = _state_manager.get_state("collected_items")
+	if collected_items == null:
+		collected_items = []
+	
+	if item_id not in collected_items:
+		collected_items.append(item_id)
+		_state_manager.set_state("collected_items", collected_items)
+		print("ItemManager: Marked ", item_id, " as collected. Total collected: ", collected_items.size())
+
+func _cleanup_duplicate_items(item_id: String) -> void:
+	"""
+	Remove all other instances of this item from the world
+	Called after an item is collected to prevent duplicates
+	
+	@param item_id: Item identifier to remove duplicates of
+	"""
+	var items_removed := 0
+	
+	# Get all collectible nodes in the scene
+	var collectibles := get_tree().get_nodes_in_group("collectibles")
+	
+	for collectible in collectibles:
+		if not is_instance_valid(collectible):
+			continue
+		
+		# Check if this is an instance of the collected item
+		var collectible_item_id: String = ""
+		
+		# Try to get item_id from metadata
+		if collectible.has_meta("item_id"):
+			collectible_item_id = collectible.get_meta("item_id")
+		# Try to get from property
+		elif collectible.has_method("get_item_id"):
+			collectible_item_id = collectible.get_item_id()
+		elif "item_id" in collectible:
+			collectible_item_id = collectible.item_id
+		
+		# If this is a duplicate of the collected item, remove it
+		if collectible_item_id == item_id:
+			print("ItemManager: Removing duplicate instance of ", item_id, " at ", collectible.global_position)
+			collectible.queue_free()
+			items_removed += 1
+	
+	if items_removed > 0:
+		print("ItemManager: Cleaned up ", items_removed, " duplicate instances of ", item_id)
 
 func _on_game_started() -> void:
 	reset_for_new_run()
