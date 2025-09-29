@@ -18,7 +18,6 @@ var game_timer: float = 0.0 # Total game time elapsed
 # Component references
 @onready var camera: Camera3D = $Camera3D
 @onready var flashlight: SpotLight3D = $Camera3D/Flashlight
-@onready var flashlight_mesh: MeshInstance3D = $Camera3D/FlashlightMesh
 
 # System references
 var _message_bus: Node
