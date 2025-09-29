@@ -430,15 +430,16 @@ func _create_random_tile(grid_pos: Vector2i) -> Node3D:
 	var random_scene: String = _normal_tiles[randi() % _normal_tiles.size()]
 	return _create_tile_from_scene(random_scene, grid_pos)
 
-func _align_tiles(source_tile: Node3D, target_tile: Node3D, door_direction: int, target_grid_pos: Vector2i = Vector2i.ZERO, did_wrap: bool = false) -> void:
+func _align_tiles(source_tile: Node3D, target_tile: Node3D, door_direction: int, target_grid_pos: Vector2i, did_wrap: bool) -> void:
 	"""
 	Align target tile to connect with source tile door
+	Physical positions are always adjacent, grid positions wrap for tracking
 	
 	@param source_tile: Source tile with door
 	@param target_tile: Target tile to align
 	@param door_direction: Direction of connecting door
-	@param target_grid_pos: Grid position of target tile (for wrapping)
-	@param did_wrap: Whether world wrapping occurred
+	@param target_grid_pos: Grid position of target tile (wrapped for tracking)
+	@param did_wrap: Whether world wrapping occurred (for tracking only)
 	"""
 	# Rotate target tile
 	if target_tile.has_method("get_available_doors"):
@@ -452,29 +453,24 @@ func _align_tiles(source_tile: Node3D, target_tile: Node3D, door_direction: int,
 			else:
 				target_tile.rotation.y = rotation_needed * PI / 2
 	
-	# FIXED: Position target tile - use grid position if wrapping occurred
-	if did_wrap and target_grid_pos != Vector2i.ZERO:
-		# When wrapping, position based on grid coordinates
-		target_tile.position = Vector3(
-			target_grid_pos.x * TILE_SIZE,
-			0,
-			target_grid_pos.y * TILE_SIZE
-		)
-		print("TileManager: Positioned wrapped tile at grid ", target_grid_pos, " -> world ", target_tile.position)
-	else:
-		# Normal adjacent positioning
-		var source_center: Vector3 = source_tile.position
-		var offset: float = TILE_SIZE
-		
-		match door_direction:
-			DoorDirection.NORTH:
-				target_tile.position = Vector3(source_center.x + offset, source_center.y, source_center.z)
-			DoorDirection.EAST:
-				target_tile.position = Vector3(source_center.x, source_center.y, source_center.z + offset)
-			DoorDirection.SOUTH:
-				target_tile.position = Vector3(source_center.x - offset, source_center.y, source_center.z)
-			DoorDirection.WEST:
-				target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
+	# FIXED: Always position tiles adjacent to each other in world space
+	# Grid wrapping is ONLY for tracking, not for physical position
+	var source_center: Vector3 = source_tile.position
+	var offset: float = TILE_SIZE
+	
+	match door_direction:
+		DoorDirection.NORTH:
+			target_tile.position = Vector3(source_center.x + offset, source_center.y, source_center.z)
+		DoorDirection.EAST:
+			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z + offset)
+		DoorDirection.SOUTH:
+			target_tile.position = Vector3(source_center.x - offset, source_center.y, source_center.z)
+		DoorDirection.WEST:
+			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
+	
+	if did_wrap:
+		print("TileManager: Tile at wrapped grid ", target_grid_pos, " positioned at world ", target_tile.position, 
+			  " (adjacent to source at ", source_center, ")")
 
 func _calculate_rotation_needed(original_door: int, target_door: int) -> int:
 	"""
@@ -859,11 +855,12 @@ func _spawn_permanent_tile(scene_path: String, grid_pos: Vector2i, source_tile: 
 func _align_tiles_with_rotation_requirement(source_tile: Node3D, target_tile: Node3D, door_direction: int, target_grid_pos: Vector2i) -> void:
 	"""
 	Align tiles ensuring the target (permanent) tile rotates to connect properly
+	Physical positions are always adjacent, grid positions wrap for tracking
 	
 	@param source_tile: Source tile with door
 	@param target_tile: Target tile to align (will be rotated)
 	@param door_direction: Direction of connecting door from source
-	@param target_grid_pos: Grid position of target tile
+	@param target_grid_pos: Grid position of target tile (wrapped for tracking)
 	"""
 	# Calculate the opposite direction (where target needs a door)
 	var required_door_direction: int = _get_opposite_direction(door_direction)
@@ -896,34 +893,22 @@ func _align_tiles_with_rotation_requirement(source_tile: Node3D, target_tile: No
 			else:
 				target_tile.rotation.y = best_rotation * PI / 2
 	
-	# FIXED: Position target tile using grid position for accuracy
-	# Check if wrapping occurred
-	var source_pos: Vector2i = source_tile.get_meta("grid_position", Vector2i.ZERO)
-	var expected_adjacent_pos: Vector2i = _get_connecting_position(source_pos, door_direction)
-	var did_wrap: bool = (expected_adjacent_pos != target_grid_pos)
+	# FIXED: Always position tiles adjacent in world space
+	# Grid wrapping is ONLY for tracking, not physical positioning
+	var source_center: Vector3 = source_tile.position
+	var offset: float = TILE_SIZE
 	
-	if did_wrap:
-		# Use grid-based positioning for wrapped tiles
-		target_tile.position = Vector3(
-			target_grid_pos.x * TILE_SIZE,
-			0,
-			target_grid_pos.y * TILE_SIZE
-		)
-		print("TileManager: Positioned wrapped permanent tile at grid ", target_grid_pos, " -> world ", target_tile.position)
-	else:
-		# Normal adjacent positioning
-		var source_center: Vector3 = source_tile.position
-		var offset: float = TILE_SIZE
-		
-		match door_direction:
-			DoorDirection.NORTH:
-				target_tile.position = Vector3(source_center.x + offset, source_center.y, source_center.z)
-			DoorDirection.EAST:
-				target_tile.position = Vector3(source_center.x, source_center.y, source_center.z + offset)
-			DoorDirection.SOUTH:
-				target_tile.position = Vector3(source_center.x - offset, source_center.y, source_center.z)
-			DoorDirection.WEST:
-				target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
+	match door_direction:
+		DoorDirection.NORTH:
+			target_tile.position = Vector3(source_center.x + offset, source_center.y, source_center.z)
+		DoorDirection.EAST:
+			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z + offset)
+		DoorDirection.SOUTH:
+			target_tile.position = Vector3(source_center.x - offset, source_center.y, source_center.z)
+		DoorDirection.WEST:
+			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
+	
+	print("TileManager: Permanent tile at wrapped grid ", target_grid_pos, " positioned at world ", target_tile.position)
 
 func _get_opposite_direction(direction: int) -> int:
 	"""
