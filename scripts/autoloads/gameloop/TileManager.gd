@@ -105,10 +105,38 @@ func _assign_permanent_tile_positions() -> void:
 	"""
 	Pre-assign permanent tiles to specific grid positions
 	This runs once at initialization to determine where permanent tiles will appear
+	Skips tiles whose puzzles are already completed
 	"""
 	_permanent_tile_assignments.clear()
 	
 	if _permanent_tiles_scenes.is_empty():
+		return
+	
+	# Filter out permanent tiles whose puzzles are completed
+	var available_permanent_tiles: Array[String] = []
+	for scene_path in _permanent_tiles_scenes:
+		# Load the tile to check its puzzle_id
+		var tile_scene: PackedScene = load(scene_path) as PackedScene
+		if tile_scene:
+			var temp_tile = tile_scene.instantiate()
+			var is_completed = false
+			
+			if temp_tile.has_method("get_puzzle_id"):
+				var puzzle_id = temp_tile.get_puzzle_id()
+				if not puzzle_id.is_empty():
+					if SaveManager.has_method("is_puzzle_completed"):
+						is_completed = SaveManager.is_puzzle_completed(puzzle_id)
+						if is_completed:
+							print("TileManager: Skipping permanent tile ", scene_path.get_file(), 
+								  " - puzzle ", puzzle_id, " is completed")
+			
+			temp_tile.queue_free()
+			
+			if not is_completed:
+				available_permanent_tiles.append(scene_path)
+	
+	if available_permanent_tiles.is_empty():
+		print("TileManager: No permanent tiles to assign (all puzzles completed or none available)")
 		return
 	
 	# Generate valid spawn positions (outside forbidden zone)
@@ -125,14 +153,14 @@ func _assign_permanent_tile_positions() -> void:
 	valid_positions.shuffle()
 	
 	# Assign each permanent tile to a position
-	var assignment_count: int = min(_permanent_tiles_scenes.size(), valid_positions.size())
+	var assignment_count: int = min(available_permanent_tiles.size(), valid_positions.size())
 	for i in range(assignment_count):
 		var pos: Vector2i = valid_positions[i]
-		var scene_path: String = _permanent_tiles_scenes[i]
+		var scene_path: String = available_permanent_tiles[i]
 		_permanent_tile_assignments[pos] = scene_path
 		print("TileManager: Assigned permanent tile ", scene_path.get_file(), " to position ", pos)
 	
-	if _permanent_tiles_scenes.size() > valid_positions.size():
+	if available_permanent_tiles.size() > valid_positions.size():
 		push_warning("TileManager: Not enough valid positions for all permanent tiles!")
 
 func initialize_game_tiles() -> void:

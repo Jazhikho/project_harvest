@@ -110,6 +110,15 @@ func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 		if SaveManager.is_puzzle_item_used(item_id):
 			return false
 	
+	# Check if this item belongs to a completed puzzle
+	var item_info = get_item_info(item_id)
+	if item_info.has("puzzle_id"):
+		var puzzle_id = item_info.get("puzzle_id")
+		if SaveManager.has_method("is_puzzle_completed"):
+			if SaveManager.is_puzzle_completed(puzzle_id):
+				print("ItemManager: ", item_id, " cannot spawn - puzzle ", puzzle_id, " is completed")
+				return false
+	
 	return true
 
 func get_spawnable_items(context: Dictionary) -> Array[Dictionary]:
@@ -238,6 +247,17 @@ func mark_item_collected(item_id: String) -> void:
 		collected_items.append(item_id)
 		_state_manager.set_state("collected_items", collected_items)
 		print("ItemManager: Marked ", item_id, " as collected. Total collected: ", collected_items.size())
+		
+func remove_item_from_inventory(item_id: String) -> void:
+	"""
+	Remove an item from player inventory (when used in puzzle)
+	
+	@param item_id: Item to remove
+	"""
+	var player_inventory = get_node_or_null("/root/PlayerInventory")
+	if player_inventory and player_inventory.has_method("remove_item"):
+		player_inventory.remove_item(item_id)
+		print("ItemManager: Removed ", item_id, " from inventory")
 
 func _cleanup_duplicate_items(item_id: String) -> void:
 	"""

@@ -157,6 +157,8 @@ func mark_puzzle_completed(puzzle_id: String) -> void:
 	
 	save_data.puzzles[puzzle_id]["completed"] = true
 	save_data.puzzles[puzzle_id]["completion_time"] = Time.get_unix_time_from_system()
+	if MessageBus:
+		MessageBus.emit_event("puzzle_completed", [puzzle_id, ])
 	save_game()
 
 func is_puzzle_item_used(item_id: String) -> bool:
