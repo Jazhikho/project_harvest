@@ -1,20 +1,17 @@
-[gd_scene load_steps=5 format=3 uid="uid://cfysh2178e3rc"]
+[gd_scene load_steps=4 format=3 uid="uid://cfysh2178e3rc"]
 
-[ext_resource type="Script" uid="uid://c0jkpqgvf0phd" path="res://scripts/items/Backpack.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://wmmv2rknruqr" path="res://assets/models/backpack.glb" id="2_hws5e"]
-[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_tqaon"]
+[ext_resource type="Script" uid="uid://bq1sm15ay2fpb" path="res://scripts/items/Backpack.gd" id="2_u1alk"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_u1alk"]
 height = 2.375
 radius = 2.25
 
 [node name="backpack" instance=ExtResource("2_hws5e")]
-script = ExtResource("1_script")
+script = ExtResource("2_u1alk")
 
 [node name="Area3D" type="Area3D" parent="." index="1"]
 collision_layer = 8
-script = ExtResource("3_tqaon")
-kind = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9375, 0)

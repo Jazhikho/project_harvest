@@ -644,33 +644,33 @@ func _cleanup_single_tile(pos: Vector2i) -> void:
 		return
 	
 	var tile: Node3D = _active_tiles[pos]
-	var tile_name = "UNKNOWN"
-	if is_instance_valid(tile):
-		tile_name = tile.name
+	
+	# Check if tile reference is valid first, before doing anything
+	if not is_instance_valid(tile):
+		print("TileManager: Tile at ", pos, " was already freed, cleaning up reference")
+		_active_tiles.erase(pos)
+		_remove_connections_for_position(pos)
+		_tile_state_manager.cleanup_tile(pos)
+		return
+	
+	var tile_name = tile.name
 	
 	# Count and remove items/entities
 	var items_removed: Array = []
 	var entities_removed: Array = []
 	
-	if is_instance_valid(tile):
-		# Find and log items being removed
-		for child in tile.get_children():
-			if child.has_meta("is_collectible"):
-				var item_id = child.get_meta("item_id", "unknown")
-				items_removed.append(item_id)
-			elif child.has_meta("is_backpack"):
-				items_removed.append("backpack")
-			elif child.is_in_group("enemies") or child.is_in_group("effigies"):
-				entities_removed.append(child.name)
-	
-	# Log what's being cleaned up
-	if items_removed.size() > 0:
-		pass
-	if entities_removed.size() > 0:
-		pass
-	
-	if pos == Vector2i(0, 0):
-		pass
+	# Find and log items being removed
+	for child in tile.get_children():
+		if not is_instance_valid(child):
+			continue
+			
+		if child.has_meta("is_collectible"):
+			var item_id = child.get_meta("item_id", "unknown")
+			items_removed.append(item_id)
+		elif child.has_meta("is_backpack"):
+			items_removed.append("backpack")
+		elif child.is_in_group("enemies") or child.is_in_group("effigies"):
+			entities_removed.append(child.name)
 	
 	# Emit cleanup event
 	_message_bus.emit_event("tile_cleaned_up", [pos, items_removed])
@@ -681,12 +681,9 @@ func _cleanup_single_tile(pos: Vector2i) -> void:
 	_tile_state_manager.cleanup_tile(pos)
 	
 	# Free the tile safely
-	if is_instance_valid(tile):
-		# Ensure tile is removed from parent before freeing
-		if tile.get_parent():
-			tile.get_parent().remove_child(tile)
-		tile.queue_free()
-	
+	if tile.get_parent():
+		tile.get_parent().remove_child(tile)
+	tile.queue_free()
 
 func _remove_connections_for_position(pos: Vector2i) -> void:
 	"""
@@ -756,6 +753,7 @@ func _connect_to_events() -> void:
 
 func _on_game_started() -> void:
 	"""Handle game start - initialize tiles when game actually starts"""
+	cleanup_invalid_tile_references()
 	initialize_game_tiles()
 
 func _on_maze_shift(center: Vector2i, radius: int, affected_tiles: Array) -> void:
@@ -949,3 +947,23 @@ func _index_to_door_enum(index: int) -> int:
 		2: return DoorDirection.SOUTH
 		3: return DoorDirection.WEST
 		_: return DoorDirection.NORTH
+		
+func cleanup_invalid_tile_references() -> void:
+	"""
+	Clean up any invalid tile references in _active_tiles
+	Should be called when starting a new run
+	"""
+	var invalid_positions: Array[Vector2i] = []
+	
+	for pos in _active_tiles.keys():
+		var tile = _active_tiles[pos]
+		if not is_instance_valid(tile):
+			invalid_positions.append(pos)
+	
+	for pos in invalid_positions:
+		print("TileManager: Removing invalid tile reference at ", pos)
+		_active_tiles.erase(pos)
+		_remove_connections_for_position(pos)
+	
+	if invalid_positions.size() > 0:
+		print("TileManager: Cleaned up ", invalid_positions.size(), " invalid tile references")

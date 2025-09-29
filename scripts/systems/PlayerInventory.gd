@@ -7,7 +7,7 @@ signal item_removed(item_id: String)
 signal inventory_full()
 signal inventory_changed(new_inventory: Array, added_items: Array, removed_items: Array)
 
-@export var max_inventory_size: int = 20
+@export var max_inventory_size: int = 99
 
 var inventory: Array[String] = []
 var _message_bus: Node
@@ -172,11 +172,11 @@ func load_from_backpack(backpack_inventory: Array) -> int:
 		if add_item(item):
 			loaded_count += 1
 		else:
-			break  # Stop if inventory is full
+			break # Stop if inventory is full
 	
 	if _message_bus and loaded_count > 0:
 		_message_bus.emit_event("notification_requested", [
-			"Found %d items from a previous explorer..." % loaded_count, 
+			"Found %d items from a previous explorer..." % loaded_count,
 			3.0, 1
 		])
 	

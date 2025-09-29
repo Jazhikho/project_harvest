@@ -6,6 +6,7 @@ var save_data: Dictionary = {
 	"time_played": 0.0,
 	"deaths": 0,
 	"collectibles": [],
+	"backpack_inventory": [],
 	"run_active": false,
 	"last_position": Vector3.ZERO,
 	"permanent_tiles": {},
@@ -26,6 +27,8 @@ func _connect_to_events() -> void:
 	if message_bus:
 		if message_bus.has_signal("game_started"):
 			message_bus.game_started.connect(_on_game_started)
+		if message_bus.has_signal("item_collected"):
+			message_bus.item_collected.connect(_on_item_collected)
 
 func _on_game_started() -> void:
 	"""Handle game start event"""
@@ -49,11 +52,18 @@ func load_game() -> void:
 			save_data = file.get_var()
 			file.close()
 			
-			# Ensure new keys exist
+			# Ensure all keys exist (for backwards compatibility with old saves)
 			if not save_data.has("puzzles"):
 				save_data.puzzles = {}
 			if not save_data.has("puzzle_items_used"):
 				save_data.puzzle_items_used = []
+			if not save_data.has("backpack_inventory"):
+				save_data.backpack_inventory = []
+			if not save_data.has("collectibles"):
+				save_data.collectibles = []
+			
+			# Save the updated structure
+			save_game()
 		else:
 			push_error("SaveManager: Failed to open save file for reading")
 
@@ -67,6 +77,7 @@ func _reset_save_data() -> void:
 		"time_played": 0.0,
 		"deaths": 0,
 		"collectibles": [],
+		"backpack_inventory": [], 
 		"run_active": false,
 		"last_position": Vector3.ZERO,
 		"permanent_tiles": {},
@@ -78,12 +89,60 @@ func _reset_save_data() -> void:
 
 func start_run() -> void:
 	"""Mark a run as active and save the state"""
+	if save_data.collectibles.size() > 0:
+		_transfer_collectibles_to_backpack()
 	save_data.run_active = true
 	save_game()
 
 func record_death() -> void:
+	_transfer_collectibles_to_backpack()
 	save_data.deaths += 1
 	save_data.run_active = false
+	save_game()
+	
+func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
+	"""
+	Handle item collection - save to collectibles
+	
+	@param item_id: ID of collected item
+	@param collector: Node that collected (usually player)
+	@param tile_pos: Tile position where collected
+	"""
+	if item_id not in save_data.collectibles:
+		save_data.collectibles.append(item_id)
+		print("SaveManager: Saved collected item: ", item_id, " (total: ", save_data.collectibles.size(), ")")
+		save_game()
+		
+func _transfer_collectibles_to_backpack() -> void:
+	"""
+	Transfer notes and puzzle pieces from collectibles to backpack
+	Called at start of new run
+	"""
+	var item_manager = get_node_or_null("/root/ItemManager")
+	if not item_manager:
+		return
+	
+	# Ensure backpack_inventory exists
+	if not save_data.has("backpack_inventory"):
+		save_data.backpack_inventory = []
+	
+	# Ensure collectibles exists
+	if not save_data.has("collectibles"):
+		save_data.collectibles = []
+		return
+	
+	for item_id in save_data.collectibles:
+		var item_info = item_manager.get_item_info(item_id)
+		var category = item_info.get("category", "")
+		
+		# Only transfer notes and puzzle pieces
+		if category in ["notes", "puzzle_pieces"]:
+			if item_id not in save_data.backpack_inventory:
+				save_data.backpack_inventory.append(item_id)
+				print("SaveManager: Moved ", item_id, " to backpack for next run")
+	
+	# Clear collectibles for new run
+	save_data.collectibles = []
 	save_game()
 
 func is_puzzle_completed(puzzle_id: String) -> bool:
@@ -94,6 +153,7 @@ func mark_puzzle_completed(puzzle_id: String) -> void:
 	"""Mark a puzzle as permanently completed"""
 	if not save_data.puzzles.has(puzzle_id):
 		save_data.puzzles[puzzle_id] = {}
+		save_game()
 	
 	save_data.puzzles[puzzle_id]["completed"] = true
 	save_data.puzzles[puzzle_id]["completion_time"] = Time.get_unix_time_from_system()
@@ -117,3 +177,48 @@ func set_puzzle_state(puzzle_id: String, state: Dictionary) -> void:
 	"""Set the state of a puzzle"""
 	save_data.puzzles[puzzle_id] = state
 	save_game()
+
+func transfer_inventory_to_backpack(current_inventory: Array) -> void:
+	"""
+	Transfer notes and puzzle pieces from current inventory to backpack
+	Called at the start of each run
+	
+	@param current_inventory: Current player inventory items
+	"""
+	var item_manager = get_node_or_null("/root/ItemManager")
+	if not item_manager:
+		push_error("SaveManager: ItemManager not found")
+		return
+	
+	# Get notes and puzzle pieces from inventory
+	for item_id in current_inventory:
+		var item_info = item_manager.get_item_info(item_id)
+		var category = item_info.get("category", "")
+		
+		# Only transfer notes and puzzle pieces
+		if category in ["notes", "puzzle_pieces"]:
+			if item_id not in save_data.backpack_inventory:
+				save_data.backpack_inventory.append(item_id)
+				print("SaveManager: Transferred ", item_id, " to backpack")
+	
+	save_game()
+
+func get_backpack_inventory() -> Array:
+	"""Get items currently stored in backpack"""
+	return save_data.get("backpack_inventory", [])
+
+func clear_backpack_inventory() -> void:
+	"""Clear backpack inventory (called when player collects backpack)"""
+	save_data.backpack_inventory = []
+	save_game()
+	print("SaveManager: Backpack inventory cleared")
+
+func add_to_backpack(item_id: String) -> void:
+	"""
+	Add an item to the backpack
+	
+	@param item_id: Item to add
+	"""
+	if item_id not in save_data.backpack_inventory:
+		save_data.backpack_inventory.append(item_id)
+		save_game()
