@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://8vap4fxs1jin"]
+[gd_scene load_steps=8 format=3 uid="uid://8vap4fxs1jin"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_gbpo1"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_gbpo1"]
@@ -6,10 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://gkb1m13l00g5" path="res://scenes/environments/1x1_corn_tile.tscn" id="4_ay174"]
 [ext_resource type="PackedScene" uid="uid://y3n3yl83883f" path="res://scenes/environments/tree.tscn" id="5_hedg3"]
 [ext_resource type="PackedScene" uid="uid://vgktbniibi0f" path="res://scenes/environments/broken_mirror.tscn" id="6_1bjqq"]
-[ext_resource type="PackedScene" uid="uid://cfjbmrppn8dad" path="res://scenes/environments/altar.tscn" id="8_kvrai"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_d7mi2"]
-size = Vector3(20, 3, 20)
+[ext_resource type="Script" uid="uid://b7hjr7r333dd1" path="res://scripts/puzzles/CrowsParlimentPuzzle.gd" id="7_gbpo1"]
 
 [node name="CrowsParliament" type="Node3D"]
 script = ExtResource("1_gbpo1")
@@ -133,15 +130,4 @@ transform = Transform3D(0.232003, 0, -0.972715, 0, 0.898317, 0, 0.972715, 0, 0.2
 
 [node name="BrokenMirror" parent="Maze/Objects" instance=ExtResource("6_1bjqq")]
 transform = Transform3D(-0.155291, 0, 0.579555, 0, 0.6, 0, -0.579555, 0, -0.155291, -5.75, 0, 0.75)
-
-[node name="KeyCheck" type="Node3D" parent="."]
-
-[node name="altar" parent="KeyCheck" instance=ExtResource("8_kvrai")]
-transform = Transform3D(1.00244, 0, 0, 0, 1.00244, 0, 0, 0, 1.00244, 7.0798, 0, -2.91204)
-
-[node name="PlayerArea" type="Area3D" parent="."]
-collision_layer = 64
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-shape = SubResource("BoxShape3D_d7mi2")
+script = ExtResource("7_gbpo1")

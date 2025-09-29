@@ -14,8 +14,8 @@ var _item_manager: Node
 var _key_spawned: bool = false
 var _gate_unlocked: bool = false
 
-@onready var gate_area: Area3D = $Gate/Area3D
-@onready var altar_node: Node3D = $Altar
+@onready var gate_area: Area3D = $gate/Area3D
+@onready var altar_node: Node3D = $altar
 
 func _ready() -> void:
 	set_meta("is_puzzle", true)

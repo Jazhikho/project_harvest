@@ -4,19 +4,19 @@ extends Node3D
 class_name WatchingStonesPuzzle
 
 @export var puzzle_id: String = "watching_stones"
-@export var required_items: Array[String] = ["phone", "holy_book", "flag"]
+@export var required_items = ["phone", "holy_book", "flag"]
 
 var _message_bus: Node
 var _player_inventory: Node
 var _save_manager: Node
 var _puzzle_ui: Control
 
-var _items_placed: Array[String] = []
-var _altar_items: Array[String] = []  # Track items placed on altar specifically
-var _brazier_items: Array[String] = []  # Track items placed in brazier
+var _items_placed = []
+var _altar_items = []  # Track items placed on altar specifically
+var _brazier_items = []  # Track items placed in brazier
 
-@onready var altar_area: Area3D = $Altar/Area3D
-@onready var brazier_area: Area3D = $Brazier/Area3D
+@onready var altar_area: Area3D = $altar/Area3D
+@onready var brazier_area: Area3D = $wbrazier/Area3D
 
 func _ready() -> void:
 	set_meta("is_puzzle", true)
@@ -41,11 +41,11 @@ func _setup_interaction_areas() -> void:
 	"""Setup interaction areas for both altar and brazier"""
 	# Setup altar interaction
 	if not altar_area:
-		altar_area = _create_interaction_area($Altar, "Altar")
+		altar_area = _create_interaction_area($altar, "Altar")
 	
 	# Setup brazier interaction
 	if not brazier_area:
-		brazier_area = _create_interaction_area($Brazier, "Brazier")
+		brazier_area = _create_interaction_area($brazier, "Brazier")
 
 func _create_interaction_area(parent: Node3D, area_name: String) -> Area3D:
 	"""Create an interaction area for a puzzle object"""
@@ -165,7 +165,6 @@ func _try_place_item(item_id: String, location: String) -> Dictionary:
 			var altar_count: int = _altar_items.size()
 			return {
 				"success": true,
-				"message": "The stones accept your offerings. %d items rest on the altar." % altar_count,
 				"completed": true,
 				"altar_count": altar_count
 			}
@@ -173,7 +172,6 @@ func _try_place_item(item_id: String, location: String) -> Dictionary:
 			var location_name: String = "altar" if location == "altar" else "brazier"
 			return {
 				"success": true,
-				"message": "You place the item on the %s." % location_name,
 				"completed": false
 			}
 	else:
