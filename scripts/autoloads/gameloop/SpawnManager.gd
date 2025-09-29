@@ -487,3 +487,43 @@ func _on_tile_generated(tile_node: Node3D, position: Vector2i, tile_data: Dictio
 
 func _on_game_started() -> void:
 	_spawn_history.clear()
+
+static func spawn_aggressive_effigies(count: int, scene_root: Node) -> Array:
+	"""Spawn aggressive effigies at entity points and return array of spawned effigies"""
+	var spawned_effigies: Array = []
+	
+	if count <= 0:
+		return spawned_effigies
+	
+	# Load effigy scene
+	var effigy_scene = load("res://scenes/entities/Effigy.tscn")
+	if not effigy_scene:
+		push_error("Failed to load Effigy scene")
+		return spawned_effigies
+	
+	# Find entity spawn points
+	var maze_objects = scene_root.get_node_or_null("Maze/Objects")
+	if not maze_objects:
+		push_error("Maze/Objects not found")
+		return spawned_effigies
+	
+	# Spawn effigies at available entity points
+	for i in range(min(count, 3)):  # Max 3 spawn points
+		var spawn_point_name = "EntityPoint%d" % (i + 1)
+		var spawn_point = maze_objects.get_node_or_null(spawn_point_name)
+		
+		if spawn_point:
+			var effigy = effigy_scene.instantiate()
+			maze_objects.add_child(effigy)
+			effigy.global_position = spawn_point.global_position
+			
+			# Set aggression mode after a brief delay to ensure initialization
+			effigy.call_deferred("set_aggression_mode", true, &"puzzle_completion")
+			
+			spawned_effigies.append(effigy)
+			
+			MessageBus.emit_event("entity_spawned", ["effigy", effigy, spawn_point.global_position])
+		else:
+			push_warning("EntityPoint%d not found" % (i + 1))
+	
+	return spawned_effigies

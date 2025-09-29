@@ -193,6 +193,9 @@ func _complete_puzzle() -> void:
 	
 	_save_manager.mark_puzzle_completed(puzzle_id)
 	
+	var effigy_count = min(_altar_items.size(), 3)
+	SpawnManager.spawn_aggressive_effigies(effigy_count, get_tree().current_scene)
+	
 	if _message_bus:
 		var tile_pos: Vector2i = Vector2i.ZERO
 		var state_manager: Node = get_node_or_null("/root/GameStateManager")
@@ -228,3 +231,4 @@ func _show_message(text: String) -> void:
 func get_altar_count() -> int:
 	"""Get number of items on altar"""
 	return _altar_items.size()
+	

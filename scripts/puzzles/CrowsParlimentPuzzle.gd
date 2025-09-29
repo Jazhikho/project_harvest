@@ -154,6 +154,8 @@ func _complete_puzzle() -> void:
 	
 	_save_manager.mark_puzzle_completed(puzzle_id)
 	
+	SpawnManager.spawn_aggressive_effigies(_completion_order, get_tree().current_scene)
+	
 	if _message_bus:
 		var tile_pos: Vector2i = Vector2i.ZERO
 		var state_manager: Node = get_node_or_null("/root/GameStateManager")

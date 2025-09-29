@@ -1,14 +1,21 @@
-[gd_scene load_steps=6 format=3 uid="uid://c5rjon02p04c"]
+[gd_scene load_steps=10 format=3 uid="uid://c5rjon02p04c"]
 
 [ext_resource type="Script" uid="uid://bdnkng8cyyvbu" path="res://scripts/entities/Effigy.gd" id="1_effigy_script"]
 [ext_resource type="PackedScene" uid="uid://bv3mdg4yo4aqv" path="res://assets/models/stage_1.tscn" id="4_stage3"]
+[ext_resource type="PackedScene" uid="uid://tj2t4odvqga3" path="res://assets/models/effigy3.glb" id="4_w53tp"]
 [ext_resource type="PackedScene" uid="uid://b37apb738anqx" path="res://assets/models/stage_2.tscn" id="5_stage4"]
+[ext_resource type="PackedScene" uid="uid://ckyolcbrjjn3s" path="res://assets/models/effigy4.glb" id="5_vrxgt"]
+[ext_resource type="Script" uid="uid://cxf23niib4c2h" path="res://scripts/utils/SanityDrainArea.gd" id="6_vrxgt"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 height = 1.75
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rlyf0"]
 size = Vector3(20, 2, 20)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_05frr"]
+height = 2.10718
+radius = 3.0
 
 [node name="Effigy" type="CharacterBody3D"]
 script = ExtResource("1_effigy_script")
@@ -24,12 +31,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 visible = false
 
-[node name="Stage3" parent="." instance=ExtResource("4_stage3")]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, -0.5, 0)
+[node name="Stage3" parent="." instance=ExtResource("4_w53tp")]
 visible = false
 
-[node name="Stage4" parent="." instance=ExtResource("5_stage4")]
-transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, -0.25, 0)
+[node name="Stage4" parent="." instance=ExtResource("5_vrxgt")]
 visible = false
 
 [node name="DetectionArea" type="Area3D" parent="."]
@@ -42,3 +47,10 @@ shape = SubResource("BoxShape3D_rlyf0")
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
 max_distance = 20.0
+
+[node name="SanityDrainArea" type="Area3D" parent="."]
+script = ExtResource("6_vrxgt")
+
+[node name="SanityDrainShape" type="CollisionShape3D" parent="SanityDrainArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.578735, 0)
+shape = SubResource("CylinderShape3D_05frr")

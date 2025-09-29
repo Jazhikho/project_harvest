@@ -157,6 +157,9 @@ func _complete_puzzle() -> void:
 	"""Mark puzzle as completed"""
 	_save_manager.mark_puzzle_completed(puzzle_id)
 	
+	var effigy_count = min(_wrong_attempts.size(), 3)
+	SpawnManager.spawn_aggressive_effigies(effigy_count, get_tree().current_scene)
+	
 	# Emit completion event
 	if _message_bus:
 		var tile_pos: Vector2i = Vector2i.ZERO

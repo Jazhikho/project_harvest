@@ -5,8 +5,9 @@ extends BaseEntity
 
 @export var turn_speed: float = 999.0  # Instant turning
 @export var follow_speed_base: float = 0.5  # Very slow base speed
-@export var follow_speed_half: float = 0.7
-@export var follow_speed_full: float = 1.0
+@export var follow_speed_half: float = 1
+@export var follow_speed_full: float = 2
+@export var aggressive_speed: float = 5
 @export var stop_distance: float = 1.5  # Distance to maintain from player
 @export var visibility_check_interval: float = 0.1  # How often to check if player is looking
 @export var camera_path: NodePath
@@ -72,9 +73,19 @@ func _initialize_entity() -> void:
 	
 	# Get initial sanity level
 	current_sanity = get_current_sanity()
-	_update_behavior_for_sanity()
 	
-	# Set initial active state based on sanity
+	if is_instance_valid(player):
+		last_player_position = player.global_position
+	else:
+		last_player_position = global_position
+		
+	var should_be_aggressive: bool = current_sanity < GameConstants.SANITY_THRESHOLD_CRITICAL
+	if should_be_aggressive:
+		set_aggression_mode(true, &"sanity_critical_boot")
+	else:
+		_update_behavior_for_sanity()
+	
+	# Set initial active state
 	set_entity_active(true)
 
 func _connect_to_events() -> void:
@@ -93,8 +104,13 @@ func _physics_process(delta: float) -> void:
 	if player_in_detection_range:
 		_check_player_visibility(delta)
 		_update_behavior(delta)
+	
+	if aggression_mode:
+		_turn_toward_player()
+		_move_toward_player(delta)
+		return
 		
-		# ALL actions only when player is NOT looking
+	if player_in_detection_range:# ALL actions only when player is NOT looking
 		if can_move:  # can_move = NOT is_player_looking
 			# Always turn toward player when not being watched (regardless of following)
 			_turn_toward_player()
@@ -226,22 +242,26 @@ func _orientation_allows_follow() -> bool:
 	return player_forward.dot(player_to_effigy) < 0.0
 
 func _update_following_behavior() -> void:
-	"""Update following behavior based on sanity levels"""
-	var was_following = is_following
+	"""Update following behavior based on sanity levels and aggression"""
+	var was_following: bool = is_following
 	
-	# Determine if effigy should follow based on sanity
-	# Above 80: No following, just watching/turning
-	# 60-80: Follow at slow speed
-	# 40-60: Follow at medium speed  
-	# Below 40: Follow at max speed
-	if current_sanity < GameConstants.SANITY_THRESHOLD_HIGH \
-		and player_in_detection_range \
-		and _orientation_allows_follow():
-		is_following = true
-		_emit_detection_event_if_needed(was_following)
+	if aggression_mode:
+		# In aggression: always follow as long as we have a valid player reference
+		is_following = is_player_valid()
 	else:
-		is_following = false
-		_emit_lost_player_event_if_needed(was_following)
+		if current_sanity < GameConstants.SANITY_THRESHOLD_HIGH \
+			and player_in_detection_range \
+			and _orientation_allows_follow():
+			is_following = true
+		else:
+			is_following = false
+	
+	if not was_following and is_following and _message_bus:
+		var distance: float = get_distance_to_player()
+		_message_bus.emit_event("entity_detected_player", ["effigy", self, distance])
+	elif was_following and not is_following and _message_bus:
+		_message_bus.emit_event("entity_lost_player", ["effigy", self])
+
 
 func _emit_detection_event_if_needed(was_following: bool) -> void:
 	"""Emit detection event when starting to follow"""
@@ -274,6 +294,7 @@ func _move_toward_player(delta: float) -> void:
 	if distance_to_player <= stop_distance:
 		velocity.x = 0.0
 		velocity.z = 0.0
+		move_and_slide()
 		return
 	
 	# Calculate movement direction (keep Y unchanged for gravity)
@@ -282,30 +303,39 @@ func _move_toward_player(delta: float) -> void:
 	direction = direction.normalized()
 	
 	# Apply horizontal movement only (preserve Y velocity for gravity)
-	velocity.x = direction.x * follow_speed
-	velocity.z = direction.z * follow_speed
+	var speed: float = aggressive_speed if aggression_mode else follow_speed
+	velocity.x = direction.x * speed
+	velocity.z = direction.z * speed
+
 	
 	# Move and allow slide (clipping through walls is now a feature)
 	move_and_slide()
 
 func _update_behavior_for_sanity() -> void:
 	"""Update behavior and appearance based on current sanity"""
-	var new_stage = _calculate_stage_for_sanity(current_sanity)
-	
+	var new_stage: int = _calculate_stage_for_sanity(current_sanity)
 	if new_stage != current_stage:
 		_change_stage(new_stage)
 	
-	# Update follow speed based on sanity thresholds
-	# Speed increases as sanity drops
-	if current_sanity >= GameConstants.SANITY_THRESHOLD_HIGH:  # Above 80
-		# No following, speed doesn't matter but set to base
-		follow_speed = 0.0  # Don't move at all
-	elif current_sanity >= GameConstants.SANITY_THRESHOLD_MEDIUM:  # 60-80
-		follow_speed = follow_speed_base  # 0.5 - slowest following
-	elif current_sanity >= GameConstants.SANITY_THRESHOLD_LOW:  # 40-60
-		follow_speed = follow_speed_half  # 0.7 - medium speed
-	else:  # Below 40
-		follow_speed = follow_speed_full  # 1.0 - max speed
+	# Aggression auto-toggle
+	if current_sanity < GameConstants.SANITY_THRESHOLD_CRITICAL:
+		set_aggression_mode(true, &"sanity_critical")
+		return
+	else:
+		# Leaving aggression if we climbed out of critical
+		if aggression_mode:
+			set_aggression_mode(false, &"sanity_recovered")
+	
+	# Normal speed tiers (no aggression here)
+	if current_sanity >= GameConstants.SANITY_THRESHOLD_HIGH:
+		follow_speed = 0.0         # above 80: statue mode
+	elif current_sanity >= GameConstants.SANITY_THRESHOLD_MEDIUM:
+		follow_speed = follow_speed_base   # 60–80
+	elif current_sanity >= GameConstants.SANITY_THRESHOLD_LOW:
+		follow_speed = follow_speed_half   # 40–60
+	else:
+		# 20–40 but not critical: fast but still obeys "don’t move when watched"
+		follow_speed = follow_speed_full
 
 func _calculate_stage_for_sanity(sanity: int) -> int:
 	"""Calculate which stage should be active for given sanity level"""
@@ -358,7 +388,17 @@ func _on_detection_area_exited(body: Node3D) -> void:
 func _on_sanity_changed(old_value: int, new_value: int, delta: int) -> void:
 	"""Handle sanity level changes"""
 	current_sanity = new_value
-	_update_behavior_for_sanity()
+	
+	# Flip aggression around the critical threshold
+	if current_sanity < GameConstants.SANITY_THRESHOLD_CRITICAL:
+		if not aggression_mode:
+			set_aggression_mode(true, &"sanity_critical")
+	else:
+		# Only recalc behavior if we’re not in aggression anymore
+		if aggression_mode:
+			set_aggression_mode(false, &"sanity_recovered")
+		else:
+			_update_behavior_for_sanity()
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:
 	"""Handle game end"""
@@ -371,7 +411,23 @@ func get_current_stage() -> int:
 	"""Get current stage number"""
 	return current_stage
 
-# is_active property inherited from BaseEntity
-# Use set_entity_active(bool) to change state with proper event emission
-
-# get_distance_to_player() inherited from BaseEntity
+## set_aggression_mode
+## Purpose: Toggle aggression. When active, Effigy ignores visibility gating and moves at aggressive_speed.
+## @param active: Whether aggression is on.
+## @param reason: Optional reason tag for telemetry/logging.
+## @return void.
+func set_aggression_mode(active: bool, reason: StringName = &"") -> void:
+	aggression_mode = active
+	
+	if aggression_mode:
+		# Lock movement policy for aggression: always allowed and fast
+		follow_speed = aggressive_speed
+		is_following = true
+		can_move = true
+		if _message_bus:
+			_message_bus.emit_event("entity_state_changed", ["effigy", "aggression_started", reason])
+	else:
+		# Recalculate normal behavior from current sanity
+		_update_behavior_for_sanity()
+		if _message_bus:
+			_message_bus.emit_event("entity_state_changed", ["effigy", "aggression_ended", reason])
