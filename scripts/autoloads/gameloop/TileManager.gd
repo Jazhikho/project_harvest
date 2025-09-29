@@ -16,14 +16,14 @@ var _puzzle_tiles: Dictionary = {} # Vector2i -> puzzle_id
 var _established_connections: Dictionary = {} # "pos1_pos2" -> true
 
 # Tile scenes
-var _available_tile_scenes: Array[String] = []
+var _normal_tiles: Array[String] = [] # Non-permanent tiles for random spawning
+var _permanent_tiles_scenes: Array[String] = [] # Permanent tile scenes
 var _start_tile_scene: String = "res://scenes/tiles/start_tile.tscn"
 var _final_tile_scene: String = "res://scenes/tiles/final_event_tile.tscn"
 
 # Initialization flag
 var _start_tile_initialized: bool = false
-var _permanent_tile_positions: Dictionary = {} # scene_path -> Vector2i (first spawn position)
-var _permanent_tile_instances: Dictionary = {} # Vector2i -> scene_path (current instances)
+var _permanent_tile_assignments: Dictionary = {}
 
 # Forbidden zone for permanent tiles (1,1) to (-1,-1)
 const FORBIDDEN_MIN: Vector2i = Vector2i(-1, -1)
@@ -58,8 +58,9 @@ func _initialize() -> void:
 	# DON'T spawn start tile here - wait for game scene
 
 func _load_available_tiles() -> void:
-	"""Load all available tile scenes"""
-	_available_tile_scenes.clear()
+	"""Load and categorize tile scenes into permanent and normal tiles"""
+	_normal_tiles.clear()
+	_permanent_tiles_scenes.clear()
 	
 	var tiles_dir: DirAccess = DirAccess.open("res://scenes/tiles/")
 	if not tiles_dir:
@@ -71,10 +72,68 @@ func _load_available_tiles() -> void:
 	
 	while file_name != "":
 		if file_name.ends_with(".tscn") and file_name != "start_tile.tscn" and file_name != "final_event_tile.tscn":
-			_available_tile_scenes.append("res://scenes/tiles/" + file_name)
+			var full_path: String = "res://scenes/tiles/" + file_name
+			
+			# Load scene to check if it's permanent
+			var tile_scene: PackedScene = load(full_path) as PackedScene
+			if tile_scene:
+				var temp_instance: Node3D = tile_scene.instantiate() as Node3D
+				if temp_instance:
+					var is_permanent: bool = false
+					if temp_instance.has_method("is_tile_permanent"):
+						is_permanent = temp_instance.is_tile_permanent()
+					
+					if is_permanent:
+						_permanent_tiles_scenes.append(full_path)
+						print("TileManager: Loaded permanent tile: ", file_name)
+					else:
+						_normal_tiles.append(full_path)
+					
+					temp_instance.queue_free()
+		
 		file_name = tiles_dir.get_next()
 	
 	tiles_dir.list_dir_end()
+	
+	print("TileManager: Loaded ", _normal_tiles.size(), " normal tiles and ", 
+		  _permanent_tiles_scenes.size(), " permanent tiles")
+	
+	# Pre-assign permanent tiles to positions
+	_assign_permanent_tile_positions()
+	
+func _assign_permanent_tile_positions() -> void:
+	"""
+	Pre-assign permanent tiles to specific grid positions
+	This runs once at initialization to determine where permanent tiles will appear
+	"""
+	_permanent_tile_assignments.clear()
+	
+	if _permanent_tiles_scenes.is_empty():
+		return
+	
+	# Generate valid spawn positions (outside forbidden zone)
+	var valid_positions: Array[Vector2i] = []
+	
+	# Generate positions in the 7x7 grid, excluding forbidden zone (-1,-1) to (1,1)
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var pos: Vector2i = Vector2i(x, y)
+			if _can_permanent_tile_spawn_at(pos):
+				valid_positions.append(pos)
+	
+	# Shuffle positions for randomness
+	valid_positions.shuffle()
+	
+	# Assign each permanent tile to a position
+	var assignment_count: int = min(_permanent_tiles_scenes.size(), valid_positions.size())
+	for i in range(assignment_count):
+		var pos: Vector2i = valid_positions[i]
+		var scene_path: String = _permanent_tiles_scenes[i]
+		_permanent_tile_assignments[pos] = scene_path
+		print("TileManager: Assigned permanent tile ", scene_path.get_file(), " to position ", pos)
+	
+	if _permanent_tiles_scenes.size() > valid_positions.size():
+		push_warning("TileManager: Not enough valid positions for all permanent tiles!")
 
 func initialize_game_tiles() -> void:
 	"""Called when the game scene is actually loaded"""
@@ -213,15 +272,16 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 	for door_direction in available_doors:
 		var raw_connecting_pos: Vector2i = _get_connecting_position(source_pos, door_direction)
 		var wrapped_connecting_pos: Vector2i = _apply_world_wrapping(raw_connecting_pos)
+		var did_wrap: bool = (raw_connecting_pos != wrapped_connecting_pos)
 		
 		print("TileManager: Checking connection from ", source_pos, " ", _get_direction_name(door_direction), 
 			  " to raw: ", raw_connecting_pos, " wrapped: ", wrapped_connecting_pos)
 		
-		# Skip if connection already established (use wrapped position for check)
+		# Skip if connection already established
 		if _is_connection_established(source_pos, wrapped_connecting_pos):
 			continue
 		
-		# Check if tile already exists at wrapped position (including permanent tiles)
+		# Check if tile already exists at wrapped position
 		if _active_tiles.has(wrapped_connecting_pos) and is_instance_valid(_active_tiles[wrapped_connecting_pos]):
 			var existing_tile: Node3D = _active_tiles[wrapped_connecting_pos]
 			
@@ -233,13 +293,11 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 			_tile_state_manager.set_tile_state(wrapped_connecting_pos, _tile_state_manager.TileState.CONNECTING)
 			continue
 		elif _active_tiles.has(wrapped_connecting_pos):
-			# Clean up invalid reference
 			_active_tiles.erase(wrapped_connecting_pos)
 		
-		# Check for permanent tile that should spawn at wrapped position
+		# Check for pre-assigned permanent tile at this position
 		var permanent_scene_at_pos: String = _get_permanent_tile_at_position(wrapped_connecting_pos)
 		if not permanent_scene_at_pos.is_empty():
-			# Spawn the permanent tile
 			var permanent_tile: Node3D = _spawn_permanent_tile(permanent_scene_at_pos, wrapped_connecting_pos, source_tile, door_direction)
 			if permanent_tile:
 				_establish_connection(source_pos, wrapped_connecting_pos)
@@ -247,24 +305,21 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 		
 		# Allow normal tiles at (0,0) if start tile is gone
 		if wrapped_connecting_pos == Vector2i(0, 0):
-			# Check if start tile still exists
 			if _active_tiles.has(Vector2i(0, 0)) and is_instance_valid(_active_tiles[Vector2i(0, 0)]):
 				var tile_at_origin: Node3D = _active_tiles[Vector2i(0, 0)]
-				# Check if it's actually the start tile
 				var scene_path: String = tile_at_origin.get_meta("scene_path", "")
 				if scene_path == _start_tile_scene or tile_at_origin.name == "StartTile":
 					_establish_connection(source_pos, wrapped_connecting_pos)
 					_tile_state_manager.set_tile_state(wrapped_connecting_pos, _tile_state_manager.TileState.CONNECTING)
 					continue
-			# Start tile is gone, (0,0) is free for normal tiles
 		
-		# Create random tile if no permanent tile exists
-		var new_tile: Node3D = _create_random_tile_with_permanent_check(wrapped_connecting_pos)
+		# Create random normal tile
+		var new_tile: Node3D = _create_random_tile(wrapped_connecting_pos)
 		if not new_tile:
 			continue
 		
 		# Setup tile orientation and position
-		_align_tiles(source_tile, new_tile, door_direction)
+		_align_tiles(source_tile, new_tile, door_direction, wrapped_connecting_pos, did_wrap)
 		_register_tile(new_tile, wrapped_connecting_pos)
 		
 		# Register with TileStateManager as connecting
@@ -273,7 +328,7 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 		# Establish the connection
 		_establish_connection(source_pos, wrapped_connecting_pos)
 		
-		# Emit tile generated event for spawn processing
+		# Emit tile generated event
 		_message_bus.emit_event("tile_generated", [new_tile, wrapped_connecting_pos, {}])
 		
 func _rotate_permanent_tile_to_connect(permanent_tile: Node3D, approaching_from_direction: int) -> void:
@@ -358,29 +413,32 @@ func _establish_connection(pos1: Vector2i, pos2: Vector2i) -> void:
 
 func _create_random_tile(grid_pos: Vector2i) -> Node3D:
 	"""
-	Create a random tile at position
+	Create a random normal (non-permanent) tile at position
 	
 	@param grid_pos: Grid position for tile
 	@return: Created tile or null
 	"""
-	if _available_tile_scenes.is_empty():
-		push_error("TileManager: No available tile scenes")
+	if _normal_tiles.is_empty():
+		push_error("TileManager: No normal tile scenes available")
 		return null
 	
 	# Check if should spawn final tile
 	if _state_manager.has_flag("final_event_available") and randf() < 0.5:
 		return _create_tile_from_scene(_final_tile_scene, grid_pos)
 	
-	var random_scene: String = _available_tile_scenes[randi() % _available_tile_scenes.size()]
+	# Select random normal tile (no permanent tiles in this pool)
+	var random_scene: String = _normal_tiles[randi() % _normal_tiles.size()]
 	return _create_tile_from_scene(random_scene, grid_pos)
 
-func _align_tiles(source_tile: Node3D, target_tile: Node3D, door_direction: int) -> void:
+func _align_tiles(source_tile: Node3D, target_tile: Node3D, door_direction: int, target_grid_pos: Vector2i = Vector2i.ZERO, did_wrap: bool = false) -> void:
 	"""
 	Align target tile to connect with source tile door
 	
 	@param source_tile: Source tile with door
 	@param target_tile: Target tile to align
 	@param door_direction: Direction of connecting door
+	@param target_grid_pos: Grid position of target tile (for wrapping)
+	@param did_wrap: Whether world wrapping occurred
 	"""
 	# Rotate target tile
 	if target_tile.has_method("get_available_doors"):
@@ -394,19 +452,29 @@ func _align_tiles(source_tile: Node3D, target_tile: Node3D, door_direction: int)
 			else:
 				target_tile.rotation.y = rotation_needed * PI / 2
 	
-	# Position target tile
-	var source_center: Vector3 = source_tile.position
-	var offset: float = TILE_SIZE
-	
-	match door_direction:
-		DoorDirection.NORTH:
-			target_tile.position = Vector3(source_center.x + offset, source_center.y, source_center.z)
-		DoorDirection.EAST:
-			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z + offset)
-		DoorDirection.SOUTH:
-			target_tile.position = Vector3(source_center.x - offset, source_center.y, source_center.z)
-		DoorDirection.WEST:
-			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
+	# FIXED: Position target tile - use grid position if wrapping occurred
+	if did_wrap and target_grid_pos != Vector2i.ZERO:
+		# When wrapping, position based on grid coordinates
+		target_tile.position = Vector3(
+			target_grid_pos.x * TILE_SIZE,
+			0,
+			target_grid_pos.y * TILE_SIZE
+		)
+		print("TileManager: Positioned wrapped tile at grid ", target_grid_pos, " -> world ", target_tile.position)
+	else:
+		# Normal adjacent positioning
+		var source_center: Vector3 = source_tile.position
+		var offset: float = TILE_SIZE
+		
+		match door_direction:
+			DoorDirection.NORTH:
+				target_tile.position = Vector3(source_center.x + offset, source_center.y, source_center.z)
+			DoorDirection.EAST:
+				target_tile.position = Vector3(source_center.x, source_center.y, source_center.z + offset)
+			DoorDirection.SOUTH:
+				target_tile.position = Vector3(source_center.x - offset, source_center.y, source_center.z)
+			DoorDirection.WEST:
+				target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
 
 func _calculate_rotation_needed(original_door: int, target_door: int) -> int:
 	"""
@@ -717,71 +785,15 @@ func debug_check_start_tile() -> void:
 	"""Debug function to check start tile status"""
 	pass
 
-func _create_random_tile_with_permanent_check(grid_pos: Vector2i) -> Node3D:
-	"""
-	Create a random tile at position, checking if it should be permanent
-	
-	@param grid_pos: Grid position for tile
-	@return: Created tile or null
-	"""
-	if _available_tile_scenes.is_empty():
-		push_error("TileManager: No available tile scenes")
-		return null
-	
-	# Check if should spawn final tile
-	if _state_manager.has_flag("final_event_available") and randf() < 0.5:
-		return _create_tile_from_scene(_final_tile_scene, grid_pos)
-	
-	# Select random scene
-	var random_scene: String = _available_tile_scenes[randi() % _available_tile_scenes.size()]
-	
-	# Create the tile
-	var new_tile: Node3D = _create_tile_from_scene(random_scene, grid_pos)
-	if not new_tile:
-		return null
-	
-	# Check if this tile is permanent
-	if new_tile.has_method("is_tile_permanent") and new_tile.is_tile_permanent():
-		# Check if this permanent tile can spawn here
-		if not _can_permanent_tile_spawn_at(grid_pos):
-			print("TileManager: Permanent tile ", random_scene, " cannot spawn at ", grid_pos, " (forbidden zone)")
-			new_tile.queue_free()
-			# Try another random non-permanent tile
-			return _create_random_tile(grid_pos)
-		
-		# Check if this permanent tile has already spawned elsewhere
-		if _permanent_tile_positions.has(random_scene):
-			var original_pos: Vector2i = _permanent_tile_positions[random_scene]
-			print("TileManager: Permanent tile ", random_scene, " already spawned at ", original_pos, ", cannot spawn at ", grid_pos)
-			new_tile.queue_free()
-			# Try another random tile
-			return _create_random_tile(grid_pos)
-		
-		# This is the first spawn of this permanent tile - record it
-		_permanent_tile_positions[random_scene] = grid_pos
-		_permanent_tile_instances[grid_pos] = random_scene
-		print("TileManager: Permanent tile ", random_scene, " first spawn at ", grid_pos)
-	
-	return new_tile
-
 func _get_permanent_tile_at_position(position: Vector2i) -> String:
 	"""
-	Check if a permanent tile should exist at this position
+	Check if a permanent tile is pre-assigned to this position
 	
 	@param position: Grid position to check
-	@return: Scene path of permanent tile that should be here, or empty string
+	@return: Scene path of permanent tile assigned here, or empty string
 	"""
-	# Check if we have a permanent tile instance recorded at this exact position
-	if _permanent_tile_instances.has(position):
-		return _permanent_tile_instances[position]
-	
-	# Check all permanent tiles to see if any should appear at this wrapped position
-	for scene_path in _permanent_tile_positions:
-		var original_position: Vector2i = _permanent_tile_positions[scene_path]
-		
-		# Check if this position is a wrapped version of the original
-		if _are_positions_equivalent_with_wrapping(position, original_position):
-			return scene_path
+	if _permanent_tile_assignments.has(position):
+		return _permanent_tile_assignments[position]
 	
 	return ""
 
@@ -816,7 +828,7 @@ func _can_permanent_tile_spawn_at(position: Vector2i) -> bool:
 
 func _spawn_permanent_tile(scene_path: String, grid_pos: Vector2i, source_tile: Node3D, door_direction: int) -> Node3D:
 	"""
-	Spawn a specific permanent tile at position
+	Spawn a pre-assigned permanent tile at position
 	
 	@param scene_path: Path to the permanent tile scene
 	@param grid_pos: Position to spawn at
@@ -824,18 +836,17 @@ func _spawn_permanent_tile(scene_path: String, grid_pos: Vector2i, source_tile: 
 	@param door_direction: Direction we're connecting from
 	@return: Spawned tile or null
 	"""
-	print("TileManager: Spawning permanent tile ", scene_path, " at ", grid_pos)
+	print("TileManager: Spawning pre-assigned permanent tile ", scene_path, " at ", grid_pos)
 	
 	var permanent_tile: Node3D = _create_tile_from_scene(scene_path, grid_pos)
 	if not permanent_tile:
 		return null
 	
 	# Permanent tiles must rotate to connect
-	_align_tiles_with_rotation_requirement(source_tile, permanent_tile, door_direction)
+	_align_tiles_with_rotation_requirement(source_tile, permanent_tile, door_direction, grid_pos)
 	
 	# Register the tile
 	_register_tile(permanent_tile, grid_pos)
-	_permanent_tile_instances[grid_pos] = scene_path
 	
 	# Register with TileStateManager as connecting
 	_tile_state_manager.register_tile(permanent_tile, grid_pos, _tile_state_manager.TileState.CONNECTING)
@@ -845,13 +856,14 @@ func _spawn_permanent_tile(scene_path: String, grid_pos: Vector2i, source_tile: 
 	
 	return permanent_tile
 
-func _align_tiles_with_rotation_requirement(source_tile: Node3D, target_tile: Node3D, door_direction: int) -> void:
+func _align_tiles_with_rotation_requirement(source_tile: Node3D, target_tile: Node3D, door_direction: int, target_grid_pos: Vector2i) -> void:
 	"""
 	Align tiles ensuring the target (permanent) tile rotates to connect properly
 	
 	@param source_tile: Source tile with door
 	@param target_tile: Target tile to align (will be rotated)
 	@param door_direction: Direction of connecting door from source
+	@param target_grid_pos: Grid position of target tile
 	"""
 	# Calculate the opposite direction (where target needs a door)
 	var required_door_direction: int = _get_opposite_direction(door_direction)
@@ -884,19 +896,34 @@ func _align_tiles_with_rotation_requirement(source_tile: Node3D, target_tile: No
 			else:
 				target_tile.rotation.y = best_rotation * PI / 2
 	
-	# Position target tile
-	var source_center: Vector3 = source_tile.position
-	var offset: float = TILE_SIZE
+	# FIXED: Position target tile using grid position for accuracy
+	# Check if wrapping occurred
+	var source_pos: Vector2i = source_tile.get_meta("grid_position", Vector2i.ZERO)
+	var expected_adjacent_pos: Vector2i = _get_connecting_position(source_pos, door_direction)
+	var did_wrap: bool = (expected_adjacent_pos != target_grid_pos)
 	
-	match door_direction:
-		DoorDirection.NORTH:
-			target_tile.position = Vector3(source_center.x + offset, source_center.y, source_center.z)
-		DoorDirection.EAST:
-			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z + offset)
-		DoorDirection.SOUTH:
-			target_tile.position = Vector3(source_center.x - offset, source_center.y, source_center.z)
-		DoorDirection.WEST:
-			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
+	if did_wrap:
+		# Use grid-based positioning for wrapped tiles
+		target_tile.position = Vector3(
+			target_grid_pos.x * TILE_SIZE,
+			0,
+			target_grid_pos.y * TILE_SIZE
+		)
+		print("TileManager: Positioned wrapped permanent tile at grid ", target_grid_pos, " -> world ", target_tile.position)
+	else:
+		# Normal adjacent positioning
+		var source_center: Vector3 = source_tile.position
+		var offset: float = TILE_SIZE
+		
+		match door_direction:
+			DoorDirection.NORTH:
+				target_tile.position = Vector3(source_center.x + offset, source_center.y, source_center.z)
+			DoorDirection.EAST:
+				target_tile.position = Vector3(source_center.x, source_center.y, source_center.z + offset)
+			DoorDirection.SOUTH:
+				target_tile.position = Vector3(source_center.x - offset, source_center.y, source_center.z)
+			DoorDirection.WEST:
+				target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
 
 func _get_opposite_direction(direction: int) -> int:
 	"""
