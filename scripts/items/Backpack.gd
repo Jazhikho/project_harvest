@@ -117,14 +117,20 @@ func interact() -> void:
 				items_collected += 1
 				print("Backpack: Returned ", collected_item_id, " to player")
 				
-				# Emit collection event for each item
-				var tile_pos = Vector2i.ZERO
-				var state_manager = get_node_or_null("/root/GameStateManager")
-				if state_manager:
-					tile_pos = state_manager.get_state("current_tile_position")
+				# Mark item as collected in current run state
+				var item_manager = get_node_or_null("/root/ItemManager")
+				if item_manager and item_manager.has_method("mark_item_collected"):
+					item_manager.mark_item_collected(collected_item_id)
 				
-				if _message_bus:
-					_message_bus.emit_event("item_collected", [collected_item_id, get_tree().get_first_node_in_group("player"), tile_pos])
+				# Add to SaveManager collectibles so it persists if player dies again
+				# (but don't emit item_collected signal to avoid triggering read/sanity effects)
+				if _save_manager.has_method("_on_item_collected"):
+					var dummy_collector = get_tree().get_first_node_in_group("player")
+					var tile_pos = Vector2i.ZERO
+					var state_manager = get_node_or_null("/root/GameStateManager")
+					if state_manager:
+						tile_pos = state_manager.get_state("current_tile_position")
+					_save_manager._on_item_collected(collected_item_id, dummy_collector, tile_pos)
 			else:
 				items_failed.append(collected_item_id)
 	
