@@ -24,32 +24,7 @@ func _initialize() -> void:
 		push_error("EventManager: Required core systems not found")
 		return
 	
-	_load_event_data()
 	_connect_to_events()
-
-func _load_event_data() -> void:
-	"""Load events.json data"""
-	if not FileAccess.file_exists(EVENTS_DATA_PATH):
-		push_error("EventManager: events.json not found at " + EVENTS_DATA_PATH)
-		_create_default_events()
-		return
-	
-	var file: FileAccess = FileAccess.open(EVENTS_DATA_PATH, FileAccess.READ)
-	if not file:
-		push_error("EventManager: Could not open events.json")
-		_create_default_events()
-		return
-	
-	var json: JSON = JSON.new()
-	var parse_result: int = json.parse(file.get_as_text())
-	file.close()
-	
-	if parse_result != OK:
-		push_error("EventManager: Failed to parse events.json")
-		_create_default_events()
-		return
-	
-	_event_data = json.data
 
 func _create_default_events() -> void:
 	"""Create minimal default events as fallback"""

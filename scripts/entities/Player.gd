@@ -128,7 +128,7 @@ func _setup_audio_players() -> void:
 		if "heartbeat" in sfx_lib and sfx_lib.heartbeat is AudioStream:
 			heartbeat_player.stream = sfx_lib.heartbeat
 		elif "hearbeat" in sfx_lib and sfx_lib.hearbeat is AudioStream:
-			heartbeat_player.stream = sfx_lib.hearbeat  # temporary fallback if you refuse to rename
+			heartbeat_player.stream = sfx_lib.hearbeat # temporary fallback if you refuse to rename
 
 	_enable_loop(walking_player.stream)
 	_enable_loop(sprinting_player.stream)
@@ -166,11 +166,13 @@ func _notification(what: int) -> void:
 	"""Handle window focus notifications and quit requests"""
 	if what == NOTIFICATION_APPLICATION_FOCUS_IN:
 		# Recapture mouse when window regains focus
-		if mouse_captured:
+		# Small delay to ensure window is fully active
+		await get_tree().create_timer(0.1).timeout
+		if mouse_captured and get_tree().paused == false:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		# Release mouse when window loses focus to prevent it getting stuck
-		if mouse_captured:
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	elif what == NOTIFICATION_WM_CLOSE_REQUEST:
 		# Handle force quit scenarios - record as death
@@ -735,7 +737,7 @@ func _get_sanity_state(sanity: int) -> String:
 	if sanity <= 0:
 		return "zero"
 	elif sanity <= 20: # CRITICAL threshold
-		return "critical" 
+		return "critical"
 	elif sanity <= 40:
 		return "low"
 	else:

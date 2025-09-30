@@ -4,16 +4,185 @@
 
 [node name="ControlsUI" type="Control"]
 layout_mode = 3
-anchors_preset = 1
-anchor_left = 1.0
+anchors_preset = 15
 anchor_right = 1.0
-offset_left = -160.0
-offset_bottom = 60.0
-grow_horizontal = 0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_s5oen")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="FullControls" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -200.0
+offset_right = 320.0
+offset_bottom = 200.0
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="FullControls"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="FullControls/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Title" type="Label" parent="FullControls/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "CONTROLS"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="FullControls/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Movement" type="HBoxContainer" parent="FullControls/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Movement"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "Move:"
+
+[node name="Key" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Movement"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "WASD"
+
+[node name="Sprint" type="HBoxContainer" parent="FullControls/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Sprint"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "Sprint:"
+
+[node name="Key" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Sprint"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "Space"
+
+[node name="Look" type="HBoxContainer" parent="FullControls/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Look"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "Look:"
+
+[node name="Key" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Look"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "Mouse"
+
+[node name="Interact" type="HBoxContainer" parent="FullControls/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Interact"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "Interact:"
+
+[node name="Key" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Interact"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "E"
+
+[node name="Flashlight" type="HBoxContainer" parent="FullControls/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Flashlight"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "Flashlight:"
+
+[node name="Key" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Flashlight"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "F"
+
+[node name="Inventory" type="HBoxContainer" parent="FullControls/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Inventory"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "Inventory:"
+
+[node name="Key" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Inventory"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "I"
+
+[node name="Journal" type="HBoxContainer" parent="FullControls/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Journal"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "Journal:"
+
+[node name="Key" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Journal"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "J"
+
+[node name="Pause" type="HBoxContainer" parent="FullControls/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Pause"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "Pause:"
+
+[node name="Key" type="Label" parent="FullControls/MarginContainer/VBoxContainer/Pause"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "ESC"
+
+[node name="MinimizedHints" type="HBoxContainer" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -24,18 +193,19 @@ offset_right = -10.0
 offset_bottom = 50.0
 grow_horizontal = 0
 theme_override_constants/separation = 15
+mouse_filter = 2
 
-[node name="BackpackHint" type="VBoxContainer" parent="HBoxContainer"]
+[node name="BackpackHint" type="VBoxContainer" parent="MinimizedHints"]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="Icon" type="TextureRect" parent="HBoxContainer/BackpackHint"]
+[node name="Icon" type="TextureRect" parent="MinimizedHints/BackpackHint"]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Key" type="Label" parent="HBoxContainer/BackpackHint"]
+[node name="Key" type="Label" parent="MinimizedHints/BackpackHint"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 0.9)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
@@ -45,17 +215,17 @@ theme_override_font_sizes/font_size = 14
 text = "I"
 horizontal_alignment = 1
 
-[node name="FlashlightHint" type="VBoxContainer" parent="HBoxContainer"]
+[node name="FlashlightHint" type="VBoxContainer" parent="MinimizedHints"]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="Icon" type="TextureRect" parent="HBoxContainer/FlashlightHint"]
+[node name="Icon" type="TextureRect" parent="MinimizedHints/FlashlightHint"]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Key" type="Label" parent="HBoxContainer/FlashlightHint"]
+[node name="Key" type="Label" parent="MinimizedHints/FlashlightHint"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 0.9)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
@@ -65,17 +235,17 @@ theme_override_font_sizes/font_size = 14
 text = "F"
 horizontal_alignment = 1
 
-[node name="JournalHint" type="VBoxContainer" parent="HBoxContainer"]
+[node name="JournalHint" type="VBoxContainer" parent="MinimizedHints"]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="Icon" type="TextureRect" parent="HBoxContainer/JournalHint"]
+[node name="Icon" type="TextureRect" parent="MinimizedHints/JournalHint"]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Key" type="Label" parent="HBoxContainer/JournalHint"]
+[node name="Key" type="Label" parent="MinimizedHints/JournalHint"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 0.9)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)

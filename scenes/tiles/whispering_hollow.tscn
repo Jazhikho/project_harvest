@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dxrwt86snuv1a" path="res://scenes/environments/3x1_corn_tile.tscn" id="6_fco4u"]
 [ext_resource type="PackedScene" uid="uid://gkb1m13l00g5" path="res://scenes/environments/1x1_corn_tile.tscn" id="7_bgcse"]
 [ext_resource type="PackedScene" uid="uid://y3n3yl83883f" path="res://scenes/environments/tree.tscn" id="8_8a55d"]
+[ext_resource type="PackedScene" uid="uid://h1234hollow678" path="res://scenes/notes/whispering_hollow_note.tscn" id="9_hollow"]
 
 [node name="WhisperingHollow" type="Node3D"]
 script = ExtResource("1_tpwhe")
@@ -34,6 +35,12 @@ transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 3.4293
 
 [node name="EntityPoint3" type="Marker3D" parent="Maze/Objects"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 3.51378, 0.2, -3.97792)
+
+[node name="ItemPoint" type="Marker3D" parent="Maze/Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.725657, 0.940526, 0.171281)
+
+[node name="whispering_hollow_note" parent="Maze/Objects" instance=ExtResource("9_hollow")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.725657, 0.940526, 0.171281)
 
 [node name="Doors" type="Node3D" parent="Maze"]
 

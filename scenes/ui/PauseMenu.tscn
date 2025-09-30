@@ -113,6 +113,56 @@ layout_mode = 2
 size_flags_horizontal = 3
 max_value = 1.0
 step = 0.01
+value = 1.0
+
+[node name="Value" type="Label" parent="SettingsPanel/SettingsContainer/MasterVolume"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "100%"
+
+[node name="MusicVolume" type="HBoxContainer" parent="SettingsPanel/SettingsContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingsPanel/SettingsContainer/MusicVolume"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Music:"
+
+[node name="Slider" type="HSlider" parent="SettingsPanel/SettingsContainer/MusicVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Value" type="Label" parent="SettingsPanel/SettingsContainer/MusicVolume"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "100%"
+
+[node name="SFXVolume" type="HBoxContainer" parent="SettingsPanel/SettingsContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingsPanel/SettingsContainer/SFXVolume"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "SFX:"
+
+[node name="Slider" type="HSlider" parent="SettingsPanel/SettingsContainer/SFXVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Value" type="Label" parent="SettingsPanel/SettingsContainer/SFXVolume"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "100%"
+
+[node name="Spacer" type="Control" parent="SettingsPanel/SettingsContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
 
 [node name="ResetDataButton" type="Button" parent="SettingsPanel/SettingsContainer"]
 layout_mode = 2
@@ -125,5 +175,8 @@ text = "BACK"
 [connection signal="pressed" from="MenuPanel/VBoxContainer/ResumeButton" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="MenuPanel/VBoxContainer/SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="MenuPanel/VBoxContainer/MainMenuButton" to="." method="_on_main_menu_pressed"]
+[connection signal="value_changed" from="SettingsPanel/SettingsContainer/MasterVolume/Slider" to="." method="_on_master_volume_changed"]
+[connection signal="value_changed" from="SettingsPanel/SettingsContainer/MusicVolume/Slider" to="." method="_on_music_volume_changed"]
+[connection signal="value_changed" from="SettingsPanel/SettingsContainer/SFXVolume/Slider" to="." method="_on_sfx_volume_changed"]
 [connection signal="pressed" from="SettingsPanel/SettingsContainer/ResetDataButton" to="." method="_on_reset_data_pressed"]
 [connection signal="pressed" from="SettingsPanel/SettingsContainer/BackButton" to="." method="_on_back_pressed"]

@@ -3,13 +3,15 @@ extends BaseEntity
 ## Moves differently based on player sanity level and visibility
 ## Refactored to use GameConstants, BaseEntity, and simplified methods
 
-@export var turn_speed: float = 999.0  # Instant turning
-@export var follow_speed_base: float = 0.5  # Very slow base speed
+signal stage_changed(new_stage: int)
+
+@export var turn_speed: float = 999.0 # Instant turning
+@export var follow_speed_base: float = 0.5 # Very slow base speed
 @export var follow_speed_half: float = 1
 @export var follow_speed_full: float = 2
 @export var aggressive_speed: float = 5
-@export var stop_distance: float = 1.5  # Distance to maintain from player
-@export var visibility_check_interval: float = 0.1  # How often to check if player is looking
+@export var stop_distance: float = 1.5 # Distance to maintain from player
+@export var visibility_check_interval: float = 0.1 # How often to check if player is looking
 @export var camera_path: NodePath
 @export var sfx_library: SFX
 
@@ -61,7 +63,7 @@ func _ready() -> void:
 		push_error("Effigy: Detection area not found!")
 	
 	# Call parent _ready
-	super()
+	super ()
 
 func _setup_stages() -> void:
 	"""Setup stage visibility"""
@@ -115,8 +117,8 @@ func _physics_process(delta: float) -> void:
 		_move_toward_player(delta)
 		return
 		
-	if player_in_detection_range:# ALL actions only when player is NOT looking
-		if can_move:  # can_move = NOT is_player_looking
+	if player_in_detection_range: # ALL actions only when player is NOT looking
+		if can_move: # can_move = NOT is_player_looking
 			# Always turn toward player when not being watched (regardless of following)
 			_turn_toward_player()
 			
@@ -127,12 +129,12 @@ func _physics_process(delta: float) -> void:
 				# Just turning, not moving - but still need to apply the turn
 				velocity.x = 0.0
 				velocity.z = 0.0
-				move_and_slide()  # Apply the movement with gravity
+				move_and_slide() # Apply the movement with gravity
 		else:
 			# Player is looking - FREEZE completely (but keep gravity)
 			velocity.x = 0.0
 			velocity.z = 0.0
-			move_and_slide()  # Apply movement with gravity
+			move_and_slide() # Apply movement with gravity
 	else:
 		# Player not in detection range - stop horizontal movement but keep gravity
 		velocity.x = 0.0
@@ -176,12 +178,12 @@ func _manual_visibility_check() -> bool:
 	
 	# Use the same logic as the player's is_looking_at_position method
 	var to_target = (global_position - player_camera.global_position).normalized()
-	var camera_forward = -player_camera.global_transform.basis.z
+	var camera_forward = - player_camera.global_transform.basis.z
 	
 	# Check if effigy is within field of view (90 degrees default)
 	var dot_product = camera_forward.dot(to_target)
 	var angle = acos(clamp(dot_product, -1.0, 1.0))
-	var fov_radians = deg_to_rad(90.0) 
+	var fov_radians = deg_to_rad(90.0)
 	
 	if angle > fov_radians:
 		return false
@@ -192,7 +194,7 @@ func _manual_visibility_check() -> bool:
 		player_camera.global_position,
 		global_position
 	)
-	query.exclude = [player]  # Exclude player from raycast
+	query.exclude = [player] # Exclude player from raycast
 	CollisionHelper.setup_visibility_raycast(query)
 	
 	var result = space_state.intersect_ray(query)
@@ -212,9 +214,9 @@ func _get_player_camera() -> Camera3D:
 	if camera_path != NodePath() and is_instance_valid(player):
 		cam = player.get_node_or_null(camera_path)
 	if cam == null and is_instance_valid(player):
-		cam = player.get_node_or_null("Camera3D")  # fallback if you really have that node
+		cam = player.get_node_or_null("Camera3D") # fallback if you really have that node
 	if cam == null:
-		cam = get_viewport().get_camera_3d()  # the active 3D camera
+		cam = get_viewport().get_camera_3d() # the active 3D camera
 	if cam == null:
 		push_warning("Effigy: No active Camera3D found.")
 	return cam
@@ -244,7 +246,7 @@ func _check_player_movement() -> bool:
 
 func _orientation_allows_follow() -> bool:
 	# Forward is -Z in Godot. Dot >= 0 means within ±90°
-	var player_forward = -player.global_transform.basis.z
+	var player_forward = - player.global_transform.basis.z
 	var player_to_effigy = (global_position - player.global_position).normalized()
 	return player_forward.dot(player_to_effigy) < 0.0
 
@@ -306,7 +308,7 @@ func _move_toward_player(delta: float) -> void:
 	
 	# Calculate movement direction (keep Y unchanged for gravity)
 	var direction = (player.global_position - global_position)
-	direction.y = 0  # Don't affect vertical movement
+	direction.y = 0 # Don't affect vertical movement
 	direction = direction.normalized()
 	
 	# Apply horizontal movement only (preserve Y velocity for gravity)
@@ -335,11 +337,11 @@ func _update_behavior_for_sanity() -> void:
 	
 	# Normal speed tiers (no aggression here)
 	if current_sanity >= GameConstants.SANITY_THRESHOLD_HIGH:
-		follow_speed = 0.0         # above 80: statue mode
+		follow_speed = 0.0 # above 80: statue mode
 	elif current_sanity >= GameConstants.SANITY_THRESHOLD_MEDIUM:
-		follow_speed = follow_speed_base   # 60–80
+		follow_speed = follow_speed_base # 60–80
 	elif current_sanity >= GameConstants.SANITY_THRESHOLD_LOW:
-		follow_speed = follow_speed_half   # 40–60
+		follow_speed = follow_speed_half # 40–60
 	else:
 		# 20–40 but not critical: fast but still obeys "don’t move when watched"
 		follow_speed = follow_speed_full
@@ -371,9 +373,11 @@ func _change_stage(new_stage: int) -> void:
 	
 	current_stage = new_stage
 	
-	# Emit stage change event
-	if _message_bus and old_stage != new_stage:
-		_message_bus.emit_event("entity_stage_changed", ["effigy", self, old_stage, new_stage])
+	# Emit stage change signal and event
+	if old_stage != new_stage:
+		stage_changed.emit(new_stage)
+		if _message_bus:
+			_message_bus.emit_event("entity_stage_changed", ["effigy", self, old_stage, new_stage])
 	
 
 # Detection Area Signal Handlers
@@ -468,6 +472,12 @@ func _update_dragging_audio() -> void:
 # Public API
 func get_current_stage() -> int:
 	"""Get current stage number"""
+	return current_stage
+
+## get_stage
+## Purpose: Alias for get_current_stage for SanityDrainArea compatibility
+## @return int: Current stage number
+func get_stage() -> int:
 	return current_stage
 
 ## set_aggression_mode

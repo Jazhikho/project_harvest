@@ -15,6 +15,34 @@
 	  "always_keep": true
 	},
 	{
+	  "id": "start_note",
+	  "name": "A letter",
+	  "description": "Your mission is to escape this maze. Run, my little lab rat. I would tell you more, but of course, that would spoil the experiment. I will assume that by reading this note and continuing through this maze you have concented to this experiment and are a willing participant, and that I have been released from all liability in the event of injury or death.",
+	  "category": "notes",
+	  "subcategory": "Puzzle Clues"
+	},
+	{
+	  "id": "crows_parliament_note",
+	  "name": "A hastily scribbled note",
+	  "description": "What do we see when we look in a mirror? Is it us, or is it someone else? It's a question that's been on my mind for a while. We act like that reflection is our own, with no will apart from ours. But perhaps we are the reflection, the ones with no will. Break a mirror, and you fracture yourself into a thousand pieces. Is breaking a mirror a form of suicide?",
+	  "category": "notes",
+	  "subcategory": "Puzzle Clues"
+	},
+	{
+	  "id": "watching_stones_note",
+	  "name": "Neatly typed memo",
+	  "description": "The externalization of identity allows us to identify others as we see ourselves. We name ourselves by our occupations; by our heritages; by our allegiances; by our connections. This fragmentation of identity - how are you you if you place upon the altar externalities?",
+	  "category": "notes",
+	  "subcategory": "Puzzle Clues"
+	},
+	{
+	  "id": "whispering_hollow_note",
+	  "name": "Musing note",
+	  "description": "Do our memories determine us, or do we determine them? Or perhaps it is our choices, if such a thing exists. Others might say, 'No, we are not our pasts, nor our presents, but our potentialities.' Bah. Illusions, all of it. Better to cast them aside.",
+	  "category": "notes",
+	  "subcategory": "Puzzle Clues"
+	},
+	{
 	  "id": "phone",
 	  "name": "Broken Phone",
 	  "description": "#DeadPhone #NoService #SadVibes #TheStruggleIsReal #InstaFomo #TiktokFomo #GetMeOutOfHere",

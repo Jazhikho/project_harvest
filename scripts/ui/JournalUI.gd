@@ -101,9 +101,17 @@ func _populate_journal() -> void:
 				notes_by_category[subcategory] = []
 			notes_by_category[subcategory].append(item_id)
 	
-	# Sort categories alphabetically
+	# Sort categories with "Puzzle Clues" first, then alphabetically
 	var sorted_categories: Array = notes_by_category.keys()
-	sorted_categories.sort()
+	sorted_categories.sort_custom(func(a, b):
+		# "Puzzle Clues" always comes first
+		if a == "Puzzle Clues":
+			return true
+		if b == "Puzzle Clues":
+			return false
+		# Otherwise sort alphabetically
+		return a < b
+	)
 	
 	# Create tree structure
 	for category in sorted_categories:

@@ -12,8 +12,9 @@ var save_data: Dictionary = {
 	"permanent_tiles": {},
 	"event_flags": [],
 	"settings": {},
-	"puzzles": {},  # Puzzle states and completion
-	"puzzle_items_used": []  # Items permanently used in puzzles
+	"puzzles": {},
+	"puzzle_items_used": [],
+	"controls_shown_this_run": false 
 }
 
 func _ready() -> void:
@@ -61,6 +62,8 @@ func load_game() -> void:
 				save_data.backpack_inventory = []
 			if not save_data.has("collectibles"):
 				save_data.collectibles = []
+			if not save_data.has("controls_shown_this_run"): 
+				save_data.controls_shown_this_run = false
 			
 			# Save the updated structure
 			save_game()
@@ -77,14 +80,15 @@ func _reset_save_data() -> void:
 		"time_played": 0.0,
 		"deaths": 0,
 		"collectibles": [],
-		"backpack_inventory": [], 
+		"backpack_inventory": [],
 		"run_active": false,
 		"last_position": Vector3.ZERO,
 		"permanent_tiles": {},
 		"event_flags": [],
 		"settings": {},
 		"puzzles": {},
-		"puzzle_items_used": []
+		"puzzle_items_used": [],
+		"controls_shown_this_run": false 
 	}
 
 func start_run() -> void:
@@ -92,7 +96,17 @@ func start_run() -> void:
 	if save_data.collectibles.size() > 0:
 		_transfer_collectibles_to_backpack()
 	save_data.run_active = true
+	save_data.controls_shown_this_run = false
 	save_game()
+
+func mark_controls_shown() -> void:
+	"""Mark that controls have been shown this run"""
+	save_data.controls_shown_this_run = true
+	save_game()
+	
+func should_show_controls() -> bool:
+	"""Check if controls should be shown this run"""
+	return not save_data.get("controls_shown_this_run", false)
 
 func record_death() -> void:
 	_transfer_collectibles_to_backpack()

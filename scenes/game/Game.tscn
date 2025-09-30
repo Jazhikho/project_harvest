@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://0atthfte3o13"]
+[gd_scene load_steps=20 format=3 uid="uid://0atthfte3o13"]
 
 [ext_resource type="PackedScene" uid="uid://c5yqrv82hov2i" path="res://scenes/tiles/start_tile.tscn" id="1_start_tile"]
 [ext_resource type="Resource" uid="uid://u8xbjjkhmjqx" path="res://data/MusicPlaylist.tres" id="2_60iot"]
@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://c0nsssaorny41" path="res://assets/textures/EveningSkyHDRI040A_16K-HDR.exr" id="6_56wml"]
 [ext_resource type="PackedScene" uid="uid://c6e6seey11ofy" path="res://scenes/ui/JournalUI.tscn" id="10_56wml"]
 [ext_resource type="PackedScene" uid="uid://b63na1dnm38kk" path="res://scenes/ui/ControlsUI.tscn" id="11_aptqa"]
+[ext_resource type="PackedScene" uid="uid://jyqvje6vpkf" path="res://scenes/ui/NarrativeUI.tscn" id="14_5xhyk"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wnrko"]
 shader = ExtResource("4_gg4pt")
@@ -112,6 +113,9 @@ visible = false
 [node name="JournalUI" parent="UI" instance=ExtResource("10_56wml")]
 
 [node name="ControlsUI" parent="UI" instance=ExtResource("11_aptqa")]
+
+[node name="NarrativeUI" parent="UI" instance=ExtResource("14_5xhyk")]
+visible = false
 
 [node name="TransitionLayer" type="CanvasLayer" parent="."]
 layer = 100

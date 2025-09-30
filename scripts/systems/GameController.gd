@@ -6,8 +6,9 @@ extends Node3D
 @onready var animation_player = $TransitionLayer/AnimationPlayer
 @onready var journal_ui = $UI/JournalUI
 @onready var control_hints = $UI/ControlsUI
-@export var music_playlist: MusicPlaylist        # res://…/MusicPlaylist.tres
-@export var sfx_library: SFX                     # res://…/SFX.tres
+@onready var narrative_ui = $UI/NarrativeUI
+@export var music_playlist: MusicPlaylist
+@export var sfx_library: SFX
 
 var game_paused = false
 var inventory_open = false

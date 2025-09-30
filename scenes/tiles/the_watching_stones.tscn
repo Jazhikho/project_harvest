@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://cgtirix8vft6s" path="res://scenes/environments/gargoyle_2.tscn" id="5_hoq1k"]
 [ext_resource type="PackedScene" uid="uid://b1uuox01ohviu" path="res://scenes/environments/gargoyle_3.tscn" id="6_3h10u"]
 [ext_resource type="PackedScene" uid="uid://y3n3yl83883f" path="res://scenes/environments/tree.tscn" id="10_30xlj"]
+[ext_resource type="PackedScene" uid="uid://w1234watch5678" path="res://scenes/notes/watching_stones_note.tscn" id="11_watch"]
 
 [node name="WatchingStones" type="Node3D"]
 script = ExtResource("1_30xlj")
@@ -51,6 +52,12 @@ transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 2.4825
 
 [node name="tree" parent="Maze/Objects" instance=ExtResource("10_30xlj")]
 transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 11.6011, 0.3, 8)
+
+[node name="ItemPoint" type="Marker3D" parent="Maze/Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.20644, 0.544887, 0.625985)
+
+[node name="watching_stones_note" parent="Maze/Objects" instance=ExtResource("11_watch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.20644, 0.544887, 0.625985)
 
 [node name="Doors" type="Node3D" parent="Maze"]
 
