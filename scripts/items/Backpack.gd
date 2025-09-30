@@ -46,18 +46,27 @@ func _setup_interaction_area() -> void:
 	collision.shape = shape
 	_interaction_area.add_child(collision)
 	
-	# Set up collision layers
-	_interaction_area.collision_layer = 0
-	_interaction_area.collision_mask = 1 # Detect player layer
+	# Set up collision layers - use interaction layer (8)
+	_interaction_area.collision_layer = 8
+	_interaction_area.collision_mask = 0
+	
+	# Create physics body for raycasting
+	var rigid_body = RigidBody3D.new()
+	rigid_body.name = "InteractionBody"
+	rigid_body.collision_layer = 8
+	rigid_body.collision_mask = 0
+	rigid_body.freeze = true
+	add_child(rigid_body)
+	
+	var body_collision = CollisionShape3D.new()
+	body_collision.name = "BodyCollision"
+	body_collision.shape = shape.duplicate()
+	rigid_body.add_child(body_collision)
 	
 	# Connect signals
 	_interaction_area.body_entered.connect(_on_body_entered)
 	_interaction_area.body_exited.connect(_on_body_exited)
 
-func _process(_delta: float) -> void:
-	"""Check for interaction input"""
-	if _player_in_range and Input.is_action_just_pressed("interact"):
-		interact()
 
 func _on_body_entered(body: Node3D) -> void:
 	"""Handle player entering interaction range"""
@@ -101,12 +110,12 @@ func interact() -> void:
 	var items_collected = 0
 	var items_failed = []
 	
-	for item_id in backpack_items:
+	for collected_item_id in backpack_items:
 		if _player_inventory.has_method("add_item"):
-			var success = _player_inventory.add_item(item_id, false) # Don't apply effects when restoring
+			var success = _player_inventory.add_item(collected_item_id, false) # Don't apply effects when restoring
 			if success:
 				items_collected += 1
-				print("Backpack: Returned ", item_id, " to player")
+				print("Backpack: Returned ", collected_item_id, " to player")
 				
 				# Emit collection event for each item
 				var tile_pos = Vector2i.ZERO
@@ -115,9 +124,9 @@ func interact() -> void:
 					tile_pos = state_manager.get_state("current_tile_position")
 				
 				if _message_bus:
-					_message_bus.emit_event("item_collected", [item_id, get_tree().get_first_node_in_group("player"), tile_pos])
+					_message_bus.emit_event("item_collected", [collected_item_id, get_tree().get_first_node_in_group("player"), tile_pos])
 			else:
-				items_failed.append(item_id)
+				items_failed.append(collected_item_id)
 	
 	# Handle results
 	if items_failed.is_empty():

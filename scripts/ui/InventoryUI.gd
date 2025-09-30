@@ -132,6 +132,18 @@ func show_inventory():
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_populate_inventory()
 
+func show_inventory_with_item(item_id: String) -> void:
+	"""
+	Show inventory and immediately inspect a specific item
+	
+	@param item_id: Item to focus on and inspect
+	"""
+	show_inventory()
+	# Wait for inventory to populate
+	await get_tree().process_frame
+	# Automatically inspect the item
+	_on_item_selected(item_id)
+
 func hide_inventory():
 	"""Hide inventory and restore mouse state"""
 	visible = false

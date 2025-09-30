@@ -7,7 +7,7 @@ var _ambient_player: AudioStreamPlayer = null
 var _music_a: AudioStreamPlayer = null
 var _music_b: AudioStreamPlayer = null
 var _music_use_a: bool = true
-var _music_playlist: Resource = null   # expect your MusicPlaylist resource
+var _music_playlist: Resource = null # expect your MusicPlaylist resource
 var _music_last_index: int = -1
 var _music_crossfade_seconds: float = 2.5
 var _music_gap_min: float = 0.5
@@ -20,8 +20,8 @@ var _message_bus: Node
 # Audio bus management
 var _audio_buses: Dictionary = {
 	"Master": 0,
-	"Music": -1,
-	"SFX": -1
+	"Music": - 1,
+	"SFX": - 1
 }
 
 func _enter_tree() -> void:
@@ -162,9 +162,9 @@ func stop_all_sounds_on_bus(bus_name: String) -> void:
 	
 	# This is a simplified approach - in a full implementation,
 	# you'd track active players and stop them individually
-	AudioServer.set_bus_volume_db(bus_idx, -80.0)  # Mute
+	AudioServer.set_bus_volume_db(bus_idx, -80.0) # Mute
 	await get_tree().process_frame
-	set_bus_volume(bus_name, get_bus_volume(bus_name))  # Restore volume
+	set_bus_volume(bus_name, get_bus_volume(bus_name)) # Restore volume
 
 func _connect_to_settings() -> void:
 	"""Connect to settings events after SettingsManager is ready"""
@@ -490,8 +490,15 @@ func stop_all_game_audio_fade(seconds: float = 1.0) -> void:
 		players.append(_theme_player)
 	if _ambient_player != null and is_instance_valid(_ambient_player):
 		players.append(_ambient_player)
-	# If you have dedicated music players, add them here:
-	# for p in _music_players: players.append(p)
+	# Add music players that are used by start_music()
+	if _music_a != null and is_instance_valid(_music_a):
+		players.append(_music_a)
+	if _music_b != null and is_instance_valid(_music_b):
+		players.append(_music_b)
+
+	# Stop music gap timer if it exists
+	if _music_gap_timer != null and is_instance_valid(_music_gap_timer):
+		_music_gap_timer.stop()
 
 	# Filter to only those that are currently playing.
 	var playing_players: Array[AudioStreamPlayer] = []

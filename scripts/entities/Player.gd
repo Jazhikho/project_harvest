@@ -179,11 +179,15 @@ func _notification(what: int) -> void:
 		_handle_force_quit()
 
 func _input(event: InputEvent) -> void:
-	# Handle mouse recapture on click when mouse is visible
+	# Handle mouse recapture on click when mouse is visible but should be captured
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE and mouse_captured:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-			return
+		# Only recapture if we're in gameplay (not paused, no menus open)
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
+			# Check if game is paused or UI is open
+			if not get_tree().paused:
+				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+				get_viewport().set_input_as_handled()
+				return
 	
 	# Debug mode toggle
 	if event is InputEventKey and event.pressed and event.keycode == KEY_TAB:

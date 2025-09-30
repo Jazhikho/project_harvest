@@ -84,10 +84,14 @@ func _is_continue_game() -> bool:
 	"""
 	# Check if save data exists and had an active run
 	if not _save_manager.has_save_data():
+		print("DeathHandler: No save data, not a continue")
 		return false
 	
 	# If run was active, that means player died and this is a continue
-	return _save_manager.save_data.get("deaths", 0) > 0
+	var death_count: int = _save_manager.save_data.get("deaths", 0)
+	var is_continue: bool = death_count > 0
+	print("DeathHandler: Save data exists, deaths=", death_count, ", is_continue=", is_continue)
+	return is_continue
 
 func _spawn_continue_items() -> void:
 	"""Spawn effigy and backpack at marked positions on start tile"""
@@ -135,21 +139,22 @@ func _spawn_backpack(position: Vector3) -> void:
 	var backpack_scene_path = "res://scenes/misc/backpack.tscn"
 	
 	if not FileAccess.file_exists(backpack_scene_path):
-		push_error("StartTileSpawner: Backpack scene not found at ", backpack_scene_path)
+		push_error("DeathHandler: Backpack scene not found at ", backpack_scene_path)
 		return
 	
 	var backpack_scene: PackedScene = load(backpack_scene_path) as PackedScene
 	if not backpack_scene:
-		push_error("StartTileSpawner: Failed to load backpack scene")
+		push_error("DeathHandler: Failed to load backpack scene")
 		return
 	
 	var backpack: Node3D = backpack_scene.instantiate() as Node3D
 	if not backpack:
-		push_error("StartTileSpawner: Failed to instantiate backpack")
+		push_error("DeathHandler: Failed to instantiate backpack")
 		return
 	
-	# Get previous run's inventory from save data
-	var previous_inventory: Array = _save_manager.save_data.get("collectibles", [])
+	# Get previous run's inventory from backpack (notes and puzzle pieces persist)
+	var previous_inventory: Array = _save_manager.get_backpack_inventory()
+	print("DeathHandler: Backpack inventory: ", previous_inventory)
 	
 	# Set backpack metadata
 	backpack.set_meta("inventory", previous_inventory)
@@ -159,4 +164,4 @@ func _spawn_backpack(position: Vector3) -> void:
 	_start_tile.add_child(backpack)
 	backpack.global_position = position
 	
-	print("StartTileSpawner: Spawned backpack at ", position, " with ", previous_inventory.size(), " items")
+	print("DeathHandler: Spawned backpack at ", position, " with ", previous_inventory.size(), " items")

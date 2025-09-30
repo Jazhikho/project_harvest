@@ -58,6 +58,59 @@ func show_journal() -> void:
 	note_content.text = "No note selected."
 	metadata_label.text = ""
 
+func show_journal_with_note(note_id: String) -> void:
+	"""
+	Show journal and immediately focus on a specific note
+	
+	@param note_id: Note to focus on and display
+	"""
+	visible = true
+	was_mouse_captured = Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	_populate_journal()
+	
+	# Wait for journal to populate
+	await get_tree().process_frame
+	
+	# Find and select the note in the tree
+	_select_note_in_tree(note_id)
+	
+	# Display the note immediately
+	if collected_notes.has(note_id):
+		selected_note_id = note_id
+		read_button.disabled = false
+		_display_note(note_id)
+
+func _select_note_in_tree(note_id: String) -> void:
+	"""
+	Find and select a specific note in the tree
+	
+	@param note_id: Note to select
+	"""
+	var root: TreeItem = note_tree.get_root()
+	if not root:
+		return
+	
+	# Search through all categories
+	var category: TreeItem = root.get_first_child()
+	while category:
+		# Expand the category
+		category.set_collapsed(false)
+		
+		# Search through notes in this category
+		var note: TreeItem = category.get_first_child()
+		while note:
+			var current_note_id: String = note.get_metadata(0)
+			if current_note_id == note_id:
+				# Found it! Select this note
+				note.select(0)
+				# Ensure it's visible (scroll to it)
+				note_tree.scroll_to_item(note)
+				return
+			note = note.get_next()
+		
+		category = category.get_next()
+
 func hide_journal() -> void:
 	"""Hide journal and restore mouse state"""
 	visible = false

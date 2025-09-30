@@ -8,8 +8,10 @@ func _ready() -> void:
 		item_name = "Research Note"
 	if item_description.is_empty():
 		item_description = "Dr. A's research notes"
+	if display_name.is_empty():
+		display_name = item_name
 	
-	pickup_sound = "res://assets/audio/effects/paper_pickup.ogg"
+	pickup_sound = "res://assets/audio/notepickup.ogg"
 	
 	# Check if this note has already been collected (for permanent notes)
 	call_deferred("_check_if_already_collected")

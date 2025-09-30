@@ -51,6 +51,10 @@ func _initialize_game():
 		# Connect to player death events
 		if message_bus.has_signal("player_died"):
 			message_bus.player_died.connect(_on_player_died)
+		
+		# Connect to item inspection events
+		message_bus.connect_event("open_inventory_to_item", _on_open_inventory_to_item)
+		message_bus.connect_event("open_journal_to_note", _on_open_journal_to_note)
 	
 	# Give TileManager a moment to finish initialization
 	await get_tree().create_timer(0.1).timeout
@@ -121,6 +125,20 @@ func _on_inventory_closed():
 func _on_journal_closed():
 	journal_open = false
 	get_tree().paused = false
+
+func _on_open_inventory_to_item(item_id: String) -> void:
+	"""Open inventory and focus on a specific item"""
+	if not inventory_open:
+		inventory_open = true
+		get_tree().paused = true
+		inventory_ui.show_inventory_with_item(item_id)
+
+func _on_open_journal_to_note(note_id: String) -> void:
+	"""Open journal and focus on a specific note"""
+	if not journal_open:
+		journal_open = true
+		get_tree().paused = true
+		journal_ui.show_journal_with_note(note_id)
 
 func _on_main_menu_requested():
 	_terminate_subject("Abandoned")

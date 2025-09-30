@@ -375,7 +375,7 @@ func _connect_to_events() -> void:
 	_message_bus.game_started.connect(_on_game_started)
 
 func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
-	# Play the pickup SFX first, at the collector’s position if available.
+	# Play the pickup SFX first, at the collector's position if available.
 	var origin: Vector3 = Vector3.ZERO
 	if collector != null and collector is Node3D:
 		origin = collector.global_position
@@ -404,6 +404,9 @@ func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) 
 	apply_item_effects(item_id)
 	mark_item_collected(item_id)
 	_cleanup_duplicate_items(item_id)
+	
+	# Trigger immediate inspection of collected item
+	_trigger_item_inspection(item_id)
 
 	
 func mark_item_collected(item_id: String) -> void:
@@ -468,6 +471,26 @@ func _cleanup_duplicate_items(item_id: String) -> void:
 	
 	if items_removed > 0:
 		print("ItemManager: Cleaned up ", items_removed, " duplicate instances of ", item_id)
+
+func _trigger_item_inspection(item_id: String) -> void:
+	"""
+	Trigger immediate inspection of collected item
+	Opens inventory for regular items, journal for notes
+	
+	@param item_id: Item that was just collected
+	"""
+	var item_info: Dictionary = get_item_info(item_id)
+	var category: String = item_info.get("category", "")
+	
+	# Delay slightly to allow pickup animation to complete
+	await get_tree().create_timer(0.3).timeout
+	
+	if category == "notes":
+		# Open journal to show the note
+		_message_bus.emit_event("open_journal_to_note", [item_id])
+	else:
+		# Open inventory to show the item
+		_message_bus.emit_event("open_inventory_to_item", [item_id])
 
 func _on_game_started() -> void:
 	reset_for_new_run()

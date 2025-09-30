@@ -41,6 +41,7 @@ signal puzzle_failed(puzzle_id: String, reason: String)
 signal sanity_changed(old_value: int, new_value: int, delta: int)
 signal sanity_threshold_crossed(threshold_name: String, value: int, crossed_down: bool)
 signal sanity_effect_triggered(effect_type: String, intensity: float)
+signal sanity_delta_requested(delta: int, source: String)
 
 # === MAZE EVENTS ===
 signal maze_shift_triggered(center: Vector2i, radius: int, affected_tiles: Array)
@@ -63,6 +64,11 @@ signal notification_requested(message: String, duration: float, priority: int)
 signal screen_effect_requested(effect_type: String, duration: float, intensity: float)
 signal dialogue_started(dialogue_id: String, speaker: String)
 signal dialogue_ended(dialogue_id: String)
+signal open_inventory_to_item(item_id: String)
+signal open_journal_to_note(note_id: String)
+signal show_interaction_prompt(prompt_text: String, target: Node)
+signal hide_interaction_prompt(target: Node)
+signal note_shown(note_id: String, note_text: String)
 
 # === SETTINGS EVENTS ===
 signal setting_changed(category: String, key: String, old_value: Variant, new_value: Variant)

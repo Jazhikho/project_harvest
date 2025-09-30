@@ -20,7 +20,8 @@ display_name = "A letter"
 transform = Transform3D(1.10884, 1.75834e-08, 0.403584, 0.231486, 0.966599, -0.636003, -0.330596, 0.67682, 0.908306, 0, 0.05, 0)
 
 [node name="Area3D" type="Area3D" parent="." index="1"]
-collision_layer = 8
+collision_layer = 0
+collision_mask = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)

@@ -120,8 +120,11 @@ func _on_player_spawned(player_node: Node3D) -> void:
 	var save_mgr = get_node_or_null("/root/SaveManager")
 	var is_new_game: bool = false
 	if save_mgr:
-		is_new_game = not save_mgr.has_save_data() or save_mgr.save_data.get("deaths", 0) == 0
-		print("NarrativeUI: SaveManager check - has_save_data=", save_mgr.has_save_data(), ", deaths=", save_mgr.save_data.get("deaths", 0), ", is_new_game=", is_new_game)
+		# It's a continue game if save data exists AND there's at least one death
+		var has_save: bool = save_mgr.has_save_data()
+		var death_count: int = save_mgr.save_data.get("deaths", 0) if has_save else 0
+		is_new_game = not has_save or death_count == 0
+		print("NarrativeUI: SaveManager check - has_save_data=", has_save, ", deaths=", death_count, ", is_new_game=", is_new_game)
 	
 	if is_new_game:
 		# Set flag IMMEDIATELY so ControlsUI knows to wait
