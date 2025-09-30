@@ -1,9 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://ce68ln22th61j"]
+[gd_scene load_steps=5 format=3 uid="uid://ce68ln22th61j"]
 
 [ext_resource type="PackedScene" uid="uid://cxuyfliqywb7i" path="res://assets/models/key.glb" id="1_2k2jk"]
 [ext_resource type="Script" uid="uid://yc2v1m8c4ohx" path="res://scripts/items/BaseItem.gd" id="1_bd6ut"]
-[ext_resource type="Script" uid="uid://baooxqqtnpsgy" path="res://scripts/utils/InteractableArea.gd" id="3_27m1a"]
-[ext_resource type="Script" uid="uid://c7qjis2op04mi" path="res://scripts/items/ItemDrop.gd" id="3_q7jxm"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_bd6ut"]
 height = 4.0
@@ -22,8 +20,6 @@ transform = Transform3D(-2.62268e-07, -6, 0, 6, -2.62268e-07, 0, 0, 0, 6, 0.25, 
 
 [node name="Area3D" type="Area3D" parent="."]
 collision_layer = 8
-script = ExtResource("3_27m1a")
-kind = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
 shape = SubResource("CylinderShape3D_bd6ut")
@@ -31,7 +27,6 @@ shape = SubResource("CylinderShape3D_bd6ut")
 [node name="RigidBody3D" type="RigidBody3D" parent="."]
 collision_layer = 8
 collision_mask = 48
-script = ExtResource("3_q7jxm")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.025, -2.98023e-08, -1.49012e-08)

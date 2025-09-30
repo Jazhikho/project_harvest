@@ -11,7 +11,7 @@ var _state_manager: Node
 
 var _spawn_history := {}
 
-const ITEM_SPAWN_CHANCE := 0.10  # 10% chance per spawn point
+const ITEM_SPAWN_CHANCE := 0.10 # 10% chance per spawn point
 const MAX_ITEMS_PER_TILE := 4
 
 func _ready() -> void:
@@ -87,7 +87,7 @@ func _get_item_spawn_points(tile_node: Node3D) -> Array[Vector3]:
 	if item_spawn_parent:
 		for child in item_spawn_parent.get_children():
 			if child is Marker3D:
-				points.append(child.global_position)	
+				points.append(child.global_position)
 	return points
 
 func _get_entity_spawn_points(tile_node: Node3D) -> Array[Vector3]:
@@ -172,22 +172,21 @@ func _spawn_item_visual(tile_node: Node3D, item_id: String, position: Vector3) -
 	if item_category == "notes":
 		return _spawn_note_visual(tile_node, item_id, position, item_info)
 	
-	# Regular item spawning
-	var item_scene_path: String = "res://scenes/items/%s.tscn" % item_id
-	print("item path is %s" % item_scene_path)
-	if not FileAccess.file_exists(item_scene_path):
+	# Regular item spawning - use ItemManager's scene mapping system
+	var item_instance: Node3D = _item_manager.spawn_item_instance(item_id, position, tile_node)
+	if not item_instance:
 		_spawn_placeholder_item(tile_node, item_id, position)
 		return true
 	
-	var item_scene: PackedScene = load(item_scene_path) as PackedScene
-	if not item_scene:
-		_spawn_placeholder_item(tile_node, item_id, position)
-		return true
+	# var item_scene: PackedScene = load(item_scene_path) as PackedScene
+	# if not item_scene:
+	# 	_spawn_placeholder_item(tile_node, item_id, position)
+	# 	return true
 	
-	var item_instance: Node3D = item_scene.instantiate()
-	tile_node.add_child(item_instance)
-	item_instance.global_position = position
-	item_instance.set_meta("item_id", item_id)
+	# var item_instance: Node3D = item_scene.instantiate()
+	# tile_node.add_child(item_instance)
+	# item_instance.global_position = position
+	# item_instance.set_meta("item_id", item_id)
 	
 	return true
 
@@ -209,11 +208,20 @@ func _spawn_note_visual(tile_node: Node3D, note_id: String, position: Vector3, n
 		"res://scenes/notes/note_4.tscn"
 	]
 	
-	# Pick a random note scene
-	var random_index: int = randi() % note_scene_paths.size()
-	var chosen_scene_path: String = note_scene_paths[random_index]
+	# Filter to only existing scenes for export safety
+	var valid_note_scenes: Array[String] = []
+	for path in note_scene_paths:
+		if ResourceLoader.exists(path, "PackedScene"):
+			valid_note_scenes.append(path)
 	
-	print("SpawnManager: Spawning note '%s' using scene %s" % [note_id, chosen_scene_path])
+	if valid_note_scenes.is_empty():
+		push_error("SpawnManager: No valid note scenes found for export")
+		_spawn_placeholder_item(tile_node, note_id, position)
+		return false
+	
+	# Pick a random note scene from valid ones
+	var random_index: int = randi() % valid_note_scenes.size()
+	var chosen_scene_path: String = valid_note_scenes[random_index]
 	
 	# Load the chosen note scene
 	var note_scene: PackedScene = load(chosen_scene_path) as PackedScene
@@ -238,7 +246,7 @@ func _spawn_note_visual(tile_node: Node3D, note_id: String, position: Vector3, n
 	note_instance.item_name = note_info.get("name", "Research Note")
 	note_instance.item_description = note_info.get("description", "")
 	note_instance.display_name = note_info.get("name", "Research Note")
-	note_instance.auto_pickup = false  # Notes require interaction
+	note_instance.auto_pickup = false # Notes require interaction
 
 	# Set required metadata
 	note_instance.set_meta("item_id", note_id)
@@ -405,7 +413,7 @@ func _calculate_entity_spawn_chance(current_sanity: int, tiles_explored: int, we
 	var base_chance: float = 0.10
 	
 	# Sanity modifier: 0% at 100 sanity, +20% at 0 sanity
-	var sanity_modifier: float = (100 - current_sanity) * 0.002  # 0.2 at 0 sanity
+	var sanity_modifier: float = (100 - current_sanity) * 0.002 # 0.2 at 0 sanity
 	
 	# Exploration modifier: Start adding after 5 tiles, +1% per tile
 	var exploration_modifier: float = max(0.0, (tiles_explored - 5) * 0.01)
@@ -453,11 +461,10 @@ func _spawn_entities(tile_node: Node3D, context: Dictionary, spawn_points: Array
 	var roll = randf()
 	
 	if roll < spawn_chance:
-		
 		# Use EnemyManager to spawn the entity
 		var enemy_manager = get_node_or_null("/root/EnemyManager")
 		if enemy_manager and enemy_manager.has_method("spawn_enemy"):
-			var spawned_entity = enemy_manager.spawn_enemy(entity_type, spawn_point, true)  # Force spawn
+			var spawned_entity = enemy_manager.spawn_enemy(entity_type, spawn_point, true) # Force spawn
 			if spawned_entity:
 				spawned_entities.append(entity_type)
 			else:
@@ -517,7 +524,7 @@ static func spawn_aggressive_effigies(count: int, scene_root: Node) -> Array:
 		return spawned_effigies
 	
 	# Spawn effigies at available entity points
-	for i in range(min(count, 3)):  # Max 3 spawn points
+	for i in range(min(count, 3)): # Max 3 spawn points
 		var spawn_point_name = "EntityPoint%d" % (i + 1)
 		var spawn_point = maze_objects.get_node_or_null(spawn_point_name)
 		

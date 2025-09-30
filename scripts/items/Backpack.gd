@@ -9,6 +9,7 @@ var _player_in_range: bool = false
 var _message_bus: Node
 var _player_inventory: Node
 var _save_manager: Node
+var item_id = "backpack"
 
 # Visual components
 @onready var _mesh: MeshInstance3D = get_node_or_null("BackpackMesh")

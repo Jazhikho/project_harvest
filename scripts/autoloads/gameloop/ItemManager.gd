@@ -20,13 +20,28 @@ const ITEM_DATA_PATH := "res://data/items.json"
 const MAX_UNLOCKED_NOTES := 10
 
 # NEW: Map item_id to PackedScene for spawning
-var _item_scene_map: Dictionary = {}  # item_id -> PackedScene
+var _item_scene_map: Dictionary = {} # item_id -> PackedScene
 
 func _ready() -> void:
 	name = "ItemManager"
 	_resolve_catalog()
 	add_to_group("core_systems")
 	call_deferred("_initialize")
+	_export_sanity()
+
+func _export_sanity() -> void:
+	if spawn_catalog == null:
+		push_error("ItemManager: spawn_catalog is NULL in export.")
+		return
+	
+	# Validate catalog entries for export
+	for ps: PackedScene in spawn_catalog.item_scenes:
+		if ps == null:
+			push_error("ItemManager: Null PackedScene found in catalog")
+			continue
+		var p := ps.resource_path
+		if not ResourceLoader.exists(p, "PackedScene"):
+			push_error("ItemManager: PackedScene not found in export: " + p)
 
 func _initialize() -> void:
 	"""Initialize connections and load data"""
@@ -38,7 +53,7 @@ func _initialize() -> void:
 		return
 	
 	_load_item_definitions()
-	_build_item_scene_map()  # NEW: Build the scene map after loading definitions
+	_build_item_scene_map() # NEW: Build the scene map after loading definitions
 	_connect_to_events()
 	
 func _resolve_catalog() -> void:
@@ -49,38 +64,37 @@ func _resolve_catalog() -> void:
 		push_warning("ItemManager: catalog has zero item scenes.")
 
 # NEW: Build a map of item_id -> PackedScene
+## _build_item_scene_map
+## Purpose: Build a mapping of item IDs to their PackedScenes for efficient spawning.
+## @return void.
 func _build_item_scene_map() -> void:
-	"""Build a mapping of item IDs to their PackedScenes for efficient spawning"""
 	_item_scene_map.clear()
-	
-	if not spawn_catalog or spawn_catalog.item_scenes.is_empty():
-		push_warning("ItemManager: No item scenes in catalog")
+
+	if spawn_catalog == null or spawn_catalog.item_scenes.is_empty():
+		push_warning("ItemManager: No item scenes in catalog.")
 		return
-	
-	for scene in spawn_catalog.item_scenes:
-		if not scene:
+
+	for scene_ps: PackedScene in spawn_catalog.item_scenes:
+		if scene_ps == null:
 			continue
-		
-		# Instantiate temporarily to get the item_id
-		var temp_instance = scene.instantiate()
+
+		var temp: Node = scene_ps.instantiate()
 		var item_id: String = ""
-		
-		if temp_instance.has_method("get_item_id"):
-			item_id = temp_instance.get_item_id()
-		elif "item_id" in temp_instance:
-			item_id = temp_instance.item_id
-		elif temp_instance.has_meta("item_id"):
-			item_id = temp_instance.get_meta("item_id")
-		
-		temp_instance.queue_free()
-		
-		if not item_id.is_empty():
-			_item_scene_map[item_id] = scene
-			print("ItemManager: Mapped item_id '", item_id, "' to scene")
+
+		if temp.has_method("get_item_id"):
+			item_id = String(temp.get_item_id())
+		elif "item_id" in temp:
+			item_id = String(temp.item_id)
+		elif temp.has_meta("item_id"):
+			item_id = String(temp.get_meta("item_id"))
+
+		temp.queue_free()
+
+		if item_id.is_empty():
+			push_warning("ItemManager: Item scene has no item_id: " + scene_ps.resource_path)
 		else:
-			push_warning("ItemManager: Item scene has no item_id: ", scene.resource_path)
-	
-	print("ItemManager: Built scene map with ", _item_scene_map.size(), " items")
+			_item_scene_map[item_id] = scene_ps
+
 
 func get_all_item_scenes() -> Array[PackedScene]:
 	if not spawn_catalog:
@@ -98,169 +112,196 @@ func get_item_scene(item_id: String) -> PackedScene:
 	return _item_scene_map.get(item_id, null)
 
 # NEW: Spawn an item instance
+## spawn_item_instance
+## Purpose: Instantiate an item by ID and place it in the world.
+## @param item_id: String
+## @param position: Vector3
+## @param parent: Node or null to use current_scene
+## @return Node3D or null
 func spawn_item_instance(item_id: String, position: Vector3, parent: Node = null) -> Node3D:
-	"""
-	Spawn an item in the world
-	
-	@param item_id: Item to spawn
-	@param position: World position
-	@param parent: Parent node (defaults to current scene)
-	@return: Spawned item instance or null
-	"""
-	var scene = get_item_scene(item_id)
-	if not scene:
-		push_error("ItemManager: No scene found for item_id: ", item_id)
+	var ps: PackedScene = get_item_scene(item_id)
+	if ps == null:
+		push_error("ItemManager: No scene found for item_id: " + item_id)
 		return null
-	
-	var instance = scene.instantiate()
-	if not instance:
-		push_error("ItemManager: Failed to instantiate item: ", item_id)
-		return null
-	
-	# Add to scene
-	if parent:
-		parent.add_child(instance)
-	else:
-		get_tree().current_scene.add_child(instance)
-	
-	# Set position
-	if instance is Node3D:
-		instance.global_position = position
-	
-	# Ensure metadata is set
-	instance.set_meta("item_id", item_id)
-	
-	return instance
 
+	var inst: Node = ps.instantiate()
+	if inst == null:
+		push_error("ItemManager: Failed to instantiate item: " + item_id)
+		return null
+
+	var host: Node = parent
+	if host == null:
+		host = get_tree().current_scene
+	host.add_child(inst)
+
+	if inst is Node3D:
+		var n3d: Node3D = inst as Node3D
+		n3d.global_position = position
+
+	inst.set_meta("item_id", item_id)
+	return inst as Node3D
+
+## _load_item_definitions
+## Purpose: Load item definitions from JSON; if unavailable in export, fall back to catalog-only.
+## @return void.
 func _load_item_definitions() -> void:
-	"""Load item definitions from JSON data file"""
-	if not FileAccess.file_exists(ITEM_DATA_PATH):
-		push_error("ItemManager: items.json not found at " + ITEM_DATA_PATH)
-		return
-	
-	var file := FileAccess.open(ITEM_DATA_PATH, FileAccess.READ)
-	if not file:
-		push_error("ItemManager: Could not open items.json")
-		return
-	
-	var json := JSON.new()
-	var parse_result := json.parse(file.get_as_text())
-	file.close()
-	
-	if parse_result != OK:
-		push_error("ItemManager: Failed to parse items.json")
-		return
-	
-	_process_item_data(json.data)
+	_item_definitions.clear()
+	_item_effects.clear()
 
+	# Reset categories explicitly
+	_item_categories["notes"] = []
+	_item_categories["items"] = []
+
+	if not FileAccess.file_exists(ITEM_DATA_PATH):
+		push_warning("ItemManager: items.json not found at " + ITEM_DATA_PATH + " (export?). Falling back to catalog-only spawn.")
+		return
+
+	var file: FileAccess = FileAccess.open(ITEM_DATA_PATH, FileAccess.READ)
+	if file == null:
+		push_error("ItemManager: Could not open items.json at " + ITEM_DATA_PATH)
+		return
+
+	var txt: String = file.get_as_text()
+	file.close()
+
+	var json := JSON.new()
+	var parse_code: int = json.parse(txt)
+	if parse_code != OK:
+		push_error("ItemManager: Failed to parse items.json, code=" + str(parse_code))
+		return
+
+	if typeof(json.data) != TYPE_DICTIONARY:
+		push_error("ItemManager: items.json root is not a Dictionary.")
+		return
+
+	_process_item_data(json.data as Dictionary)
+
+
+## _process_item_data
+## Purpose: Ingest JSON into definitions, categories, and effects.
+## @param data: Dictionary parsed from items.json
+## @return void.
 func _process_item_data(data: Dictionary) -> void:
-	"""
-	Process loaded item data into internal structures
-	
-	@param data: Parsed JSON data dictionary
-	"""
-	for item in data.get("items", []):
-		var item_id: String = item.get("id", "")
+	if not data.has("items"):
+		return
+
+	var items_arr: Array = data["items"]
+	for entry in items_arr:
+		if typeof(entry) != TYPE_DICTIONARY:
+			continue
+
+		var item: Dictionary = entry
+		var item_id: String = String(item.get("id", ""))
 		if item_id.is_empty():
 			continue
-		
-		_item_definitions[item_id] = item
-		
-		var category: String = item.get("category", "")
-		if category in _item_categories:
-			_item_categories[category].append(item_id)
-		
-		_item_effects[item_id] = item.get("effects", {})
-	
-	_unlocked_notes = _item_categories.notes.slice(0, min(3, _item_categories.notes.size()))
 
+		_item_definitions[item_id] = item.duplicate(true)
+
+		var category: String = String(item.get("category", ""))
+		if _item_categories.has(category):
+			var cat_list: Array = _item_categories[category]
+			if item_id not in cat_list:
+				cat_list.append(item_id)
+				_item_categories[category] = cat_list
+
+		_item_effects[item_id] = (item.get("effects", {}) as Dictionary).duplicate(true)
+
+	# initial unlocked notes
+	var notes_list: Array = _item_categories.get("notes", []) as Array
+	var initial_count: int = min(3, notes_list.size())
+	_unlocked_notes = notes_list.slice(0, initial_count)
+
+
+## can_item_spawn
+## Purpose: Validate whether an item may spawn given context and current/save state.
+## @param item_id: String
+## @param context: Dictionary (tile_position, is_permanent, etc.)
+## @return bool
 func can_item_spawn(item_id: String, context: Dictionary) -> bool:
-	"""
-	Check if item can spawn in given context
-	
-	@param item_id: Item identifier to check
-	@param context: Spawning context with tile_position, is_permanent, etc.
-	@return: True if item can spawn
-	"""
-	# NEW: First check if we actually have a scene for this item
+	# Must have a scene to spawn.
 	if not _item_scene_map.has(item_id):
 		return false
-	
-	# Check if already collected in THIS RUN
-	var collected_items: Array = _state_manager.get_state("collected_items")
+
+	# Treat "notes" as a special category only if JSON loaded them.
+	var notes_list: Array = _item_categories.get("notes", []) as Array
+	var is_note: bool = item_id in notes_list
+
+	# Current-run collected list.
+	var collected_items: Array = _state_manager.get_state("collected_items") as Array
 	if collected_items == null:
 		collected_items = []
-	
-	# Notes can only be collected once per run
-	if item_id in _item_categories.notes:
+
+	if is_note:
 		if item_id in collected_items:
 			return false
-		# Also check if note is unlocked
 		if item_id not in _unlocked_notes:
 			return false
 	else:
-		# Non-note items: check if already collected this run
 		if item_id in collected_items:
 			return false
-	
-	# Special items that shouldn't spawn randomly
-	if item_id in ["hollow_key", "flashlight", "journal"]:
+
+	# Never random-spawn these.
+	if item_id == "hollow_key" or item_id == "flashlight" or item_id == "journal":
 		return false
-	
-	# Check if puzzle item has been used (persistent across runs)
-	if SaveManager.has_method("is_puzzle_item_used"):
+
+	# Persistent save checks (optional).
+	if SaveManager != null and SaveManager.has_method("is_puzzle_item_used"):
 		if SaveManager.is_puzzle_item_used(item_id):
 			return false
-	
-	# Check if this item belongs to a completed puzzle
-	var item_info = get_item_info(item_id)
-	if item_info.has("puzzle_id"):
-		var puzzle_id = item_info.get("puzzle_id")
-		if SaveManager.has_method("is_puzzle_completed"):
-			if SaveManager.is_puzzle_completed(puzzle_id):
-				print("ItemManager: ", item_id, " cannot spawn - puzzle ", puzzle_id, " is completed")
-				return false
-	
+
+	var item_info: Dictionary = get_item_info(item_id)
+	if item_info.has("puzzle_id") and SaveManager != null and SaveManager.has_method("is_puzzle_completed"):
+		var puzzle_id: String = String(item_info.get("puzzle_id", ""))
+		if not puzzle_id.is_empty() and SaveManager.is_puzzle_completed(puzzle_id):
+			print("ItemManager: ", item_id, " cannot spawn - puzzle ", puzzle_id, " is completed")
+			return false
+
 	return true
 
+## get_spawnable_items
+## Purpose: Build a weighted list of items that can spawn, with catalog fallback if JSON missing.
+## @param context: Dictionary with spawn context.
+## @return Array of { "item_id": String, "weight": float }.
 func get_spawnable_items(context: Dictionary) -> Array[Dictionary]:
-	"""
-	Get weighted list of items that can spawn
-	
-	@param context: Spawning context
-	@return: Array of {item_id: String, weight: float} dictionaries
-	"""
 	var spawnable: Array[Dictionary] = []
-	
-	for item_id in _item_definitions:
-		if can_item_spawn(item_id, context):
-			spawnable.append({"item_id": item_id, "weight": 1})
-	
+	var candidate_ids: Array[String] = []
+
+	# Prefer JSON list; if empty (export miss), fall back to scenes we actually have.
+	if _item_definitions.size() > 0:
+		for k in _item_definitions.keys():
+			candidate_ids.append(String(k))
+	else:
+		for k in _item_scene_map.keys():
+			candidate_ids.append(String(k))
+
+	for id_str: String in candidate_ids:
+		if can_item_spawn(id_str, context):
+			var entry := {"item_id": id_str, "weight": 1.0}
+			spawnable.append(entry)
+
 	return spawnable
 
+## select_random_item
+## Purpose: Pick one entry from a weighted list.
+## @param spawnable_items: Array of { "item_id": String, "weight": float }.
+## @return Item ID or "".
 func select_random_item(spawnable_items: Array[Dictionary]) -> String:
-	"""
-	Select random item from list
-	
-	@param spawnable_items: Array of {item_id, weight} dictionaries
-	@return: Selected item ID or empty string if none available
-	"""
 	if spawnable_items.is_empty():
 		return ""
-	
-	var total_weight := 0.0
-	for item_data in spawnable_items:
-		total_weight += item_data.weight
-	
-	var roll := randf() * total_weight
-	var current_weight := 0.0
-	
-	for item_data in spawnable_items:
-		current_weight += item_data.weight
-		if roll <= current_weight:
-			return item_data.item_id
-	
-	return spawnable_items[0].item_id
+
+	var total_weight: float = 0.0
+	for row in spawnable_items:
+		total_weight += float(row.get("weight", 1.0))
+
+	var roll: float = randf() * total_weight
+	var accum: float = 0.0
+
+	for row2 in spawnable_items:
+		accum += float(row2.get("weight", 1.0))
+		if roll <= accum:
+			return String(row2.get("item_id", ""))
+
+	return String(spawnable_items[0].get("item_id", ""))
 
 func apply_item_effects(item_id: String) -> void:
 	"""

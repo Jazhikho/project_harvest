@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpawnCatalog" load_steps=13 format=3 uid="uid://b7375yaxa6php"]
+[gd_resource type="Resource" script_class="SpawnCatalog" load_steps=16 format=3 uid="uid://b7375yaxa6php"]
 
 [ext_resource type="Script" uid="uid://dlxejxpqfojiy" path="res://data/SpawnCatalog.gd" id="1_kbaq4"]
 [ext_resource type="PackedScene" uid="uid://c5rjon02p04c" path="res://scenes/entities/effigy.tscn" id="1_wy5ud"]
@@ -12,9 +12,12 @@
 [ext_resource type="PackedScene" uid="uid://b2xiofalti8wi" path="res://scenes/items/symbol_ticket.tscn" id="9_8laut"]
 [ext_resource type="PackedScene" uid="uid://iktgwd2fp8q8" path="res://scenes/items/symbol_watch.tscn" id="10_847mp"]
 [ext_resource type="PackedScene" uid="uid://ce68ln22th61j" path="res://scenes/misc/key.tscn" id="11_b11ws"]
+[ext_resource type="PackedScene" uid="uid://du5jyfxdllxxw" path="res://scenes/misc/flashlight.tscn" id="12_kl1yn"]
+[ext_resource type="PackedScene" uid="uid://cfysh2178e3rc" path="res://scenes/misc/backpack.tscn" id="12_qx3ue"]
+[ext_resource type="PackedScene" uid="uid://chwvk4ss5vpx3" path="res://scenes/misc/journal.tscn" id="13_yt0hw"]
 
 [resource]
 script = ExtResource("1_kbaq4")
-item_scenes = Array[PackedScene]([ExtResource("2_qx3ue"), ExtResource("3_xaxqc"), ExtResource("4_kl1yn"), ExtResource("5_yt0hw"), ExtResource("6_sgvry"), ExtResource("7_ybxci"), ExtResource("8_wkdlw"), ExtResource("9_8laut"), ExtResource("10_847mp"), ExtResource("11_b11ws")])
+item_scenes = Array[PackedScene]([ExtResource("2_qx3ue"), ExtResource("3_xaxqc"), ExtResource("4_kl1yn"), ExtResource("5_yt0hw"), ExtResource("6_sgvry"), ExtResource("7_ybxci"), ExtResource("8_wkdlw"), ExtResource("9_8laut"), ExtResource("10_847mp"), ExtResource("12_qx3ue"), ExtResource("12_kl1yn"), ExtResource("13_yt0hw"), ExtResource("11_b11ws")])
 enemy_scenes = Array[PackedScene]([ExtResource("1_wy5ud")])
 metadata/_custom_type_script = "uid://dlxejxpqfojiy"
