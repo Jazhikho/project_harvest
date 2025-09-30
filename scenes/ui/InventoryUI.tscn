@@ -60,7 +60,9 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-columns = 5
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 6
 
 [node name="CloseButton" type="Button" parent="MainPanel/VBoxContainer"]
 layout_mode = 2
@@ -98,7 +100,6 @@ size_flags_vertical = 3
 stretch = true
 
 [node name="Viewport" type="SubViewport" parent="InspectPanel/VBoxContainer/ViewportContainer"]
-transparent_bg = false
 handle_input_locally = false
 size = Vector2i(2, 2)
 render_target_update_mode = 0

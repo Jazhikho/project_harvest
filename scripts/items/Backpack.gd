@@ -47,7 +47,7 @@ func _setup_interaction_area() -> void:
 	
 	# Set up collision layers
 	_interaction_area.collision_layer = 0
-	_interaction_area.collision_mask = 1  # Detect player layer
+	_interaction_area.collision_mask = 1 # Detect player layer
 	
 	# Connect signals
 	_interaction_area.body_entered.connect(_on_body_entered)
@@ -102,7 +102,7 @@ func interact() -> void:
 	
 	for item_id in backpack_items:
 		if _player_inventory.has_method("add_item"):
-			var success = _player_inventory.add_item(item_id)
+			var success = _player_inventory.add_item(item_id, false) # Don't apply effects when restoring
 			if success:
 				items_collected += 1
 				print("Backpack: Returned ", item_id, " to player")
@@ -124,7 +124,7 @@ func interact() -> void:
 		_save_manager.clear_backpack_inventory()
 		
 		if _message_bus:
-			_message_bus.emit_event("notification_requested", 
+			_message_bus.emit_event("notification_requested",
 				["Collected %d items from backpack" % items_collected, 3.0, 0])
 		
 		# Play collection effect and remove backpack
@@ -132,7 +132,7 @@ func interact() -> void:
 	else:
 		# Some items couldn't be collected (inventory full?)
 		if _message_bus:
-			_message_bus.emit_event("notification_requested", 
+			_message_bus.emit_event("notification_requested",
 				["Collected %d items, %d remain (inventory full?)" % [items_collected, items_failed.size()], 3.0, 1])
 		
 		print("Backpack: ", items_failed.size(), " items remain due to full inventory")

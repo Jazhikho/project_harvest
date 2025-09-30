@@ -8,12 +8,13 @@ var control_scheme = "keyboard"
 # Input action mappings
 const INPUT_ACTIONS = {
 	"move_forward": "W",
-	"move_back": "S", 
+	"move_back": "S",
 	"move_left": "A",
 	"move_right": "D",
 	"toggle_flashlight": "F",
 	"interact": "E",
-	"inventory": "Tab",
+	"inventory": "I",
+	"journal": "J",
 	"pause": "Escape"
 }
 
@@ -55,7 +56,8 @@ func get_control_hint(action: String) -> String:
 			"sprint": "Shift",
 			"interact": "E",
 			"flashlight": "F",
-			"inventory": "Tab",
+			"inventory": "I",
+			"journal": "J",
 			"pause": "Escape"
 		},
 		"controller": {
@@ -64,6 +66,7 @@ func get_control_hint(action: String) -> String:
 			"interact": "A",
 			"flashlight": "X",
 			"inventory": "Select",
+			"journal": "Select",
 			"pause": "Start"
 		}
 	}

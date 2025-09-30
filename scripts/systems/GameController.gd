@@ -4,12 +4,14 @@ extends Node3D
 @onready var inventory_ui = $UI/InventoryUI
 @onready var fade_rect = $TransitionLayer/FadeRect
 @onready var animation_player = $TransitionLayer/AnimationPlayer
+@onready var journal_ui = $UI/JournalUI
+@onready var control_hints = $UI/ControlsUI
 
 var game_paused = false
 var inventory_open = false
+var journal_open = false
 
 func _ready():
-	
 	# Connect signals
 	if pause_menu:
 		pause_menu.resume_requested.connect(_on_resume_requested)
@@ -18,6 +20,9 @@ func _ready():
 	
 	if inventory_ui:
 		inventory_ui.closed.connect(_on_inventory_closed)
+
+	if journal_ui:
+		journal_ui.closed.connect(_on_journal_closed)
 	
 	# IMPORTANT: Trigger initial tile generation after scene is fully loaded
 	call_deferred("_initialize_game")
@@ -35,7 +40,6 @@ func _notification(what: int) -> void:
 		get_tree().quit()
 
 func _initialize_game():
-	
 	var tile_manager = get_node_or_null("/root/TileManager")
 	if tile_manager and tile_manager.has_method("initialize_game_tiles"):
 		tile_manager.initialize_game_tiles()
@@ -67,8 +71,12 @@ func _input(event):
 		toggle_inventory()
 		return
 	
+	if event.is_action_pressed("journal") and not game_paused:
+		toggle_journal()
+		return
+	
 	# Only allow pause if inventory isn't open
-	if event.is_action_pressed("ui_cancel") and not inventory_open and not game_paused:
+	if event.is_action_pressed("ui_cancel") and not inventory_open and not journal_open and not game_paused:
 		toggle_pause()
 
 func toggle_pause():
@@ -94,9 +102,22 @@ func toggle_inventory():
 
 func _on_resume_requested():
 	toggle_pause()
+	
+func toggle_journal():
+	journal_open = !journal_open
+	get_tree().paused = journal_open
+	
+	if journal_open:
+		journal_ui.show_journal()
+	else:
+		journal_ui.hide_journal()
 
 func _on_inventory_closed():
 	inventory_open = false
+	get_tree().paused = false
+
+func _on_journal_closed():
+	journal_open = false
 	get_tree().paused = false
 
 func _on_main_menu_requested():
@@ -148,7 +169,6 @@ func _on_player_died(cause: String, death_position: Vector2i, death_data: Dictio
 	trigger_death(cause)
 
 func trigger_death(death_type: String):
-	
 	# Make sure game isn't paused
 	get_tree().paused = false
 	

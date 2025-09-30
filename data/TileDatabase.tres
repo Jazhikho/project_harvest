@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="TileDatabase" load_steps=18 format=3 uid="uid://55y4o3um30jb"]
+
+[ext_resource type="PackedScene" uid="uid://d1a2b3c4d5e6f" path="res://scenes/tiles/adjacent_doors_tile1.tscn" id="1_fpblb"]
+[ext_resource type="Script" uid="uid://h72gr45lnh34" path="res://data/TileCatalog.gd" id="1_oj56e"]
+[ext_resource type="PackedScene" uid="uid://b2o6a4idq4d0" path="res://scenes/tiles/adjacent_doors_tile2.tscn" id="2_q1ixp"]
+[ext_resource type="PackedScene" uid="uid://csvqdq4bujhxi" path="res://scenes/tiles/cross_tile0.tscn" id="3_thfe5"]
+[ext_resource type="PackedScene" uid="uid://o0xmcoxclbgy" path="res://scenes/tiles/cross_tile1.tscn" id="4_v4ts5"]
+[ext_resource type="PackedScene" uid="uid://f21wglho4auq" path="res://scenes/tiles/cross_tile2.tscn" id="5_u5t83"]
+[ext_resource type="PackedScene" uid="uid://dyia370e7ln54" path="res://scenes/tiles/cross_tile3.tscn" id="6_8w1ns"]
+[ext_resource type="PackedScene" uid="uid://dw6ialkbegvv" path="res://scenes/tiles/cross_tile4.tscn" id="7_661ih"]
+[ext_resource type="PackedScene" uid="uid://baru8fi3bxs0t" path="res://scenes/tiles/opposite_doors_tile1.tscn" id="8_kacjh"]
+[ext_resource type="PackedScene" uid="uid://1uvr70ewwsnf" path="res://scenes/tiles/opposite_doors_tile2.tscn" id="9_wkob4"]
+[ext_resource type="PackedScene" uid="uid://kygn3icjrpde" path="res://scenes/tiles/three_door_tile3.tscn" id="10_ibih3"]
+[ext_resource type="PackedScene" uid="uid://d4l10horut8oj" path="res://scenes/tiles/three_door_tile4.tscn" id="11_ih5hy"]
+[ext_resource type="PackedScene" uid="uid://c1whv1q6ecsie" path="res://scenes/tiles/three_door_tile5.tscn" id="12_l3nte"]
+[ext_resource type="PackedScene" uid="uid://8vap4fxs1jin" path="res://scenes/tiles/crows_parliament.tscn" id="13_e0q3r"]
+[ext_resource type="PackedScene" uid="uid://brjqpebl0t14f" path="res://scenes/tiles/Final_Gate.tscn" id="14_qdhfu"]
+[ext_resource type="PackedScene" uid="uid://cv8rrbhuahlg0" path="res://scenes/tiles/the_watching_stones.tscn" id="15_xdr4q"]
+[ext_resource type="PackedScene" uid="uid://bvgl3xwausiay" path="res://scenes/tiles/whispering_hollow.tscn" id="16_y0qe8"]
+
+[resource]
+script = ExtResource("1_oj56e")
+normal_tile_scenes = Array[PackedScene]([ExtResource("1_fpblb"), ExtResource("2_q1ixp"), ExtResource("3_thfe5"), ExtResource("4_v4ts5"), ExtResource("5_u5t83"), ExtResource("6_8w1ns"), ExtResource("7_661ih"), ExtResource("8_kacjh"), ExtResource("9_wkob4"), ExtResource("10_ibih3"), ExtResource("11_ih5hy"), ExtResource("12_l3nte")])
+permanent_tile_scenes = Array[PackedScene]([ExtResource("13_e0q3r"), ExtResource("14_qdhfu"), ExtResource("15_xdr4q"), ExtResource("16_y0qe8")])
+metadata/_custom_type_script = "uid://h72gr45lnh34"

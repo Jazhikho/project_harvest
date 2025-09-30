@@ -6,6 +6,9 @@ var _message_bus: Node
 var _item_manager: Node
 var _state_manager: Node
 
+@onready var _items: Node = get_node_or_null("/root/ItemManager")
+@onready var _enemies: Node = get_node_or_null("/root/EnemyManager")
+
 var _spawn_history := {}
 
 const ITEM_SPAWN_CHANCE := 0.10  # 10% chance per spawn point
@@ -13,6 +16,7 @@ const MAX_ITEMS_PER_TILE := 4
 
 func _ready() -> void:
 	name = "SpawnManager"
+	_validate_deps()
 	add_to_group("core_systems")
 	call_deferred("_initialize")
 
@@ -27,6 +31,12 @@ func _initialize() -> void:
 		return
 	
 	_connect_to_events()
+	
+func _validate_deps() -> void:
+	if _items == null:
+		push_error("SpawnManager: ItemManager not found.")
+	if _enemies == null:
+		push_error("SpawnManager: EnemyManager not found.")
 
 func process_tile_spawning(tile_node: Node3D, tile_position: Vector2i) -> Dictionary:
 	"""
@@ -425,7 +435,6 @@ func _spawn_entities(tile_node: Node3D, context: Dictionary, spawn_points: Array
 	
 	if spawn_points.is_empty():
 		return spawned_entities
-	
 	
 	# Get current game state
 	var current_sanity: int = _state_manager.get_state("sanity")

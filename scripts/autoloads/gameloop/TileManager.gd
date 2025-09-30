@@ -1,6 +1,7 @@
 extends Node
 ## TileManager - Handles tile generation, connections, and cleanup
 ## State management delegated to TileStateManager
+@export var tile_database: TileDatabase = preload("res://data/TileDatabase.tres")
 
 var _message_bus: Node
 var _state_manager: Node
@@ -16,10 +17,10 @@ var _puzzle_tiles: Dictionary = {} # Vector2i -> puzzle_id
 var _established_connections: Dictionary = {} # "pos1_pos2" -> true
 
 # Tile scenes
-var _normal_tiles: Array[String] = [] # Non-permanent tiles for random spawning
-var _permanent_tiles_scenes: Array[String] = [] # Permanent tile scenes
-var _start_tile_scene: String = "res://scenes/tiles/start_tile.tscn"
-var _final_tile_scene: String = "res://scenes/tiles/final_event_tile.tscn"
+var _normal_tiles: Array[PackedScene] = [] # Changed from Array[String]
+var _permanent_tiles_scenes: Array[PackedScene] = [] # Changed from Array[String]
+var _start_tile_scene: PackedScene = preload("res://scenes/tiles/start_tile.tscn")
+
 
 # Initialization flag
 var _start_tile_initialized: bool = false
@@ -58,91 +59,65 @@ func _initialize() -> void:
 	# DON'T spawn start tile here - wait for game scene
 
 func _load_available_tiles() -> void:
-	"""Load and categorize tile scenes into permanent and normal tiles"""
+	"""Load and categorize tile scenes from database"""
 	_normal_tiles.clear()
 	_permanent_tiles_scenes.clear()
 	
-	var tiles_dir: DirAccess = DirAccess.open("res://scenes/tiles/")
-	if not tiles_dir:
-		push_error("TileManager: Could not open tiles directory")
+	if not tile_database:
+		push_error("TileManager: No tile database assigned!")
 		return
 	
-	tiles_dir.list_dir_begin()
-	var file_name: String = tiles_dir.get_next()
+	# Process normal tiles
+	for tile_scene in tile_database.normal_tile_scenes:
+		if tile_scene:
+			_normal_tiles.append(tile_scene)
 	
-	while file_name != "":
-		if file_name.ends_with(".tscn") and file_name != "start_tile.tscn" and file_name != "final_event_tile.tscn":
-			var full_path: String = "res://scenes/tiles/" + file_name
+	# Process permanent tiles - check which puzzles are completed
+	for tile_scene in tile_database.permanent_tile_scenes:
+		if not tile_scene:
+			continue
 			
-			# Load scene to check if it's permanent
-			var tile_scene: PackedScene = load(full_path) as PackedScene
-			if tile_scene:
-				var temp_instance: Node3D = tile_scene.instantiate() as Node3D
-				if temp_instance:
-					var is_permanent: bool = false
-					if temp_instance.has_method("is_tile_permanent"):
-						is_permanent = temp_instance.is_tile_permanent()
-					
-					if is_permanent:
-						_permanent_tiles_scenes.append(full_path)
-						print("TileManager: Loaded permanent tile: ", file_name)
-					else:
-						_normal_tiles.append(full_path)
-					
-					temp_instance.queue_free()
-		
-		file_name = tiles_dir.get_next()
+		# Check if this permanent tile's puzzle is already completed
+		var temp_instance: Node3D = tile_scene.instantiate() as Node3D
+		if temp_instance:
+			var is_completed = false
+			
+			if temp_instance.has_method("get_puzzle_id"):
+				var puzzle_id = temp_instance.get_puzzle_id()
+				if not puzzle_id.is_empty() and SaveManager.has_method("is_puzzle_completed"):
+					is_completed = SaveManager.is_puzzle_completed(puzzle_id)
+			
+			temp_instance.queue_free()
+			
+			if not is_completed:
+				_permanent_tiles_scenes.append(tile_scene)
 	
-	tiles_dir.list_dir_end()
-	
-	print("TileManager: Loaded ", _normal_tiles.size(), " normal tiles and ", 
+	print("TileManager: Loaded ", _normal_tiles.size(), " normal tiles and ",
 		  _permanent_tiles_scenes.size(), " permanent tiles")
 	
 	# Pre-assign permanent tiles to positions
 	_assign_permanent_tile_positions()
 	
 func _assign_permanent_tile_positions() -> void:
-	"""
-	Pre-assign permanent tiles to specific grid positions
-	This runs once at initialization to determine where permanent tiles will appear
-	Skips tiles whose puzzles are already completed
-	"""
+	"""Pre-assign permanent tiles to specific grid positions"""
 	_permanent_tile_assignments.clear()
 	
 	if _permanent_tiles_scenes.is_empty():
 		return
 	
 	# Filter out permanent tiles whose puzzles are completed
-	var available_permanent_tiles: Array[String] = []
-	for scene_path in _permanent_tiles_scenes:
-		# Load the tile to check its puzzle_id
-		var tile_scene: PackedScene = load(scene_path) as PackedScene
+	var available_permanent_tiles: Array[PackedScene] = []
+	for tile_scene in _permanent_tiles_scenes:
 		if tile_scene:
-			var temp_tile = tile_scene.instantiate()
-			var is_completed = false
-			
-			if temp_tile.has_method("get_puzzle_id"):
-				var puzzle_id = temp_tile.get_puzzle_id()
-				if not puzzle_id.is_empty():
-					if SaveManager.has_method("is_puzzle_completed"):
-						is_completed = SaveManager.is_puzzle_completed(puzzle_id)
-						if is_completed:
-							print("TileManager: Skipping permanent tile ", scene_path.get_file(), 
-								  " - puzzle ", puzzle_id, " is completed")
-			
-			temp_tile.queue_free()
-			
-			if not is_completed:
-				available_permanent_tiles.append(scene_path)
+			available_permanent_tiles.append(tile_scene)
 	
 	if available_permanent_tiles.is_empty():
-		print("TileManager: No permanent tiles to assign (all puzzles completed or none available)")
+		print("TileManager: No permanent tiles to assign")
 		return
 	
 	# Generate valid spawn positions (outside forbidden zone)
 	var valid_positions: Array[Vector2i] = []
 	
-	# Generate positions in the 7x7 grid, excluding forbidden zone (-1,-1) to (1,1)
 	for x in range(-3, 4):
 		for y in range(-3, 4):
 			var pos: Vector2i = Vector2i(x, y)
@@ -152,16 +127,13 @@ func _assign_permanent_tile_positions() -> void:
 	# Shuffle positions for randomness
 	valid_positions.shuffle()
 	
-	# Assign each permanent tile to a position
+	# Assign each permanent tile to a position (storing PackedScene)
 	var assignment_count: int = min(available_permanent_tiles.size(), valid_positions.size())
 	for i in range(assignment_count):
 		var pos: Vector2i = valid_positions[i]
-		var scene_path: String = available_permanent_tiles[i]
-		_permanent_tile_assignments[pos] = scene_path
-		print("TileManager: Assigned permanent tile ", scene_path.get_file(), " to position ", pos)
-	
-	if available_permanent_tiles.size() > valid_positions.size():
-		push_warning("TileManager: Not enough valid positions for all permanent tiles!")
+		var tile_scene: PackedScene = available_permanent_tiles[i]
+		_permanent_tile_assignments[pos] = tile_scene
+		print("TileManager: Assigned permanent tile to position ", pos)
 
 func initialize_game_tiles() -> void:
 	"""Called when the game scene is actually loaded"""
@@ -227,30 +199,39 @@ func _spawn_start_tile() -> void:
 	_message_bus.emit_event("tile_generated", [start_tile, Vector2i(0, 0), {}])
 	
 
-func _create_tile_from_scene(scene_path: String, grid_pos: Vector2i) -> Node3D:
+func _create_tile_from_scene(scene: Variant, grid_pos: Vector2i) -> Node3D:
 	"""
-	Create tile instance from scene file
+	Create tile instance from scene file or PackedScene
 	
-	@param scene_path: Path to tile scene file
+	@param scene: PackedScene or path to tile scene file
 	@param grid_pos: Grid position for the tile
 	@return: Created tile node or null if failed
 	"""
-	var tile_scene: PackedScene = load(scene_path) as PackedScene
-	if not tile_scene:
-		push_error("TileManager: Failed to load scene: " + scene_path)
+	var tile_scene: PackedScene
+	
+	# Handle both PackedScene and String path
+	if scene is PackedScene:
+		tile_scene = scene
+	elif scene is String:
+		tile_scene = load(scene) as PackedScene
+		if not tile_scene:
+			push_error("TileManager: Failed to load scene: " + scene)
+			return null
+	else:
+		push_error("TileManager: Invalid scene type")
 		return null
 	
 	var tile_instance: Node3D = tile_scene.instantiate() as Node3D
 	if not tile_instance:
-		push_error("TileManager: Failed to instantiate scene: " + scene_path)
+		push_error("TileManager: Failed to instantiate scene")
 		return null
 	
 	tile_instance.set_meta("grid_position", grid_pos)
-	tile_instance.set_meta("scene_path", scene_path)
+	tile_instance.set_meta("scene_resource", tile_scene) # Store the PackedScene reference
 	tile_instance.set_meta("world_map_pos", grid_pos)
 	
 	# For start tile, explicitly ensure it's not permanent
-	if scene_path == _start_tile_scene:
+	if tile_scene == _start_tile_scene:
 		if tile_instance.has_method("set") and tile_instance.get("is_permanent") != null:
 			tile_instance.set("is_permanent", false)
 	
@@ -302,7 +283,7 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 		var wrapped_connecting_pos: Vector2i = _apply_world_wrapping(raw_connecting_pos)
 		var did_wrap: bool = (raw_connecting_pos != wrapped_connecting_pos)
 		
-		print("TileManager: Checking connection from ", source_pos, " ", _get_direction_name(door_direction), 
+		print("TileManager: Checking connection from ", source_pos, " ", _get_direction_name(door_direction),
 			  " to raw: ", raw_connecting_pos, " wrapped: ", wrapped_connecting_pos)
 		
 		# Skip if connection already established
@@ -324,8 +305,8 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 			_active_tiles.erase(wrapped_connecting_pos)
 		
 		# Check for pre-assigned permanent tile at this position
-		var permanent_scene_at_pos: String = _get_permanent_tile_at_position(wrapped_connecting_pos)
-		if not permanent_scene_at_pos.is_empty():
+		var permanent_scene_at_pos: PackedScene = _get_permanent_tile_at_position(wrapped_connecting_pos)
+		if permanent_scene_at_pos != null:
 			var permanent_tile: Node3D = _spawn_permanent_tile(permanent_scene_at_pos, wrapped_connecting_pos, source_tile, door_direction)
 			if permanent_tile:
 				_establish_connection(source_pos, wrapped_connecting_pos)
@@ -336,10 +317,10 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 			if _active_tiles.has(Vector2i(0, 0)) and is_instance_valid(_active_tiles[Vector2i(0, 0)]):
 				var tile_at_origin: Node3D = _active_tiles[Vector2i(0, 0)]
 				var scene_path: String = tile_at_origin.get_meta("scene_path", "")
-				if scene_path == _start_tile_scene or tile_at_origin.name == "StartTile":
-					_establish_connection(source_pos, wrapped_connecting_pos)
-					_tile_state_manager.set_tile_state(wrapped_connecting_pos, _tile_state_manager.TileState.CONNECTING)
-					continue
+				# if scene_path == _start_tile_scene or tile_at_origin.name == "StartTile":
+				# 	_establish_connection(source_pos, wrapped_connecting_pos)
+				# 	_tile_state_manager.set_tile_state(wrapped_connecting_pos, _tile_state_manager.TileState.CONNECTING)
+				# 	continue
 		
 		# Create random normal tile
 		var new_tile: Node3D = _create_random_tile(wrapped_connecting_pos)
@@ -369,7 +350,7 @@ func _rotate_permanent_tile_to_connect(permanent_tile: Node3D, approaching_from_
 	# Calculate the opposite direction (where permanent tile needs a door)
 	var required_door_direction: int = _get_opposite_direction(approaching_from_direction)
 	
-	print("TileManager: Need to rotate permanent tile ", permanent_tile.name, 
+	print("TileManager: Need to rotate permanent tile ", permanent_tile.name,
 		  " to have door facing ", _get_direction_name(required_door_direction))
 	
 	# Get the permanent tile's available doors in their ORIGINAL orientations
@@ -391,7 +372,7 @@ func _rotate_permanent_tile_to_connect(permanent_tile: Node3D, approaching_from_
 				if rotated_direction == required_door_direction:
 					best_rotation = rotation_steps
 					door_found = true
-					print("TileManager: Found door at ", _get_direction_name(check_direction), 
+					print("TileManager: Found door at ", _get_direction_name(check_direction),
 						  " that needs ", rotation_steps, " rotations")
 					break
 		
@@ -405,7 +386,7 @@ func _rotate_permanent_tile_to_connect(permanent_tile: Node3D, approaching_from_
 			current_rotation = permanent_tile.get_current_rotation()
 		
 		if current_rotation != best_rotation:
-			print("TileManager: Rotating permanent tile from rotation ", current_rotation, 
+			print("TileManager: Rotating permanent tile from rotation ", current_rotation,
 				  " to ", best_rotation)
 			
 			if permanent_tile.has_method("set_tile_rotation"):
@@ -413,7 +394,7 @@ func _rotate_permanent_tile_to_connect(permanent_tile: Node3D, approaching_from_
 			else:
 				permanent_tile.rotation.y = best_rotation * PI / 2
 	else:
-		push_warning("TileManager: Could not find valid rotation for permanent tile ", 
+		push_warning("TileManager: Could not find valid rotation for permanent tile ",
 					 permanent_tile.name, " to connect from ", _get_direction_name(approaching_from_direction))
 
 func _is_connection_established(pos1: Vector2i, pos2: Vector2i) -> bool:
@@ -440,22 +421,13 @@ func _establish_connection(pos1: Vector2i, pos2: Vector2i) -> void:
 	_established_connections[key] = true
 
 func _create_random_tile(grid_pos: Vector2i) -> Node3D:
-	"""
-	Create a random normal (non-permanent) tile at position
-	
-	@param grid_pos: Grid position for tile
-	@return: Created tile or null
-	"""
+	"""Create a random normal (non-permanent) tile at position"""
 	if _normal_tiles.is_empty():
 		push_error("TileManager: No normal tile scenes available")
 		return null
 	
-	# Check if should spawn final tile
-	if _state_manager.has_flag("final_event_available") and randf() < 0.5:
-		return _create_tile_from_scene(_final_tile_scene, grid_pos)
-	
-	# Select random normal tile (no permanent tiles in this pool)
-	var random_scene: String = _normal_tiles[randi() % _normal_tiles.size()]
+	# Select random normal tile
+	var random_scene: PackedScene = _normal_tiles[randi() % _normal_tiles.size()]
 	return _create_tile_from_scene(random_scene, grid_pos)
 
 func _align_tiles(source_tile: Node3D, target_tile: Node3D, door_direction: int, target_grid_pos: Vector2i, did_wrap: bool) -> void:
@@ -497,7 +469,7 @@ func _align_tiles(source_tile: Node3D, target_tile: Node3D, door_direction: int,
 			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
 	
 	if did_wrap:
-		print("TileManager: Tile at wrapped grid ", target_grid_pos, " positioned at world ", target_tile.position, 
+		print("TileManager: Tile at wrapped grid ", target_grid_pos, " positioned at world ", target_tile.position,
 			  " (adjacent to source at ", source_center, ")")
 
 func _calculate_rotation_needed(original_door: int, target_door: int) -> int:
@@ -807,17 +779,17 @@ func debug_check_start_tile() -> void:
 	"""Debug function to check start tile status"""
 	pass
 
-func _get_permanent_tile_at_position(position: Vector2i) -> String:
+func _get_permanent_tile_at_position(position: Vector2i) -> PackedScene:
 	"""
 	Check if a permanent tile is pre-assigned to this position
 	
 	@param position: Grid position to check
-	@return: Scene path of permanent tile assigned here, or empty string
+	@return: PackedScene of permanent tile assigned here, or null
 	"""
 	if _permanent_tile_assignments.has(position):
 		return _permanent_tile_assignments[position]
 	
-	return ""
+	return null
 
 func _are_positions_equivalent_with_wrapping(pos1: Vector2i, pos2: Vector2i) -> bool:
 	"""
@@ -848,19 +820,19 @@ func _can_permanent_tile_spawn_at(position: Vector2i) -> bool:
 	
 	return true
 
-func _spawn_permanent_tile(scene_path: String, grid_pos: Vector2i, source_tile: Node3D, door_direction: int) -> Node3D:
+func _spawn_permanent_tile(tile_scene: PackedScene, grid_pos: Vector2i, source_tile: Node3D, door_direction: int) -> Node3D:
 	"""
 	Spawn a pre-assigned permanent tile at position
 	
-	@param scene_path: Path to the permanent tile scene
+	@param tile_scene: PackedScene of the permanent tile
 	@param grid_pos: Position to spawn at
 	@param source_tile: Tile we're connecting from
 	@param door_direction: Direction we're connecting from
 	@return: Spawned tile or null
 	"""
-	print("TileManager: Spawning pre-assigned permanent tile ", scene_path, " at ", grid_pos)
+	print("TileManager: Spawning pre-assigned permanent tile at ", grid_pos)
 	
-	var permanent_tile: Node3D = _create_tile_from_scene(scene_path, grid_pos)
+	var permanent_tile: Node3D = _create_tile_from_scene(tile_scene, grid_pos)
 	if not permanent_tile:
 		return null
 	

@@ -11,6 +11,11 @@ var _active_enemies: Dictionary = {}  # entity_id -> entity_node
 var _enemy_spawn_cooldowns: Dictionary = {}  # enemy_type -> cooldown_time
 var _next_enemy_id: int = 0
 
+@export var spawn_catalog: SpawnCatalog = preload("res://data/SpawnCatalog.tres")
+
+# NEW: Map enemy_type to PackedScene
+var _enemy_scene_map: Dictionary = {}  # enemy_type -> PackedScene
+
 # Enemy spawn settings
 var _stalker_spawn_conditions: Dictionary = {
 	"min_weird_things": 3,
@@ -25,7 +30,7 @@ var _watcher_spawn_conditions: Dictionary = {
 	"mvp_disabled": true  # Disable Watchers for MVP release
 }
 
-# Enemy scene references
+# Enemy scene references (FALLBACK - catalog is preferred)
 var _enemy_scenes: Dictionary = {
 	"stalker": "res://scenes/entities/stalker.tscn",
 	"watcher": "res://scenes/entities/watcher.tscn",
@@ -34,6 +39,7 @@ var _enemy_scenes: Dictionary = {
 
 func _ready() -> void:
 	name = "EnemyManager"
+	_resolve_catalog()
 	add_to_group("game_systems")
 	call_deferred("_initialize")
 
@@ -47,7 +53,57 @@ func _initialize() -> void:
 		push_error("EnemyManager: Required core systems not found")
 		return
 	
+	_build_enemy_scene_map()  # NEW: Build the scene map
 	_connect_to_events()
+	
+func _resolve_catalog() -> void:
+	if spawn_catalog == null:
+		push_error("EnemyManager: spawn_catalog is null. Assign SpawnCatalog.tres in Inspector.")
+		return
+	if spawn_catalog.enemy_scenes.is_empty():
+		push_warning("EnemyManager: catalog has zero enemy scenes.")
+
+# NEW: Build a map of enemy_type -> PackedScene
+func _build_enemy_scene_map() -> void:
+	"""Build a mapping of enemy types to their PackedScenes for efficient spawning"""
+	_enemy_scene_map.clear()
+	
+	if not spawn_catalog or spawn_catalog.enemy_scenes.is_empty():
+		push_warning("EnemyManager: No enemy scenes in catalog")
+		return
+	
+	for scene in spawn_catalog.enemy_scenes:
+		if not scene:
+			continue
+		
+		# Instantiate temporarily to get the enemy_type
+		var temp_instance = scene.instantiate()
+		var enemy_type: String = ""
+		
+		if temp_instance.has_method("get_enemy_type"):
+			enemy_type = temp_instance.get_enemy_type()
+		elif "enemy_type" in temp_instance:
+			enemy_type = temp_instance.enemy_type
+		elif temp_instance.has_meta("enemy_type"):
+			enemy_type = temp_instance.get_meta("enemy_type")
+		else:
+			# Fallback: use node name
+			enemy_type = temp_instance.name.to_lower()
+		
+		temp_instance.queue_free()
+		
+		if not enemy_type.is_empty():
+			_enemy_scene_map[enemy_type] = scene
+			print("EnemyManager: Mapped enemy_type '", enemy_type, "' to scene")
+		else:
+			push_warning("EnemyManager: Enemy scene has no enemy_type: ", scene.resource_path)
+	
+	print("EnemyManager: Built scene map with ", _enemy_scene_map.size(), " enemies")
+
+func get_all_enemy_scenes() -> Array[PackedScene]:
+	if not spawn_catalog:
+		return []
+	return spawn_catalog.enemy_scenes.duplicate()
 
 func _process(delta: float) -> void:
 	"""Update enemy spawn cooldowns"""
@@ -66,20 +122,19 @@ func spawn_enemy(enemy_type: String, position: Vector3 = Vector3.ZERO, force_spa
 	if not _can_spawn_enemy(enemy_type) and not force_spawn:
 		return null
 	
-	if not _enemy_scenes.has(enemy_type):
-		push_error("EnemyManager: Unknown enemy type '%s'" % enemy_type)
-		return null
+	# NEW: Try to get scene from catalog map first
+	var enemy_scene: PackedScene = _enemy_scene_map.get(enemy_type, null)
 	
-	var scene_path = _enemy_scenes[enemy_type]
+	# FALLBACK: Try loading from hardcoded paths
+	if not enemy_scene and _enemy_scenes.has(enemy_type):
+		var scene_path = _enemy_scenes[enemy_type]
+		if FileAccess.file_exists(scene_path):
+			enemy_scene = load(scene_path) as PackedScene
 	
-	if not FileAccess.file_exists(scene_path):
-		var placeholder = _spawn_placeholder_enemy(enemy_type, position)
-		return placeholder
-	
-	var enemy_scene = load(scene_path) as PackedScene
+	# If still no scene, create placeholder
 	if not enemy_scene:
-		push_error("EnemyManager: Failed to load enemy scene: %s" % scene_path)
-		return null
+		push_warning("EnemyManager: No scene found for enemy_type: ", enemy_type, " - using placeholder")
+		return _spawn_placeholder_enemy(enemy_type, position)
 	
 	var enemy_instance = enemy_scene.instantiate()
 	if not enemy_instance:
@@ -105,6 +160,8 @@ func spawn_enemy(enemy_type: String, position: Vector3 = Vector3.ZERO, force_spa
 	
 	# Emit spawn event
 	_message_bus.emit_event("entity_spawned", [enemy_type, enemy_instance, position])
+	
+	print("EnemyManager: Spawned ", enemy_type, " at ", position)
 	
 	return enemy_instance
 
@@ -155,6 +212,8 @@ func _spawn_placeholder_enemy(enemy_type: String, position: Vector3) -> Node3D:
 	_active_enemies[entity_id] = placeholder
 	placeholder.set_meta("entity_id", entity_id)
 	placeholder.set_meta("enemy_type", enemy_type)
+	
+	print("EnemyManager: Spawned placeholder ", enemy_type, " at ", position)
 	
 	return placeholder
 
@@ -234,7 +293,6 @@ func cleanup_invalid_enemies() -> void:
 	
 	for entity_id in invalid_ids:
 		_active_enemies.erase(entity_id)
-		pass
 
 func _can_spawn_enemy(enemy_type: String) -> bool:
 	"""
@@ -348,7 +406,7 @@ func _connect_to_events() -> void:
 func _on_weird_thing_collected(thing_id: String, position: Vector2i, effects: Dictionary) -> void:
 	"""Handle weird thing collection - may trigger stalker spawn"""
 	var weird_things_manager = get_node_or_null("/root/WeirdThingsManager")
-	if weird_things_manager and weird_things_manager.has_method("get_collected_count"):
+	if weird_things_manager and weird_things_manager.has_method("get_collecte d_count"):
 		var weird_count = weird_things_manager.get_collected_count()
 		if weird_count >= _stalker_spawn_conditions.min_weird_things:
 			if randf() < 0.3:  # 30% chance to spawn stalker
@@ -386,7 +444,6 @@ func _on_game_ended(cause: String, data: Dictionary) -> void:
 	_on_game_started()  # Same cleanup
 
 # Debug functions
-
 
 func get_enemy_count() -> int:
 	"""Get total number of active enemies"""

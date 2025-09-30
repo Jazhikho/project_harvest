@@ -8,7 +8,7 @@ extends CharacterBody3D
 @export var detection_range: float = 15.0
 @export var lose_target_range: float = 30.0
 @export var sanity_drain_range: float = 12.0
-@export var sanity_drain_rate: int = 25  # Per proximity event
+@export var sanity_drain_rate: int = 25 # Per proximity event
 
 var is_activated: bool = false
 var player_reference: Node3D
@@ -18,10 +18,10 @@ var current_target_position: Vector3
 
 # Stalker states
 enum StalkerState {
-	DORMANT,      # Not yet activated
-	PATROLLING,   # Searching for player
-	HUNTING,      # Actively pursuing player
-	CLOSING_IN    # Very close to player
+	DORMANT, # Not yet activated
+	PATROLLING, # Searching for player
+	HUNTING, # Actively pursuing player
+	CLOSING_IN # Very close to player
 }
 
 var current_state: StalkerState = StalkerState.DORMANT
@@ -175,7 +175,7 @@ func _calculate_next_pathfinding_step(maze_manager: Node) -> Vector2i:
 	if maze_manager.can_move(grid_position.x, grid_position.y, next_pos.x, next_pos.y):
 		return next_pos
 	
-	return Vector2i(-1, -1)  # No valid move
+	return Vector2i(-1, -1) # No valid move
 
 func _move_to_grid_position(new_grid_pos: Vector2i, delta: float):
 	"""Smoothly move to new grid position"""
@@ -206,16 +206,16 @@ func _check_state_transitions():
 	if current_sanity > 70:
 		# Stalker is idle, just watching
 		current_state = StalkerState.PATROLLING
-		movement_speed = 0.0  # Don't move, just watch
+		movement_speed = 0.0 # Don't move, just watch
 		return
 	elif current_sanity > 50:
 		# Move toward player at ~half speed, stop 2 meters away
 		if distance_to_player > 2.0:
 			current_state = StalkerState.HUNTING
-			movement_speed = 2.25  # Half of player's normal speed (4.5)
+			movement_speed = 2.25 # Half of player's normal speed (4.5)
 		else:
 			current_state = StalkerState.PATROLLING
-			movement_speed = 0.0  # Stop and watch
+			movement_speed = 0.0 # Stop and watch
 	elif current_sanity > 30:
 		# Actively try to touch the player (no stopping)
 		current_state = StalkerState.HUNTING
@@ -226,8 +226,8 @@ func _check_state_transitions():
 		# Move at increasing speed up to player's speed at 10% sanity
 		current_state = StalkerState.CLOSING_IN
 		# Speed scales from half speed (30% sanity) to full speed (10% sanity)
-		var speed_ratio = (30.0 - current_sanity) / 20.0  # 0.0 at 30%, 1.0 at 10%
-		movement_speed = 2.25 + (2.25 * speed_ratio)  # 2.25 to 4.5
+		var speed_ratio = (30.0 - current_sanity) / 20.0 # 0.0 at 30%, 1.0 at 10%
+		movement_speed = 2.25 + (2.25 * speed_ratio) # 2.25 to 4.5
 		
 		if distance_to_player <= 1.0:
 			_trigger_player_caught()
@@ -291,7 +291,7 @@ func _update_effects(delta: float) -> void:
 func _apply_proximity_sanity_drain(_delta: float) -> void:
 	"""Apply gradual sanity drain when Stalker is nearby"""
 	# Occasional sanity drain instead of constant
-	if randf() < 0.05:  # 5% chance per frame when close
+	if randf() < 0.05: # 5% chance per frame when close
 		var sanity_manager = get_node("/root/SanityManager")
 		if sanity_manager:
 			sanity_manager.apply_sanity_loss_event("stalker_proximity", 5)
@@ -300,11 +300,11 @@ func _play_state_audio(state_type: String):
 	"""Play audio appropriate for current state"""
 	match state_type:
 		"patrol":
-			pass  # Subtle movement sounds
+			pass # Subtle movement sounds
 		"hunt":
-			pass  # Aggressive pursuit sounds  
+			pass # Aggressive pursuit sounds
 		"closing":
-			pass  # Terrifying approach sounds
+			pass # Terrifying approach sounds
 
 func _on_player_detected(body: Node3D) -> void:
 	"""Handle player entering detection range"""
@@ -348,10 +348,10 @@ func activate():
 		patrol_center = global_position
 		
 		# Update grid position
-			grid_position = Vector2i(
-				int(global_position.x / grid_size),
-				int(global_position.z / grid_size)
-			)
+		grid_position = Vector2i(
+			int(global_position.x / grid_size),
+			int(global_position.z / grid_size)
+		)
 
 func is_stalker_active() -> bool:
 	return is_activated

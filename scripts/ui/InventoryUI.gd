@@ -16,6 +16,7 @@ var selected_item = null
 var is_rotating = false
 var last_mouse_pos = Vector2.ZERO
 var was_mouse_captured: bool = false
+var permanent_items: Array = ["flashlight", "journal"]
 
 func _ready() -> void:
 	# Set process mode so inventory works when game is paused
@@ -88,28 +89,40 @@ func _populate_inventory() -> void:
 	# Get ItemManager for item info
 	var item_manager: Node = get_node_or_null("/root/ItemManager")
 	
-	# Add items from inventory
+	var displayed_items: int = 0
+	
+	# First, add permanent items (flashlight, journal)
+	for item_id in permanent_items:
+		var item_slot: Panel = _create_item_slot(item_id, true) # true = permanent item
+		item_grid.add_child(item_slot)
+		displayed_items += 1
+	
+	# Then add regular items from inventory (excluding notes)
 	var items: Array = inventory_manager.get_inventory()
 	for item_id in items:
-		var item_button: Button = Button.new()
-		
-		# Get display name from ItemManager if available
-		var display_name: String = item_id
+		# Skip notes - they're in the journal now
 		if item_manager and item_manager.has_method("get_item_info"):
 			var item_info: Dictionary = item_manager.get_item_info(item_id)
-			display_name = item_info.get("name", item_id)
+			if item_info.get("category", "") == "notes":
+				continue
 		
-		item_button.text = display_name
-		item_button.custom_minimum_size = Vector2(100, 100)
-		item_button.pressed.connect(_on_item_selected.bind(item_id))
-		item_grid.add_child(item_button)
+		# Create item slot
+		var item_slot: Panel = _create_item_slot(item_id, false)
+		item_grid.add_child(item_slot)
+		displayed_items += 1
 	
-	# Show message if inventory is empty
-	if items.is_empty():
-		var empty_label: Label = Label.new()
-		empty_label.text = "Inventory is empty"
-		empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		item_grid.add_child(empty_label)
+	# Add empty slots to maintain grid structure (optional)
+	var min_slots: int = 20 # Minimum number of slots to show
+	var empty_slots_needed: int = min_slots - displayed_items
+	if empty_slots_needed > 0:
+		for i in empty_slots_needed:
+			var empty_slot: Panel = _create_empty_slot()
+			item_grid.add_child(empty_slot)
+	
+	# Show message if inventory is completely empty (only permanent items)
+	if displayed_items == permanent_items.size():
+		# Don't show empty message, they have permanent items
+		pass
 
 func show_inventory():
 	"""Show inventory and handle mouse state"""
@@ -138,17 +151,13 @@ func _load_item_model(item_id: String) -> void:
 	for child in item_model_node.get_children():
 		child.queue_free()
 	
-	# Try to load from items folder
-	var model_path: String = "res://scenes/items/" + item_id + ".tscn"
-	
-	# For notes, try the notes folder
-	var item_manager: Node = get_node_or_null("/root/ItemManager")
-	if item_manager and item_manager.has_method("get_item_info"):
-		var item_info: Dictionary = item_manager.get_item_info(item_id)
-		if item_info.get("category", "") == "notes":
-			# For notes, use a random note scene
-			var note_number: int = randi() % 4 + 1
-			model_path = "res://scenes/notes/note_%d.tscn" % note_number
+	var model_path: String
+	if item_id in ["flashlight", "journal"]:
+		model_path = "res://scenes/misc/" + item_id + ".tscn"
+	elif item_id == "hollow_key":
+		model_path = "res://scenes/misc/key.tscn"
+	else:
+		model_path = "res://scenes/items/" + item_id + ".tscn"
 	
 	print("InventoryUI: Attempting to load model from: ", model_path)
 	
@@ -295,3 +304,116 @@ func _on_back_pressed():
 	inspect_panel.visible = false
 	main_panel.visible = true
 	_populate_inventory()
+
+func _create_item_slot(item_id: String, is_permanent: bool = false) -> Panel:
+	"""Create a properly formatted item slot with thumbnail and name"""
+	var slot: Panel = Panel.new()
+	slot.custom_minimum_size = Vector2(120, 140) # Fixed size for grid consistency
+	
+	# Add visual indicator for permanent items
+	if is_permanent:
+		var style: StyleBoxFlat = StyleBoxFlat.new()
+		style.bg_color = Color(0.3, 0.3, 0.4, 0.5) # Slightly different background
+		style.border_color = Color(0.6, 0.6, 0.8, 0.8) # Subtle border
+		style.border_width_left = 2
+		style.border_width_right = 2
+		style.border_width_top = 2
+		style.border_width_bottom = 2
+		slot.add_theme_stylebox_override("panel", style)
+	
+	# Create vertical container for icon and text
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.add_theme_constant_override("separation", 4)
+	slot.add_child(vbox)
+	
+	# Create button for the item icon
+	var icon_button: Button = Button.new()
+	icon_button.custom_minimum_size = Vector2(100, 100)
+	icon_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	icon_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon_button.expand_icon = true
+	icon_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	
+	# Permanent items have different interaction
+	if is_permanent:
+		icon_button.pressed.connect(_on_permanent_item_selected.bind(item_id))
+	else:
+		icon_button.pressed.connect(_on_item_selected.bind(item_id))
+	
+	# Try to load thumbnail
+	var thumbnail_path: String = "res://assets/thumbnails/" + item_id + ".png"
+	if ResourceLoader.exists(thumbnail_path):
+		var thumbnail: Texture2D = load(thumbnail_path)
+		if thumbnail:
+			icon_button.icon = thumbnail
+			# Make the icon fill the button
+			icon_button.add_theme_constant_override("icon_max_width", 96)
+	else:
+		# Create placeholder if no thumbnail exists
+		icon_button.text = "?"
+		icon_button.add_theme_font_size_override("font_size", 32)
+		push_warning("InventoryUI: Thumbnail not found for " + item_id + " at " + thumbnail_path)
+	
+	vbox.add_child(icon_button)
+	
+	# Add item name label
+	var name_label: Label = Label.new()
+	name_label.custom_minimum_size = Vector2(120, 20)
+	name_label.size_flags_horizontal = Control.SIZE_FILL
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.add_theme_font_size_override("font_size", 12)
+	
+	# Get display name from ItemManager
+	var display_name: String = item_id
+	var item_manager: Node = get_node_or_null("/root/ItemManager")
+	if item_manager and item_manager.has_method("get_item_info"):
+		var item_info: Dictionary = item_manager.get_item_info(item_id)
+		display_name = item_info.get("name", item_id)
+	
+	# Truncate name if too long
+	if display_name.length() > 15:
+		display_name = display_name.substr(0, 13) + "..."
+	
+	name_label.text = display_name
+	name_label.tooltip_text = display_name # Show full name on hover
+	vbox.add_child(name_label)
+	
+	# Add permanent indicator label
+	if is_permanent:
+		var perm_label: Label = Label.new()
+		perm_label.text = "[EQUIPPED]"
+		perm_label.add_theme_font_size_override("font_size", 9)
+		perm_label.add_theme_color_override("font_color", Color(0.7, 0.7, 1.0))
+		perm_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vbox.add_child(perm_label)
+	else:
+		# Add quantity label for regular items if you track quantities (optional)
+		if inventory_manager and inventory_manager.has_method("get_item_quantity"):
+			var quantity: int = inventory_manager.get_item_quantity(item_id)
+			if quantity > 1:
+				var qty_label: Label = Label.new()
+				qty_label.text = "x" + str(quantity)
+				qty_label.add_theme_font_size_override("font_size", 10)
+				qty_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+				qty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				vbox.add_child(qty_label)
+	
+	return slot
+
+func _create_empty_slot() -> Panel:
+	"""Create an empty slot to maintain grid structure"""
+	var slot: Panel = Panel.new()
+	slot.custom_minimum_size = Vector2(120, 140)
+	slot.modulate = Color(0.5, 0.5, 0.5, 0.3) # Make it semi-transparent
+	
+	return slot
+
+func _on_permanent_item_selected(item_id: String):
+	"""Handle selection of permanent items (flashlight, journal)"""
+	selected_item = item_id
+	main_panel.visible = false
+	inspect_panel.visible = true
+	_load_item_model(item_id)

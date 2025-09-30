@@ -29,11 +29,12 @@ func _initialize() -> void:
 		_message_bus.item_collected.connect(_on_item_collected_external)
 		_message_bus.game_started.connect(_on_game_started)
 
-func add_item(item_id: String) -> bool:
+func add_item(item_id: String, apply_effects: bool = true) -> bool:
 	"""
 	Add an item to inventory
 	
 	@param item_id: Item identifier to add
+	@param apply_effects: Whether to apply item effects (false for restoration)
 	@return: True if item was added successfully
 	"""
 	if inventory.size() >= max_inventory_size:
@@ -48,8 +49,8 @@ func add_item(item_id: String) -> bool:
 	
 	inventory.append(item_id)
 	
-	# Apply item effects if ItemManager is available
-	if _item_manager and _item_manager.has_method("apply_item_effects"):
+	# Apply item effects if ItemManager is available and effects should be applied
+	if apply_effects and _item_manager and _item_manager.has_method("apply_item_effects"):
 		_item_manager.apply_item_effects(item_id)
 	
 	# Emit signals
@@ -169,7 +170,7 @@ func load_from_backpack(backpack_inventory: Array) -> int:
 	var loaded_count = 0
 	
 	for item in backpack_inventory:
-		if add_item(item):
+		if add_item(item, false): # Don't apply effects when restoring from backpack
 			loaded_count += 1
 		else:
 			break # Stop if inventory is full

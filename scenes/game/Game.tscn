@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://0atthfte3o13"]
+[gd_scene load_steps=17 format=3 uid="uid://0atthfte3o13"]
 
 [ext_resource type="PackedScene" uid="uid://c5yqrv82hov2i" path="res://scenes/tiles/start_tile.tscn" id="1_start_tile"]
 [ext_resource type="PackedScene" uid="uid://b2djga0bpmfs7" path="res://scenes/entities/player.tscn" id="2_player"]
@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" uid="uid://5m8oiae77mxv" path="res://scenes/ui/InventoryUI.tscn" id="5"]
 [ext_resource type="Texture2D" uid="uid://cobe1yg0mkran" path="res://assets/textures/mealie_road_4k.exr" id="5_qf6a8"]
 [ext_resource type="Texture2D" uid="uid://c0nsssaorny41" path="res://assets/textures/EveningSkyHDRI040A_16K-HDR.exr" id="6_56wml"]
+[ext_resource type="PackedScene" uid="uid://c6e6seey11ofy" path="res://scenes/ui/JournalUI.tscn" id="10_56wml"]
+[ext_resource type="PackedScene" uid="uid://b63na1dnm38kk" path="res://scenes/ui/ControlsUI.tscn" id="11_aptqa"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wnrko"]
 shader = ExtResource("4_gg4pt")
@@ -73,7 +75,7 @@ script = ExtResource("3")
 [node name="StartTile" parent="MazeContainer" instance=ExtResource("1_start_tile")]
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, -0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, 5.45634)
 
 [node name="Environment" type="Node3D" parent="."]
 
@@ -102,6 +104,10 @@ grow_vertical = 2
 
 [node name="InventoryUI" parent="UI" instance=ExtResource("5")]
 visible = false
+
+[node name="JournalUI" parent="UI" instance=ExtResource("10_56wml")]
+
+[node name="ControlsUI" parent="UI" instance=ExtResource("11_aptqa")]
 
 [node name="TransitionLayer" type="CanvasLayer" parent="."]
 layer = 100

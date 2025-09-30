@@ -2,6 +2,8 @@ extends Node
 ## Manages item definitions, availability, and effects
 ## Handles item data loading and gameplay logic
 
+@export var spawn_catalog: SpawnCatalog
+
 var _item_definitions := {}
 var _item_categories := {
 	"notes": [],
@@ -17,8 +19,12 @@ var _state_manager: Node
 const ITEM_DATA_PATH := "res://data/items.json"
 const MAX_UNLOCKED_NOTES := 10
 
+# NEW: Map item_id to PackedScene for spawning
+var _item_scene_map: Dictionary = {}  # item_id -> PackedScene
+
 func _ready() -> void:
 	name = "ItemManager"
+	_resolve_catalog()
 	add_to_group("core_systems")
 	call_deferred("_initialize")
 
@@ -32,7 +38,99 @@ func _initialize() -> void:
 		return
 	
 	_load_item_definitions()
+	_build_item_scene_map()  # NEW: Build the scene map after loading definitions
 	_connect_to_events()
+	
+func _resolve_catalog() -> void:
+	if spawn_catalog == null:
+		push_error("ItemManager: spawn_catalog is null. Assign SpawnCatalog.tres in Inspector.")
+		return
+	if spawn_catalog.item_scenes.is_empty():
+		push_warning("ItemManager: catalog has zero item scenes.")
+
+# NEW: Build a map of item_id -> PackedScene
+func _build_item_scene_map() -> void:
+	"""Build a mapping of item IDs to their PackedScenes for efficient spawning"""
+	_item_scene_map.clear()
+	
+	if not spawn_catalog or spawn_catalog.item_scenes.is_empty():
+		push_warning("ItemManager: No item scenes in catalog")
+		return
+	
+	for scene in spawn_catalog.item_scenes:
+		if not scene:
+			continue
+		
+		# Instantiate temporarily to get the item_id
+		var temp_instance = scene.instantiate()
+		var item_id: String = ""
+		
+		if temp_instance.has_method("get_item_id"):
+			item_id = temp_instance.get_item_id()
+		elif "item_id" in temp_instance:
+			item_id = temp_instance.item_id
+		elif temp_instance.has_meta("item_id"):
+			item_id = temp_instance.get_meta("item_id")
+		
+		temp_instance.queue_free()
+		
+		if not item_id.is_empty():
+			_item_scene_map[item_id] = scene
+			print("ItemManager: Mapped item_id '", item_id, "' to scene")
+		else:
+			push_warning("ItemManager: Item scene has no item_id: ", scene.resource_path)
+	
+	print("ItemManager: Built scene map with ", _item_scene_map.size(), " items")
+
+func get_all_item_scenes() -> Array[PackedScene]:
+	if not spawn_catalog:
+		return []
+	return spawn_catalog.item_scenes.duplicate()
+
+# NEW: Get specific item scene by ID
+func get_item_scene(item_id: String) -> PackedScene:
+	"""
+	Get the PackedScene for a specific item
+	
+	@param item_id: Item identifier
+	@return: PackedScene or null if not found
+	"""
+	return _item_scene_map.get(item_id, null)
+
+# NEW: Spawn an item instance
+func spawn_item_instance(item_id: String, position: Vector3, parent: Node = null) -> Node3D:
+	"""
+	Spawn an item in the world
+	
+	@param item_id: Item to spawn
+	@param position: World position
+	@param parent: Parent node (defaults to current scene)
+	@return: Spawned item instance or null
+	"""
+	var scene = get_item_scene(item_id)
+	if not scene:
+		push_error("ItemManager: No scene found for item_id: ", item_id)
+		return null
+	
+	var instance = scene.instantiate()
+	if not instance:
+		push_error("ItemManager: Failed to instantiate item: ", item_id)
+		return null
+	
+	# Add to scene
+	if parent:
+		parent.add_child(instance)
+	else:
+		get_tree().current_scene.add_child(instance)
+	
+	# Set position
+	if instance is Node3D:
+		instance.global_position = position
+	
+	# Ensure metadata is set
+	instance.set_meta("item_id", item_id)
+	
+	return instance
 
 func _load_item_definitions() -> void:
 	"""Load item definitions from JSON data file"""
@@ -83,7 +181,11 @@ func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 	@param item_id: Item identifier to check
 	@param context: Spawning context with tile_position, is_permanent, etc.
 	@return: True if item can spawn
-	"""	
+	"""
+	# NEW: First check if we actually have a scene for this item
+	if not _item_scene_map.has(item_id):
+		return false
+	
 	# Check if already collected in THIS RUN
 	var collected_items: Array = _state_manager.get_state("collected_items")
 	if collected_items == null:

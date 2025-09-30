@@ -1,0 +1,119 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6e6seey11ofy"]
+
+[ext_resource type="Script" uid="uid://bjagb41rndr56" path="res://scripts/ui/JournalUI.gd" id="1_63ixx"]
+
+[node name="JournalUI" type="Control"]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_63ixx")
+
+[node name="DarkOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="MainPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -350.0
+offset_right = 500.0
+offset_bottom = 350.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HSplitContainer" type="HSplitContainer" parent="MainPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+split_offset = 300
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainPanel/HSplitContainer"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="MainPanel/HSplitContainer/LeftPanel"]
+layout_mode = 2
+text = "JOURNAL"
+horizontal_alignment = 1
+
+[node name="SearchBar" type="LineEdit" parent="MainPanel/HSplitContainer/LeftPanel"]
+layout_mode = 2
+placeholder_text = "Search notes..."
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainPanel/HSplitContainer/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NoteTree" type="Tree" parent="MainPanel/HSplitContainer/LeftPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+hide_root = true
+
+[node name="ButtonContainer" type="HBoxContainer" parent="MainPanel/HSplitContainer/LeftPanel"]
+layout_mode = 2
+
+[node name="ReadButton" type="Button" parent="MainPanel/HSplitContainer/LeftPanel/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+disabled = true
+text = "READ"
+
+[node name="CloseButton" type="Button" parent="MainPanel/HSplitContainer/LeftPanel/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "CLOSE"
+
+[node name="RightPanel" type="VBoxContainer" parent="MainPanel/HSplitContainer"]
+layout_mode = 2
+
+[node name="NoteTitle" type="Label" parent="MainPanel/HSplitContainer/RightPanel"]
+layout_mode = 2
+text = "Select a note to read"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="MainPanel/HSplitContainer/RightPanel"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainPanel/HSplitContainer/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NoteContent" type="RichTextLabel" parent="MainPanel/HSplitContainer/RightPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "No note selected."
+
+[node name="MetadataLabel" type="Label" parent="MainPanel/HSplitContainer/RightPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+horizontal_alignment = 2
+
+[connection signal="text_changed" from="MainPanel/HSplitContainer/LeftPanel/SearchBar" to="." method="_on_search_text_changed"]
+[connection signal="item_activated" from="MainPanel/HSplitContainer/LeftPanel/ScrollContainer/NoteTree" to="." method="_on_note_tree_item_activated"]
+[connection signal="item_selected" from="MainPanel/HSplitContainer/LeftPanel/ScrollContainer/NoteTree" to="." method="_on_note_tree_item_selected"]
+[connection signal="pressed" from="MainPanel/HSplitContainer/LeftPanel/ButtonContainer/ReadButton" to="." method="_on_read_button_pressed"]
+[connection signal="pressed" from="MainPanel/HSplitContainer/LeftPanel/ButtonContainer/CloseButton" to="." method="_on_close_button_pressed"]
