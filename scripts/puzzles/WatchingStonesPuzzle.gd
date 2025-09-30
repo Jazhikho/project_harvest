@@ -16,7 +16,7 @@ var _altar_items = []  # Track items placed on altar specifically
 var _brazier_items = []  # Track items placed in brazier
 
 @onready var altar_area: Area3D = $altar/Area3D
-@onready var brazier_area: Area3D = $wbrazier/Area3D
+@onready var brazier_area: Area3D = $brazier/Area3D
 
 func _ready() -> void:
 	set_meta("is_puzzle", true)

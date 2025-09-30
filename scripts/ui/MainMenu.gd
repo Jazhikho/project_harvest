@@ -17,17 +17,14 @@ extends Control
 @onready var music_value_label = $SettingsPanel/SettingsContainer/MusicVolume/Value
 @onready var sfx_value_label = $SettingsPanel/SettingsContainer/SFXVolume/Value
 
-func _ready():
-	# Check for existing save data
-	_check_save_data()
-	# Load settings
-	_load_settings()
-	
-	# Detect input device
-	_detect_input_device()
+@export var music_playlist: Resource         # MusicPlaylist.tres
 
-	# Set initial focus
+func _ready() -> void:
+	_check_save_data()
+	_load_settings()
+	_detect_input_device()
 	start_button.grab_focus()
+	call_deferred("_start_menu_audio")
 
 func _check_save_data():
 	# Check if save file exists
@@ -45,6 +42,24 @@ func _detect_input_device():
 		InputManager.set_control_scheme("controller")
 	else:
 		InputManager.set_control_scheme("keyboard")
+		
+## _start_menu_audio
+## Purpose: Start main menu theme via AudioManager using the exported playlist.
+## @return void.
+func _start_menu_audio() -> void:
+	var am: Node = get_node_or_null("/root/AudioManager")
+	if am == null:
+		return
+
+	# Prefer the exported MusicPlaylist resource.
+	if music_playlist is MusicPlaylist and music_playlist.main_theme is AudioStream:
+		am.play_theme_loop(music_playlist.main_theme, -8.0)
+		return
+
+	# Fallback if someone forgot to set main_theme in the .tres.
+	var theme_stream: AudioStream = load("res://assets/audio/music/theme.ogg")
+	if theme_stream != null:
+		am.play_theme_loop(theme_stream, -8.0)
 
 func _load_settings():
 	# Wait for AudioManager to initialize buses, then load volume settings
@@ -89,10 +104,16 @@ func _on_start_pressed():
 		_start_new_game()
 
 func _start_new_game():
+	var am := get_node_or_null("/root/AudioManager")
+	if am != null:
+		await am.stop_theme_fade(1.5)
 	SaveManager.delete_save()
 	SceneManager.load_game_scene()
 
 func _on_continue_pressed():
+	var am := get_node_or_null("/root/AudioManager")
+	if am != null:
+		await am.stop_theme_fade(1.5)
 	SaveManager.load_game()
 	SceneManager.load_game_scene()
 
@@ -109,9 +130,10 @@ func _on_quit_pressed():
 	get_tree().quit()
 
 func _notification(what: int) -> void:
-	"""Handle window close requests"""
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		# In main menu, just quit normally - no active game to record death for
+		var am := get_node_or_null("/root/AudioManager")
+		if am != null:
+			await am.stop_theme_fade(1.0)
 		get_tree().quit()
 
 # Settings Panel Signals

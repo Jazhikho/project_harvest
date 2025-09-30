@@ -1,8 +1,10 @@
-[gd_scene load_steps=17 format=3 uid="uid://0atthfte3o13"]
+[gd_scene load_steps=19 format=3 uid="uid://0atthfte3o13"]
 
 [ext_resource type="PackedScene" uid="uid://c5yqrv82hov2i" path="res://scenes/tiles/start_tile.tscn" id="1_start_tile"]
+[ext_resource type="Resource" uid="uid://u8xbjjkhmjqx" path="res://data/MusicPlaylist.tres" id="2_60iot"]
 [ext_resource type="PackedScene" uid="uid://b2djga0bpmfs7" path="res://scenes/entities/player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://h3dp65gy6hmq" path="res://scripts/systems/GameController.gd" id="3"]
+[ext_resource type="Resource" uid="uid://b11pmr7ctvqqy" path="res://data/SFX.tres" id="3_5xhyk"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="4"]
 [ext_resource type="Script" uid="uid://cqcmqlkjrddqa" path="res://scripts/systems/TimeOfDayController.gd" id="4_365ku"]
 [ext_resource type="Shader" uid="uid://c71dha5rynbn0" path="res://assets/textures/sky.gdshader" id="4_gg4pt"]
@@ -69,6 +71,8 @@ shader = SubResource("Shader_gg4pt")
 
 [node name="Game" type="Node3D"]
 script = ExtResource("3")
+music_playlist = ExtResource("2_60iot")
+sfx_library = ExtResource("3_5xhyk")
 
 [node name="MazeContainer" type="Node3D" parent="."]
 

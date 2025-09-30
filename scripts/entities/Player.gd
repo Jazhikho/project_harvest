@@ -7,6 +7,7 @@ extends CharacterBody3D
 @export var mouse_sensitivity: float = 0.003
 @export var flashlight_battery_max: float = 300.0
 @export var flashlight_drain_rate: float = 1.0
+@export var sfx_lib: SFX
 
 # Flashlight system
 var flashlight_battery: float
@@ -14,6 +15,19 @@ var flashlight_enabled: bool = false
 var flashlight_battery_died: bool = false # Track if battery died (for one-time sanity loss)
 var darkness_timer: float = 0.0 # Timer for darkness sanity drain
 var game_timer: float = 0.0 # Total game time elapsed
+
+# Audio state tracking
+var walking_player: AudioStreamPlayer3D
+var sprinting_player: AudioStreamPlayer3D
+var heartbeat_player: AudioStreamPlayer3D
+var whisper_players: Array[AudioStreamPlayer3D] = []
+var scream_players: Array[AudioStreamPlayer3D] = []
+var _whisper_timer: Timer
+var _whispers_active: bool = false
+
+# Audio state tracking
+var is_moving: bool = false
+var is_sprinting: bool = false
 
 # Component references
 @onready var camera: Camera3D = $Camera3D
@@ -27,7 +41,7 @@ var mouse_captured: bool = false
 var debug_mode: bool = false
 
 # Health system
-var health: int = 100
+var last_sanity_state: String = "normal"
 
 func _ready() -> void:
 	name = "Player"
@@ -42,6 +56,7 @@ func _ready() -> void:
 	
 	# Initialize systems after scene is ready
 	call_deferred("_initialize_systems")
+	call_deferred("_setup_audio_players")
 	
 	# Initialize flashlight
 	flashlight_battery = randf_range(60.0, 300.0)
@@ -64,6 +79,88 @@ func _initialize_systems() -> void:
 func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""
 	_message_bus.game_ended.connect(_on_game_ended)
+	
+func _make_player3d(name_str: String) -> AudioStreamPlayer3D:
+		var p := AudioStreamPlayer3D.new()
+		p.name = name_str
+		p.bus = "SFX"
+		# Keep volume spatially constant since it’s glued to the player/camera.
+		p.attenuation_filter_cutoff_hz = 20500.0
+		p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
+		p.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
+		add_child(p)
+		return p
+
+	# Loop continuous streams as appropriate
+func _enable_loop(stream: AudioStream) -> void:
+	if stream == null:
+		return
+	if stream is AudioStreamWAV:
+		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	elif stream.has_method("set_loop"):
+		stream.call("set_loop", true)
+	elif "loop" in stream:
+		stream.loop = true
+
+## _setup_audio_players
+## Purpose: Create and configure movement/heartbeat/whisper/scream audio players.
+## @return void.
+func _setup_audio_players() -> void:
+	# Ensure SFX bus exists just in case
+	var audio_manager: Node = get_node_or_null("/root/AudioManager")
+	if audio_manager and audio_manager.has_method("_ensure_core_buses"):
+		audio_manager._ensure_core_buses()
+
+	# Create core players if missing
+	if walking_player == null or not is_instance_valid(walking_player):
+		walking_player = _make_player3d("WalkingPlayer")
+	if sprinting_player == null or not is_instance_valid(sprinting_player):
+		sprinting_player = _make_player3d("SprintingPlayer")
+	if heartbeat_player == null or not is_instance_valid(heartbeat_player):
+		heartbeat_player = _make_player3d("HeartbeatPlayer")
+
+	# Assign streams from SFX library (after you fix the heartbeat typo)
+	if sfx_lib:
+		if sfx_lib.walking is AudioStream:
+			walking_player.stream = sfx_lib.walking
+		if sfx_lib.sprinting is AudioStream:
+			sprinting_player.stream = sfx_lib.sprinting
+		if "heartbeat" in sfx_lib and sfx_lib.heartbeat is AudioStream:
+			heartbeat_player.stream = sfx_lib.heartbeat
+		elif "hearbeat" in sfx_lib and sfx_lib.hearbeat is AudioStream:
+			heartbeat_player.stream = sfx_lib.hearbeat  # temporary fallback if you refuse to rename
+
+	_enable_loop(walking_player.stream)
+	_enable_loop(sprinting_player.stream)
+	_enable_loop(heartbeat_player.stream)
+
+	# Prepare whispers: up to 4 players, each with a different whisper
+	var max_whispers: int = min(4, sfx_lib.whispers.size() if sfx_lib else 0)
+	# Create missing players
+	while whisper_players.size() < max_whispers:
+		var wp := _make_player3d("WhisperPlayer_%d" % whisper_players.size())
+		whisper_players.append(wp)
+	# Assign streams
+	for i in range(max_whispers):
+		whisper_players[i].stream = sfx_lib.whispers[i]
+		_enable_loop(whisper_players[i].stream)
+
+	# Prepare screams similarly
+	var max_screams: int = min(4, sfx_lib.screams.size() if sfx_lib else 0)
+	while scream_players.size() < max_screams:
+		var sp := _make_player3d("ScreamPlayer_%d" % scream_players.size())
+		scream_players.append(sp)
+	for i in range(max_screams):
+		scream_players[i].stream = sfx_lib.screams[i]
+		# Screams are usually one-shots; do not loop.
+
+	# Timer for whispers
+	if _whisper_timer == null or not is_instance_valid(_whisper_timer):
+		_whisper_timer = Timer.new()
+		_whisper_timer.name = "WhisperTimer"
+		_whisper_timer.one_shot = true
+		add_child(_whisper_timer)
+		_whisper_timer.timeout.connect(_play_random_whisper)
 
 func _notification(what: int) -> void:
 	"""Handle window focus notifications and quit requests"""
@@ -134,7 +231,8 @@ func _physics_process(delta: float) -> void:
 	_handle_movement(delta)
 	_update_flashlight(delta)
 	_check_interactions()
-
+	_update_sanity_audio()
+	
 func _handle_movement(delta: float) -> void:
 	"""
 	Handle player movement input and physics
@@ -142,45 +240,75 @@ func _handle_movement(delta: float) -> void:
 	@param delta: Frame time delta
 	"""
 	var input_dir: Vector3 = Vector3.ZERO
+	var was_moving = is_moving
+	var was_sprinting = is_sprinting
 	
-	if debug_mode:
-		# Flight mode
-		if Input.is_action_pressed("move_forward"):
-			input_dir -= transform.basis.z
-		if Input.is_action_pressed("move_back"):
-			input_dir += transform.basis.z
-		if Input.is_action_pressed("move_left"):
-			input_dir -= transform.basis.x
-		if Input.is_action_pressed("move_right"):
-			input_dir += transform.basis.x
-		# Z to go up, C to go down
-		if Input.is_key_pressed(KEY_Z):
-			input_dir += Vector3.UP
-		if Input.is_key_pressed(KEY_C):
-			input_dir += Vector3.DOWN
+	#if debug_mode:
+		## Flight mode
+		#if Input.is_action_pressed("move_forward"):
+			#input_dir -= transform.basis.z
+		#if Input.is_action_pressed("move_back"):
+			#input_dir += transform.basis.z
+		#if Input.is_action_pressed("move_left"):
+			#input_dir -= transform.basis.x
+		#if Input.is_action_pressed("move_right"):
+			#input_dir += transform.basis.x
+		## Z to go up, C to go down
+		#if Input.is_key_pressed(KEY_Z):
+			#input_dir += Vector3.UP
+		#if Input.is_key_pressed(KEY_C):
+			#input_dir += Vector3.DOWN
+		#
+		#if input_dir.length() > 0:
+			#global_position += input_dir.normalized() * movement_speed * delta * 3.0
+		#
+		#velocity = Vector3.ZERO
+	#else:
+	## Normal movement with collision
+	if Input.is_action_pressed("move_forward"):
+		input_dir -= transform.basis.z
+	if Input.is_action_pressed("move_back"):
+		input_dir += transform.basis.z
+	if Input.is_action_pressed("move_left"):
+		input_dir -= transform.basis.x
+	if Input.is_action_pressed("move_right"):
+		input_dir += transform.basis.x
+	
+	is_moving = input_dir.length() > 0
+	is_sprinting = is_moving and Input.is_action_pressed("sprint")
 		
-		if input_dir.length() > 0:
-			global_position += input_dir.normalized() * movement_speed * delta * 3.0
+	if is_moving:
+		var speed: float = movement_speed
+		if is_sprinting:
+			speed *= sprint_mult
 		
-		velocity = Vector3.ZERO
-	else:
-		# Normal movement with collision
-		if Input.is_action_pressed("move_forward"):
-			input_dir -= transform.basis.z
-		if Input.is_action_pressed("move_back"):
-			input_dir += transform.basis.z
-		if Input.is_action_pressed("move_left"):
-			input_dir -= transform.basis.x
-		if Input.is_action_pressed("move_right"):
-			input_dir += transform.basis.x
-		
-		if input_dir.length() > 0:
-			var speed: float = movement_speed
-			if Input.is_action_pressed("sprint"):
-				speed *= sprint_mult
-			
-			velocity = input_dir.normalized() * speed
-			move_and_slide()
+		velocity = input_dir.normalized() * speed
+		move_and_slide()
+
+	# Handle movement audio
+	_update_movement_audio(was_moving, was_sprinting)
+
+func _update_movement_audio(was_moving: bool, was_sprinting: bool) -> void:
+	"""Update movement audio based on current state"""
+	if not walking_player or not sprinting_player:
+		return
+	
+	# Handle sprinting audio
+	if is_sprinting and not was_sprinting:
+		walking_player.stop()
+		if not sprinting_player.playing:
+			sprinting_player.play()
+	elif not is_sprinting and was_sprinting:
+		sprinting_player.stop()
+	
+	# Handle walking audio  
+	if is_moving and not is_sprinting and not was_moving:
+		sprinting_player.stop()
+		if not walking_player.playing:
+			walking_player.play()
+	elif not is_moving and was_moving:
+		walking_player.stop()
+		sprinting_player.stop()
 
 func _check_interactions() -> void:
 	"""Check for nearby interactive objects using both raycast and area detection"""
@@ -461,30 +589,12 @@ func _handle_force_quit() -> void:
 	if save_manager and save_manager.has_method("record_death"):
 		save_manager.record_death()
 
-func take_damage(amount: int, source: String = "") -> void:
-	"""
-	Take damage and potentially die
-	
-	@param amount: Damage amount
-	@param source: Damage source description
-	"""
-	health -= amount
-	
-	if health <= 0:
-		die(source if not source.is_empty() else "Unknown")
-
 func die(cause: String) -> void:
 	"""
 	Handle player death
 	
 	@param cause: Cause of death
 	"""
-	
-	# Prevent multiple death triggers
-	if health <= -100: # Already dead
-		return
-	
-	health = -100 # Mark as dead
 	
 	var state_manager = get_node_or_null("/root/GameStateManager")
 	var current_tile = Vector2i.ZERO
@@ -495,7 +605,6 @@ func die(cause: String) -> void:
 		"position": current_tile,
 		"world_position": global_position,
 		"cause": cause,
-		"health": health,
 		"battery": flashlight_battery
 	}
 	
@@ -505,25 +614,6 @@ func die(cause: String) -> void:
 	
 	# Emit death event
 	_message_bus.emit_event("player_died", [cause, current_tile, death_data])
-
-func heal(amount: int) -> void:
-	"""
-	Heal player
-	
-	@param amount: Amount to heal
-	"""
-	health = min(100, health + amount)
-	_show_message("Health restored: +%d" % amount)
-
-func add_battery(amount: float) -> void:
-	"""
-	Add battery charge
-	
-	@param amount: Battery amount to add
-	"""
-	flashlight_battery = min(flashlight_battery_max, flashlight_battery + amount)
-	_show_message("Flashlight battery recharged!")
-
 func use_inventory_item(item_id: String) -> bool:
 	"""
 	Use an item from inventory
@@ -550,10 +640,6 @@ func get_flashlight_battery_ratio() -> float:
 func is_flashlight_enabled() -> bool:
 	"""Check if flashlight is enabled and has battery"""
 	return flashlight_enabled and flashlight_battery > 0.0
-
-func get_health() -> int:
-	"""Get current health"""
-	return health
 
 func is_looking_at_position(target_position: Vector3, fov_degrees: float = 180.0) -> bool:
 	"""
@@ -604,3 +690,88 @@ func _on_game_ended(cause: String, data: Dictionary) -> void:
 	"""Handle game end"""
 	mouse_captured = false
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+func _update_sanity_audio() -> void:
+	if heartbeat_player == null:
+		return
+
+	var state_manager: Node = get_node_or_null("/root/GameStateManager")
+	if state_manager == null:
+		return
+
+	var current_sanity: int = state_manager.get_state("sanity")
+	var current_state: String = _get_sanity_state(current_sanity)
+
+	# Heartbeat control
+	if current_state == "critical":
+		if not heartbeat_player.playing:
+			heartbeat_player.play()
+	else:
+		if heartbeat_player.playing:
+			heartbeat_player.stop()
+
+	# Whispers: start timer when entering low/critical, stop when leaving
+	if (current_state == "low" or current_state == "critical"):
+		if not _whispers_active:
+			_whispers_active = true
+			# Kick off first whisper in 15–45s
+			_whisper_timer.start(randf_range(15.0, 45.0))
+	else:
+		if _whispers_active:
+			_whispers_active = false
+			_whisper_timer.stop()
+			for p in whisper_players:
+				if p.playing:
+					p.stop()
+
+	# Scream at zero
+	if current_sanity <= 0 and last_sanity_state != "zero":
+		_play_scream()
+
+	last_sanity_state = current_state
+	
+func _get_sanity_state(sanity: int) -> String:
+	"""Get sanity state name based on value"""
+	if sanity <= 0:
+		return "zero"
+	elif sanity <= 20: # CRITICAL threshold
+		return "critical" 
+	elif sanity <= 40:
+		return "low"
+	else:
+		return "normal"
+
+func _play_random_whisper() -> void:
+	if not _whispers_active:
+		return
+	if whisper_players.is_empty():
+		return
+
+	var idx: int = randi() % whisper_players.size()
+	var player: AudioStreamPlayer3D = whisper_players[idx]
+
+	# Stop others
+	for p in whisper_players:
+		if p != player and p.playing:
+			p.stop()
+
+	player.play()
+
+	# Schedule next one
+	_whisper_timer.start(randf_range(15.0, 45.0))
+
+func _play_scream() -> void:
+	"""Play a random scream once"""
+	if scream_players.is_empty():
+		return
+
+	# Pick one at random
+	var idx: int = randi() % scream_players.size()
+	var player: AudioStreamPlayer3D = scream_players[idx]
+
+	# Stop any currently running scream
+	for p in scream_players:
+		if p.playing:
+			p.stop()
+
+	player.play()

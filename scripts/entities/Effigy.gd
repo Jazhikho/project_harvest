@@ -11,6 +11,9 @@ extends BaseEntity
 @export var stop_distance: float = 1.5  # Distance to maintain from player
 @export var visibility_check_interval: float = 0.1  # How often to check if player is looking
 @export var camera_path: NodePath
+@export var sfx_library: SFX
+
+var dragging_player: AudioStreamPlayer3D = null
 
 # Stage references
 @onready var stage1: Node3D = $Stage1
@@ -84,7 +87,9 @@ func _initialize_entity() -> void:
 		set_aggression_mode(true, &"sanity_critical_boot")
 	else:
 		_update_behavior_for_sanity()
-	
+		
+	_setup_audio_players()
+		
 	# Set initial active state
 	set_entity_active(true)
 
@@ -133,6 +138,8 @@ func _physics_process(delta: float) -> void:
 		velocity.x = 0.0
 		velocity.z = 0.0
 		move_and_slide()
+		
+	_update_dragging_audio()
 
 func _check_player_visibility(delta: float) -> void:
 	"""Check if player is looking at the effigy"""
@@ -405,6 +412,58 @@ func _on_game_ended(cause: String, data: Dictionary) -> void:
 	is_following = false
 	can_move = false
 	player_in_detection_range = false
+	
+## _setup_audio_players
+## Purpose: Create and configure the dragging SFX player.
+## @return void.
+func _setup_audio_players() -> void:
+	# Create the player if missing
+	if dragging_player == null or not is_instance_valid(dragging_player):
+		dragging_player = AudioStreamPlayer3D.new()
+		dragging_player.name = "DraggingPlayer"
+		dragging_player.bus = "SFX"
+		# No spatial falloff; it’s glued to the Effigy
+		dragging_player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
+		dragging_player.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
+		add_child(dragging_player)
+
+	# Assign stream and make sure it loops
+	if sfx_library != null and sfx_library.dragging is AudioStream:
+		dragging_player.stream = sfx_library.dragging
+		if dragging_player.stream is AudioStreamWAV:
+			var wav: AudioStreamWAV = dragging_player.stream
+			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		elif dragging_player.stream is AudioStreamOggVorbis:
+			var ogg: AudioStreamOggVorbis = dragging_player.stream
+			ogg.loop = true
+
+	# Soft volume
+	dragging_player.volume_db = -16.0
+
+
+## _update_dragging_audio
+## Purpose: Play dragging only while the Effigy is translating (not just turning).
+## @return void.
+func _update_dragging_audio() -> void:
+	if dragging_player == null or not is_instance_valid(dragging_player):
+		return
+
+	# Horizontal speed only; ignore gravity axis
+	var horizontal_speed: float = Vector2(velocity.x, velocity.z).length()
+
+	var is_actively_moving: bool = false
+	if can_move:
+		if is_following:
+			if horizontal_speed > 0.05:
+				is_actively_moving = true
+
+	# Start/stop as needed
+	if is_actively_moving:
+		if not dragging_player.playing:
+			dragging_player.play()
+	else:
+		if dragging_player.playing:
+			dragging_player.stop()
 
 # Public API
 func get_current_stage() -> int:

@@ -17,6 +17,7 @@ is_permanent = true
 [node name="Maze" type="Node3D" parent="."]
 
 [node name="Objects" type="Node3D" parent="Maze"]
+script = ExtResource("5_oclvx")
 
 [node name="tree" parent="Maze/Objects" instance=ExtResource("8_p3ja7")]
 transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 7.71841, 0.0820141, 8)
@@ -32,7 +33,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0, 0)
 
 [node name="altar" parent="Maze/Objects" instance=ExtResource("4_ur14w")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.86155, 0, 0)
-script = ExtResource("5_oclvx")
 
 [node name="Doors" type="Node3D" parent="Maze"]
 

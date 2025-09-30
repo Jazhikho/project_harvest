@@ -6,6 +6,8 @@ extends Node3D
 @onready var animation_player = $TransitionLayer/AnimationPlayer
 @onready var journal_ui = $UI/JournalUI
 @onready var control_hints = $UI/ControlsUI
+@export var music_playlist: MusicPlaylist        # res://…/MusicPlaylist.tres
+@export var sfx_library: SFX                     # res://…/SFX.tres
 
 var game_paused = false
 var inventory_open = false
@@ -29,14 +31,11 @@ func _ready():
 
 	# Start with fade in
 	fade_in()
-	
 
 func _notification(what: int) -> void:
-	"""Handle window close requests as death events"""
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		# Record death before quitting
 		_terminate_subject("Force Quit")
-		# Allow the quit to proceed after recording death
+		await _fade_out_game_audio_and_wait(1.0)
 		get_tree().quit()
 
 func _initialize_game():
@@ -64,6 +63,8 @@ func _initialize_game():
 			tile_manager._spawn_tile_connections(start_tile, Vector2i(0, 0))
 		else:
 			push_error("GameController: Start tile not found!")
+			
+	_start_game_audio()
 
 func _input(event):
 	# Inventory takes priority over pause
@@ -121,22 +122,20 @@ func _on_journal_closed():
 	get_tree().paused = false
 
 func _on_main_menu_requested():
-	# Record death before leaving
 	_terminate_subject("Abandoned")
-	
+	# Start visual fade and audio fade together; wait on audio before scene swap
 	fade_out()
-	await get_tree().create_timer(0.5).timeout
+	await _fade_out_game_audio_and_wait(1.5)
 	get_tree().paused = false
 	SceneManager.load_main_menu()
 
 func _on_quit_requested():
-	# Record death and show death screen
 	_terminate_subject("Terminated")
-	
 	fade_out()
-	await get_tree().create_timer(0.5).timeout
+	await _fade_out_game_audio_and_wait(1.5)
 	get_tree().paused = false
 	SceneManager.load_death_screen("Terminated")
+
 
 func _terminate_subject(cause: String):
 	"""Handle subject termination for quit/main menu"""
@@ -169,16 +168,70 @@ func _on_player_died(cause: String, death_position: Vector2i, death_data: Dictio
 	trigger_death(cause)
 
 func trigger_death(death_type: String):
-	# Make sure game isn't paused
 	get_tree().paused = false
-	
-	# Hide UI elements
 	if pause_menu:
 		pause_menu.visible = false
 	if inventory_ui:
 		inventory_ui.visible = false
-	
-	# Fade out and load death screen
+
 	fade_out()
-	await get_tree().create_timer(0.5).timeout
+	await _fade_out_game_audio_and_wait(1.5)
 	SceneManager.load_death_screen(death_type)
+
+func _fade_out_game_audio_and_wait(seconds: float) -> void:
+	var am := get_node_or_null("/root/AudioManager")
+	if am == null:
+		return
+	await am.stop_all_game_audio_fade(seconds)
+
+## _start_game_audio
+## Purpose: Start looping ambient and randomized music using exported resources and AudioManager.
+## @return void.
+func _start_game_audio() -> void:
+	var audio_manager: Node = get_node_or_null("/root/AudioManager")
+	if audio_manager == null:
+		push_error("GameController: AudioManager autoload not found.")
+		return
+
+	# If a menu theme is still playing, fade it out first.
+	if audio_manager.has_method("stop_theme_fade"):
+		await audio_manager.stop_theme_fade(0.5)
+
+	# Ensure buses are present before anything touches volumes/players.
+	if audio_manager.has_method("setup_music_buses"):
+		audio_manager.setup_music_buses()
+	elif audio_manager.has_method("_ensure_core_buses"):
+		audio_manager._ensure_core_buses()
+
+	# 1) Ambient loop from SFX resource
+	var ambient_stream: AudioStream = null
+	if sfx_library is SFX and sfx_library.ambient is AudioStream:
+		ambient_stream = sfx_library.ambient
+
+	if ambient_stream != null:
+		# Use the correct method name that exists in AudioManager
+		if audio_manager.has_method("play_ambient_loop"):
+			audio_manager.play_ambient_loop(ambient_stream, -10.0)
+		else:
+			push_error("GameController: AudioManager.play_ambient_loop(AudioStream, float) missing.")
+	else:
+		push_error("GameController: No ambient stream set. Assign SFX.tres -> 'ambient' in the inspector.")
+
+	# 2) Music playlist from resource
+	if music_playlist is MusicPlaylist and music_playlist.tracks.size() > 0:
+		if audio_manager.has_method("set_music_playlist"):
+			audio_manager.set_music_playlist(music_playlist)
+		else:
+			push_error("GameController: AudioManager.set_music_playlist(MusicPlaylist) missing.")
+
+		# Configure crossfade/gap if available.
+		if audio_manager.has_method("configure_music_timing"):
+			# crossfade_seconds, gap_min_seconds, gap_max_seconds
+			audio_manager.configure_music_timing(2.5, 0.5, 2.0)
+
+		if audio_manager.has_method("start_music"):
+			audio_manager.start_music()
+		else:
+			push_error("GameController: AudioManager.start_music() missing.")
+	else:
+		push_error("GameController: music_playlist is empty or not assigned in the inspector.")

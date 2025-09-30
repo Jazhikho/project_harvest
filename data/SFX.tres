@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="SFX" load_steps=22 format=3 uid="uid://b11pmr7ctvqqy"]
+
+[ext_resource type="Script" uid="uid://ck6mfksth7lfi" path="res://data/SFX.gd" id="1_40wi3"]
+[ext_resource type="AudioStream" uid="uid://dk38i5nulmvpx" path="res://assets/audio/Corn.ogg" id="1_vcavf"]
+[ext_resource type="AudioStream" uid="uid://dr1hqge7ib4ek" path="res://assets/audio/dragging.ogg" id="2_gl02i"]
+[ext_resource type="AudioStream" uid="uid://lus8ak76vw50" path="res://assets/audio/gateopen.ogg" id="3_rtagi"]
+[ext_resource type="AudioStream" uid="uid://cay4afojgq03u" path="res://assets/audio/heartbeat.ogg" id="4_s65gy"]
+[ext_resource type="AudioStream" uid="uid://b114rubm08u6e" path="res://assets/audio/itempickup.ogg" id="5_wdpgw"]
+[ext_resource type="AudioStream" uid="uid://dgny7hw041sox" path="res://assets/audio/kick.ogg" id="6_y6f0h"]
+[ext_resource type="AudioStream" uid="uid://texbcivbs3x4" path="res://assets/audio/notepickup.ogg" id="7_o3r8w"]
+[ext_resource type="AudioStream" uid="uid://c5427kl4vxbi" path="res://assets/audio/padlock.ogg" id="8_npbvu"]
+[ext_resource type="AudioStream" uid="uid://csyj71unfey52" path="res://assets/audio/scream1.ogg" id="9_sd81p"]
+[ext_resource type="AudioStream" uid="uid://d37qur1o66oja" path="res://assets/audio/scream2.ogg" id="10_std1t"]
+[ext_resource type="AudioStream" uid="uid://daiylyerbylw8" path="res://assets/audio/scream3.ogg" id="11_2tsge"]
+[ext_resource type="AudioStream" uid="uid://b1scf04p1mjfl" path="res://assets/audio/scream.ogg" id="12_prqyg"]
+[ext_resource type="AudioStream" uid="uid://sk3fri0larry" path="res://assets/audio/sprinting.ogg" id="14_3ximn"]
+[ext_resource type="AudioStream" uid="uid://ktuprjquflfm" path="res://assets/audio/stilllocked.ogg" id="15_h8o4p"]
+[ext_resource type="AudioStream" uid="uid://1cu7jfgnuomh" path="res://assets/audio/walking.ogg" id="16_knihv"]
+[ext_resource type="AudioStream" uid="uid://die1gqocil6rs" path="res://assets/audio/whispers1.ogg" id="17_13mny"]
+[ext_resource type="AudioStream" uid="uid://l3vdvtk7nhu6" path="res://assets/audio/whispers2.ogg" id="18_4l6l7"]
+[ext_resource type="AudioStream" uid="uid://donucdt1axyo5" path="res://assets/audio/whispers3.ogg" id="19_7tva0"]
+[ext_resource type="AudioStream" uid="uid://oyp5ln71g5mx" path="res://assets/audio/whispers4.ogg" id="20_ukifc"]
+[ext_resource type="AudioStream" uid="uid://c8eb66vn6mnx4" path="res://assets/audio/whispers.ogg" id="21_tjbnc"]
+
+[resource]
+script = ExtResource("1_40wi3")
+ambient = ExtResource("1_vcavf")
+dragging = ExtResource("2_gl02i")
+gateopn = ExtResource("3_rtagi")
+heartbeat = ExtResource("4_s65gy")
+itempickup = ExtResource("5_wdpgw")
+kick = ExtResource("6_y6f0h")
+notepickup = ExtResource("7_o3r8w")
+padlock = ExtResource("8_npbvu")
+sprinting = ExtResource("14_3ximn")
+stilllocked = ExtResource("15_h8o4p")
+walking = ExtResource("16_knihv")
+whispers = Array[AudioStream]([ExtResource("17_13mny"), ExtResource("18_4l6l7"), ExtResource("19_7tva0"), ExtResource("20_ukifc"), ExtResource("21_tjbnc")])
+screams = Array[AudioStream]([ExtResource("9_sd81p"), ExtResource("10_std1t"), ExtResource("11_2tsge"), ExtResource("12_prqyg")])
+metadata/_custom_type_script = "uid://ck6mfksth7lfi"

@@ -1,6 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://c5rjon02p04c"]
+[gd_scene load_steps=11 format=3 uid="uid://c5rjon02p04c"]
 
 [ext_resource type="Script" uid="uid://bdnkng8cyyvbu" path="res://scripts/entities/Effigy.gd" id="1_effigy_script"]
+[ext_resource type="Resource" uid="uid://b11pmr7ctvqqy" path="res://data/SFX.tres" id="2_05frr"]
 [ext_resource type="PackedScene" uid="uid://bv3mdg4yo4aqv" path="res://assets/models/stage_1.tscn" id="4_stage3"]
 [ext_resource type="PackedScene" uid="uid://tj2t4odvqga3" path="res://assets/models/effigy3.glb" id="4_w53tp"]
 [ext_resource type="PackedScene" uid="uid://b37apb738anqx" path="res://assets/models/stage_2.tscn" id="5_stage4"]
@@ -19,6 +20,7 @@ radius = 3.0
 
 [node name="Effigy" type="CharacterBody3D"]
 script = ExtResource("1_effigy_script")
+sfx_library = ExtResource("2_05frr")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
@@ -43,10 +45,6 @@ collision_layer = 0
 [node name="DetectionShape" type="CollisionShape3D" parent="DetectionArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("BoxShape3D_rlyf0")
-
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
-max_distance = 20.0
 
 [node name="SanityDrainArea" type="Area3D" parent="."]
 script = ExtResource("6_vrxgt")

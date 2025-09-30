@@ -3,6 +3,7 @@ extends Node
 ## Handles item data loading and gameplay logic
 
 @export var spawn_catalog: SpawnCatalog
+@export var sfx_library: SFX
 
 var _item_definitions := {}
 var _item_categories := {
@@ -18,6 +19,8 @@ var _state_manager: Node
 
 const ITEM_DATA_PATH := "res://data/items.json"
 const MAX_UNLOCKED_NOTES := 10
+const PICKUP_ITEM_DB: float = -8.0
+const PICKUP_NOTE_DB: float = -12.0
 
 # NEW: Map item_id to PackedScene for spawning
 var _item_scene_map: Dictionary = {} # item_id -> PackedScene
@@ -372,9 +375,36 @@ func _connect_to_events() -> void:
 	_message_bus.game_started.connect(_on_game_started)
 
 func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
+	# Play the pickup SFX first, at the collector’s position if available.
+	var origin: Vector3 = Vector3.ZERO
+	if collector != null and collector is Node3D:
+		origin = collector.global_position
+	else:
+		# Fallback: try to find any remaining instance to grab a position from.
+		var found: Vector3 = origin
+		var got_pos: bool = false
+		for node in get_tree().get_nodes_in_group("collectibles"):
+			if is_instance_valid(node):
+				var nid: String = ""
+				if node.has_meta("item_id"):
+					nid = String(node.get_meta("item_id"))
+				elif node.has_method("get_item_id"):
+					nid = String(node.get_item_id())
+				elif "item_id" in node:
+					nid = String(node.item_id)
+				if nid == item_id and node is Node3D:
+					found = node.global_position
+					got_pos = true
+					break
+		if got_pos:
+			origin = found
+	_play_pickup_sfx(item_id, origin)
+
+	# Then do your existing bookkeeping
 	apply_item_effects(item_id)
 	mark_item_collected(item_id)
 	_cleanup_duplicate_items(item_id)
+
 	
 func mark_item_collected(item_id: String) -> void:
 	"""
@@ -441,3 +471,56 @@ func _cleanup_duplicate_items(item_id: String) -> void:
 
 func _on_game_started() -> void:
 	reset_for_new_run()
+
+## _play_stream_3d_at
+## Purpose: Play an AudioStream at a world position on the SFX bus and auto-free.
+## @param stream: AudioStream to play.
+## @param position: World position.
+## @param volume_db: Playback volume in dB.
+## @return void.
+func _play_stream_3d_at(stream: AudioStream, position: Vector3, volume_db: float) -> void:
+	if stream == null:
+		return
+	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+	player.name = "PickupSFX"
+	player.stream = stream
+	player.bus = "SFX"
+	player.volume_db = volume_db
+	player.global_position = position
+	# No falloff. It’s a local event sound originating at the pickup.
+	player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
+	player.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
+	get_tree().current_scene.add_child(player)
+	player.play()
+	player.finished.connect(player.queue_free)
+
+## _play_pickup_sfx
+## Purpose: Decide which pickup sound to play based on category (note vs item).
+## @param item_id: Collected item id.
+## @param origin: Where to play the sound (usually the collector or item position).
+## @return void.
+func _play_pickup_sfx(item_id: String, origin: Vector3) -> void:
+	if sfx_library == null:
+		return
+	
+	var notes_list: Array = _item_categories.get("notes", []) as Array
+	var is_note: bool = false
+	if notes_list != null:
+		is_note = notes_list.has(item_id)
+
+	if is_note:
+		# Prefer dedicated notepickup if set; otherwise fall back to itempickup.
+		if sfx_library.notepickup is AudioStream:
+			_play_stream_3d_at(sfx_library.notepickup, origin, PICKUP_NOTE_DB)
+			return
+		if sfx_library.itempickup is AudioStream:
+			_play_stream_3d_at(sfx_library.itempickup, origin, PICKUP_NOTE_DB)
+			return
+	else:
+		if sfx_library.itempickup is AudioStream:
+			_play_stream_3d_at(sfx_library.itempickup, origin, PICKUP_ITEM_DB)
+			return
+		# If someone misfiled the audio, a note sound is better than silence.
+		if sfx_library.notepickup is AudioStream:
+			_play_stream_3d_at(sfx_library.notepickup, origin, PICKUP_ITEM_DB)
+			return

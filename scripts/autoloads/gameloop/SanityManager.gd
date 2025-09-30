@@ -216,6 +216,10 @@ func _on_sanity_changed(old_value: int, new_value: int, delta: int) -> void:
 	"""Handle sanity value changes"""
 	_apply_sanity_effects(old_value, new_value)
 	_last_sanity_value = new_value
+	
+	var player = get_tree().get_first_node_in_group("player")
+	if player and player.has_method("_update_sanity_audio"):
+		player._update_sanity_audio()
 
 func _on_sanity_threshold_crossed(threshold_name: String, value: int, crossed_down: bool) -> void:
 	"""Handle sanity threshold crossings"""

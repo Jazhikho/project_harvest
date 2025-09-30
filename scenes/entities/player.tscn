@@ -1,12 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://b2djga0bpmfs7"]
+[gd_scene load_steps=4 format=3 uid="uid://b2djga0bpmfs7"]
 
 [ext_resource type="Script" uid="uid://bd6i85w34p2be" path="res://scripts/entities/Player.gd" id="1_player"]
+[ext_resource type="Resource" uid="uid://b11pmr7ctvqqy" path="res://data/SFX.tres" id="2_08t41"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pqjxn"]
 radius = 0.4
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_player")
+sfx_lib = ExtResource("2_08t41")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_pqjxn")

@@ -279,6 +279,25 @@ This document provides complete attribution for all assets used in Project Harve
 
 **Attribution:** "Audio generated using Stability AI's Stable Audio 1.0 under the Stable Audio Community License"
 
+### Scream Sound Effects
+**Source:** Freesound.org  
+**License:** Creative Commons 0 (CC0) - Public Domain  
+**Website:** https://freesound.org/
+
+**Assets Used:**
+- `assets/audio/panic_scream_1.ogg` - Panic-stricken screaming sound effect
+- `assets/audio/female_scream_02.ogg` - Female scream sound effect
+- `assets/audio/loud_female_scream.ogg` - Loud female scream sound effect
+- `assets/audio/male_screams_1.ogg` - Male screams sound effect
+
+**Individual Attributions:**
+- "Panic-stricken screaming #1" by Klangkobold -- https://freesound.org/s/547961/ -- License: Creative Commons 0
+- "Female scream 02" by missozzy -- https://freesound.org/s/169811/ -- License: Creative Commons 0
+- "Loud Female Scream.wav" by Yin_Yang_Jake007 -- https://freesound.org/s/406088/ -- License: Creative Commons 0
+- "Male Screams [1]" by marc3122 -- https://freesound.org/s/556976/ -- License: Creative Commons 0
+
+**Attribution:** "Scream sound effects from Freesound.org contributors, licensed under Creative Commons 0"
+
 **License Details:** The Stable Audio Community License allows for non-commercial use. For commercial distribution, verify current licensing terms at https://stability.ai/
 
 ---

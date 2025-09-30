@@ -14,7 +14,7 @@ var _puzzle_ui: Control
 var _items_placed = []
 var _completion_order: int = -1  # Which number puzzle this was (1st, 2nd, 3rd)
 
-@onready var mirror_area: Area3D = $BrokenMirror/Area3D
+@onready var mirror_area: Area3D = $Area3D
 
 func _ready() -> void:
 	set_meta("is_puzzle", true)
