@@ -116,15 +116,21 @@ func _on_player_spawned(player_node: Node3D) -> void:
 		print("NarrativeUI: Intro already completed, skipping")
 		return
 	
-	# Check if this is a new game (no save data OR no deaths recorded)
+	# Wait for game_started to fire and SaveManager to update had_existing_save flag
+	# We need to wait because game_started fires AFTER player spawns
 	var save_mgr = get_node_or_null("/root/SaveManager")
-	var is_new_game: bool = false
-	if save_mgr:
-		# It's a continue game if save data exists AND there's at least one death
-		var has_save: bool = save_mgr.has_save_data()
-		var death_count: int = save_mgr.save_data.get("deaths", 0) if has_save else 0
-		is_new_game = not has_save or death_count == 0
-		print("NarrativeUI: SaveManager check - has_save_data=", has_save, ", deaths=", death_count, ", is_new_game=", is_new_game)
+	if not save_mgr:
+		return
+	
+	# Wait a few frames to ensure game_started signal has been processed
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
+	
+	# Check if this is a new game using SaveManager's had_existing_save flag
+	# This flag is set in SaveManager._on_game_started() before start_run() creates a new save file
+	var is_new_game: bool = not save_mgr.had_existing_save
+	print("NarrativeUI: SaveManager had_existing_save=", save_mgr.had_existing_save, ", is_new_game=", is_new_game)
 	
 	if is_new_game:
 		# Set flag IMMEDIATELY so ControlsUI knows to wait

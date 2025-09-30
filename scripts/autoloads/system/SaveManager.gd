@@ -2,6 +2,9 @@ extends Node
 
 const SAVE_PATH = "user://save_data.sav"
 
+# Track if save existed at scene load (before start_run creates it)
+var had_existing_save: bool = false
+
 var save_data: Dictionary = {
 	"time_played": 0.0,
 	"deaths": 0,
@@ -14,12 +17,13 @@ var save_data: Dictionary = {
 	"settings": {},
 	"puzzles": {},
 	"puzzle_items_used": [],
-	"controls_shown_this_run": false 
+	"controls_shown_this_run": false
 }
 
 func _ready() -> void:
 	# Connect to game events to manage run state
 	call_deferred("_connect_to_events")
+	# Note: had_existing_save is set in _on_game_started() when game scene loads
 	load_game()
 
 func _connect_to_events() -> void:
@@ -33,6 +37,8 @@ func _connect_to_events() -> void:
 
 func _on_game_started() -> void:
 	"""Handle game start event"""
+	# Update the flag before start_run creates a new save
+	had_existing_save = has_save_data()
 	start_run()
 
 func has_save_data() -> bool:
@@ -62,7 +68,7 @@ func load_game() -> void:
 				save_data.backpack_inventory = []
 			if not save_data.has("collectibles"):
 				save_data.collectibles = []
-			if not save_data.has("controls_shown_this_run"): 
+			if not save_data.has("controls_shown_this_run"):
 				save_data.controls_shown_this_run = false
 			
 			# Save the updated structure
@@ -88,7 +94,7 @@ func _reset_save_data() -> void:
 		"settings": {},
 		"puzzles": {},
 		"puzzle_items_used": [],
-		"controls_shown_this_run": false 
+		"controls_shown_this_run": false
 	}
 
 func start_run() -> void:

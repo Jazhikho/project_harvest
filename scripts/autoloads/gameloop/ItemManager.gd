@@ -13,6 +13,7 @@ var _item_categories := {
 
 var _item_effects := {}
 var _unlocked_notes := []
+var _puzzle_notes := []
 
 var _message_bus: Node
 var _state_manager: Node
@@ -154,6 +155,7 @@ func _load_item_definitions() -> void:
 	# Reset categories explicitly
 	_item_categories["notes"] = []
 	_item_categories["items"] = []
+	_puzzle_notes.clear()
 
 	if not FileAccess.file_exists(ITEM_DATA_PATH):
 		push_warning("ItemManager: items.json not found at " + ITEM_DATA_PATH + " (export?). Falling back to catalog-only spawn.")
@@ -208,11 +210,21 @@ func _process_item_data(data: Dictionary) -> void:
 				_item_categories[category] = cat_list
 
 		_item_effects[item_id] = (item.get("effects", {}) as Dictionary).duplicate(true)
+		
+		# Track puzzle notes separately (they have subcategory "Puzzle Clues")
+		if category == "notes" and item.get("subcategory", "") == "Puzzle Clues":
+			if item_id not in _puzzle_notes:
+				_puzzle_notes.append(item_id)
 
-	# initial unlocked notes
+	# Initial unlocked notes - only regular notes, not puzzle notes
 	var notes_list: Array = _item_categories.get("notes", []) as Array
-	var initial_count: int = min(3, notes_list.size())
-	_unlocked_notes = notes_list.slice(0, initial_count)
+	var regular_notes: Array = []
+	for note_id in notes_list:
+		if note_id not in _puzzle_notes:
+			regular_notes.append(note_id)
+	
+	var initial_count: int = min(10, regular_notes.size())
+	_unlocked_notes = regular_notes.slice(0, initial_count)
 
 
 ## can_item_spawn
@@ -223,6 +235,10 @@ func _process_item_data(data: Dictionary) -> void:
 func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 	# Must have a scene to spawn.
 	if not _item_scene_map.has(item_id):
+		return false
+
+	# Never random-spawn puzzle notes (they spawn only in their designated puzzle tiles)
+	if item_id in _puzzle_notes:
 		return false
 
 	# Treat "notes" as a special category only if JSON loaded them.
@@ -351,23 +367,41 @@ func get_category_items(category: String) -> Array:
 
 func _unlock_next_note(collected_note_id: String) -> void:
 	"""
-	Unlock next note when one is collected
+	Unlock next note when one is collected (only for regular notes, not puzzle notes)
 	
 	@param collected_note_id: ID of note that was collected
 	"""
+	# Don't unlock new notes for puzzle notes
+	if collected_note_id in _puzzle_notes:
+		return
+	
 	var note_index: int = _item_categories.notes.find(collected_note_id)
 	if note_index < 0:
 		return
 	
+	# Get only regular notes (exclude puzzle notes)
 	var all_notes: Array = _item_categories.notes
+	var regular_notes: Array = []
+	for note_id in all_notes:
+		if note_id not in _puzzle_notes:
+			regular_notes.append(note_id)
+	
 	var next_index := _unlocked_notes.size()
 	
-	if next_index < all_notes.size() and all_notes[next_index] not in _unlocked_notes:
-		_unlocked_notes.append(all_notes[next_index])
+	if next_index < regular_notes.size() and regular_notes[next_index] not in _unlocked_notes:
+		_unlocked_notes.append(regular_notes[next_index])
 
 func reset_for_new_run() -> void:
-	"""Reset item availability for new game run"""
-	_unlocked_notes = _item_categories.notes.slice(0, min(3, _item_categories.notes.size()))
+	"""Reset item availability for new game run (only regular notes, not puzzle notes)"""
+	# Get only regular notes (exclude puzzle notes)
+	var all_notes: Array = _item_categories.notes
+	var regular_notes: Array = []
+	for note_id in all_notes:
+		if note_id not in _puzzle_notes:
+			regular_notes.append(note_id)
+	
+	var initial_count: int = min(3, regular_notes.size())
+	_unlocked_notes = regular_notes.slice(0, initial_count)
 
 func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""

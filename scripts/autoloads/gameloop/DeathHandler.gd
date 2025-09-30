@@ -8,6 +8,9 @@ var _message_bus: Node
 # Reference to the start tile
 var _start_tile: Node3D
 
+# Track if this was a continue game (checked before save is created)
+var _is_continue: bool = false
+
 func _ready() -> void:
 	call_deferred("_initialize")
 
@@ -22,10 +25,18 @@ func _initialize() -> void:
 		return
 	
 	# Connect to game started event
+	# We check for save data when the event fires, not now, because autoloads
+	# persist across scene changes and this only runs once at app startup
 	_message_bus.game_started.connect(_on_game_started)
 
 func _on_game_started() -> void:
 	"""Called when game starts - check if we should spawn continue items"""
+	
+	# Check if this is a continue using SaveManager's flag
+	# SaveManager sets had_existing_save before start_run() creates a new save
+	# This is the most reliable way to detect if this is a truly new game or a continue
+	_is_continue = _save_manager.had_existing_save
+	print("DeathHandler: SaveManager had_existing_save: ", _is_continue, ", is_continue: ", _is_continue)
 	
 	# Wait a few frames for start tile to be registered
 	await get_tree().process_frame
@@ -38,12 +49,13 @@ func _on_game_started() -> void:
 		push_error("StartTileSpawner: Could not find start tile")
 		return
 	
-	# Check if this is a continue (run was active when loaded)
-	if _is_continue_game():
-		print("StartTileSpawner: Continue detected, spawning effigy and backpack")
+	# Use the flag we checked before awaiting
+	if _is_continue:
+		print("StartTileSpawner: Continue detected, spawning effigy and backpack, hiding start note")
+		_hide_start_note()
 		_spawn_continue_items()
 	else:
-		print("StartTileSpawner: New game, no continue items spawned")
+		print("StartTileSpawner: New game, start note available")
 
 func _find_start_tile() -> Node3D:
 	"""Find the start tile in the scene"""
@@ -76,22 +88,22 @@ func _find_start_tile() -> Node3D:
 	
 	return null
 
-func _is_continue_game() -> bool:
+func _hide_start_note() -> void:
 	"""
-	Check if this is a continue game (player died in previous run)
-	
-	@return: True if continuing from a death
+	Hide the start note on the start tile for continue games
+	The note should only be visible on brand new games
 	"""
-	# Check if save data exists and had an active run
-	if not _save_manager.has_save_data():
-		print("DeathHandler: No save data, not a continue")
-		return false
+	if not _start_tile:
+		return
 	
-	# If run was active, that means player died and this is a continue
-	var death_count: int = _save_manager.save_data.get("deaths", 0)
-	var is_continue: bool = death_count > 0
-	print("DeathHandler: Save data exists, deaths=", death_count, ", is_continue=", is_continue)
-	return is_continue
+	var objects_node = _start_tile.get_node_or_null("Objects")
+	if not objects_node:
+		return
+	
+	var start_note = objects_node.get_node_or_null("start_note")
+	if start_note:
+		print("DeathHandler: Hiding start note for continue game")
+		start_note.queue_free()
 
 func _spawn_continue_items() -> void:
 	"""Spawn effigy and backpack at marked positions on start tile"""
