@@ -233,17 +233,18 @@ func _process_item_data(data: Dictionary) -> void:
 ## @param context: Dictionary (tile_position, is_permanent, etc.)
 ## @return bool
 func can_item_spawn(item_id: String, context: Dictionary) -> bool:
-	# Must have a scene to spawn.
-	if not _item_scene_map.has(item_id):
+	# Treat "notes" as a special category only if JSON loaded them.
+	var notes_list: Array = _item_categories.get("notes", []) as Array
+	var is_note: bool = item_id in notes_list
+	
+	# Notes are spawned dynamically (don't need individual scenes)
+	# Regular items must have a scene to spawn.
+	if not is_note and not _item_scene_map.has(item_id):
 		return false
 
 	# Never random-spawn puzzle notes (they spawn only in their designated puzzle tiles)
 	if item_id in _puzzle_notes:
 		return false
-
-	# Treat "notes" as a special category only if JSON loaded them.
-	var notes_list: Array = _item_categories.get("notes", []) as Array
-	var is_note: bool = item_id in notes_list
 
 	# Current-run collected list.
 	var collected_items: Array = _state_manager.get_state("collected_items") as Array
@@ -400,7 +401,7 @@ func reset_for_new_run() -> void:
 		if note_id not in _puzzle_notes:
 			regular_notes.append(note_id)
 	
-	var initial_count: int = min(3, regular_notes.size())
+	var initial_count: int = min(MAX_UNLOCKED_NOTES, regular_notes.size())
 	_unlocked_notes = regular_notes.slice(0, initial_count)
 
 func _connect_to_events() -> void:
