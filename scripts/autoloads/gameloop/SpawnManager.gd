@@ -11,7 +11,7 @@ var _state_manager: Node
 
 var _spawn_history := {}
 
-const ITEM_SPAWN_CHANCE := 0.10 # 10% chance per spawn point
+const ITEM_SPAWN_CHANCE := 0.9 # 90% chance per spawn point
 const MAX_ITEMS_PER_TILE := 4
 
 func _ready() -> void:

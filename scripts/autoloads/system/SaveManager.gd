@@ -5,6 +5,9 @@ const SAVE_PATH = "user://save_data.sav"
 # Track if save existed at scene load (before start_run creates it)
 var had_existing_save: bool = false
 
+# Signal emitted when save data is loaded (for continue games)
+signal save_data_loaded()
+
 var save_data: Dictionary = {
 	"time_played": 0.0,
 	"deaths": 0,
@@ -73,6 +76,11 @@ func load_game() -> void:
 			
 			# Save the updated structure
 			save_game()
+			
+			# Emit signal that save data is loaded (important for continue games)
+			# Only emit if this is not the initial app startup load
+			if get_tree().current_scene and get_tree().current_scene.name != "Main":
+				save_data_loaded.emit()
 		else:
 			push_error("SaveManager: Failed to open save file for reading")
 
@@ -183,7 +191,7 @@ func mark_puzzle_completed(puzzle_id: String) -> void:
 	save_data.puzzles[puzzle_id]["completed"] = true
 	save_data.puzzles[puzzle_id]["completion_time"] = Time.get_unix_time_from_system()
 	if MessageBus:
-		MessageBus.emit_event("puzzle_completed", [puzzle_id, ])
+		MessageBus.emit_event("puzzle_completed", [puzzle_id, Vector2i.ZERO, {}])
 	save_game()
 
 func is_puzzle_item_used(item_id: String) -> bool:

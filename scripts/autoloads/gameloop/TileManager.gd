@@ -86,6 +86,9 @@ func _load_available_tiles() -> void:
 				var puzzle_id = temp_instance.get_puzzle_id()
 				if not puzzle_id.is_empty() and SaveManager.has_method("is_puzzle_completed"):
 					is_completed = SaveManager.is_puzzle_completed(puzzle_id)
+					print("TileManager: Checking puzzle '%s' - completed: %s" % [puzzle_id, is_completed])
+				else:
+					print("TileManager: Warning - puzzle ID empty or SaveManager method missing for tile: %s" % tile_scene.resource_path)
 			
 			temp_instance.queue_free()
 			
@@ -750,6 +753,11 @@ func _connect_to_events() -> void:
 	_message_bus.game_started.connect(_on_game_started)
 	_message_bus.maze_shift_triggered.connect(_on_maze_shift)
 	_message_bus.puzzle_completed.connect(_on_puzzle_completed)
+	
+	# Connect to SaveManager signal for continue games
+	var save_manager: Node = get_node_or_null("/root/SaveManager")
+	if save_manager and save_manager.has_signal("save_data_loaded"):
+		save_manager.save_data_loaded.connect(_on_save_data_loaded)
 
 func _on_game_started() -> void:
 	"""Handle game start - initialize tiles when game actually starts"""
@@ -766,6 +774,11 @@ func _on_maze_shift(center: Vector2i, radius: int, affected_tiles: Array) -> voi
 func _on_puzzle_completed(puzzle_id: String, tile_pos: Vector2i, reward: Dictionary) -> void:
 	"""Handle puzzle completion"""
 	remove_permanent_tile(tile_pos)
+
+func _on_save_data_loaded() -> void:
+	"""Handle save data loaded signal - reload tiles to check puzzle completion status"""
+	print("TileManager: Save data loaded, reloading available tiles")
+	_load_available_tiles()
 
 # Debug functions
 func debug_print_active_tiles() -> void:
