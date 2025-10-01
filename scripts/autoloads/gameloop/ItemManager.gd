@@ -402,8 +402,37 @@ func reset_for_new_run() -> void:
 		if note_id not in _puzzle_notes:
 			regular_notes.append(note_id)
 	
-	var initial_count: int = min(MAX_UNLOCKED_NOTES, regular_notes.size())
-	_unlocked_notes = regular_notes.slice(0, initial_count)
+	# Check if this is a continue game by looking at SaveManager's collectibles
+	var save_manager = get_node_or_null("/root/SaveManager")
+	var previously_collected_notes: Array = []
+	
+	if save_manager and save_manager.has_method("get_all_collected_notes"):
+		previously_collected_notes = save_manager.get_all_collected_notes()
+	elif save_manager and save_manager.save_data.has("collectibles"):
+		# Fallback: get notes from collectibles
+		var item_manager = get_node_or_null("/root/ItemManager")
+		if item_manager:
+			for item_id in save_manager.save_data.collectibles:
+				var item_info = item_manager.get_item_info(item_id)
+				if item_info.get("category", "") == "notes":
+					previously_collected_notes.append(item_id)
+	
+	# Calculate how many notes should be unlocked based on previous collection
+	var notes_to_unlock: int = min(MAX_UNLOCKED_NOTES, regular_notes.size())
+	
+	# If we have previously collected notes, unlock additional notes
+	if not previously_collected_notes.is_empty():
+		# Count how many regular notes were previously collected
+		var collected_regular_notes: int = 0
+		for note_id in previously_collected_notes:
+			if note_id in regular_notes:
+				collected_regular_notes += 1
+		
+		# Unlock notes up to the number collected + initial batch
+		notes_to_unlock = min(MAX_UNLOCKED_NOTES + collected_regular_notes, regular_notes.size())
+	
+	_unlocked_notes = regular_notes.slice(0, notes_to_unlock)
+	print("ItemManager: Unlocked ", notes_to_unlock, " notes for new run (previously collected: ", previously_collected_notes.size(), ")")
 
 func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""

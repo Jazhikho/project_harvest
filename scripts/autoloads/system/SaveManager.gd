@@ -253,6 +253,31 @@ func clear_backpack_inventory() -> void:
 	save_game()
 	print("SaveManager: Backpack inventory cleared")
 
+func get_all_collected_notes() -> Array:
+	"""
+	Get all notes that have been collected across all runs
+	
+	@return: Array of note item IDs
+	"""
+	var notes: Array = []
+	var item_manager = get_node_or_null("/root/ItemManager")
+	if not item_manager:
+		return notes
+	
+	# Get notes from current collectibles
+	for item_id in save_data.get("collectibles", []):
+		var item_info = item_manager.get_item_info(item_id)
+		if item_info.get("category", "") == "notes":
+			notes.append(item_id)
+	
+	# Get notes from backpack inventory (previously collected)
+	for item_id in save_data.get("backpack_inventory", []):
+		var item_info = item_manager.get_item_info(item_id)
+		if item_info.get("category", "") == "notes":
+			notes.append(item_id)
+	
+	return notes
+
 func add_to_backpack(item_id: String) -> void:
 	"""
 	Add an item to the backpack
