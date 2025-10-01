@@ -7,15 +7,15 @@ var _state_manager: Node
 var _tile_manager: Node
 
 # Tile state tracking
-var _active_tiles: Dictionary = {}  # Vector2i -> {node: Node3D, state: String, last_changed: float}
+var _active_tiles: Dictionary = {} # Vector2i -> {node: Node3D, state: String, last_changed: float}
 var _current_player_tile: Vector2i = Vector2i(0, 0)
 var _previous_player_tile: Vector2i = Vector2i(-1000, -1000)
 
 # Transition management
-var _tile_transition_detectors: Dictionary = {}  # Vector2i -> Area3D
+var _tile_transition_detectors: Dictionary = {} # Vector2i -> Area3D
 var _transition_cooldown: float = 0.5
 var _last_transition_time: float = 0.0
-var _transition_threshold: float = 8.0  # Distance from tile center to trigger transition
+var _transition_threshold: float = 8.0 # Distance from tile center to trigger transition
 
 # Prevent stack overflow - defer TileManager notifications
 var _pending_tile_notifications: Array[Vector2i] = []
@@ -27,10 +27,10 @@ var _last_player_position: Vector3 = Vector3.ZERO
 
 # Tile states
 enum TileState {
-	INACTIVE,      # Tile exists but player not near
-	CONNECTING,    # Tile available for player to enter
-	ACTIVE,        # Player currently on this tile
-	PREVIOUS       # Tile player just came from
+	INACTIVE, # Tile exists but player not near
+	CONNECTING, # Tile available for player to enter
+	ACTIVE, # Player currently on this tile
+	PREVIOUS # Tile player just came from
 }
 
 const TILE_SIZE: float = 20.0
@@ -153,7 +153,7 @@ func set_tile_state(position: Vector2i, new_state: TileState) -> bool:
 	var old_state = tile_data.state
 	
 	if old_state == new_state:
-		return false  # No change needed
+		return false # No change needed
 	
 	tile_data.state = new_state
 	tile_data.last_changed = Time.get_unix_time_from_system()
@@ -183,7 +183,7 @@ func _setup_tile_for_state(tile_node: Node3D, position: Vector2i, state: TileSta
 	
 	match state:
 		TileState.INACTIVE:
-			pass  # No detector needed
+			pass # No detector needed
 		
 		TileState.CONNECTING:
 			# We're using position-based detection now, so no Area3D needed
@@ -207,7 +207,7 @@ func _create_transition_detector(tile_node: Node3D, position: Vector2i) -> void:
 	@param tile_node: Tile to create detector for
 	@param position: Grid position of tile
 	"""
-	pass  # No longer using Area3D detectors
+	pass # No longer using Area3D detectors
 
 func _remove_transition_detector(position: Vector2i) -> void:
 	"""
@@ -239,7 +239,7 @@ func _execute_tile_transition(new_tile_position: Vector2i) -> void:
 		_state_manager.set_state("current_tile_position", new_tile_position)
 		
 		# Increment tiles explored counter (only for new tiles, not revisits)
-		if old_tile_position != Vector2i(-1000, -1000):  # Not initial spawn
+		if old_tile_position != Vector2i(-1000, -1000): # Not initial spawn
 			var current_tiles_explored = _state_manager.get_state("tiles_explored")
 			if current_tiles_explored == null:
 				current_tiles_explored = 0
@@ -393,7 +393,9 @@ func _connect_to_events() -> void:
 	_message_bus.player_spawned.connect(_on_player_spawned)
 
 func _on_game_started() -> void:
-	"""Handle game start"""
+	"""Handle game start - reset state for new run"""
+	# Clear all previous run state
+	_active_tiles.clear()
 	_find_player()
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:

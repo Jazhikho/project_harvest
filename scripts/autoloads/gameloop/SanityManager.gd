@@ -53,12 +53,8 @@ func apply_sanity_loss(cause: String, base_amount: int, position: Vector3 = Vect
 	@param position: World position where loss occurred
 	"""
 	var final_amount: int = _calculate_sanity_loss(cause, base_amount)
-	var message: String = _get_sanity_loss_message(cause, final_amount)
 	
 	_state_manager.modify_sanity(-final_amount)
-	
-	if not message.is_empty():
-		_message_bus.emit_event("notification_requested", [message, 3.0, 1])
 	
 	_message_bus.emit_event("sanity_effect_triggered", [cause, final_amount / 100.0])
 
@@ -91,28 +87,6 @@ func _calculate_sanity_loss(cause: String, base_amount: int) -> int:
 				multiplier *= 0.7
 	
 	return int(base_amount * multiplier)
-
-func _get_sanity_loss_message(cause: String, amount: int) -> String:
-	"""
-	Get appropriate message for sanity loss
-	
-	@param cause: Cause of loss
-	@param amount: Amount lost
-	@return: Message to display
-	"""
-	match cause:
-		"weird_object":
-			return "Your mind reels as you touch the cursed object..."
-		"entity_encounter":
-			return "Terror grips your heart..."
-		"maze_shift":
-			return "Reality bends unnaturally around you..."
-		"isolation":
-			return "The endless maze weighs on your psyche..."
-		"whispers":
-			return "The voices grow louder in your head..."
-		_:
-			return "Your sanity deteriorates..."
 
 func _apply_passive_decay() -> void:
 	"""Apply gradual sanity decay over time"""
@@ -216,7 +190,7 @@ func _on_sanity_changed(old_value: int, new_value: int, delta: int) -> void:
 	"""Handle sanity value changes"""
 	_apply_sanity_effects(old_value, new_value)
 	_last_sanity_value = new_value
-	
+	print("Sanity is now ", new_value, " with a delta of ", delta)
 	var player = get_tree().get_first_node_in_group("player")
 	if player and player.has_method("_update_sanity_audio"):
 		player._update_sanity_audio()

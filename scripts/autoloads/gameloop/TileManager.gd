@@ -753,6 +753,9 @@ func _connect_to_events() -> void:
 
 func _on_game_started() -> void:
 	"""Handle game start - initialize tiles when game actually starts"""
+	# Clear all previous run data
+	_established_connections.clear()
+	_start_tile_initialized = false
 	cleanup_invalid_tile_references()
 	initialize_game_tiles()
 

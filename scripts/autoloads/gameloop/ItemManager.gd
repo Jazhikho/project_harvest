@@ -282,7 +282,7 @@ func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 ## Purpose: Build a weighted list of items that can spawn, with catalog fallback if JSON missing.
 ## @param context: Dictionary with spawn context.
 ## @return Array of { "item_id": String, "weight": float }.
-func get_spawnable_items(context: Dictionary) -> Array[Dictionary]:
+func get_spawnable_items(context: Dictionary, already_listed) -> Array[Dictionary]:
 	var spawnable: Array[Dictionary] = []
 	var candidate_ids: Array[String] = []
 
@@ -297,7 +297,8 @@ func get_spawnable_items(context: Dictionary) -> Array[Dictionary]:
 	for id_str: String in candidate_ids:
 		if can_item_spawn(id_str, context):
 			var entry := {"item_id": id_str, "weight": 1.0}
-			spawnable.append(entry)
+			if entry not in already_listed:
+				spawnable.append(entry)
 
 	return spawnable
 

@@ -15,6 +15,7 @@ var sequence_index: int = 0
 var waiting_for_advance: bool = false
 var in_intro_sequence: bool = false
 var intro_completed: bool = false
+var last_effigy_stage_seen: int = 0
 
 func _ready() -> void:
 	visible = false
@@ -84,7 +85,6 @@ func _connect_to_events() -> void:
 	bus.item_collected.connect(_on_item_collected)
 	bus.sanity_changed.connect(_on_sanity_changed)
 	bus.player_looking_at.connect(_on_player_looking_at)
-	bus.entity_stage_changed.connect(_on_entity_stage_changed)
 	
 	# Check if player already exists (fallback for race condition)
 	call_deferred("_check_for_existing_player")
@@ -290,15 +290,20 @@ func _on_sanity_changed(old_value: int, new_value: int, delta: int) -> void:
 			break
 
 func _on_player_looking_at(target: Node3D, target_type: String) -> void:
-	# Can be extended for specific look-at triggers
-	pass
-
-func _on_entity_stage_changed(entity_type: String, entity_node: Node3D, old_stage: int, new_stage: int) -> void:
-	if entity_type == "effigy":
-		var toast_key = "effigy_stage" + str(new_stage) + "_seen"
-		if narrative_data.has("toasts") and narrative_data.toasts.has(toast_key):
-			var toast = narrative_data.toasts[toast_key]
-			_queue_message(toast.text, toast.get("seconds", 5.0))
+	"""Handle when player looks at an entity"""
+	if target_type == "effigy":
+		# Get the effigy's current stage
+		var current_stage: int = target.get_meta("current_stage", 1)
+		
+		# Check if this is the first time seeing this stage
+		if current_stage != last_effigy_stage_seen:
+			last_effigy_stage_seen = current_stage
+			
+			# Fire narrative toast for first time seeing this stage
+			var toast_key: String = "effigy_stage" + str(current_stage) + "_seen"
+			if narrative_data.has("toasts") and narrative_data.toasts.has(toast_key):
+				var toast = narrative_data.toasts[toast_key]
+				_queue_message(toast.text, toast.get("seconds", 5.0))
 
 func _queue_message(text: String, duration: float) -> void:
 	"""Queue a toast message (non-interactive, timed display)"""

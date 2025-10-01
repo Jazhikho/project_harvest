@@ -163,7 +163,7 @@ func record_death_location(position: Vector2i, cause: String) -> void:
 	
 	var death_data := {
 		"position": final_position,
-		"original_death_position": position,  # Keep track of actual death location
+		"original_death_position": position, # Keep track of actual death location
 		"cause": cause,
 		"inventory": current_inventory,
 		"timestamp": Time.get_unix_time_from_system(),
@@ -202,18 +202,13 @@ func mark_death_used(position: Vector2i) -> void:
 func reset_for_new_run() -> void:
 	"""Reset state for new game run while preserving persistent data"""
 	_state.sanity = MAX_SANITY
-	_state.inventory.clear()
-	_state.collected_items.clear()
 	_state.spawned_items.clear()
 	_state.visited_tiles_this_run.clear()
 	_state.player_position = Vector2i.ZERO
 	_state.current_tile_id = ""
 	_state.current_tile_position = Vector2i.ZERO
 	_state.tiles_explored = 0
-	_state.puzzle_progress.clear()
 	_initialize_run_data()
-	
-	_message_bus.emit_event("inventory_changed", [[], [], []])
 
 func save_state_snapshot() -> Dictionary:
 	"""
@@ -326,6 +321,8 @@ func _log_state_change(key: String, old_value: Variant, new_value: Variant) -> v
 # === EVENT HANDLERS ===
 
 func _on_game_started() -> void:
+	"""Handle game start - reset state for new run"""
+	reset_for_new_run()
 	_state.game_active = true
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:

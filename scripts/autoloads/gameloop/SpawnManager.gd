@@ -62,11 +62,6 @@ func process_tile_spawning(tile_node: Node3D, tile_position: Vector2i) -> Dictio
 		"is_permanent": _is_permanent_tile(tile_node)
 	}
 	
-	var death_data: Dictionary = _state_manager.get_unused_death_at_position(tile_position)
-	if not death_data.is_empty():
-		spawn_results["backpack"] = _spawn_backpack_at_death(tile_node, death_data, item_spawn_points)
-		return spawn_results
-	
 	spawn_results["items"] = _spawn_items(tile_node, context, item_spawn_points)
 	
 	spawn_results["entities"] = _spawn_entities(tile_node, context, entity_spawn_points)
@@ -132,14 +127,10 @@ func _spawn_items(tile_node: Node3D, context: Dictionary, spawn_points: Array[Ve
 	for i in range(shuffled_points.size()):
 		var spawn_point = shuffled_points[i]
 		
-		if spawned_items.size() >= MAX_ITEMS_PER_TILE:
-			break
-		
 		var roll = randf()
 		
 		if roll < ITEM_SPAWN_CHANCE:
-			var spawnable: Array[Dictionary] = _item_manager.get_spawnable_items(context)
-			
+			var spawnable: Array[Dictionary] = _item_manager.get_spawnable_items(context, spawned_items)
 			if not spawnable.is_empty():
 				var item_id: String = _item_manager.select_random_item(spawnable)
 				
@@ -177,16 +168,6 @@ func _spawn_item_visual(tile_node: Node3D, item_id: String, position: Vector3) -
 	if not item_instance:
 		_spawn_placeholder_item(tile_node, item_id, position)
 		return true
-	
-	# var item_scene: PackedScene = load(item_scene_path) as PackedScene
-	# if not item_scene:
-	# 	_spawn_placeholder_item(tile_node, item_id, position)
-	# 	return true
-	
-	# var item_instance: Node3D = item_scene.instantiate()
-	# tile_node.add_child(item_instance)
-	# item_instance.global_position = position
-	# item_instance.set_meta("item_id", item_id)
 	
 	return true
 

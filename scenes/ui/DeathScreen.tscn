@@ -1,16 +1,16 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3 uid="uid://d1iht8bfl5a7h"]
 
-[ext_resource type="Script" path="res://scripts/ui/DeathScreen.gd" id="1"]
+[ext_resource type="Script" uid="uid://bd1ool6hyrnij" path="res://scripts/ui/DeathScreen.gd" id="1"]
 
 [sub_resource type="Theme" id="Theme_1"]
 default_font_size = 16
+Button/colors/font_color = Color(1, 1, 1, 1)
+Button/colors/font_hover_color = Color(1, 0.8, 0.8, 1)
+Button/colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 Label/colors/font_color = Color(1, 1, 1, 1)
 Label/colors/font_shadow_color = Color(0, 0, 0, 0.5)
 Label/constants/shadow_offset_x = 2
 Label/constants/shadow_offset_y = 2
-Button/colors/font_color = Color(1, 1, 1, 1)
-Button/colors/font_hover_color = Color(1, 0.8, 0.8, 1)
-Button/colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 
 [node name="DeathScreen" type="Control"]
 layout_mode = 3
@@ -27,6 +27,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
 [node name="FadeRect" type="ColorRect" parent="."]
@@ -34,8 +36,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0, 0, 0, 1)
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
+color = Color(0, 0, 0, 1)
 
 [node name="Panel" type="Control" parent="."]
 layout_mode = 1
@@ -60,6 +64,8 @@ offset_left = 20.0
 offset_top = 20.0
 offset_right = -20.0
 offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 20
 
 [node name="ExperimentEnded" type="Label" parent="Panel/VBoxContainer"]
@@ -151,8 +157,8 @@ autowrap_mode = 2
 [node name="QuitConfirmDialog" type="ConfirmationDialog" parent="."]
 initial_position = 2
 size = Vector2i(400, 150)
-dialog_text = "Are you certain you wish to pause the experiments, Dr. Amundsen? Your subjects' data will be preserved for future analysis."
 ok_button_text = "YES, QUIT FOR NOW"
+dialog_text = "Are you certain you wish to pause the experiments, Dr. Amundsen? Your subjects' data will be preserved for future analysis."
 cancel_button_text = "NO, CONTINUE"
 
 [connection signal="pressed" from="Panel/VBoxContainer/ButtonContainer/ContinueButton" to="." method="_on_continue_pressed"]
