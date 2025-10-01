@@ -2,8 +2,8 @@ extends Node3D
 ## The Watcher - Half-formed duplicate entity that stalks the player
 ## Appears at edge of vision, causes sanity loss, represents unfinished experiments
 
-@export var spawn_rate_base: float = 0.1  # Base spawn chance per minute
-@export var visibility_duration: float = 2.0  # How long Watcher is visible
+@export var spawn_rate_base: float = 0.1 # Base spawn chance per minute
+@export var visibility_duration: float = 2.0 # How long Watcher is visible
 @export var min_distance_from_player: float = 15.0
 @export var max_distance_from_player: float = 25.0
 @export var sanity_loss_per_encounter: int = 15
@@ -97,7 +97,7 @@ func _find_spawn_position(player_pos: Vector3) -> Vector3:
 		
 		# Convert to grid position for maze checking
 		var grid_pos = Vector2i(
-			int(spawn_pos.x / 4.0),  # Assuming 4.0 grid size
+			int(spawn_pos.x / 4.0), # Assuming 4.0 grid size
 			int(spawn_pos.z / 4.0)
 		)
 		
@@ -119,7 +119,7 @@ func _is_valid_spawn_position(grid_pos: Vector2i, maze_manager: Node) -> bool:
 		if cell.walls[wall]:
 			wall_count += 1
 	
-	return wall_count < 3  # At least somewhat open
+	return wall_count < 3 # At least somewhat open
 
 func _manifest_at_position(pos: Vector3):
 	"""Manifest the Watcher at the specified position"""
@@ -172,16 +172,16 @@ func _is_player_looking_at_watcher(player: Node3D) -> bool:
 		return false
 	
 	var to_watcher = (global_position - player_camera.global_position).normalized()
-	var camera_forward = -player_camera.global_transform.basis.z.normalized()
+	var camera_forward = - player_camera.global_transform.basis.z.normalized()
 	
 	var dot_product = to_watcher.dot(camera_forward)
-	return dot_product > 0.7  # Within field of view
+	return dot_product > 0.7 # Within field of view
 
 func _trigger_sanity_loss():
 	"""Trigger sanity loss when player sees Watcher"""
 	var sanity_manager = get_node("/root/SanityManager")
 	if sanity_manager:
-		sanity_manager.apply_sanity_loss_event("watcher_encounter", sanity_loss_per_encounter)
+		sanity_manager.apply_sanity_loss("watcher_encounter", sanity_loss_per_encounter)
 	
 	# Despawn after being seen
 	_start_despawn()

@@ -102,7 +102,6 @@ func _apply_sanity_delta(delta_points: int) -> void:
 	"""
 	if _message_bus.has_method("emit_event"):
 		var cause: String = "effigy_drain_stage_" + str(_stage_cached)
-		var drain_position: Vector3 = global_position
-		_message_bus.call("emit_event", "sanity_delta_requested", [delta_points, cause, drain_position])
+		_message_bus.call("emit_event", "sanity_delta_requested", [delta_points, cause])
 	else:
 		push_error("SanityDrainArea: MessageBus.emit_event not found on autoload.")

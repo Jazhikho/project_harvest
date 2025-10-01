@@ -246,7 +246,7 @@ func _transition_to_hunting():
 	# Trigger sanity loss when hunt begins
 	var sanity_manager = get_node("/root/SanityManager")
 	if sanity_manager:
-		sanity_manager.apply_sanity_loss_event("stalker_proximity", 20)
+		sanity_manager.apply_sanity_loss("stalker_proximity", 20)
 
 func _transition_to_closing_in():
 	"""Transition to closing in state"""
@@ -256,7 +256,7 @@ func _transition_to_closing_in():
 	# Heavy sanity loss when stalker gets close
 	var sanity_manager = get_node("/root/SanityManager")
 	if sanity_manager:
-		sanity_manager.apply_sanity_loss_event("stalker_proximity", 40)
+		sanity_manager.apply_sanity_loss("stalker_proximity", 40)
 
 func _trigger_player_caught():
 	"""Handle player being caught by stalker"""
@@ -294,7 +294,7 @@ func _apply_proximity_sanity_drain(_delta: float) -> void:
 	if randf() < 0.05: # 5% chance per frame when close
 		var sanity_manager = get_node("/root/SanityManager")
 		if sanity_manager:
-			sanity_manager.apply_sanity_loss_event("stalker_proximity", 5)
+			sanity_manager.apply_sanity_loss("stalker_proximity", 5)
 
 func _play_state_audio(state_type: String):
 	"""Play audio appropriate for current state"""

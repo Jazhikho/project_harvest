@@ -9,7 +9,7 @@ var _passive_decay_timer: float = 0.0
 var _last_sanity_value: int = 100
 var _sanity_thresholds: Dictionary = {
 	"critical": 20,
-	"low": 40, 
+	"low": 40,
 	"normal": 60,
 	"high": 80
 }
@@ -60,33 +60,14 @@ func apply_sanity_loss(cause: String, base_amount: int, position: Vector3 = Vect
 
 func _calculate_sanity_loss(cause: String, base_amount: int) -> int:
 	"""
-	Calculate final sanity loss based on cause and current state
+	Calculate final sanity loss based on cause
 	
 	@param cause: Cause of sanity loss
 	@param base_amount: Base loss amount
 	@return: Final calculated loss amount
 	"""
-	var multiplier: float = 1.0
-	var current_sanity: int = _state_manager.get_state("sanity")
-	
-	# Sanity loss accelerates at low sanity
-	if current_sanity < 50:
-		multiplier *= 1.2
-	if current_sanity < 20:
-		multiplier *= 1.5
-	
-	# Certain causes are more severe at different sanity levels
-	match cause:
-		"weird_object":
-			if current_sanity < 30:
-				multiplier *= 1.5
-		"entity_encounter":
-			multiplier *= 1.3
-		"maze_shift":
-			if current_sanity > 60:
-				multiplier *= 0.7
-	
-	return int(base_amount * multiplier)
+	# Simple sanity loss calculation without dynamic multipliers
+	return base_amount
 
 func _apply_passive_decay() -> void:
 	"""Apply gradual sanity decay over time"""
@@ -95,7 +76,7 @@ func _apply_passive_decay() -> void:
 	# Decay is slower at high sanity, faster at low sanity
 	var decay_amount: int = PASSIVE_DECAY_AMOUNT
 	if current_sanity < 50:
-		decay_amount = int(decay_amount * 1.5)
+		decay_amount = int(decay_amount * 1.25)
 	if current_sanity > 80:
 		decay_amount = int(decay_amount * 0.5)
 	
@@ -129,7 +110,7 @@ func _handle_threshold_crossed(threshold_name: String, new_value: int, crossed_d
 	@param crossed_down: True if crossed from higher to lower
 	"""
 	if not crossed_down:
-		return  # Only handle crossing down for now
+		return # Only handle crossing down for now
 	
 	match threshold_name:
 		"critical":
@@ -184,6 +165,7 @@ func _connect_to_events() -> void:
 	_message_bus.sanity_changed.connect(_on_sanity_changed)
 	_message_bus.sanity_threshold_crossed.connect(_on_sanity_threshold_crossed)
 	_message_bus.weird_effect_triggered.connect(_on_weird_effect_triggered)
+	_message_bus.sanity_delta_requested.connect(_on_sanity_delta_requested)
 	_message_bus.game_started.connect(_on_game_started)
 
 func _on_sanity_changed(old_value: int, new_value: int, delta: int) -> void:
@@ -206,6 +188,16 @@ func _on_weird_effect_triggered(effect_type: String, intensity: float, position:
 			apply_sanity_loss("reality_distortion", int(5 + intensity * 10))
 		"whisper_chorus":
 			apply_sanity_loss("whispers", int(3 + intensity * 7))
+
+func _on_sanity_delta_requested(delta: int, source: String) -> void:
+	"""
+	Handle sanity delta requests from other systems (like effigy drain)
+	
+	@param delta: Amount of sanity to change (positive or negative)
+	@param source: Source of the sanity change request
+	"""
+	_state_manager.modify_sanity(delta)
+	_message_bus.emit_event("sanity_effect_triggered", [source, abs(delta) / 100.0])
 
 func _on_game_started() -> void:
 	"""Reset sanity effects for new game"""

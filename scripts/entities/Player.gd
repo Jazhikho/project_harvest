@@ -79,6 +79,7 @@ func _initialize_systems() -> void:
 func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""
 	_message_bus.game_ended.connect(_on_game_ended)
+	_message_bus.game_started.connect(_on_game_started)
 	
 func _make_player3d(name_str: String) -> AudioStreamPlayer3D:
 		var p := AudioStreamPlayer3D.new()
@@ -643,6 +644,24 @@ func get_flashlight_battery_ratio() -> float:
 	"""Get flashlight battery as ratio (0.0 to 1.0)"""
 	return flashlight_battery / flashlight_battery_max
 
+func reset_for_new_run() -> void:
+	"""Reset player state for new game run"""
+	# Reset flashlight state
+	flashlight_battery = randf_range(60.0, 300.0)
+	flashlight_battery_max = flashlight_battery
+	flashlight_battery_died = false
+	flashlight_enabled = false
+	darkness_timer = 0.0
+	game_timer = 0.0
+	
+	# Reset audio state
+	last_sanity_state = "normal"
+	
+	# Update flashlight visual state
+	_update_flashlight_state()
+	
+	print("Player: Reset for new run - flashlight battery: ", flashlight_battery, " seconds")
+
 func is_flashlight_enabled() -> bool:
 	"""Check if flashlight is enabled and has battery"""
 	return flashlight_enabled and flashlight_battery > 0.0
@@ -696,6 +715,10 @@ func _on_game_ended(cause: String, data: Dictionary) -> void:
 	"""Handle game end"""
 	mouse_captured = false
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+func _on_game_started() -> void:
+	"""Handle game start - reset player state for new run"""
+	reset_for_new_run()
 
 func _update_sanity_audio() -> void:
 	if heartbeat_player == null:
