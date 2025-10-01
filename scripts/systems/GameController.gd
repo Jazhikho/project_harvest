@@ -30,9 +30,6 @@ func _ready():
 	# IMPORTANT: Trigger initial tile generation after scene is fully loaded
 	call_deferred("_initialize_game")
 
-	# Start with fade in
-	fade_in()
-
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		_terminate_subject("Force Quit")
@@ -70,6 +67,9 @@ func _initialize_game():
 			push_error("GameController: Start tile not found!")
 			
 	_start_game_audio()
+	
+	# Fade in as the final step of initialization
+	fade_in()
 
 func _input(event):
 	# Inventory takes priority over pause

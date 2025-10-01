@@ -7,6 +7,7 @@ extends Control
 @onready var credits_panel = $CreditsPanel
 @onready var confirm_dialog = $ConfirmDialog
 @onready var menu_container = $MenuContainer
+@onready var fade_rect = $FadeRect
 
 # Audio sliders
 @onready var master_slider = $SettingsPanel/SettingsContainer/MasterVolume/Slider
@@ -17,7 +18,7 @@ extends Control
 @onready var music_value_label = $SettingsPanel/SettingsContainer/MusicVolume/Value
 @onready var sfx_value_label = $SettingsPanel/SettingsContainer/SFXVolume/Value
 
-@export var music_playlist: Resource         # MusicPlaylist.tres
+@export var music_playlist: Resource # MusicPlaylist.tres
 
 func _ready() -> void:
 	_check_save_data()
@@ -72,7 +73,7 @@ func _load_settings():
 	
 	if AudioManager:
 		master_vol = AudioManager.get_bus_volume("Master")
-		music_vol = AudioManager.get_bus_volume("Music") 
+		music_vol = AudioManager.get_bus_volume("Music")
 		sfx_vol = AudioManager.get_bus_volume("SFX")
 	
 	# Set slider values
@@ -104,16 +105,20 @@ func _on_start_pressed():
 		_start_new_game()
 
 func _start_new_game():
+	fade_out()
 	var am := get_node_or_null("/root/AudioManager")
 	if am != null:
 		await am.stop_theme_fade(1.5)
+	await get_tree().create_timer(0.5).timeout
 	SaveManager.delete_save()
 	SceneManager.load_game_scene()
 
 func _on_continue_pressed():
+	fade_out()
 	var am := get_node_or_null("/root/AudioManager")
 	if am != null:
 		await am.stop_theme_fade(1.5)
+	await get_tree().create_timer(0.5).timeout
 	SaveManager.load_game()
 	SceneManager.load_game_scene()
 
@@ -172,6 +177,14 @@ func _on_credits_back_pressed():
 func _on_confirm_reset():
 	# Dialog automatically disconnects after use
 	pass
+
+## fade_out
+## Purpose: Create a fade out effect using the fade rect.
+## @return void.
+func fade_out() -> void:
+	if fade_rect:
+		var tween = create_tween()
+		tween.tween_property(fade_rect, "color:a", 1.0, 0.5)
 
 func _input(event):
 	# Handle ESC key to go back
