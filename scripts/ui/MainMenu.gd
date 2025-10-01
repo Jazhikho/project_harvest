@@ -26,6 +26,7 @@ func _ready() -> void:
 	_detect_input_device()
 	start_button.grab_focus()
 	call_deferred("_start_menu_audio")
+	call_deferred("fade_in")
 
 func _check_save_data():
 	# Check if save file exists
@@ -185,6 +186,15 @@ func fade_out() -> void:
 	if fade_rect:
 		var tween = create_tween()
 		tween.tween_property(fade_rect, "color:a", 1.0, 0.5)
+
+## fade_in
+## Purpose: Create a fade in effect using the fade rect.
+## @return void.
+func fade_in() -> void:
+	if fade_rect:
+		fade_rect.color.a = 1.0
+		var tween = create_tween()
+		tween.tween_property(fade_rect, "color:a", 0.0, 0.5)
 
 func _input(event):
 	# Handle ESC key to go back
