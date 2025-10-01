@@ -16,7 +16,7 @@ size = Vector3(20, 2, 20)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_05frr"]
 height = 2.10718
-radius = 3.0
+radius = 2.0332
 
 [node name="Effigy" type="CharacterBody3D"]
 script = ExtResource("1_effigy_script")
@@ -24,6 +24,7 @@ sfx_library = ExtResource("2_05frr")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+visible = false
 shape = SubResource("CapsuleShape3D_1")
 
 [node name="Stage1" parent="." instance=ExtResource("4_stage3")]

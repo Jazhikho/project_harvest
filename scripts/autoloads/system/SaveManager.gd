@@ -157,6 +157,11 @@ func _transfer_collectibles_to_backpack() -> void:
 		
 		# Only transfer notes and puzzle pieces
 		if category in ["notes", "puzzle_pieces"]:
+			# Skip puzzle pieces that have already been used
+			if category == "puzzle_pieces" and is_puzzle_item_used(item_id):
+				print("SaveManager: Skipping used puzzle piece ", item_id)
+				continue
+			
 			if item_id not in save_data.backpack_inventory:
 				save_data.backpack_inventory.append(item_id)
 				print("SaveManager: Moved ", item_id, " to backpack for next run")
@@ -219,6 +224,11 @@ func transfer_inventory_to_backpack(current_inventory: Array) -> void:
 		
 		# Only transfer notes and puzzle pieces
 		if category in ["notes", "puzzle_pieces"]:
+			# Skip puzzle pieces that have already been used
+			if category == "puzzle_pieces" and is_puzzle_item_used(item_id):
+				print("SaveManager: Skipping used puzzle piece ", item_id, " from inventory transfer")
+				continue
+			
 			if item_id not in save_data.backpack_inventory:
 				save_data.backpack_inventory.append(item_id)
 				print("SaveManager: Transferred ", item_id, " to backpack")

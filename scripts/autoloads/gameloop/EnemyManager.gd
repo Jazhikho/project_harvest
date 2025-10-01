@@ -7,18 +7,18 @@ var _state_manager: Node
 var _sanity_manager: Node
 
 # Enemy tracking
-var _active_enemies: Dictionary = {}  # entity_id -> entity_node
-var _enemy_spawn_cooldowns: Dictionary = {}  # enemy_type -> cooldown_time
+var _active_enemies: Dictionary = {} # entity_id -> entity_node
+var _enemy_spawn_cooldowns: Dictionary = {} # enemy_type -> cooldown_time
 var _next_enemy_id: int = 0
 
 @export var spawn_catalog: SpawnCatalog = preload("res://data/SpawnCatalog.tres")
 
 # NEW: Map enemy_type to PackedScene
-var _enemy_scene_map: Dictionary = {}  # enemy_type -> PackedScene
+var _enemy_scene_map: Dictionary = {} # enemy_type -> PackedScene
 
 # Enemy spawn settings
 var _stalker_spawn_conditions: Dictionary = {
-	"min_weird_things": 3,
+	"sanity_threshold": 20,
 	"max_active": 1,
 	"cooldown": 30.0
 }
@@ -27,7 +27,7 @@ var _watcher_spawn_conditions: Dictionary = {
 	"sanity_threshold": 80,
 	"max_active": 3,
 	"cooldown": 10.0,
-	"mvp_disabled": true  # Disable Watchers for MVP release
+	"mvp_disabled": true # Disable Watchers for MVP release
 }
 
 # Enemy scene references (FALLBACK - catalog is preferred)
@@ -53,7 +53,7 @@ func _initialize() -> void:
 		push_error("EnemyManager: Required core systems not found")
 		return
 	
-	_build_enemy_scene_map()  # NEW: Build the scene map
+	_build_enemy_scene_map() # NEW: Build the scene map
 	_connect_to_events()
 	
 func _resolve_catalog() -> void:
@@ -312,7 +312,7 @@ func _can_spawn_enemy(enemy_type: String) -> bool:
 		"watcher":
 			return _can_spawn_watcher()
 		"effigy":
-			return true  # Effigies are spawned by EffigyManager based on death locations
+			return true # Effigies are spawned by EffigyManager based on death locations
 		_:
 			return true
 
@@ -409,7 +409,7 @@ func _on_weird_thing_collected(thing_id: String, position: Vector2i, effects: Di
 	if weird_things_manager and weird_things_manager.has_method("get_collecte d_count"):
 		var weird_count = weird_things_manager.get_collected_count()
 		if weird_count >= _stalker_spawn_conditions.min_weird_things:
-			if randf() < 0.3:  # 30% chance to spawn stalker
+			if randf() < 0.3: # 30% chance to spawn stalker
 				spawn_enemy("stalker")
 
 func _on_sanity_threshold_crossed(threshold_name: String, value: int, crossed_down: bool) -> void:
@@ -418,10 +418,10 @@ func _on_sanity_threshold_crossed(threshold_name: String, value: int, crossed_do
 		return
 	
 	match threshold_name:
-		"low":  # Below 40%
+		"low": # Below 40%
 			if randf() < 0.4:
 				spawn_enemy("watcher")
-		"critical":  # Below 20%
+		"critical": # Below 20%
 			if randf() < 0.6:
 				spawn_enemy("watcher")
 
@@ -441,7 +441,7 @@ func _on_game_started() -> void:
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:
 	"""Handle game end - cleanup all enemies"""
-	_on_game_started()  # Same cleanup
+	_on_game_started() # Same cleanup
 
 # Debug functions
 
@@ -453,3 +453,55 @@ func get_enemy_count() -> int:
 func get_enemy_count_by_type(enemy_type: String) -> int:
 	"""Get number of active enemies of specific type"""
 	return get_enemies_by_type(enemy_type).size()
+
+static func spawn_aggressive_effigies(count: int, scene_root: Node) -> Array:
+	"""Spawn aggressive effigies at entity points and return array of spawned effigies"""
+	var spawned_effigies: Array = []
+	
+	if count <= 0:
+		return spawned_effigies
+	
+	# Get EnemyManager instance to access spawn_catalog
+	var enemy_manager = scene_root.get_node_or_null("/root/EnemyManager")
+	if not enemy_manager:
+		push_error("EnemyManager not found")
+		return spawned_effigies
+	
+	# Get effigy scene from spawn catalog
+	var effigy_scene: PackedScene = null
+	if enemy_manager.spawn_catalog and not enemy_manager.spawn_catalog.enemy_scenes.is_empty():
+		for scene in enemy_manager.spawn_catalog.enemy_scenes:
+			if scene and scene.resource_path.ends_with("effigy.tscn"):
+				effigy_scene = scene
+				break
+	
+	if not effigy_scene:
+		push_error("Failed to load Effigy scene from SpawnCatalog")
+		return spawned_effigies
+	
+	# Find entity spawn points
+	var maze_objects = scene_root.get_node_or_null("Maze/Objects")
+	if not maze_objects:
+		push_error("Maze/Objects not found")
+		return spawned_effigies
+	
+	# Spawn effigies at available entity points
+	for i in range(min(count, 3)): # Max 3 spawn points
+		var spawn_point_name = "EntityPoint%d" % (i + 1)
+		var spawn_point = maze_objects.get_node_or_null(spawn_point_name)
+		
+		if spawn_point:
+			var effigy = effigy_scene.instantiate()
+			maze_objects.add_child(effigy)
+			effigy.global_position = spawn_point.global_position
+			
+			# Set aggression mode after a brief delay to ensure initialization
+			effigy.call_deferred("set_aggression_mode", true, &"puzzle_completion")
+			
+			spawned_effigies.append(effigy)
+			
+			MessageBus.emit_event("entity_spawned", ["effigy", effigy, spawn_point.global_position])
+		else:
+			push_warning("EntityPoint%d not found" % (i + 1))
+	
+	return spawned_effigies

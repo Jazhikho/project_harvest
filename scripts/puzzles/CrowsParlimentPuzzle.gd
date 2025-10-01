@@ -12,7 +12,7 @@ var _save_manager: Node
 var _puzzle_ui: Control
 
 var _items_placed = []
-var _completion_order: int = -1  # Which number puzzle this was (1st, 2nd, 3rd)
+var _completion_order: int = -1 # Which number puzzle this was (1st, 2nd, 3rd)
 
 @onready var mirror_area: Area3D = $Area3D
 
@@ -115,12 +115,7 @@ func try_place_item(item_id: String) -> Dictionary:
 		if _items_placed.size() == required_items.size():
 			_complete_puzzle()
 			
-			var message: String = "The mirror is complete. "
-			match _completion_order:
-				1: message += "This was the first puzzle completed."
-				2: message += "This was the second puzzle completed."
-				3: message += "This was the third puzzle completed."
-				_: message += "The reflection seems strange..."
+			var message = "The reflection seems strange..."
 			
 			return {
 				"success": true,
@@ -154,7 +149,9 @@ func _complete_puzzle() -> void:
 	
 	_save_manager.mark_puzzle_completed(puzzle_id)
 	
-	SpawnManager.spawn_aggressive_effigies(_completion_order, get_tree().current_scene)
+	var enemy_manager: Node = get_node_or_null("/root/EnemyManager")
+	if enemy_manager and enemy_manager.has_method("spawn_aggressive_effigies"):
+		enemy_manager.spawn_aggressive_effigies(_completion_order, get_tree().current_scene)
 	
 	if _message_bus:
 		var tile_pos: Vector2i = Vector2i.ZERO
@@ -170,7 +167,7 @@ func _complete_puzzle() -> void:
 
 func _get_completion_order() -> int:
 	"""Determine which number puzzle this is (1st, 2nd, or 3rd completed)"""
-	var completed_count: int = 1  # This puzzle is being completed now
+	var completed_count: int = 1 # This puzzle is being completed now
 	
 	if _save_manager.is_puzzle_completed("whispering_hollow"):
 		completed_count += 1

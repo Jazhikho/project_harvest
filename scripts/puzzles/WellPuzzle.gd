@@ -133,7 +133,7 @@ func try_place_item(item_id: String) -> Dictionary:
 			_complete_puzzle()
 			return {
 				"success": true,
-				"message": "The well accepts your offering. You hear a distant echo...",
+				"message": "You hear a distant echo...",
 				"completed": true
 			}
 		else:
@@ -158,7 +158,9 @@ func _complete_puzzle() -> void:
 	_save_manager.mark_puzzle_completed(puzzle_id)
 	
 	var effigy_count = min(_wrong_attempts.size(), 3)
-	SpawnManager.spawn_aggressive_effigies(effigy_count, get_tree().current_scene)
+	var enemy_manager: Node = get_node_or_null("/root/EnemyManager")
+	if enemy_manager and enemy_manager.has_method("spawn_aggressive_effigies"):
+		enemy_manager.spawn_aggressive_effigies(effigy_count, get_tree().current_scene)
 	
 	# Emit completion event
 	if _message_bus:

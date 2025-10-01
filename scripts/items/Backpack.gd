@@ -60,7 +60,7 @@ func _setup_interaction_area() -> void:
 	
 	var body_collision = CollisionShape3D.new()
 	body_collision.name = "BodyCollision"
-	body_collision.shape = shape.duplicate()
+	body_collision.shape = BoxShape3D
 	rigid_body.add_child(body_collision)
 	
 	# Connect signals

@@ -12,8 +12,8 @@ var _save_manager: Node
 var _puzzle_ui: Control
 
 var _items_placed = []
-var _altar_items = []  # Track items placed on altar specifically
-var _brazier_items = []  # Track items placed in brazier
+var _altar_items = [] # Track items placed on altar specifically
+var _brazier_items = [] # Track items placed in brazier
 
 @onready var altar_area: Area3D = $altar/Area3D
 @onready var brazier_area: Area3D = $brazier/Area3D
@@ -194,7 +194,9 @@ func _complete_puzzle() -> void:
 	_save_manager.mark_puzzle_completed(puzzle_id)
 	
 	var effigy_count = min(_altar_items.size(), 3)
-	SpawnManager.spawn_aggressive_effigies(effigy_count, get_tree().current_scene)
+	var enemy_manager: Node = get_node_or_null("/root/EnemyManager")
+	if enemy_manager and enemy_manager.has_method("spawn_aggressive_effigies"):
+		enemy_manager.spawn_aggressive_effigies(effigy_count, get_tree().current_scene)
 	
 	if _message_bus:
 		var tile_pos: Vector2i = Vector2i.ZERO
@@ -203,8 +205,8 @@ func _complete_puzzle() -> void:
 			tile_pos = state_manager.get_state("current_tile_position")
 		
 		_message_bus.emit_event("puzzle_completed", [
-			puzzle_id, 
-			tile_pos, 
+			puzzle_id,
+			tile_pos,
 			{"altar_count": _altar_items.size()}
 		])
 
@@ -231,4 +233,3 @@ func _show_message(text: String) -> void:
 func get_altar_count() -> int:
 	"""Get number of items on altar"""
 	return _altar_items.size()
-	
