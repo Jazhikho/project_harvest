@@ -479,10 +479,15 @@ static func spawn_aggressive_effigies(count: int, scene_root: Node) -> Array:
 		push_error("Failed to load Effigy scene from SpawnCatalog")
 		return spawned_effigies
 	
-	# Find entity spawn points
-	var maze_objects = scene_root.get_node_or_null("Maze/Objects")
+	# Find current tile and its entity spawn points
+	var current_tile = _find_current_tile(scene_root)
+	if not current_tile:
+		push_error("Current tile not found")
+		return spawned_effigies
+	
+	var maze_objects = current_tile.get_node_or_null("Maze/Objects")
 	if not maze_objects:
-		push_error("Maze/Objects not found")
+		push_error("Maze/Objects not found in current tile")
 		return spawned_effigies
 	
 	# Spawn effigies at available entity points
@@ -505,3 +510,22 @@ static func spawn_aggressive_effigies(count: int, scene_root: Node) -> Array:
 			push_warning("EntityPoint%d not found" % (i + 1))
 	
 	return spawned_effigies
+
+static func _find_current_tile(scene_root: Node) -> Node3D:
+	"""
+	Find the current tile that the player is on
+	
+	@param scene_root: Root scene node
+	@return: Current tile node or null if not found
+	"""
+	# Get TileStateManager to find current player tile
+	var tile_state_manager = scene_root.get_node_or_null("/root/TileStateManager")
+	if not tile_state_manager:
+		push_error("TileStateManager not found")
+		return null
+	
+	# Get current player tile position
+	var current_tile_pos: Vector2i = tile_state_manager.get_current_player_tile()
+	
+	# Get the tile node from TileStateManager
+	return tile_state_manager.get_tile_node(current_tile_pos)

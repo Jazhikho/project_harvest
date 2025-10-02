@@ -348,6 +348,19 @@ func get_previous_player_tile() -> Vector2i:
 	"""Get previous player tile position"""
 	return _previous_player_tile
 
+func get_tile_node(position: Vector2i) -> Node3D:
+	"""
+	Get the tile node at the specified position
+	
+	@param position: Grid position of tile
+	@return: Tile node or null if not found
+	"""
+	if not _active_tiles.has(position):
+		return null
+	
+	var tile_data = _active_tiles[position]
+	return tile_data.get("node", null)
+
 func get_tiles_in_state(state: TileState) -> Array[Vector2i]:
 	"""
 	Get all tiles currently in a specific state
