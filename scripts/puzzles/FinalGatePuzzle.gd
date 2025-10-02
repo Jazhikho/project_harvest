@@ -92,7 +92,7 @@ func _spawn_key() -> void:
 	
 	print("FinalGatePuzzle: Spawning key on altar")
 	
-	var spawn_position: Vector3 = altar_node.global_position + Vector3(0, 1, 0)
+	var spawn_position: Vector3 = altar_node.global_position + Vector3(0, 1.5, 0)
 	var key_instance: Node3D = _item_manager.spawn_item_instance("hollow_key", spawn_position, get_tree().current_scene)
 	
 	if not key_instance:
@@ -101,8 +101,6 @@ func _spawn_key() -> void:
 	
 	_key_spawned = true
 	_save_puzzle_state()
-	
-	_show_message("A golden key materializes on the altar!")
 
 func interact() -> bool:
 	"""Called when player interacts with the gate"""
@@ -139,10 +137,14 @@ func _unlock_gate() -> void:
 
 func _play_ending_sequence() -> void:
 	"""Play the ending sequence with fade and sounds"""
-	# Start screen fade to black
+	# Start screen fade to black and audio fade out
 	var game_controller: Node = get_tree().current_scene.get_node_or_null("GameController")
-	if game_controller and game_controller.has_method("fade_out"):
-		game_controller.fade_out()
+	if game_controller:
+		if game_controller.has_method("fade_out"):
+			game_controller.fade_out()
+		if game_controller.has_method("_fade_out_game_audio_and_wait"):
+			# Start audio fade out in parallel with visual fade
+			game_controller._fade_out_game_audio_and_wait(2.0)
 	
 	# Wait a moment for fade to start
 	await get_tree().create_timer(0.5).timeout
@@ -156,12 +158,6 @@ func _play_ending_sequence() -> void:
 	
 	# Wait for gate open sound to finish (estimate ~8.1 seconds)
 	await get_tree().create_timer(8.1).timeout
-	
-	# Trigger game completion event
-	if _message_bus:
-		_message_bus.emit_event("game_completed", [ {
-			"puzzles_data": _gather_puzzle_data()
-		}])
 	
 	# Transition to ending scene
 	_transition_to_ending()

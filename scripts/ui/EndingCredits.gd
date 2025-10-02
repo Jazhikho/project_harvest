@@ -114,15 +114,15 @@ func _start_credits() -> void:
 	await _scroll_credits()
 
 func _scroll_credits() -> void:
-	"""Scroll the credits from bottom to top"""
+	"""Scroll the credits from top to bottom"""
 	var scroll_bar: VScrollBar = credits_scroll.get_v_scroll_bar()
-	scroll_bar.value = scroll_bar.max_value
+	scroll_bar.value = 0.0
 	
 	# Calculate scroll duration based on content height (about 1 minute total)
 	var scroll_duration: float = 60.0
 	
 	var scroll_tween: Tween = create_tween()
-	scroll_tween.tween_property(scroll_bar, "value", 0.0, scroll_duration)
+	scroll_tween.tween_property(scroll_bar, "value", scroll_bar.max_value, scroll_duration)
 	await scroll_tween.finished
 	
 	# Credits finished - wait a moment then return to main menu

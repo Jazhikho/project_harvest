@@ -391,7 +391,11 @@ func _create_item_slot(item_id: String, is_permanent: bool = false) -> Panel:
 		icon_button.pressed.connect(_on_item_selected.bind(item_id))
 	
 	# Try to load thumbnail
-	var thumbnail_path: String = "res://assets/thumbnails/" + item_id + ".png"
+	var thumbnail_path: String
+	if item_id === hollow_key:
+		thumbnail_path = "res://assets/thumbnails/" + key + ".png"
+	else: 
+		thumbnail_path = "res://assets/thumbnails/" + item_id + ".png"
 	if ResourceLoader.exists(thumbnail_path):
 		var thumbnail: Texture2D = load(thumbnail_path)
 		if thumbnail:
