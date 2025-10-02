@@ -20,6 +20,9 @@ func _ready() -> void:
 	# Set process mode so journal works when game is paused
 	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	
+	# Setup responsive sizing (deferred to ensure viewport is ready)
+	call_deferred("_setup_responsive_sizing")
+	
 	# Get managers
 	inventory_manager = get_node_or_null("/root/PlayerInventory")
 	item_manager = get_node_or_null("/root/ItemManager")
@@ -31,6 +34,29 @@ func _ready() -> void:
 	
 	# Setup tree
 	_setup_tree()
+
+func _setup_responsive_sizing() -> void:
+	"""Setup responsive sizing for different screen resolutions"""
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	
+	# Calculate responsive panel size (85% of screen width, 80% of screen height, with minimums)
+	var panel_width: float = viewport_size.x * 0.85
+	var panel_height: float = viewport_size.y * 0.8
+	
+	# Update main panel size
+	var main_panel: Control = $MainPanel
+	if main_panel:
+		main_panel.offset_left = - panel_width / 2.0
+		main_panel.offset_top = - panel_height / 2.0
+		main_panel.offset_right = panel_width / 2.0
+		main_panel.offset_bottom = panel_height / 2.0
+	
+	# Adjust split container split offset based on screen width
+	var hsplit_container: HSplitContainer = $MainPanel/HSplitContainer
+	if hsplit_container:
+		# Left panel should be about 40% of panel width, with minimum 250px
+		var left_panel_width: float = max(250.0, panel_width * 0.4)
+		hsplit_container.split_offset = int(left_panel_width)
 
 func _setup_tree() -> void:
 	"""Initialize the tree structure"""

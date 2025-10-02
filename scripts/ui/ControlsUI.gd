@@ -17,6 +17,9 @@ var _has_been_shown: bool = false
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
+	# Setup responsive sizing (deferred to ensure viewport is ready)
+	call_deferred("_setup_responsive_sizing")
+	
 	# Both start hidden
 	full_controls.visible = false
 	full_controls.modulate.a = 0.0
@@ -29,6 +32,32 @@ func _ready() -> void:
 	
 	# Connect immediately to avoid missing the player_spawned event
 	_connect_to_events()
+
+## _setup_responsive_sizing
+## Purpose: Setup responsive sizing for different screen resolutions
+## @return void.
+func _setup_responsive_sizing() -> void:
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	
+	# Calculate responsive panel size for full controls
+	var panel_width: float = max(320.0, viewport_size.x * 0.25) # 25% of screen width, min 320px
+	var panel_height: float = max(400.0, viewport_size.y * 0.6) # 60% of screen height, min 400px
+	
+	# Update full controls panel size
+	if full_controls:
+		full_controls.offset_left = 20.0
+		full_controls.offset_top = - panel_height / 2.0
+		full_controls.offset_right = 20.0 + panel_width
+		full_controls.offset_bottom = panel_height / 2.0
+	
+	# Update minimized hints position (top-right corner)
+	if minimized_hints:
+		var hints_width: float = 150.0
+		var hints_height: float = 50.0
+		minimized_hints.offset_left = viewport_size.x - hints_width - 10.0
+		minimized_hints.offset_top = 10.0
+		minimized_hints.offset_right = viewport_size.x - 10.0
+		minimized_hints.offset_bottom = hints_height
 
 ## _connect_to_events
 ## Purpose: Connect to MessageBus events for player spawn

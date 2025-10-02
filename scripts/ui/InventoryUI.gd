@@ -26,6 +26,9 @@ func _ready() -> void:
 	if inspect_panel:
 		inspect_panel.visible = false
 	
+	# Setup responsive sizing (deferred to ensure viewport is ready)
+	call_deferred("_setup_responsive_sizing")
+	
 	# Connect to the actual player inventory autoload
 	inventory_manager = get_node_or_null("/root/PlayerInventory")
 	if inventory_manager:
@@ -35,6 +38,32 @@ func _ready() -> void:
 	
 	# Setup viewport for 3D item display
 	_setup_viewport()
+
+func _setup_responsive_sizing() -> void:
+	"""Setup responsive sizing for different screen resolutions"""
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	print("InventoryUI: Setting up responsive sizing for viewport: ", viewport_size)
+	
+	# Calculate responsive panel size (80% of screen width, 70% of screen height, with minimums)
+	var panel_width: float = viewport_size.x * 0.8
+	var panel_height: float = viewport_size.y * 0.7
+	
+	# Update main panel size
+	if main_panel:
+		main_panel.offset_left = - panel_width / 2.0
+		main_panel.offset_top = - panel_height / 2.0
+		main_panel.offset_right = panel_width / 2.0
+		main_panel.offset_bottom = panel_height / 2.0
+	
+	# Adjust grid columns based on screen width
+	var grid_columns: int = 6
+	if panel_width < 900:
+		grid_columns = 5
+	elif panel_width > 1200:
+		grid_columns = 7
+	
+	if item_grid:
+		item_grid.columns = grid_columns
 
 func _setup_viewport() -> void:
 	"""Setup the 3D viewport for item inspection"""
@@ -320,7 +349,14 @@ func _on_back_pressed():
 func _create_item_slot(item_id: String, is_permanent: bool = false) -> Panel:
 	"""Create a properly formatted item slot with thumbnail and name"""
 	var slot: Panel = Panel.new()
-	slot.custom_minimum_size = Vector2(120, 140) # Fixed size for grid consistency
+	
+	# Calculate responsive slot size based on panel width
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var panel_width: float = max(800.0, viewport_size.x * 0.8)
+	var slot_width: float = max(100.0, (panel_width - 100.0) / item_grid.columns - 10.0) # Account for margins and gaps
+	var slot_height: float = slot_width * 1.2 # Maintain aspect ratio
+	
+	slot.custom_minimum_size = Vector2(slot_width, slot_height)
 	
 	# Add visual indicator for permanent items
 	if is_permanent:
@@ -341,7 +377,8 @@ func _create_item_slot(item_id: String, is_permanent: bool = false) -> Panel:
 	
 	# Create button for the item icon
 	var icon_button: Button = Button.new()
-	icon_button.custom_minimum_size = Vector2(100, 100)
+	var icon_size: float = max(80.0, slot_width * 0.8) # Responsive icon size
+	icon_button.custom_minimum_size = Vector2(icon_size, icon_size)
 	icon_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	icon_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	icon_button.expand_icon = true
@@ -359,8 +396,8 @@ func _create_item_slot(item_id: String, is_permanent: bool = false) -> Panel:
 		var thumbnail: Texture2D = load(thumbnail_path)
 		if thumbnail:
 			icon_button.icon = thumbnail
-			# Make the icon fill the button
-			icon_button.add_theme_constant_override("icon_max_width", 96)
+			# Make the icon fill the button responsively
+			icon_button.add_theme_constant_override("icon_max_width", int(icon_size * 0.9))
 	else:
 		# Create placeholder if no thumbnail exists
 		icon_button.text = "?"
@@ -371,12 +408,14 @@ func _create_item_slot(item_id: String, is_permanent: bool = false) -> Panel:
 	
 	# Add item name label
 	var name_label: Label = Label.new()
-	name_label.custom_minimum_size = Vector2(120, 20)
+	name_label.custom_minimum_size = Vector2(slot_width, 20)
 	name_label.size_flags_horizontal = Control.SIZE_FILL
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	name_label.add_theme_font_size_override("font_size", 12)
+	# Responsive font size based on slot size
+	var font_size: int = max(10, int(slot_width / 10))
+	name_label.add_theme_font_size_override("font_size", font_size)
 	
 	# Get display name from ItemManager
 	var display_name: String = item_id

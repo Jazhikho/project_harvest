@@ -101,21 +101,22 @@ sky_mat = SubResource("ShaderMaterial_gg4pt")
 duration_sec = 300.0
 
 [node name="UI" type="CanvasLayer" parent="."]
+follow_viewport_enabled = true
 
-[node name="PauseMenu" parent="UI" instance=ExtResource("4")]
+[node name="ControlsUI" parent="UI" instance=ExtResource("11_aptqa")]
+
+[node name="NarrativeUI" parent="UI" instance=ExtResource("14_5xhyk")]
 visible = false
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="InventoryUI" parent="UI" instance=ExtResource("5")]
 visible = false
 
 [node name="JournalUI" parent="UI" instance=ExtResource("10_56wml")]
 
-[node name="ControlsUI" parent="UI" instance=ExtResource("11_aptqa")]
-
-[node name="NarrativeUI" parent="UI" instance=ExtResource("14_5xhyk")]
+[node name="PauseMenu" parent="UI" instance=ExtResource("4")]
 visible = false
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="TransitionLayer" type="CanvasLayer" parent="."]
 layer = 100
