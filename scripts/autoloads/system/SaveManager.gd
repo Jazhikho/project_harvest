@@ -10,6 +10,7 @@ signal save_data_loaded()
 
 var save_data: Dictionary = {
 	"time_played": 0.0,
+	"tiles_explored": 0,
 	"deaths": 0,
 	"collectibles": [],
 	"backpack_inventory": [],
@@ -73,6 +74,8 @@ func load_game() -> void:
 				save_data.collectibles = []
 			if not save_data.has("controls_shown_this_run"):
 				save_data.controls_shown_this_run = false
+			if not save_data.has("tiles_explored"):
+				save_data.tiles_explored = 0
 			
 			# Save the updated structure
 			save_game()
@@ -92,6 +95,7 @@ func delete_save() -> void:
 func _reset_save_data() -> void:
 	save_data = {
 		"time_played": 0.0,
+		"tiles_explored": 0,
 		"deaths": 0,
 		"collectibles": [],
 		"backpack_inventory": [],
@@ -123,9 +127,27 @@ func should_show_controls() -> bool:
 	return not save_data.get("controls_shown_this_run", false)
 
 func record_death() -> void:
+	"""Record death and save current run statistics"""
 	_transfer_collectibles_to_backpack()
 	save_data.deaths += 1
 	save_data.run_active = false
+	
+	# Save current run statistics
+	var state_manager = get_node_or_null("/root/GameStateManager")
+	var game_director = get_node_or_null("/root/GameDirector")
+	
+	if state_manager:
+		# Save tiles explored from current run
+		var tiles_explored = state_manager.get_state("tiles_explored")
+		if tiles_explored > 0:
+			save_data["tiles_explored"] = tiles_explored
+	
+	if game_director and game_director.has_method("get_session_duration"):
+		# Save time played from current session
+		var session_time = game_director.get_session_duration()
+		if session_time > 0:
+			save_data["time_played"] = session_time
+	
 	save_game()
 	
 func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:

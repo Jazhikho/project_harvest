@@ -22,7 +22,7 @@ func _ready() -> void:
 	name = "GameDirector"
 	add_to_group("core_systems")
 	require_systems(["MessageBus", "GameStateManager", "EventManager"])
-	super()
+	super ()
 
 func _notification(what: int) -> void:
 	"""Handle application quit as death if a game is active"""
@@ -233,7 +233,7 @@ func _update_difficulty_scaling() -> void:
 	elif current_sanity <= 40:
 		_current_difficulty = "hard"
 		_current_shift_interval = _stressed_shift_interval
-	elif session_time > 300:  # 5 minutes
+	elif session_time > 300: # 5 minutes
 		_current_difficulty = "hard"
 		_current_shift_interval = _stressed_shift_interval
 	else:
@@ -308,11 +308,16 @@ func is_finale_available() -> bool:
 
 func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""
+	_message_bus.game_started.connect(_on_game_started)
 	_message_bus.player_died.connect(_on_player_died)
 	_message_bus.sanity_threshold_crossed.connect(_on_sanity_threshold_crossed)
 	_message_bus.puzzle_completed.connect(_on_puzzle_completed)
 	_message_bus.weird_effect_triggered.connect(_on_weird_effect_triggered)
 	_message_bus.maze_shift_triggered.connect(_on_maze_shift_triggered)
+
+func _on_game_started() -> void:
+	"""Handle game start event - initialize session timing"""
+	start_new_game()
 
 func _on_player_died(cause: String, position: Vector2i, data: Dictionary) -> void:
 	"""Handle player death"""

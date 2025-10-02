@@ -23,7 +23,6 @@ var dr_amundsen_quotes = [
 var death_type = ""
 
 func _ready() -> void:
-	
 	# Check if all nodes exist
 	if not death_reason_label:
 		push_error("DeathScreen: death_reason_label not found!")
@@ -72,16 +71,36 @@ func _ready() -> void:
 
 func _update_stats():
 	"""Update the stats display"""
-	# Try to get save data, use defaults if not available
+	# Get data from GameStateManager for current run stats
+	var state_manager = get_node_or_null("/root/GameStateManager")
 	var save_manager = get_node_or_null("/root/SaveManager")
 	
 	var time_played = 0.0
 	var tiles = 0
 	var collectibles = 0
 	
-	if save_manager and save_manager.save_data:
+	# Get time from GameDirector session data
+	var game_director = get_node_or_null("/root/GameDirector")
+	if game_director and game_director.has_method("get_session_duration"):
+		time_played = game_director.get_session_duration()
+	elif state_manager:
+		# Fallback: calculate from run data start time
+		var run_data = state_manager.get_state("run_data")
+		if run_data and run_data.has("start_time"):
+			time_played = Time.get_unix_time_from_system() - run_data.start_time
+	elif save_manager and save_manager.save_data:
+		# Final fallback: use saved time from previous run
 		time_played = save_manager.save_data.get("time_played", 0.0)
+	
+	# Get tiles explored from GameStateManager
+	if state_manager:
+		tiles = state_manager.get_state("tiles_explored")
+	elif save_manager and save_manager.save_data:
+		# Fallback: use saved tiles from previous run
 		tiles = save_manager.save_data.get("tiles_explored", 0)
+	
+	# Get collectibles from SaveManager
+	if save_manager and save_manager.save_data:
 		collectibles = save_manager.save_data.get("collectibles", []).size()
 	
 	var minutes = int(time_played / 60)
