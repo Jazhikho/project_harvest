@@ -29,6 +29,8 @@ func _ready() -> void:
 	call_deferred("_connect_to_events")
 	# Note: had_existing_save is set in _on_game_started() when game scene loads
 	load_game()
+	# Connect to settings events for audio settings persistence
+	call_deferred("_connect_to_settings")
 
 func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""
@@ -38,6 +40,16 @@ func _connect_to_events() -> void:
 			message_bus.game_started.connect(_on_game_started)
 		if message_bus.has_signal("item_collected"):
 			message_bus.item_collected.connect(_on_item_collected)
+
+func _connect_to_settings() -> void:
+	"""Connect to SettingsManager for audio settings persistence"""
+	var message_bus: Node = get_node_or_null("/root/MessageBus")
+	if message_bus and message_bus.has_signal("setting_changed"):
+		message_bus.connect_event("setting_changed", _on_setting_changed)
+	elif message_bus:
+		# Wait for SettingsManager to be ready
+		await get_tree().process_frame
+		call_deferred("_connect_to_settings")
 
 func _on_game_started() -> void:
 	"""Handle game start event"""
@@ -76,9 +88,16 @@ func load_game() -> void:
 				save_data.controls_shown_this_run = false
 			if not save_data.has("tiles_explored"):
 				save_data.tiles_explored = 0
+			if not save_data.has("settings"):
+				save_data.settings = {}
+			if not save_data.settings.has("audio"):
+				save_data.settings.audio = {}
 			
 			# Save the updated structure
 			save_game()
+			
+			# Load audio settings from save data
+			load_audio_settings()
 			
 			# Emit signal that save data is loaded (important for continue games)
 			# Only emit if this is not the initial app startup load
@@ -309,3 +328,78 @@ func add_to_backpack(item_id: String) -> void:
 	if item_id not in save_data.backpack_inventory:
 		save_data.backpack_inventory.append(item_id)
 		save_game()
+
+func _on_setting_changed(category: String, key: String, old_value: Variant, new_value: Variant) -> void:
+	"""
+	Handle settings changes from SettingsManager
+	Only save audio settings to save data
+	
+	@param category: Settings category
+	@param key: Setting key
+	@param old_value: Previous value
+	@param new_value: New value
+	"""
+	if category == "audio":
+		# Ensure audio settings structure exists
+		if not save_data.settings.has("audio"):
+			save_data.settings.audio = {}
+		
+		# Save the audio setting
+		save_data.settings.audio[key] = new_value
+		save_game()
+		print("SaveManager: Saved audio setting ", key, " = ", new_value)
+
+func load_audio_settings() -> void:
+	"""
+	Load audio settings from save data to SettingsManager
+	Called when save data is loaded
+	"""
+	var settings_manager = get_node_or_null("/root/SettingsManager")
+	if not settings_manager:
+		return
+	
+	if save_data.settings.has("audio"):
+		var audio_settings = save_data.settings.audio
+		for key in audio_settings:
+			# Use internal method to avoid triggering save loop
+			settings_manager._set_setting_internal("audio", key, audio_settings[key], false)
+		print("SaveManager: Loaded audio settings from save data")
+
+func test_audio_persistence() -> void:
+	"""
+	Test function to verify audio settings persistence
+	This can be called from debug console or UI for testing
+	"""
+	print("=== Audio Persistence Test ===")
+	
+	# Get current audio settings
+	var settings_manager = get_node_or_null("/root/SettingsManager")
+	if not settings_manager:
+		print("ERROR: SettingsManager not found")
+		return
+	
+	var current_audio = settings_manager.get_audio_settings()
+	print("Current audio settings: ", current_audio)
+	
+	# Check save data
+	if save_data.settings.has("audio"):
+		print("Save data audio settings: ", save_data.settings.audio)
+	else:
+		print("No audio settings in save data")
+	
+	# Test setting a value
+	var test_value = 0.5
+	settings_manager.set_setting("audio", "master_volume", test_value)
+	await get_tree().process_frame
+	
+	print("After setting master_volume to ", test_value, ":")
+	print("Current audio settings: ", settings_manager.get_audio_settings())
+	print("Save data audio settings: ", save_data.settings.audio)
+	
+	# Test loading
+	load_audio_settings()
+	await get_tree().process_frame
+	
+	print("After loading from save data:")
+	print("Current audio settings: ", settings_manager.get_audio_settings())
+	print("=== Test Complete ===")

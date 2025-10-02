@@ -77,6 +77,18 @@ func set_setting(category: String, key: String, value: Variant) -> bool:
 	@param value: New value to set
 	@return: True if setting was changed successfully
 	"""
+	return _set_setting_internal(category, key, value, true)
+
+func _set_setting_internal(category: String, key: String, value: Variant, emit_event: bool) -> bool:
+	"""
+	Internal method to set a setting value with optional event emission
+	
+	@param category: Settings category
+	@param key: Setting key within category
+	@param value: New value to set
+	@param emit_event: Whether to emit setting_changed event
+	@return: True if setting was changed successfully
+	"""
 	if not _settings.has(category):
 		push_error("SettingsManager: Cannot set unknown category '%s'" % category)
 		return false
@@ -87,14 +99,14 @@ func set_setting(category: String, key: String, value: Variant) -> bool:
 	
 	var old_value = _settings[category][key]
 	if old_value == value:
-		return false  # No change needed
+		return false # No change needed
 	
 	_settings[category][key] = value
 	_apply_setting(category, key, value)
 	_save_settings()
 	
-	# Emit change event
-	if _message_bus:
+	# Emit change event only if requested
+	if emit_event and _message_bus:
 		_message_bus.emit_event("setting_changed", [category, key, old_value, value])
 	
 	return true
