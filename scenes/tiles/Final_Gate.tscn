@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://brjqpebl0t14f"]
+[gd_scene load_steps=11 format=3 uid="uid://brjqpebl0t14f"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_bemli"]
 [ext_resource type="PackedScene" uid="uid://cfjbmrppn8dad" path="res://scenes/environments/altar.tscn" id="4_ur14w"]
 [ext_resource type="Script" uid="uid://bl5snw1fbt5b3" path="res://scripts/puzzles/FinalGatePuzzle.gd" id="5_oclvx"]
+[ext_resource type="Resource" uid="uid://b11pmr7ctvqqy" path="res://data/SFX.tres" id="5_sfx"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="5_yi2lo"]
 [ext_resource type="PackedScene" uid="uid://dxrwt86snuv1a" path="res://scenes/environments/3x1_corn_tile.tscn" id="6_o2efe"]
 [ext_resource type="PackedScene" uid="uid://vu4cqxlw4rbg" path="res://scenes/environments/gate.tscn" id="7_2u30e"]
@@ -18,6 +19,7 @@ is_permanent = true
 
 [node name="Objects" type="Node3D" parent="Maze"]
 script = ExtResource("5_oclvx")
+sfx_library = ExtResource("5_sfx")
 
 [node name="tree" parent="Maze/Objects" instance=ExtResource("8_p3ja7")]
 transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 7.71841, 0.0820141, 8)

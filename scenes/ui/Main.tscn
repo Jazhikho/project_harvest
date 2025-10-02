@@ -247,110 +247,120 @@ bbcode_enabled = true
 text = "[center][b]PROJECT HARVEST[/b]
 A Walking Nightmare
 
-[b]DEVELOPMENT TEAM[/b]
+[b]CREATED BY[/b]
+Christopher B. Del Gesso
+Chosen Gaming
 
-[b]Christopher B. Del Gesso[/b]
-Lead Developer, Game Designer, Programmer
-3D Artist, Audio Designer, Writer
+[b]DEVELOPMENT[/b]
+
+[b]Lead Developer & Designer[/b]
+Christopher B. Del Gesso
+
+[b]Programming[/b]
+Christopher B. Del Gesso
+with assistance from Anthropic Claude-4 Sonnet
+
+[b]3D Art & Modeling[/b]
+Christopher B. Del Gesso
+
+[b]Audio Design[/b]
+Christopher B. Del Gesso
+
+[b]Narrative Design[/b]
+Christopher B. Del Gesso
 
 [b]TECHNOLOGY[/b]
 
 [b]Game Engine[/b]
-Godot Engine 4.x
-Godot Development Team
+Godot Engine 4.4.1
+MIT License
 
-[b]Programming Languages[/b]
-GDScript
-C# (where applicable)
+[b]3D Software[/b]
+Blender 4.5.2, 3DS Max 2026 (Student License)
+Materialize v1.78
 
 [b]3D MODELS & ASSETS[/b]
 
 [b]Animpic POLY[/b]
-Farm Pack - Corn stalks, well, environmental props
-Lite Halloween Pack - Scarecrow, graves, bags, rocks
+Farm Pack & Lite Halloween Pack
 Standard License (purchased 2025)
 
-[b]Samy Belaloui[/b]
-Low Poly Skeleton model
-Creative Commons Attribution
+[b]Sketchfab Contributors (CC Attribution)[/b]
+Samy Belaloui - Low Poly Skeleton
+yomans - Key model
+Bill Nguyen - Gargoyle
+Cat O - Gargoyle
+JacksonMGB - Photogrammetry Gargoyle Statue
+BunQuest - Altar
+Scary - Low Poly Brazier
+ClintonAbbott Art - Low Poly Dead Tree
+Sousinho - Paper debris
+Kirrek - Broken Glass
+AnishRoyalinc - Gate apocalyptic rusty
+Psychopete696 - CORN MAZE-01
+kimmy.k - Low Poly Mobile Phone
+donnichols - Flashlight
+mohitnuslusion - Vintage Pocket Watch
+SCANIMATE_IO - PB153 Notebook Low
+Aoerchemix - Pirate Coin
+TwilightFox - Old Soviet Backpack
+3D History - 49 Star Flag
+Errlatte - Anubis bible
 
-[b]yomans[/b]
-Key model
-Creative Commons Attribution
+[b]Virtual Museums of Malopolska (CC0)[/b]
+Pocket watch - Public Domain
 
 [b]TEXTURES & MATERIALS[/b]
 
-[b]AmbientCG[/b]
-Foliage003 texture set (4K)
-CC0 License - Public Domain
+[b]AmbientCG (CC0)[/b]
+Foliage003, Bark006, Lava002, Rock032, Wood035
 https://ambientcg.com/
 
 [b]Poly Haven[/b]
-Mealie Road HDRI environment
-Greg Zaal
-CC0 License - Public Domain
-https://polyhaven.com/
+Mealie Road HDRI by Greg Zaal
+CC0 License - https://polyhaven.com/
 
 [b]OpenAI GPT-5[/b]
-Corn texture generation
-Custom corn leaf and stalk materials
+Corn, Pumpkin, Flannel textures
+Effigy concept designs
 
 [b]AUDIO[/b]
 
-[b]Original Compositions[/b]
-Christopher B. Del Gesso
-- Atmospheric soundscapes
-- Environmental audio design
-- Horror ambience
+[b]Original Music[/b]
+Christopher B. Del Gesso with assistance from ElevenLabs
+- Project Harvest Main Theme
+- Architect's Maze
+- High Tension, Hymn of the Echoes
+- The Effigy's Theme, The Stalker's Theme
+- Who Am I (In the Cornfield) 1, 2, 3
 
 [b]Sound Effects[/b]
-Christopher B. Del Gesso
-- Custom corn rustling
-- Wind effects
-- Environmental audio
 
-[b]CONCEPT ART & DESIGN[/b]
-
-[b]Project Harvest Development[/b]
-Christopher B. Del Gesso
-- Main concept art
-- Character designs
-- Environmental concepts
-- UI/UX design
-
-[b]AI-Generated Assets[/b]
-OpenAI GPT-5
-- Effigy concept designs
-- Additional texture work
-- Creative consultation
+[b]Freesound.org (CC0)[/b]
+Klangkobold, missozzy, Yin_Yang_Jake007, marc3122
 
 [b]SPECIAL THANKS[/b]
 
 [b]Family & Support[/b]
-Sarrah - For unwavering support and belief
-Dawn - For encouragement and family support
-The Del Gesso Family - For believing in this project
+Sarrah, Dawn, The Del Gesso Family
 
-[b]Academic Support[/b]
+[b]Academic[/b]
 Lindenwood University
 Professor Ben Fulcher
 GAM56800: Game Development Course
 
-[b]Beta Testing[/b]
-[Space reserved for future beta testers]
-
-[b]Additional Thanks[/b]
-The Godot community for excellent documentation
-Open source contributors who made this possible
-All the creators of the free assets used in this project
+[b]Community[/b]
+Godot community
+Open source contributors
+Free asset creators
 
 [b]DEDICATION[/b]
 
 This game is dedicated to Jeri
 You will be remembered
 
-[b]© 2025 Christopher B. Del Gesso
-All rights reserved[/b][/center]"
+[b]© 2025 Christopher B. Del Gesso[/b]
+[b]Chosen Gaming - All rights reserved[/b][/center]"
 fit_content = true
 
 [node name="CreditsBackButton" type="Button" parent="CreditsPanel/CreditsContainer"]

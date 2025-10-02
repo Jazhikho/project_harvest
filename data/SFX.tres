@@ -26,7 +26,7 @@
 script = ExtResource("1_40wi3")
 ambient = ExtResource("1_vcavf")
 dragging = ExtResource("2_gl02i")
-gateopn = ExtResource("3_rtagi")
+gate_open = ExtResource("3_rtagi")
 heartbeat = ExtResource("4_s65gy")
 itempickup = ExtResource("5_wdpgw")
 kick = ExtResource("6_y6f0h")

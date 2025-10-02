@@ -3,6 +3,7 @@ extends Node
 const GAME_SCENE = "res://scenes/game/Game.tscn"
 const MAIN_MENU = "res://scenes/ui/Main.tscn"
 const DEATH_SCREEN = "res://scenes/ui/DeathScreen.tscn"
+const ENDING_CREDITS = "res://scenes/ui/EndingCredits.tscn"
 
 func _ready():
 	pass
@@ -13,8 +14,10 @@ func load_game_scene():
 func load_main_menu():
 	get_tree().change_scene_to_file(MAIN_MENU)
 
+func load_ending_credits():
+	get_tree().change_scene_to_file(ENDING_CREDITS)
+
 func load_death_screen(death_type: String):
-	
 	# Store the death type
 	var death_scene = load(DEATH_SCREEN)
 	if death_scene:
