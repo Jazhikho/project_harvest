@@ -87,15 +87,21 @@ func _input(event):
 
 func toggle_pause():
 	game_paused = !game_paused
-	pause_menu.visible = game_paused
-	get_tree().paused = game_paused
-	pass
 	
 	if game_paused:
+		# Pausing - hide menu and set mouse visible
+		pause_menu.visible = true
+		get_tree().paused = true
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		pause_menu.show_menu()
 	else:
+		# Unpausing - hide menu first, then set pause state
+		pause_menu.visible = false
+		get_tree().paused = false
+		# Set mouse capture immediately
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		# Ensure player's mouse capture state is synchronized after a frame
+		call_deferred("_ensure_resume_mouse_capture")
 
 func toggle_inventory():
 	inventory_open = !inventory_open
@@ -105,9 +111,19 @@ func toggle_inventory():
 		inventory_ui.show_inventory()
 	else:
 		inventory_ui.hide_inventory()
+		# Ensure player's mouse capture state is synchronized
+		var player = get_node_or_null("/root/Game/Player")
+		if player and player.has_method("ensure_mouse_capture_state"):
+			player.ensure_mouse_capture_state()
 
 func _on_resume_requested():
 	toggle_pause()
+
+func _ensure_resume_mouse_capture():
+	"""Ensure mouse capture is properly set after resuming from pause"""
+	var player = get_node_or_null("/root/Game/Player")
+	if player and player.has_method("ensure_mouse_capture_state"):
+		player.ensure_mouse_capture_state()
 	
 func toggle_journal():
 	journal_open = !journal_open
@@ -117,14 +133,26 @@ func toggle_journal():
 		journal_ui.show_journal()
 	else:
 		journal_ui.hide_journal()
+		# Ensure player's mouse capture state is synchronized
+		var player = get_node_or_null("/root/Game/Player")
+		if player and player.has_method("ensure_mouse_capture_state"):
+			player.ensure_mouse_capture_state()
 
 func _on_inventory_closed():
 	inventory_open = false
 	get_tree().paused = false
+	# Ensure player's mouse capture state is synchronized
+	var player = get_node_or_null("/root/Game/Player")
+	if player and player.has_method("ensure_mouse_capture_state"):
+		player.ensure_mouse_capture_state()
 
 func _on_journal_closed():
 	journal_open = false
 	get_tree().paused = false
+	# Ensure player's mouse capture state is synchronized
+	var player = get_node_or_null("/root/Game/Player")
+	if player and player.has_method("ensure_mouse_capture_state"):
+		player.ensure_mouse_capture_state()
 
 func _on_open_inventory_to_item(item_id: String) -> void:
 	"""Open inventory and focus on a specific item"""

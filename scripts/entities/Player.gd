@@ -169,7 +169,8 @@ func _notification(what: int) -> void:
 		# Recapture mouse when window regains focus
 		# Small delay to ensure window is fully active
 		await get_tree().create_timer(0.1).timeout
-		if mouse_captured and get_tree().paused == false:
+		# Only recapture if we should have mouse captured and game isn't paused
+		if mouse_captured and get_tree().paused == false and not _is_ui_open():
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		# Release mouse when window loses focus to prevent it getting stuck
@@ -183,9 +184,9 @@ func _input(event: InputEvent) -> void:
 	# Handle mouse recapture on click when mouse is visible but should be captured
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		# Only recapture if we're in gameplay (not paused, no menus open)
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE and mouse_captured:
 			# Check if game is paused or UI is open
-			if not get_tree().paused:
+			if not get_tree().paused and not _is_ui_open():
 				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 				get_viewport().set_input_as_handled()
 				return
@@ -232,6 +233,62 @@ func _handle_mouse_look(relative_motion: Vector2) -> void:
 	"""
 	camera.rotation.x = clamp(camera.rotation.x - relative_motion.y * mouse_sensitivity, -PI / 2, PI / 2)
 	rotation.y -= relative_motion.x * mouse_sensitivity
+
+func _is_ui_open() -> bool:
+	"""
+	Check if any UI menu is currently open
+	
+	@return bool: True if any UI is open
+	"""
+	# If game is paused, assume UI is open
+	if get_tree().paused:
+		return true
+	
+	var game_controller = get_node_or_null("/root/Game/GameController")
+	if not game_controller:
+		return false
+	
+	# Check pause menu
+	if game_controller.get("game_paused") and game_controller.pause_menu and game_controller.pause_menu.visible:
+		return true
+	
+	# Check inventory
+	if game_controller.get("inventory_open") and game_controller.inventory_ui and game_controller.inventory_ui.visible:
+		return true
+	
+	# Check journal
+	if game_controller.get("journal_open") and game_controller.journal_ui and game_controller.journal_ui.visible:
+		return true
+	
+	# Check narrative UI
+	if game_controller.narrative_ui and game_controller.narrative_ui.visible:
+		return true
+	
+	return false
+
+func ensure_mouse_capture_state() -> void:
+	"""
+	Ensure mouse capture state is correct based on current game state
+	Should be called when game state changes
+	"""
+	# If game is paused, always use visible mouse
+	if get_tree().paused:
+		if Input.get_mouse_mode() != Input.MOUSE_MODE_VISIBLE:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		return
+	
+	# When resuming from pause, restore mouse capture state
+	if not _is_ui_open():
+		mouse_captured = true
+		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			print("Player: Mouse capture restored")
+	else:
+		# UI is open, keep mouse visible
+		mouse_captured = false
+		if Input.get_mouse_mode() != Input.MOUSE_MODE_VISIBLE:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			print("Player: Mouse set to visible")
 
 func _physics_process(delta: float) -> void:
 	game_timer += delta

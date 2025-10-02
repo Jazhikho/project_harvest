@@ -79,6 +79,9 @@ func _on_settings_pressed():
 	_load_settings()
 	if master_slider:
 		master_slider.grab_focus()
+	
+	# Ensure mouse remains visible for settings interaction
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 ## _on_main_menu_pressed
 ## Purpose: Handle main menu button press and show confirmation dialog
@@ -202,3 +205,5 @@ func _on_sfx_volume_changed(value: float):
 func _on_back_pressed():
 	settings_panel.visible = false
 	menu_panel.visible = true
+	# Ensure mouse remains visible for main menu interaction
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)

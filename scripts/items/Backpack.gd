@@ -113,7 +113,8 @@ func interact() -> void:
 	for collected_item_id in backpack_items:
 		if _player_inventory.has_method("add_item"):
 			var success = _player_inventory.add_item(collected_item_id, false) # Don't apply effects when restoring
-			if success:
+			if success: 
+				ItemManager._cleanup_duplicate_items(collected_item_id)
 				items_collected += 1
 				print("Backpack: Returned ", collected_item_id, " to player")
 				
