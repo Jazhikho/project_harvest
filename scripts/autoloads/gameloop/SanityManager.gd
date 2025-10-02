@@ -75,10 +75,13 @@ func _apply_passive_decay() -> void:
 	
 	# Decay is slower at high sanity, faster at low sanity
 	var decay_amount: int = PASSIVE_DECAY_AMOUNT
-	if current_sanity < 50:
+	if current_sanity > GameConstants.SANITY_THRESHOLD_HIGH:
+		decay_amount = int(decay_amount * 0.75)
+	elif current_sanity < GameConstants.SANITY_THRESHOLD_LOW:
+		decay_amount = int(decay_amount * 1.5)
+	elif current_sanity < GameConstants.SANITY_THRESHOLD_MEDIUM:
 		decay_amount = int(decay_amount * 1.25)
-	if current_sanity > 80:
-		decay_amount = int(decay_amount * 0.5)
+	
 	
 	_state_manager.modify_sanity(-decay_amount)
 
@@ -122,8 +125,6 @@ func _handle_threshold_crossed(threshold_name: String, new_value: int, crossed_d
 
 func _enter_critical_state() -> void:
 	"""Handle entering critical sanity state"""
-	_message_bus.emit_event("notification_requested", ["Your grip on reality weakens...", 4.0, 3])
-	_message_bus.emit_event("screen_effect_requested", ["vignette", -1, 0.7])
 	
 	# Increase entity spawn rates
 	_message_bus.emit_event("entity_spawned", ["watcher", null, Vector3.ZERO])

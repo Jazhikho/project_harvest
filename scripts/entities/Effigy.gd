@@ -230,7 +230,11 @@ func _update_behavior(delta: float) -> void:
 	var player_moved = _check_player_movement()
 	
 	# Effigy can only move/turn when player is NOT looking at it
-	can_move = not is_player_looking
+	if aggression_mode:
+		can_move = true
+		_turn_toward_player()
+		return
+	else: can_move = not is_player_looking
 	
 	_update_following_behavior()
 
@@ -486,17 +490,17 @@ func get_stage() -> int:
 ## @param reason: Optional reason tag for telemetry/logging.
 ## @return void.
 func set_aggression_mode(active: bool, reason: StringName = &"") -> void:
-	aggression_mode = active
+	aggression_mode = true
 	
 	if aggression_mode:
 		# Lock movement policy for aggression: always allowed and fast
 		follow_speed = aggressive_speed
+		turn_speed = 999.0
 		is_following = true
 		can_move = true
+		
+		# Force stage 4 appearance for aggressive effigies
+		_change_stage(4)
+		
 		if _message_bus:
 			_message_bus.emit_event("entity_state_changed", ["effigy", "aggression_started", reason])
-	else:
-		# Recalculate normal behavior from current sanity
-		_update_behavior_for_sanity()
-		if _message_bus:
-			_message_bus.emit_event("entity_state_changed", ["effigy", "aggression_ended", reason])

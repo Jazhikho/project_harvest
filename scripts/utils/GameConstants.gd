@@ -26,11 +26,11 @@ const MAX_TILES_ACTIVE: int = 10
 const CLEANUP_DISTANCE: int = 3
 
 # Door directions (bit flags)
-enum DoorDirection { 
+enum DoorDirection {
 	NONE = 0,
-	NORTH = 1, 
-	EAST = 2, 
-	SOUTH = 4, 
+	NORTH = 1,
+	EAST = 2,
+	SOUTH = 4,
 	WEST = 8,
 	ALL = 15
 }
@@ -73,7 +73,7 @@ const ENEMY_PATROL_RADIUS: float = 8.0
 
 # Effigy stages
 const EFFIGY_STAGE_COUNT: int = 4
-const EFFIGY_STAGE_SANITY_THRESHOLDS: Array[int] = [70, 50, 40, 0]
+const EFFIGY_STAGE_SANITY_THRESHOLDS: Array[int] = [80, 60, 40, 20]
 
 # === AUDIO SYSTEM ===
 const AUDIO_BUS_MASTER: String = "Master"

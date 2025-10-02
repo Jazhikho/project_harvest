@@ -5,7 +5,7 @@ extends CharacterBody3D
 @export var movement_speed: float = 4.5
 @export var sprint_mult: float = 1.6
 @export var mouse_sensitivity: float = 0.003
-@export var flashlight_battery_max: float = 300.0
+@export var flashlight_battery_max: float = 420.0
 @export var flashlight_drain_rate: float = 1.0
 @export var sfx_lib: SFX
 
@@ -59,7 +59,7 @@ func _ready() -> void:
 	call_deferred("_setup_audio_players")
 	
 	# Initialize flashlight
-	flashlight_battery = randf_range(60.0, 300.0)
+	flashlight_battery = randf_range(120.0, 420.0)
 	flashlight_battery_max = flashlight_battery
 	_update_flashlight_state()
 
@@ -530,7 +530,9 @@ func _update_flashlight(delta: float) -> void:
 				flashlight_battery_died = true
 				var state_manager = get_node_or_null("/root/GameStateManager")
 				if state_manager:
-					state_manager.modify_sanity(-10)
+					# Delay next action for 2 seconds after flashlight battery dies
+					await get_tree().create_timer(2.0).timeout
+					state_manager.modify_sanity(-100)
 			
 			_toggle_flashlight()
 	
@@ -539,11 +541,11 @@ func _update_flashlight(delta: float) -> void:
 		flashlight_enabled = true
 		_update_flashlight_state()
 	
-	# Handle darkness sanity drain (1 sanity per 15 seconds when flashlight is off)
+	# Handle darkness sanity drain (1 sanity per 5 seconds when flashlight is off)
 	# Only start draining sanity after 3 minutes (180 seconds) of game time
 	if game_timer >= 180.0 and (not flashlight_enabled or flashlight_battery <= 0.0):
 		darkness_timer += delta
-		if darkness_timer >= 15.0: # 15 seconds
+		if darkness_timer >= 5.0: # 5 seconds
 			darkness_timer = 0.0
 			var state_manager = get_node_or_null("/root/GameStateManager")
 			if state_manager:
@@ -647,7 +649,7 @@ func get_flashlight_battery_ratio() -> float:
 func reset_for_new_run() -> void:
 	"""Reset player state for new game run"""
 	# Reset flashlight state
-	flashlight_battery = randf_range(60.0, 300.0)
+	flashlight_battery = randf_range(120.0, 420.0)
 	flashlight_battery_max = flashlight_battery
 	flashlight_battery_died = false
 	flashlight_enabled = false
