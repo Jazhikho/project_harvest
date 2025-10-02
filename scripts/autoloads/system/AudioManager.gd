@@ -56,6 +56,9 @@ func _ensure_audio_buses() -> void:
 	else:
 		_audio_buses["Music"] = AudioServer.get_bus_index("Music")
 	
+	# Configure Music bus to continue playing during pause
+	# Music bus will continue playing during pause by default in Godot 4
+	
 	# Check and create SFX bus
 	if AudioServer.get_bus_index("SFX") == -1:
 		AudioServer.add_bus(2)
@@ -218,6 +221,7 @@ func play_ambient_loop(stream: AudioStream, volume_db: float) -> void:
 	if _ambient_player == null or not is_instance_valid(_ambient_player):
 		_ambient_player = AudioStreamPlayer.new()
 		_ambient_player.name = "AmbientLoop"
+		_ambient_player.process_mode = Node.PROCESS_MODE_INHERIT # Pause with game
 		if AudioServer.get_bus_index("Music") != -1:
 			_ambient_player.bus = "Music"
 		else:
@@ -254,6 +258,7 @@ func start_music() -> void:
 	if _music_a == null or not is_instance_valid(_music_a):
 		_music_a = AudioStreamPlayer.new()
 		_music_a.name = "MusicA"
+		_music_a.process_mode = Node.PROCESS_MODE_ALWAYS # Continue playing during pause
 		if AudioServer.get_bus_index("Music") != -1:
 			_music_a.bus = "Music"
 		else:
@@ -263,6 +268,7 @@ func start_music() -> void:
 	if _music_b == null or not is_instance_valid(_music_b):
 		_music_b = AudioStreamPlayer.new()
 		_music_b.name = "MusicB"
+		_music_b.process_mode = Node.PROCESS_MODE_ALWAYS # Continue playing during pause
 		if AudioServer.get_bus_index("Music") != -1:
 			_music_b.bus = "Music"
 		else:
@@ -272,6 +278,7 @@ func start_music() -> void:
 	if _music_gap_timer == null or not is_instance_valid(_music_gap_timer):
 		_music_gap_timer = Timer.new()
 		_music_gap_timer.one_shot = true
+		_music_gap_timer.process_mode = Node.PROCESS_MODE_ALWAYS # Continue during pause
 		get_tree().root.add_child(_music_gap_timer)
 		_music_gap_timer.timeout.connect(_on_music_gap_timeout)
 
@@ -374,6 +381,7 @@ func play_theme_loop(stream: AudioStream, volume_db: float = -8.0) -> void:
 		_theme_player = AudioStreamPlayer.new()
 		_theme_player.name = "ThemePlayer"
 		_theme_player.bus = "Music"
+		_theme_player.process_mode = Node.PROCESS_MODE_ALWAYS # Continue playing during pause
 		add_child(_theme_player)
 
 	# Wait until it's actually in the scene tree
