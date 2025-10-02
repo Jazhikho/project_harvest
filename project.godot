@@ -51,8 +51,6 @@ gdscript/warnings/narrowing_conversion=0
 [display]
 
 window/stretch/mode="viewport"
-window/stretch/aspect="keep"
-window/stretch/scale=1.0
 window/stretch/scale_mode="integer"
 
 [dotnet]

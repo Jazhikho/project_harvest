@@ -9,9 +9,10 @@ var _spawn_manager: Node
 var _tile_state_manager: Node
 
 # Tile tracking
-var _active_tiles: Dictionary = {} # Vector2i -> Node3D
-var _permanent_tiles: Dictionary = {} # Vector2i -> Node3D
+var _active_tiles: Dictionary = {} # Vector2i -> Node3D (canonical instances only)
+var _permanent_tiles: Dictionary = {} # Vector2i -> Node3D (canonical instances only)
 var _puzzle_tiles: Dictionary = {} # Vector2i -> puzzle_id
+var _wrap_duplicates: Array[Node3D] = [] # Duplicate tile instances for world wrapping
 
 # Connection tracking - prevents respawning
 var _established_connections: Dictionary = {} # "pos1_pos2" -> true
@@ -271,6 +272,12 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 	Spawn connecting tiles for all doors (only if connection doesn't exist)
 	Implements GAMELOOP.md step 5: Check for permanent tiles with 7x7 grid wrapping
 	
+	IMPORTANT: World wrapping affects TRACKING only, not physical positioning.
+	- Wrapped positions are used as keys for _active_tiles dictionary
+	- Physical positions are ALWAYS calculated relative to source tile
+	- This allows permanent tiles at one world position to appear at multiple 
+	  physical locations when approached from different directions due to wrapping
+	
 	@param source_tile: Source tile to connect from
 	@param source_pos: Grid position of source tile
 	"""
@@ -289,28 +296,41 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 		print("TileManager: Checking connection from ", source_pos, " ", _get_direction_name(door_direction),
 			  " to raw: ", raw_connecting_pos, " wrapped: ", wrapped_connecting_pos)
 		
-		# Skip if connection already established
+		# Skip if connection already established FROM THIS SOURCE
 		if _is_connection_established(source_pos, wrapped_connecting_pos):
 			continue
 		
-		# Check if tile already exists at wrapped position
+		# Check if tile already exists at wrapped position AND is physically adjacent
 		if _active_tiles.has(wrapped_connecting_pos) and is_instance_valid(_active_tiles[wrapped_connecting_pos]):
 			var existing_tile: Node3D = _active_tiles[wrapped_connecting_pos]
 			
-			# If it's a permanent tile, rotate it to connect
-			if existing_tile.has_method("is_tile_permanent") and existing_tile.is_tile_permanent():
-				_rotate_permanent_tile_to_connect(existing_tile, door_direction)
+			# Check if existing tile is physically adjacent to source tile
+			var expected_physical_pos: Vector3 = _calculate_adjacent_position(source_tile.position, door_direction)
+			var distance_to_existing: float = existing_tile.position.distance_to(expected_physical_pos)
 			
-			_establish_connection(source_pos, wrapped_connecting_pos)
-			_tile_state_manager.set_tile_state(wrapped_connecting_pos, _tile_state_manager.TileState.CONNECTING)
-			continue
+			# If existing tile is physically adjacent (within 1 unit tolerance), reuse it
+			if distance_to_existing < 1.0:
+				# If it's a permanent tile, rotate it to connect
+				if existing_tile.has_method("is_tile_permanent") and existing_tile.is_tile_permanent():
+					_rotate_permanent_tile_to_connect(existing_tile, door_direction)
+				
+				_establish_connection(source_pos, wrapped_connecting_pos)
+				_tile_state_manager.set_tile_state(wrapped_connecting_pos, _tile_state_manager.TileState.CONNECTING)
+				continue
+			else:
+				# Existing tile is NOT physically adjacent - this is a wrapped duplicate
+				# Don't reuse it, spawn a new instance below
+				print("TileManager: Tile at ", wrapped_connecting_pos, " exists but not adjacent (distance: ",
+					  distance_to_existing, "). Creating new instance due to wrapping.")
 		elif _active_tiles.has(wrapped_connecting_pos):
 			_active_tiles.erase(wrapped_connecting_pos)
 		
 		# Check for pre-assigned permanent tile at this position
 		var permanent_scene_at_pos: PackedScene = _get_permanent_tile_at_position(wrapped_connecting_pos)
 		if permanent_scene_at_pos != null:
-			var permanent_tile: Node3D = _spawn_permanent_tile(permanent_scene_at_pos, wrapped_connecting_pos, source_tile, door_direction)
+			# Check if we already have a permanent tile at this wrapped position
+			var is_duplicate: bool = _has_permanent_tile_at(wrapped_connecting_pos)
+			var permanent_tile: Node3D = _spawn_permanent_tile(permanent_scene_at_pos, wrapped_connecting_pos, source_tile, door_direction, is_duplicate)
 			if permanent_tile:
 				_establish_connection(source_pos, wrapped_connecting_pos)
 			continue
@@ -436,13 +456,18 @@ func _create_random_tile(grid_pos: Vector2i) -> Node3D:
 func _align_tiles(source_tile: Node3D, target_tile: Node3D, door_direction: int, target_grid_pos: Vector2i, did_wrap: bool) -> void:
 	"""
 	Align target tile to connect with source tile door
-	Physical positions are always adjacent, grid positions wrap for tracking
+	Physical positions are ALWAYS adjacent in world space, regardless of wrapping
+	
+	CRITICAL: This function ensures tiles are positioned adjacent to each other
+	in physical 3D space. Grid wrapping only affects tracking/dictionary keys,
+	never physical positioning. A tile at wrapped grid (-3,0) approached from
+	grid (3,0) will be positioned adjacent in physical space, not 6 tiles away.
 	
 	@param source_tile: Source tile with door
 	@param target_tile: Target tile to align
 	@param door_direction: Direction of connecting door
-	@param target_grid_pos: Grid position of target tile (wrapped for tracking)
-	@param did_wrap: Whether world wrapping occurred (for tracking only)
+	@param target_grid_pos: Grid position of target tile (wrapped for tracking ONLY)
+	@param did_wrap: Whether world wrapping occurred (for tracking/logging only)
 	"""
 	# Rotate target tile
 	if target_tile.has_method("get_available_doors"):
@@ -526,6 +551,28 @@ func _get_connecting_position(tile_pos: Vector2i, door_direction: int) -> Vector
 		DoorDirection.SOUTH: return tile_pos + Vector2i(-1, 0)
 		DoorDirection.WEST: return tile_pos + Vector2i(0, -1)
 		_: return tile_pos
+
+func _calculate_adjacent_position(source_position: Vector3, door_direction: int) -> Vector3:
+	"""
+	Calculate the physical position adjacent to source in the given direction
+	
+	@param source_position: Physical position of source tile
+	@param door_direction: Direction from source
+	@return: Expected physical position of adjacent tile
+	"""
+	var offset: float = TILE_SIZE
+	
+	match door_direction:
+		DoorDirection.NORTH:
+			return Vector3(source_position.x + offset, source_position.y, source_position.z)
+		DoorDirection.EAST:
+			return Vector3(source_position.x, source_position.y, source_position.z + offset)
+		DoorDirection.SOUTH:
+			return Vector3(source_position.x - offset, source_position.y, source_position.z)
+		DoorDirection.WEST:
+			return Vector3(source_position.x, source_position.y, source_position.z - offset)
+		_:
+			return source_position
 
 func _apply_world_wrapping(position: Vector2i) -> Vector2i:
 	"""
@@ -636,6 +683,47 @@ func _cleanup_tiles_for_position(player_pos: Vector2i) -> void:
 	if tiles_to_remove.size() > 0:
 		for pos in tiles_to_remove:
 			_cleanup_single_tile(pos)
+	
+	# Also cleanup distant wrap duplicates
+	_cleanup_distant_wrap_duplicates(player_pos)
+
+func _cleanup_distant_wrap_duplicates(player_pos: Vector2i) -> void:
+	"""
+	Clean up wrap duplicate tiles that are far from player
+	
+	@param player_pos: Current player position
+	"""
+	if _wrap_duplicates.is_empty():
+		return
+	
+	# Get player's physical position
+	var player: Node3D = get_tree().get_first_node_in_group("player") as Node3D
+	if not player:
+		return
+	
+	var player_physical_pos: Vector3 = player.global_position
+	var cleanup_distance: float = TILE_SIZE * 3.0 # Clean up duplicates more than 3 tiles away
+	
+	var duplicates_to_remove: Array[Node3D] = []
+	
+	for duplicate in _wrap_duplicates:
+		if not is_instance_valid(duplicate):
+			duplicates_to_remove.append(duplicate)
+			continue
+		
+		var distance: float = duplicate.position.distance_to(player_physical_pos)
+		if distance > cleanup_distance:
+			print("TileManager: Cleaning up distant wrap duplicate at ", duplicate.position, " (distance: ", distance, ")")
+			duplicates_to_remove.append(duplicate)
+			
+			# Free the duplicate
+			if duplicate.get_parent():
+				duplicate.get_parent().remove_child(duplicate)
+			duplicate.queue_free()
+	
+	# Remove from tracking
+	for duplicate in duplicates_to_remove:
+		_wrap_duplicates.erase(duplicate)
 
 func _cleanup_single_tile(pos: Vector2i) -> void:
 	"""
@@ -764,6 +852,7 @@ func _on_game_started() -> void:
 	# Clear all previous run data
 	_established_connections.clear()
 	_start_tile_initialized = false
+	_wrap_duplicates.clear()
 	cleanup_invalid_tile_references()
 	initialize_game_tiles()
 
@@ -836,17 +925,21 @@ func _can_permanent_tile_spawn_at(position: Vector2i) -> bool:
 	
 	return true
 
-func _spawn_permanent_tile(tile_scene: PackedScene, grid_pos: Vector2i, source_tile: Node3D, door_direction: int) -> Node3D:
+func _spawn_permanent_tile(tile_scene: PackedScene, grid_pos: Vector2i, source_tile: Node3D, door_direction: int, is_duplicate: bool = false) -> Node3D:
 	"""
 	Spawn a pre-assigned permanent tile at position
 	
 	@param tile_scene: PackedScene of the permanent tile
-	@param grid_pos: Position to spawn at
+	@param grid_pos: Position to spawn at (wrapped world position)
 	@param source_tile: Tile we're connecting from
 	@param door_direction: Direction we're connecting from
+	@param is_duplicate: If true, this is a duplicate instance for wrapping (won't be tracked in _active_tiles)
 	@return: Spawned tile or null
 	"""
-	print("TileManager: Spawning pre-assigned permanent tile at ", grid_pos)
+	if is_duplicate:
+		print("TileManager: Spawning DUPLICATE permanent tile at ", grid_pos, " (wrapping instance)")
+	else:
+		print("TileManager: Spawning pre-assigned permanent tile at ", grid_pos)
 	
 	var permanent_tile: Node3D = _create_tile_from_scene(tile_scene, grid_pos)
 	if not permanent_tile:
@@ -855,11 +948,20 @@ func _spawn_permanent_tile(tile_scene: PackedScene, grid_pos: Vector2i, source_t
 	# Permanent tiles must rotate to connect
 	_align_tiles_with_rotation_requirement(source_tile, permanent_tile, door_direction, grid_pos)
 	
-	# Register the tile
-	_register_tile(permanent_tile, grid_pos)
-	
-	# Register with TileStateManager as connecting
-	_tile_state_manager.register_tile(permanent_tile, grid_pos, _tile_state_manager.TileState.CONNECTING)
+	# Only register in tracking dictionaries if this is NOT a duplicate
+	# Duplicates exist physically in the scene but aren't tracked for cleanup
+	if not is_duplicate:
+		_register_tile(permanent_tile, grid_pos)
+		
+		# Register with TileStateManager as connecting
+		_tile_state_manager.register_tile(permanent_tile, grid_pos, _tile_state_manager.TileState.CONNECTING)
+	else:
+		# Mark as duplicate so it's not confused with the canonical instance
+		permanent_tile.set_meta("is_wrap_duplicate", true)
+		permanent_tile.set_meta("canonical_world_pos", grid_pos)
+		
+		# Track duplicate for cleanup
+		_wrap_duplicates.append(permanent_tile)
 	
 	# Emit tile generated event
 	_message_bus.emit_event("tile_generated", [permanent_tile, grid_pos, {}])
@@ -869,12 +971,16 @@ func _spawn_permanent_tile(tile_scene: PackedScene, grid_pos: Vector2i, source_t
 func _align_tiles_with_rotation_requirement(source_tile: Node3D, target_tile: Node3D, door_direction: int, target_grid_pos: Vector2i) -> void:
 	"""
 	Align tiles ensuring the target (permanent) tile rotates to connect properly
-	Physical positions are always adjacent, grid positions wrap for tracking
+	Physical positions are ALWAYS adjacent in world space, regardless of wrapping
+	
+	CRITICAL: Like _align_tiles, this ensures adjacent physical positioning.
+	Permanent tiles exist at one world (wrapped) position but can appear at
+	multiple physical locations when approached from different directions.
 	
 	@param source_tile: Source tile with door
 	@param target_tile: Target tile to align (will be rotated)
 	@param door_direction: Direction of connecting door from source
-	@param target_grid_pos: Grid position of target tile (wrapped for tracking)
+	@param target_grid_pos: Grid position of target tile (wrapped for tracking ONLY)
 	"""
 	# Calculate the opposite direction (where target needs a door)
 	var required_door_direction: int = _get_opposite_direction(door_direction)
@@ -966,7 +1072,7 @@ func _index_to_door_enum(index: int) -> int:
 		
 func cleanup_invalid_tile_references() -> void:
 	"""
-	Clean up any invalid tile references in _active_tiles
+	Clean up any invalid tile references in _active_tiles and _wrap_duplicates
 	Should be called when starting a new run
 	"""
 	var invalid_positions: Array[Vector2i] = []
@@ -983,3 +1089,15 @@ func cleanup_invalid_tile_references() -> void:
 	
 	if invalid_positions.size() > 0:
 		print("TileManager: Cleaned up ", invalid_positions.size(), " invalid tile references")
+	
+	# Also cleanup invalid wrap duplicates
+	var invalid_duplicates: Array[Node3D] = []
+	for duplicate in _wrap_duplicates:
+		if not is_instance_valid(duplicate):
+			invalid_duplicates.append(duplicate)
+	
+	for duplicate in invalid_duplicates:
+		_wrap_duplicates.erase(duplicate)
+	
+	if invalid_duplicates.size() > 0:
+		print("TileManager: Cleaned up ", invalid_duplicates.size(), " invalid wrap duplicates")
