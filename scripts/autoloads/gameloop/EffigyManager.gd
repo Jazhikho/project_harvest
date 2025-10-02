@@ -7,8 +7,8 @@ var _state_manager: Node
 var _harvest_logger: Node
 
 # Effigy tracking
-var _active_effigies: Dictionary = {}  # Vector2i -> effigy_node
-var _effigy_data: Dictionary = {}  # Vector2i -> effigy_metadata
+var _active_effigies: Dictionary = {} # Vector2i -> effigy_node
+var _effigy_data: Dictionary = {} # Vector2i -> effigy_metadata
 var _next_effigy_id: int = 0
 
 # Effigy scenes and stages
@@ -54,8 +54,11 @@ func spawn_effigy_at_death_location(death_data: Dictionary) -> Node3D:
 		return null
 	
 	# Position the effigy in world space
-	var world_pos = Vector3(position.x * 20.0, 0, position.y * 20.0)  # TILE_SIZE = 20.0
+	var world_pos = Vector3(position.x * 20.0, 0, position.y * 20.0) # TILE_SIZE = 20.0
 	effigy.global_position = world_pos
+	
+	# Ensure proper orientation - face positive Z direction like normal effigies
+	effigy.rotation.y = 0.0
 	
 	# Add to scene
 	get_tree().current_scene.add_child(effigy)
@@ -144,13 +147,13 @@ func _calculate_stage_for_sanity(sanity: int) -> int:
 	@return: Stage number (1-4)
 	"""
 	if sanity >= 80:
-		return 1  # Normal scarecrow
+		return 1 # Normal scarecrow
 	elif sanity >= 60:
-		return 2  # Slightly unsettling
+		return 2 # Slightly unsettling
 	elif sanity >= 40:
-		return 3  # Clearly wrong
+		return 3 # Clearly wrong
 	else:
-		return 4  # Nightmare fuel
+		return 4 # Nightmare fuel
 
 func cleanup_old_effigies(max_age_seconds: float = 300.0) -> void:
 	"""
@@ -223,7 +226,7 @@ func _load_existing_effigies() -> void:
 	if not _harvest_logger:
 		return
 	
-	var recent_runs = _harvest_logger.get_recent_runs(5)  # Last 5 runs
+	var recent_runs = _harvest_logger.get_recent_runs(5) # Last 5 runs
 	
 	for run_data in recent_runs:
 		var final_pos = Vector2i(run_data.final_position.x, run_data.final_position.y)
@@ -266,14 +269,16 @@ func _on_entity_spawned(entity_type: String, entity_node: Node3D, position: Vect
 		var death_data = _state_manager.get_unused_death_at_position(grid_pos)
 		
 		if not death_data.is_empty():
-			var effigy_pos = position + Vector3(1.5, 0, 0)  # Offset from backpack
+			var effigy_pos = position + Vector3(1.5, 0, 0) # Offset from backpack
 			var effigy = spawn_effigy_at_death_location(death_data)
 			if effigy:
 				effigy.global_position = effigy_pos
+				# Ensure proper orientation - face positive Z direction like normal effigies
+				effigy.rotation.y = 0.0
 
 func _on_game_started() -> void:
 	"""Game start cleanup in case something was missed last run"""
-	cleanup_old_effigies(0.0)  # Remove all existing effigies
+	cleanup_old_effigies(0.0) # Remove all existing effigies
 	_next_effigy_id = 0
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:

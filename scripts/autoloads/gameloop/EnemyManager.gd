@@ -149,6 +149,10 @@ func spawn_enemy(enemy_type: String, position: Vector3 = Vector3.ZERO, force_spa
 		position = _find_spawn_position(enemy_type)
 	enemy_instance.global_position = position
 	
+	# Ensure proper orientation for effigies - face positive Z direction
+	if enemy_type == "effigy":
+		enemy_instance.rotation.y = 0.0
+	
 	# Register enemy
 	var entity_id = _generate_enemy_id(enemy_type)
 	_active_enemies[entity_id] = enemy_instance
@@ -499,6 +503,9 @@ static func spawn_aggressive_effigies(count: int, scene_root: Node) -> Array:
 			var effigy = effigy_scene.instantiate()
 			maze_objects.add_child(effigy)
 			effigy.global_position = spawn_point.global_position
+			
+			# Ensure proper orientation - face positive Z direction like normal effigies
+			effigy.rotation.y = 0.0
 			
 			# Set aggression mode after a brief delay to ensure initialization
 			effigy.call_deferred("set_aggression_mode", true, &"puzzle_completion")

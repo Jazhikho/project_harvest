@@ -3,18 +3,18 @@ class_name CollisionHelper
 ## Ensures all collision layers are properly configured
 
 # Collision layer constants (matching project.godot layer numbers)
-const LAYER_PLAYER: int = 1          # Player character
-const LAYER_ENTITIES: int = 2        # Enemies, effigies, NPCs  
-const LAYER_WALLS: int = 3           # Maze walls, barriers
-const LAYER_OBJECTS: int = 4         # Collectible items
-const LAYER_PUZZLE_OBJECTS: int = 5  # Puzzle interaction objects
+const LAYER_PLAYER: int = 1 # Player character
+const LAYER_ENTITIES: int = 2 # Enemies, effigies, NPCs
+const LAYER_WALLS: int = 3 # Maze walls, barriers
+const LAYER_OBJECTS: int = 4 # Collectible items
+const LAYER_PUZZLE_OBJECTS: int = 5 # Puzzle interaction objects
 
 # Collision masks (bit flags for what each layer should collide with)
-const MASK_PLAYER: int = (1 << (LAYER_ENTITIES-1)) + (1 << (LAYER_WALLS-1)) + (1 << (LAYER_OBJECTS-1)) + (1 << (LAYER_PUZZLE_OBJECTS-1))
-const MASK_ENTITIES: int = (1 << (LAYER_PLAYER-1)) + (1 << (LAYER_WALLS-1))
-const MASK_WALLS: int = (1 << (LAYER_PLAYER-1)) + (1 << (LAYER_ENTITIES-1))
-const MASK_OBJECTS: int = (1 << (LAYER_PLAYER-1))
-const MASK_PUZZLE_OBJECTS: int = (1 << (LAYER_PLAYER-1))
+const MASK_PLAYER: int = (1 << (LAYER_ENTITIES - 1)) + (1 << (LAYER_WALLS - 1)) + (1 << (LAYER_OBJECTS - 1)) + (1 << (LAYER_PUZZLE_OBJECTS - 1))
+const MASK_ENTITIES: int = (1 << (LAYER_PLAYER - 1)) + (1 << (LAYER_WALLS - 1)) + (1 << (LAYER_ENTITIES - 1))
+const MASK_WALLS: int = (1 << (LAYER_PLAYER - 1)) + (1 << (LAYER_ENTITIES - 1))
+const MASK_OBJECTS: int = (1 << (LAYER_PLAYER - 1))
+const MASK_PUZZLE_OBJECTS: int = (1 << (LAYER_PLAYER - 1))
 
 static func setup_player_collision(player: CharacterBody3D) -> void:
 	"""Setup collision for player character"""
@@ -43,8 +43,8 @@ static func setup_puzzle_collision(puzzle_object: StaticBody3D) -> void:
 
 static func setup_pickup_area(area: Area3D) -> void:
 	"""Setup Area3D for item pickup detection"""
-	area.collision_layer = 0  # Areas don't need to be on a layer
-	area.collision_mask = 1 << (LAYER_PLAYER - 1)  # Only detect player
+	area.collision_layer = 0 # Areas don't need to be on a layer
+	area.collision_mask = 1 << (LAYER_PLAYER - 1) # Only detect player
 
 static func setup_interaction_raycast(query: PhysicsRayQueryParameters3D) -> void:
 	"""Setup raycast for player interaction"""
@@ -53,7 +53,7 @@ static func setup_interaction_raycast(query: PhysicsRayQueryParameters3D) -> voi
 
 static func setup_visibility_raycast(query: PhysicsRayQueryParameters3D) -> void:
 	"""Setup raycast for line-of-sight checks"""
-	query.collision_mask = 1 << (LAYER_WALLS - 1)  # Only walls block visibility
+	query.collision_mask = 1 << (LAYER_WALLS - 1) # Only walls block visibility
 
 static func get_layer_name(layer: int) -> String:
 	"""Get human-readable name for collision layer"""
