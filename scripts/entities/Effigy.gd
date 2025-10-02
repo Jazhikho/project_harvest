@@ -221,7 +221,6 @@ func _get_player_camera() -> Camera3D:
 		push_warning("Effigy: No active Camera3D found.")
 	return cam
 
-
 func _update_behavior(delta: float) -> void:
 	"""Update effigy behavior based on sanity level"""
 	if not is_player_valid():
@@ -275,7 +274,6 @@ func _update_following_behavior() -> void:
 	elif was_following and not is_following and _message_bus:
 		_message_bus.emit_event("entity_lost_player", ["effigy", self])
 
-
 func _emit_detection_event_if_needed(was_following: bool) -> void:
 	"""Emit detection event when starting to follow"""
 	if not was_following and is_following and _message_bus:
@@ -291,6 +289,7 @@ func _turn_toward_player() -> void:
 	"""Turn to face player - only happens when player is NOT looking"""
 	if not player: return
 	var dir = (player.global_position - global_position).normalized()
+	# Add PI to account for effigy model's forward direction being -Z instead of +Z
 	var target_yaw = atan2(dir.x, dir.z)
 	rotation.y = lerp_angle(rotation.y, target_yaw, clamp(turn_speed * get_physics_process_delta_time(), 0.0, 1.0))
 

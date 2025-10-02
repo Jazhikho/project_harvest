@@ -51,13 +51,15 @@ func _setup_responsive_sizing() -> void:
 		full_controls.offset_bottom = panel_height / 2.0
 	
 	# Update minimized hints position (top-right corner)
+	# Since MinimizedHints uses anchor_right = 1.0, offsets are relative to right edge
 	if minimized_hints:
 		var hints_width: float = 150.0
 		var hints_height: float = 50.0
-		minimized_hints.offset_left = viewport_size.x - hints_width - 10.0
+		minimized_hints.offset_left = - hints_width - 10.0 # Negative offset from right edge
 		minimized_hints.offset_top = 10.0
-		minimized_hints.offset_right = viewport_size.x - 10.0
+		minimized_hints.offset_right = -10.0 # Negative offset from right edge
 		minimized_hints.offset_bottom = hints_height
+		print("ControlsUI: MinimizedHints positioned at offset_left=", minimized_hints.offset_left, ", offset_right=", minimized_hints.offset_right)
 
 ## _connect_to_events
 ## Purpose: Connect to MessageBus events for player spawn
@@ -107,12 +109,21 @@ func _on_player_spawned(player_node: Node3D) -> void:
 	if narrative_ui:
 		print("ControlsUI: Found NarrativeUI, checking if intro is playing...")
 		if narrative_ui.has_method("is_intro_playing"):
-			var wait_count: int = 0
-			while narrative_ui.is_intro_playing():
-				print("ControlsUI: Waiting for intro to finish... (", wait_count, ")")
-				await get_tree().create_timer(0.1).timeout
-				wait_count += 1
-			print("ControlsUI: Intro finished, showing controls")
+			var intro_playing: bool = narrative_ui.is_intro_playing()
+			print("ControlsUI: Intro playing status=", intro_playing)
+			if intro_playing:
+				var wait_count: int = 0
+				while narrative_ui.is_intro_playing():
+					print("ControlsUI: Waiting for intro to finish... (", wait_count, ")")
+					await get_tree().create_timer(0.1).timeout
+					wait_count += 1
+					# Safety timeout to prevent infinite loop
+					if wait_count > 300: # 30 seconds max wait
+						print("ControlsUI: WARNING - Intro wait timeout, forcing continuation")
+						break
+				print("ControlsUI: Intro finished, showing controls")
+			else:
+				print("ControlsUI: Intro not playing, proceeding immediately")
 		else:
 			print("ControlsUI: NarrativeUI doesn't have is_intro_playing method")
 	else:
@@ -172,12 +183,26 @@ func _transition_to_minimized() -> void:
 ## @return void.
 func _fade_in_minimized() -> void:
 	print("ControlsUI: Fading in minimized hints")
+	print("ControlsUI: MinimizedHints global_position=", minimized_hints.global_position, ", size=", minimized_hints.size)
+	print("ControlsUI: MinimizedHints anchors=", minimized_hints.anchor_left, ",", minimized_hints.anchor_right, ",", minimized_hints.anchor_top, ",", minimized_hints.anchor_bottom)
 	minimized_hints.visible = true
 	minimized_hints.modulate.a = 0.0
 	var tween: Tween = create_tween()
 	tween.tween_property(minimized_hints, "modulate:a", 1.0, FADE_DURATION)
 	await tween.finished
 	print("ControlsUI: Minimized hints visible, controls sequence complete")
+
+## force_show_minimized_hints
+## Purpose: Force show minimized hints (for debugging or fallback)
+## @return void.
+func force_show_minimized_hints() -> void:
+	print("ControlsUI: Force showing minimized hints")
+	if minimized_hints:
+		minimized_hints.visible = true
+		minimized_hints.modulate.a = 1.0
+		print("ControlsUI: Minimized hints force-shown")
+	else:
+		print("ControlsUI: ERROR - minimized_hints node not found!")
 
 
 ## _load_icons

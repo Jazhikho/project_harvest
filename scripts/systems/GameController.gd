@@ -282,3 +282,13 @@ func _start_game_audio() -> void:
 			push_error("GameController: AudioManager.start_music() missing.")
 	else:
 		push_error("GameController: music_playlist is empty or not assigned in the inspector.")
+
+## debug_force_show_minimized_hints
+## Purpose: Debug method to force show minimized hints
+## @return void.
+func debug_force_show_minimized_hints() -> void:
+	print("GameController: Debug - Force showing minimized hints")
+	if control_hints and control_hints.has_method("force_show_minimized_hints"):
+		control_hints.force_show_minimized_hints()
+	else:
+		print("GameController: ERROR - ControlsUI not found or missing force_show_minimized_hints method")

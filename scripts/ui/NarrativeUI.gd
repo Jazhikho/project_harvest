@@ -16,6 +16,7 @@ var waiting_for_advance: bool = false
 var in_intro_sequence: bool = false
 var intro_completed: bool = false
 var last_effigy_stage_seen: int = 0
+var flashlight_narrative_triggered: bool = false
 
 func _ready() -> void:
 	visible = false
@@ -38,6 +39,12 @@ func _ready() -> void:
 	
 	# Connect immediately to avoid missing events
 	_connect_to_events()
+
+func _process(_delta: float) -> void:
+	"""Check for timer-based narrative triggers"""
+	# Only check if intro is completed and we haven't triggered flashlight narrative yet
+	if intro_completed and not flashlight_narrative_triggered:
+		_check_flashlight_timer()
 
 func _input(event: InputEvent) -> void:
 	# Allow keyboard input to advance ONLY during intro sequence
@@ -304,6 +311,23 @@ func _on_player_looking_at(target: Node3D, target_type: String) -> void:
 			if narrative_data.has("toasts") and narrative_data.toasts.has(toast_key):
 				var toast = narrative_data.toasts[toast_key]
 				_queue_message(toast.text, toast.get("seconds", 5.0))
+
+func _check_flashlight_timer() -> void:
+	"""Check if 3 minutes have passed and trigger flashlight narrative"""
+	var game_director = get_node_or_null("/root/GameDirector")
+	if not game_director:
+		return
+	
+	var session_duration: float = game_director.get_session_duration()
+	
+	# Check if 3 minutes (180 seconds) have passed
+	if session_duration >= 180.0:
+		flashlight_narrative_triggered = true
+		
+		# Trigger the flashlight narrative
+		if narrative_data.has("toasts") and narrative_data.toasts.has("flashlight_after_3m"):
+			var toast = narrative_data.toasts.flashlight_after_3m
+			_queue_message(toast.text, toast.get("seconds", 5.0))
 
 func _queue_message(text: String, duration: float) -> void:
 	"""Queue a toast message (non-interactive, timed display)"""

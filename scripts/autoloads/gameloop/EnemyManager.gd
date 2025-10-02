@@ -458,15 +458,21 @@ func get_enemy_count_by_type(enemy_type: String) -> int:
 	"""Get number of active enemies of specific type"""
 	return get_enemies_by_type(enemy_type).size()
 
-static func spawn_aggressive_effigies(count: int, scene_root: Node) -> Array:
-	"""Spawn aggressive effigies at entity points and return array of spawned effigies"""
+static func spawn_aggressive_effigies(count: int, puzzle_node: Node) -> Array:
+	"""
+	Spawn aggressive effigies at entity points and return array of spawned effigies
+	
+	@param count: Number of effigies to spawn
+	@param puzzle_node: The puzzle node calling this (used to find the tile)
+	@return: Array of spawned effigy nodes
+	"""
 	var spawned_effigies: Array = []
 	
 	if count <= 0:
 		return spawned_effigies
 	
 	# Get EnemyManager instance to access spawn_catalog
-	var enemy_manager = scene_root.get_node_or_null("/root/EnemyManager")
+	var enemy_manager: Node = puzzle_node.get_node_or_null("/root/EnemyManager")
 	if not enemy_manager:
 		push_error("EnemyManager not found")
 		return spawned_effigies
@@ -483,40 +489,98 @@ static func spawn_aggressive_effigies(count: int, scene_root: Node) -> Array:
 		push_error("Failed to load Effigy scene from SpawnCatalog")
 		return spawned_effigies
 	
-	# Find current tile and its entity spawn points
-	var current_tile = _find_current_tile(scene_root)
+	# Find the tile by walking up from the puzzle node
+	var current_tile: Node3D = _find_tile_from_puzzle(puzzle_node)
 	if not current_tile:
-		push_error("Current tile not found")
+		push_error("Current tile not found from puzzle node")
 		return spawned_effigies
 	
-	var maze_objects = current_tile.get_node_or_null("Maze/Objects")
+	# Try to find Maze/Objects, then fallback to just Objects
+	var maze_objects: Node3D = current_tile.get_node_or_null("Maze/Objects")
 	if not maze_objects:
-		push_error("Maze/Objects not found in current tile")
-		return spawned_effigies
+		maze_objects = current_tile.get_node_or_null("Objects")
 	
-	# Spawn effigies at available entity points
-	for i in range(min(count, 3)): # Max 3 spawn points
-		var spawn_point_name = "EntityPoint%d" % (i + 1)
-		var spawn_point = maze_objects.get_node_or_null(spawn_point_name)
-		
-		if spawn_point:
-			var effigy = effigy_scene.instantiate()
-			maze_objects.add_child(effigy)
-			effigy.global_position = spawn_point.global_position
-			
-			# Ensure proper orientation - face positive Z direction like normal effigies
-			effigy.rotation.y = 0.0
-			
-			# Set aggression mode after a brief delay to ensure initialization
-			effigy.call_deferred("set_aggression_mode", true, &"puzzle_completion")
-			
-			spawned_effigies.append(effigy)
-			
-			MessageBus.emit_event("entity_spawned", ["effigy", effigy, spawn_point.global_position])
+	var spawn_parent: Node3D = null
+	var spawn_positions: Array[Vector3] = []
+	var player: Node3D = puzzle_node.get_tree().get_first_node_in_group("player")
+	
+	# If we have maze_objects with EntityPoints, use those
+	if maze_objects:
+		for i in range(min(count, 3)):
+			var spawn_point_name: String = "EntityPoint%d" % (i + 1)
+			var spawn_point: Node3D = maze_objects.get_node_or_null(spawn_point_name)
+			if spawn_point:
+				spawn_positions.append(spawn_point.global_position)
+		spawn_parent = maze_objects
+	
+	# If we didn't find any spawn points, create positions near player
+	if spawn_positions.is_empty():
+		if player:
+			var player_pos: Vector3 = player.global_position
+			for i in range(min(count, 3)):
+				var angle: float = (i * TAU / 3.0) + randf_range(-0.3, 0.3)
+				var distance: float = randf_range(8.0, 12.0)
+				var offset: Vector3 = Vector3(cos(angle) * distance, 0, sin(angle) * distance)
+				spawn_positions.append(player_pos + offset)
 		else:
-			push_warning("EntityPoint%d not found" % (i + 1))
+			push_error("Cannot spawn effigies: no spawn points and no player found")
+			return spawned_effigies
+		
+		# Use current scene as spawn parent if no Objects node exists
+		spawn_parent = puzzle_node.get_tree().current_scene
+	
+	# Spawn effigies at calculated positions
+	for spawn_pos in spawn_positions:
+		var effigy: Node3D = effigy_scene.instantiate()
+		spawn_parent.add_child(effigy)
+		effigy.global_position = spawn_pos
+		
+		# Ensure proper orientation - face player direction
+		var dir = (player.global_position - effigy.global_position).normalized()
+		# Add PI to account for effigy model's forward direction being -Z instead of +Z
+		var target_yaw = atan2(dir.x, dir.z)
+		effigy.rotation.y = lerp_angle(effigy.rotation.y + 90.0, target_yaw, clamp(999, 0.0, 1.0))
+		
+		# Set aggression mode after a brief delay to ensure initialization
+		effigy.call_deferred("set_aggression_mode", true, &"puzzle_completion")
+		
+		spawned_effigies.append(effigy)
+		
+		MessageBus.emit_event("entity_spawned", ["effigy", effigy, spawn_pos])
 	
 	return spawned_effigies
+
+static func _find_tile_from_puzzle(puzzle_node: Node) -> Node3D:
+	"""
+	Find the tile node by walking up the scene tree from the puzzle
+	
+	@param puzzle_node: The puzzle node to start from
+	@return: The tile node or null if not found
+	"""
+	var current: Node = puzzle_node
+	
+	# Walk up the tree until we find a node with the tile script or is_permanent property
+	while current:
+		# Check if this node has the tile script
+		if current.get_script():
+			var script_path: String = current.get_script().resource_path
+			if script_path.ends_with("tile.gd"):
+				return current as Node3D
+		
+		# Check if this node has is_permanent (tiles have this)
+		if "is_permanent" in current:
+			return current as Node3D
+		
+		# Check if this looks like a tile by name
+		var node_name: String = current.name
+		if node_name.contains("Tile") or node_name.contains("Hollow") or node_name.contains("Parliament") or node_name.contains("Stones") or node_name.contains("Gate"):
+			# Verify it has a Maze child (tiles should have this)
+			if current.has_node("Maze"):
+				return current as Node3D
+		
+		current = current.get_parent()
+	
+	return null
 
 static func _find_current_tile(scene_root: Node) -> Node3D:
 	"""

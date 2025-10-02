@@ -151,7 +151,7 @@ func _complete_puzzle() -> void:
 	
 	var enemy_manager: Node = get_node_or_null("/root/EnemyManager")
 	if enemy_manager and enemy_manager.has_method("spawn_aggressive_effigies"):
-		enemy_manager.spawn_aggressive_effigies(_completion_order, get_tree().current_scene)
+		enemy_manager.spawn_aggressive_effigies(_completion_order, self)
 	
 	if _message_bus:
 		var tile_pos: Vector2i = Vector2i.ZERO

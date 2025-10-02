@@ -157,10 +157,10 @@ func _complete_puzzle() -> void:
 	"""Mark puzzle as completed"""
 	_save_manager.mark_puzzle_completed(puzzle_id)
 	
-	var effigy_count = min(_wrong_attempts.size(), 3)
+	var effigy_count: int = min(_wrong_attempts.size(), 3)
 	var enemy_manager: Node = get_node_or_null("/root/EnemyManager")
 	if enemy_manager and enemy_manager.has_method("spawn_aggressive_effigies"):
-		enemy_manager.spawn_aggressive_effigies(effigy_count, get_tree().current_scene)
+		enemy_manager.spawn_aggressive_effigies(effigy_count, self)
 	
 	# Emit completion event
 	if _message_bus:

@@ -15,6 +15,7 @@ var flashlight_enabled: bool = false
 var flashlight_battery_died: bool = false # Track if battery died (for one-time sanity loss)
 var darkness_timer: float = 0.0 # Timer for darkness sanity drain
 var game_timer: float = 0.0 # Total game time elapsed
+var toggle_once: bool = false
 
 # Audio state tracking
 var walking_player: AudioStreamPlayer3D
@@ -594,8 +595,9 @@ func _update_flashlight(delta: float) -> void:
 			_toggle_flashlight()
 	
 	# Auto-toggle flashlight on when grace period ends (3 minutes)
-	if game_timer >= 180.0 and not flashlight_enabled and flashlight_battery > 0.0:
-		flashlight_enabled = true
+	if game_timer >= 180.0 and not flashlight_enabled and flashlight_battery > 0.0 and toggle_once == false:
+		_toggle_flashlight()
+		toggle_once = true
 		_update_flashlight_state()
 	
 	# Handle darkness sanity drain (1 sanity per 5 seconds when flashlight is off)
@@ -799,11 +801,15 @@ func _update_sanity_audio() -> void:
 			heartbeat_player.stop()
 
 	# Whispers: start timer when entering low/critical, stop when leaving
-	if (current_state == "low" or current_state == "critical"):
+	if current_state != "high":
 		if not _whispers_active:
 			_whispers_active = true
-			# Kick off first whisper in 15–45s
-			_whisper_timer.start(randf_range(15.0, 45.0))
+			if current_state == "normal":
+				_whisper_timer.start(randf_range(15.0, 45.0))
+			elif current_state == "low":
+				_whisper_timer.start(randf_range(5.0, 15.0))
+			elif current_state == "critical":
+				_whisper_timer.start(randf_range(1.0, 5.0))
 	else:
 		if _whispers_active:
 			_whispers_active = false
@@ -826,8 +832,10 @@ func _get_sanity_state(sanity: int) -> String:
 		return "critical"
 	elif sanity <= 40:
 		return "low"
-	else:
+	elif sanity <= 60:
 		return "normal"
+	else:
+		return "high"
 
 func _play_random_whisper() -> void:
 	if not _whispers_active:

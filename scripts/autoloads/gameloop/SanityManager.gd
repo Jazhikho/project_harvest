@@ -93,16 +93,6 @@ func _apply_sanity_effects(old_sanity: int, new_sanity: int) -> void:
 	@param new_sanity: Current sanity value
 	"""
 	var intensity: float = 1.0 - (new_sanity / 100.0)
-	
-	# Visual effects
-	if new_sanity < 60:
-		_message_bus.emit_event("screen_effect_requested", ["desaturate", -1, intensity * 0.3])
-	
-	if new_sanity < 40:
-		_message_bus.emit_event("screen_effect_requested", ["chromatic_aberration", -1, intensity * 0.2])
-	
-	if new_sanity < 20:
-		_message_bus.emit_event("screen_effect_requested", ["screen_shake", 1.0, intensity * 0.5])
 
 func _handle_threshold_crossed(threshold_name: String, new_value: int, crossed_down: bool) -> void:
 	"""

@@ -92,13 +92,6 @@ func _update_sanity_display(sanity: int):
 	sanity_bar.value = sanity
 	sanity_label.text = str(sanity) + "%"
 	
-	# Update color based on sanity level
-	if sanity > 50:
-		sanity_bar.modulate = sanity_color_normal
-	elif sanity > 20:
-		sanity_bar.modulate = sanity_color_warning
-	else:
-		sanity_bar.modulate = sanity_color_critical
 		_add_screen_effects_critical()
 
 func _update_weird_counter(count: int):
@@ -127,7 +120,7 @@ func show_message(text: String, duration: float = 3.0):
 	var message_data = {
 		"text": text,
 		"duration": duration,
-		"priority": 1  # Normal priority
+		"priority": 1 # Normal priority
 	}
 	
 	message_queue.append(message_data)
@@ -137,7 +130,7 @@ func show_weird_message(text: String, duration: float = 4.0):
 	var message_data = {
 		"text": text,
 		"duration": duration,
-		"priority": 2,  # High priority
+		"priority": 2, # High priority
 		"style": "weird"
 	}
 	
