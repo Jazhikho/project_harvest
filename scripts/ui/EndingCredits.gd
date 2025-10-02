@@ -169,6 +169,9 @@ func _return_to_main_menu() -> void:
 	# Stop music
 	audio_player.stop()
 	
+	# Ensure mouse is visible for main menu
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	
 	# Return to main menu
 	var scene_manager: Node = get_node_or_null("/root/SceneManager")
 	if scene_manager:

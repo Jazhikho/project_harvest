@@ -392,8 +392,8 @@ func _create_item_slot(item_id: String, is_permanent: bool = false) -> Panel:
 	
 	# Try to load thumbnail
 	var thumbnail_path: String
-	if item_id === hollow_key:
-		thumbnail_path = "res://assets/thumbnails/" + key + ".png"
+	if item_id == "hollow_key":
+		thumbnail_path = "res://assets/thumbnails/key.png"
 	else: 
 		thumbnail_path = "res://assets/thumbnails/" + item_id + ".png"
 	if ResourceLoader.exists(thumbnail_path):
