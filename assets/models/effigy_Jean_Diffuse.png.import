@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://du0lifce5chjs"
 path.s3tc="res://.godot/imported/effigy_Jean_Diffuse.png-f592cd9a127dc44b27615777f442a626.s3tc.ctex"
+path.etc2="res://.godot/imported/effigy_Jean_Diffuse.png-f592cd9a127dc44b27615777f442a626.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/effigy_Jean_Diffuse.png"
-dest_files=["res://.godot/imported/effigy_Jean_Diffuse.png-f592cd9a127dc44b27615777f442a626.s3tc.ctex"]
+dest_files=["res://.godot/imported/effigy_Jean_Diffuse.png-f592cd9a127dc44b27615777f442a626.s3tc.ctex", "res://.godot/imported/effigy_Jean_Diffuse.png-f592cd9a127dc44b27615777f442a626.etc2.ctex"]
 
 [params]
 

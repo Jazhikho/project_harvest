@@ -43,8 +43,14 @@ func _initialize_systems() -> void:
 	if _message_bus:
 		_message_bus.connect_event("tile_entered", _on_tile_entered)
 		_message_bus.connect_event("puzzle_completed", _on_puzzle_completed)
+		_message_bus.connect_event("game_started", _on_game_started)
 	
 	_load_puzzle_state()
+	_check_key_spawn()
+
+func _on_game_started() -> void:
+	"""Reset puzzle state for new run - gate should always start locked"""
+	_gate_unlocked = false
 	_check_key_spawn()
 
 func _setup_interaction_area() -> void:
@@ -140,34 +146,35 @@ func _play_ending_sequence() -> void:
 	"""Play the ending sequence with fade and sounds"""
 	# Play padlock sound immediately
 	_play_sfx_stream(sfx_library.padlock)
-	await get_tree().create_timer(1.0).timeout
+	
+	# Create timer for padlock sound
+	var padlock_timer: SceneTreeTimer = get_tree().create_timer(1.0)
+	await padlock_timer.timeout
 	
 	# Play gate open sound
 	_play_sfx_stream(sfx_library.gate_open)
 	
-	# Start screen fade to black and audio fade out while gate opens
-	var game_controller: Node = get_tree().current_scene.get_node_or_null("GameController")
-	if game_controller:
-		if game_controller.has_method("fade_out"):
-			game_controller.fade_out()
-		if game_controller.has_method("_fade_out_game_audio_and_wait"):
-			# Start audio fade out in parallel - await it properly
-			await game_controller._fade_out_game_audio_and_wait(2.5)
+	# Request screen fade to black through MessageBus (2.5 second fade)
+	_message_bus.emit_event("screen_effect_requested", ["fade_black", 2.5, 1.0])
 	
-	# Wait for gate open sound to finish (estimate ~8.1 seconds from start)
-	await get_tree().create_timer(6.0).timeout
+	# Request audio fade out through MessageBus (runs in parallel)
+	_message_bus.emit_event("audio_fade_requested", [2.5])
 	
-	# Trigger game end to cleanup everything properly
+	# Wait for fades to complete and gate sound to finish
+	var ending_timer: SceneTreeTimer = get_tree().create_timer(7.0)
+	await ending_timer.timeout
+	
+	# Gather puzzle data before any cleanup happens
+	var puzzle_data: Dictionary = _gather_puzzle_data()
+	
+	# Transition to ending scene FIRST (before cleanup removes us from tree)
+	_transition_to_ending()
+	
+	# THEN trigger game end to cleanup (after scene transition has started)
+	# Use call_deferred so it happens after the scene change begins
 	var game_director: Node = get_node_or_null("/root/GameDirector")
 	if game_director and game_director.has_method("end_game"):
-		var puzzle_data: Dictionary = _gather_puzzle_data()
-		game_director.end_game("Victory", puzzle_data)
-	
-	# Wait a moment for cleanup to process
-	await get_tree().create_timer(0.5).timeout
-	
-	# Transition to ending scene
-	_transition_to_ending()
+		game_director.call_deferred("end_game", "Victory", puzzle_data)
 
 func _gather_puzzle_data() -> Dictionary:
 	"""Gather data from all completed puzzles"""
@@ -189,13 +196,17 @@ func _gather_puzzle_data() -> Dictionary:
 
 func _transition_to_ending() -> void:
 	"""Transition to the ending credits scene"""
-	get_tree().paused = false
 	var scene_manager: Node = get_node_or_null("/root/SceneManager")
 	if scene_manager and scene_manager.has_method("load_ending_credits"):
 		scene_manager.load_ending_credits()
 	else:
 		push_error("FinalGatePuzzle: SceneManager not found or missing load_ending_credits method")
-		get_tree().change_scene_to_file("res://scenes/ui/EndingCredits.tscn")
+		# Check if we're still in the tree before trying to change scenes
+		var tree: SceneTree = get_tree()
+		if tree:
+			tree.change_scene_to_file("res://scenes/ui/EndingCredits.tscn")
+		else:
+			push_error("FinalGatePuzzle: Node is no longer in tree, cannot transition to ending")
 
 func _on_puzzle_completed(puzzle_id: String, tile_pos: Vector2i, reward: Dictionary) -> void:
 	"""Handle when any puzzle is completed - check if key should spawn"""
@@ -219,20 +230,18 @@ func _on_tile_entered(tile_node: Node3D, position: Vector2i, player: Node3D) -> 
 	_check_key_spawn()
 
 func _load_puzzle_state() -> void:
-	"""Load puzzle state from save"""
+	"""Load puzzle state from save - only load first visit flag"""
 	var state: Dictionary = _save_manager.get_puzzle_state(puzzle_id)
-	_key_spawned = state.get("key_spawned", false)
-	_gate_unlocked = state.get("gate_unlocked", false)
+	# Only persist the first tile visit message across sessions
 	_first_tile_visit = state.get("first_tile_visit", false)
-	_interaction_count = state.get("interaction_count", 0)
+	# Reset these each run so the gate is always playable
+	_gate_unlocked = false
+	_interaction_count = 0
 
 func _save_puzzle_state() -> void:
-	"""Save current puzzle state"""
+	"""Save current puzzle state - only save first visit to avoid duplicate message"""
 	_save_manager.set_puzzle_state(puzzle_id, {
-		"key_spawned": _key_spawned,
-		"gate_unlocked": _gate_unlocked,
-		"first_tile_visit": _first_tile_visit,
-		"interaction_count": _interaction_count
+		"first_tile_visit": _first_tile_visit
 	})
 
 func _show_message(text: String) -> void:

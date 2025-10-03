@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cmmvktj23206j"
 path.s3tc="res://.godot/imported/note3_T_paper_1001_albedo.jpg-797efad5cb3d8764a8d61cf3275e72b2.s3tc.ctex"
+path.etc2="res://.godot/imported/note3_T_paper_1001_albedo.jpg-797efad5cb3d8764a8d61cf3275e72b2.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/note3_T_paper_1001_albedo.jpg"
-dest_files=["res://.godot/imported/note3_T_paper_1001_albedo.jpg-797efad5cb3d8764a8d61cf3275e72b2.s3tc.ctex"]
+dest_files=["res://.godot/imported/note3_T_paper_1001_albedo.jpg-797efad5cb3d8764a8d61cf3275e72b2.s3tc.ctex", "res://.godot/imported/note3_T_paper_1001_albedo.jpg-797efad5cb3d8764a8d61cf3275e72b2.etc2.ctex"]
 
 [params]
 

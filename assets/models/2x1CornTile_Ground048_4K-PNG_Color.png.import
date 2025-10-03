@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c8kt86lb7nr7s"
 path.s3tc="res://.godot/imported/2x1CornTile_Ground048_4K-PNG_Color.png-80eb5c95edab18ba684f500653e3b140.s3tc.ctex"
+path.etc2="res://.godot/imported/2x1CornTile_Ground048_4K-PNG_Color.png-80eb5c95edab18ba684f500653e3b140.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/2x1CornTile_Ground048_4K-PNG_Color.png"
-dest_files=["res://.godot/imported/2x1CornTile_Ground048_4K-PNG_Color.png-80eb5c95edab18ba684f500653e3b140.s3tc.ctex"]
+dest_files=["res://.godot/imported/2x1CornTile_Ground048_4K-PNG_Color.png-80eb5c95edab18ba684f500653e3b140.s3tc.ctex", "res://.godot/imported/2x1CornTile_Ground048_4K-PNG_Color.png-80eb5c95edab18ba684f500653e3b140.etc2.ctex"]
 
 [params]
 

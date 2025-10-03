@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://d4h1bc4jqk5r0"
 path.s3tc="res://.godot/imported/2x1CornTile_coorn_smooth.png-50a4075ca0bce25df6b1174f3d40232b.s3tc.ctex"
+path.etc2="res://.godot/imported/2x1CornTile_coorn_smooth.png-50a4075ca0bce25df6b1174f3d40232b.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/2x1CornTile_coorn_smooth.png"
-dest_files=["res://.godot/imported/2x1CornTile_coorn_smooth.png-50a4075ca0bce25df6b1174f3d40232b.s3tc.ctex"]
+dest_files=["res://.godot/imported/2x1CornTile_coorn_smooth.png-50a4075ca0bce25df6b1174f3d40232b.s3tc.ctex", "res://.godot/imported/2x1CornTile_coorn_smooth.png-50a4075ca0bce25df6b1174f3d40232b.etc2.ctex"]
 
 [params]
 

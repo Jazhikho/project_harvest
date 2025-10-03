@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dxslek5wqm3n5"
 path.s3tc="res://.godot/imported/BrokenMirror_quadro finito_initialShadingGroup_BaseColor.png-1d4f648b37e6ff6453e24af85feece1f.s3tc.ctex"
+path.etc2="res://.godot/imported/BrokenMirror_quadro finito_initialShadingGroup_BaseColor.png-1d4f648b37e6ff6453e24af85feece1f.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/BrokenMirror_quadro finito_initialShadingGroup_BaseColor.png"
-dest_files=["res://.godot/imported/BrokenMirror_quadro finito_initialShadingGroup_BaseColor.png-1d4f648b37e6ff6453e24af85feece1f.s3tc.ctex"]
+dest_files=["res://.godot/imported/BrokenMirror_quadro finito_initialShadingGroup_BaseColor.png-1d4f648b37e6ff6453e24af85feece1f.s3tc.ctex", "res://.godot/imported/BrokenMirror_quadro finito_initialShadingGroup_BaseColor.png-1d4f648b37e6ff6453e24af85feece1f.etc2.ctex"]
 
 [params]
 

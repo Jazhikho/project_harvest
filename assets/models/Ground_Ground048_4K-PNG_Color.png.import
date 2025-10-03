@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b2umb8rp7lmao"
 path.s3tc="res://.godot/imported/Ground_Ground048_4K-PNG_Color.png-cabc939b1fb6fabc2fbb336e19a03021.s3tc.ctex"
+path.etc2="res://.godot/imported/Ground_Ground048_4K-PNG_Color.png-cabc939b1fb6fabc2fbb336e19a03021.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/Ground_Ground048_4K-PNG_Color.png"
-dest_files=["res://.godot/imported/Ground_Ground048_4K-PNG_Color.png-cabc939b1fb6fabc2fbb336e19a03021.s3tc.ctex"]
+dest_files=["res://.godot/imported/Ground_Ground048_4K-PNG_Color.png-cabc939b1fb6fabc2fbb336e19a03021.s3tc.ctex", "res://.godot/imported/Ground_Ground048_4K-PNG_Color.png-cabc939b1fb6fabc2fbb336e19a03021.etc2.ctex"]
 
 [params]
 

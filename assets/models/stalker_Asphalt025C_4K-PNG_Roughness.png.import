@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://d1sm4n02pd8in"
 path.s3tc="res://.godot/imported/stalker_Asphalt025C_4K-PNG_Roughness.png-6d704b7194509baf90bff98ce4fc6ea6.s3tc.ctex"
+path.etc2="res://.godot/imported/stalker_Asphalt025C_4K-PNG_Roughness.png-6d704b7194509baf90bff98ce4fc6ea6.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/stalker_Asphalt025C_4K-PNG_Roughness.png"
-dest_files=["res://.godot/imported/stalker_Asphalt025C_4K-PNG_Roughness.png-6d704b7194509baf90bff98ce4fc6ea6.s3tc.ctex"]
+dest_files=["res://.godot/imported/stalker_Asphalt025C_4K-PNG_Roughness.png-6d704b7194509baf90bff98ce4fc6ea6.s3tc.ctex", "res://.godot/imported/stalker_Asphalt025C_4K-PNG_Roughness.png-6d704b7194509baf90bff98ce4fc6ea6.etc2.ctex"]
 
 [params]
 

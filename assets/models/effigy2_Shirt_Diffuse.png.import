@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://h3kclowqk8bp"
 path.s3tc="res://.godot/imported/effigy2_Shirt_Diffuse.png-cf8ce9c2e076d0f0c0ef6f9d8e69c3d0.s3tc.ctex"
+path.etc2="res://.godot/imported/effigy2_Shirt_Diffuse.png-cf8ce9c2e076d0f0c0ef6f9d8e69c3d0.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/effigy2_Shirt_Diffuse.png"
-dest_files=["res://.godot/imported/effigy2_Shirt_Diffuse.png-cf8ce9c2e076d0f0c0ef6f9d8e69c3d0.s3tc.ctex"]
+dest_files=["res://.godot/imported/effigy2_Shirt_Diffuse.png-cf8ce9c2e076d0f0c0ef6f9d8e69c3d0.s3tc.ctex", "res://.godot/imported/effigy2_Shirt_Diffuse.png-cf8ce9c2e076d0f0c0ef6f9d8e69c3d0.etc2.ctex"]
 
 [params]
 

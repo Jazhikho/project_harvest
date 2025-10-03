@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://4q6jg15sk1p4"
 path.s3tc="res://.godot/imported/4x1CornTile_corn_field-MAT.png-7ee7b5a9cf8deb332dc092cb17bf248a.s3tc.ctex"
+path.etc2="res://.godot/imported/4x1CornTile_corn_field-MAT.png-7ee7b5a9cf8deb332dc092cb17bf248a.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/4x1CornTile_corn_field-MAT.png"
-dest_files=["res://.godot/imported/4x1CornTile_corn_field-MAT.png-7ee7b5a9cf8deb332dc092cb17bf248a.s3tc.ctex"]
+dest_files=["res://.godot/imported/4x1CornTile_corn_field-MAT.png-7ee7b5a9cf8deb332dc092cb17bf248a.s3tc.ctex", "res://.godot/imported/4x1CornTile_corn_field-MAT.png-7ee7b5a9cf8deb332dc092cb17bf248a.etc2.ctex"]
 
 [params]
 

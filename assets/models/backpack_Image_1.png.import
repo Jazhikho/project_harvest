@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bqu16eaog0iq8"
 path.s3tc="res://.godot/imported/backpack_Image_1.png-29750f8db0e576b31475672bee1ff268.s3tc.ctex"
+path.etc2="res://.godot/imported/backpack_Image_1.png-29750f8db0e576b31475672bee1ff268.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/backpack_Image_1.png"
-dest_files=["res://.godot/imported/backpack_Image_1.png-29750f8db0e576b31475672bee1ff268.s3tc.ctex"]
+dest_files=["res://.godot/imported/backpack_Image_1.png-29750f8db0e576b31475672bee1ff268.s3tc.ctex", "res://.godot/imported/backpack_Image_1.png-29750f8db0e576b31475672bee1ff268.etc2.ctex"]
 
 [params]
 

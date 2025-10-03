@@ -62,6 +62,7 @@ signal entity_stage_changed(entity_type: String, entity_node: Node3D, old_stage:
 # === UI EVENTS ===
 signal notification_requested(message: String, duration: float, priority: int)
 signal screen_effect_requested(effect_type: String, duration: float, intensity: float)
+signal audio_fade_requested(duration: float)
 signal dialogue_started(dialogue_id: String, speaker: String)
 signal dialogue_ended(dialogue_id: String)
 signal open_inventory_to_item(item_id: String)

@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://glktg3qbvtmo"
 path.s3tc="res://.godot/imported/HolyBook_books_textureSmooth.png-7a7c98977e7c4ed9cefc23b0d3b4f554.s3tc.ctex"
+path.etc2="res://.godot/imported/HolyBook_books_textureSmooth.png-7a7c98977e7c4ed9cefc23b0d3b4f554.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/HolyBook_books_textureSmooth.png"
-dest_files=["res://.godot/imported/HolyBook_books_textureSmooth.png-7a7c98977e7c4ed9cefc23b0d3b4f554.s3tc.ctex"]
+dest_files=["res://.godot/imported/HolyBook_books_textureSmooth.png-7a7c98977e7c4ed9cefc23b0d3b4f554.s3tc.ctex", "res://.godot/imported/HolyBook_books_textureSmooth.png-7a7c98977e7c4ed9cefc23b0d3b4f554.etc2.ctex"]
 
 [params]
 

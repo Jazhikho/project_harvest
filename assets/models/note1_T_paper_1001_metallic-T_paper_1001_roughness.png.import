@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://7ltq5je7qa83"
 path.s3tc="res://.godot/imported/note1_T_paper_1001_metallic-T_paper_1001_roughness.png-8ba16672d5365ee981cb5c72fb2f449f.s3tc.ctex"
+path.etc2="res://.godot/imported/note1_T_paper_1001_metallic-T_paper_1001_roughness.png-8ba16672d5365ee981cb5c72fb2f449f.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/note1_T_paper_1001_metallic-T_paper_1001_roughness.png"
-dest_files=["res://.godot/imported/note1_T_paper_1001_metallic-T_paper_1001_roughness.png-8ba16672d5365ee981cb5c72fb2f449f.s3tc.ctex"]
+dest_files=["res://.godot/imported/note1_T_paper_1001_metallic-T_paper_1001_roughness.png-8ba16672d5365ee981cb5c72fb2f449f.s3tc.ctex", "res://.godot/imported/note1_T_paper_1001_metallic-T_paper_1001_roughness.png-8ba16672d5365ee981cb5c72fb2f449f.etc2.ctex"]
 
 [params]
 

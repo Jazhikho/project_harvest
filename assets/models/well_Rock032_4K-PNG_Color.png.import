@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://fg8koo3nevet"
 path.s3tc="res://.godot/imported/well_Rock032_4K-PNG_Color.png-bedb732a259194a5b7e40a62ac45dcdf.s3tc.ctex"
+path.etc2="res://.godot/imported/well_Rock032_4K-PNG_Color.png-bedb732a259194a5b7e40a62ac45dcdf.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/well_Rock032_4K-PNG_Color.png"
-dest_files=["res://.godot/imported/well_Rock032_4K-PNG_Color.png-bedb732a259194a5b7e40a62ac45dcdf.s3tc.ctex"]
+dest_files=["res://.godot/imported/well_Rock032_4K-PNG_Color.png-bedb732a259194a5b7e40a62ac45dcdf.s3tc.ctex", "res://.godot/imported/well_Rock032_4K-PNG_Color.png-bedb732a259194a5b7e40a62ac45dcdf.etc2.ctex"]
 
 [params]
 

@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://w37fy5njtyrg"
 path.s3tc="res://.godot/imported/effigy_hay.png-57547287ff99e8b5d3589e57459dc57d.s3tc.ctex"
+path.etc2="res://.godot/imported/effigy_hay.png-57547287ff99e8b5d3589e57459dc57d.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/effigy_hay.png"
-dest_files=["res://.godot/imported/effigy_hay.png-57547287ff99e8b5d3589e57459dc57d.s3tc.ctex"]
+dest_files=["res://.godot/imported/effigy_hay.png-57547287ff99e8b5d3589e57459dc57d.s3tc.ctex", "res://.godot/imported/effigy_hay.png-57547287ff99e8b5d3589e57459dc57d.etc2.ctex"]
 
 [params]
 

@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://die5bhcqilgbh"
 path.s3tc="res://.godot/imported/effigy4_DirtyFlannelBottomAlpha.png-450efef1d905db45cf001686353f8aaa.s3tc.ctex"
+path.etc2="res://.godot/imported/effigy4_DirtyFlannelBottomAlpha.png-450efef1d905db45cf001686353f8aaa.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/effigy4_DirtyFlannelBottomAlpha.png"
-dest_files=["res://.godot/imported/effigy4_DirtyFlannelBottomAlpha.png-450efef1d905db45cf001686353f8aaa.s3tc.ctex"]
+dest_files=["res://.godot/imported/effigy4_DirtyFlannelBottomAlpha.png-450efef1d905db45cf001686353f8aaa.s3tc.ctex", "res://.godot/imported/effigy4_DirtyFlannelBottomAlpha.png-450efef1d905db45cf001686353f8aaa.etc2.ctex"]
 
 [params]
 

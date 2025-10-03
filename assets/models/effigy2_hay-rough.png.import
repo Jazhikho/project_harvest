@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dx00x2howgk3r"
 path.s3tc="res://.godot/imported/effigy2_hay-rough.png-4f19dca007bb47f24ee04434a1d62a5f.s3tc.ctex"
+path.etc2="res://.godot/imported/effigy2_hay-rough.png-4f19dca007bb47f24ee04434a1d62a5f.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/effigy2_hay-rough.png"
-dest_files=["res://.godot/imported/effigy2_hay-rough.png-4f19dca007bb47f24ee04434a1d62a5f.s3tc.ctex"]
+dest_files=["res://.godot/imported/effigy2_hay-rough.png-4f19dca007bb47f24ee04434a1d62a5f.s3tc.ctex", "res://.godot/imported/effigy2_hay-rough.png-4f19dca007bb47f24ee04434a1d62a5f.etc2.ctex"]
 
 [params]
 

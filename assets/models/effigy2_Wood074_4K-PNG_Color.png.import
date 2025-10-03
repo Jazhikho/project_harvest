@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dcgc0lrurq87k"
 path.s3tc="res://.godot/imported/effigy2_Wood074_4K-PNG_Color.png-93940226a7a57c931500c97365da8dc2.s3tc.ctex"
+path.etc2="res://.godot/imported/effigy2_Wood074_4K-PNG_Color.png-93940226a7a57c931500c97365da8dc2.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/effigy2_Wood074_4K-PNG_Color.png"
-dest_files=["res://.godot/imported/effigy2_Wood074_4K-PNG_Color.png-93940226a7a57c931500c97365da8dc2.s3tc.ctex"]
+dest_files=["res://.godot/imported/effigy2_Wood074_4K-PNG_Color.png-93940226a7a57c931500c97365da8dc2.s3tc.ctex", "res://.godot/imported/effigy2_Wood074_4K-PNG_Color.png-93940226a7a57c931500c97365da8dc2.etc2.ctex"]
 
 [params]
 

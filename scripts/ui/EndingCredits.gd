@@ -347,9 +347,22 @@ You will be remembered
 
 [b]═══════════════════════════════════[/b]
 
+[b]LICENSING[/b]
+
+[b]Code & Game Engine[/b]
+MIT License - Christopher B. Del Gesso
+
+[b]Original Art & Assets[/b]
+CC BY 4.0 - Christopher B. Del Gesso
+
+[b]Story & Writing[/b]
+All rights reserved - Christopher B. Del Gesso
+
+[b]Third Party Assets[/b]
+Retain their original copyright
+
 [b]© 2025 Christopher B. Del Gesso[/b]
 [b]Chosen Gaming[/b]
-[b]All rights reserved[/b]
 
 Thank you for playing PROJECT HARVEST
 

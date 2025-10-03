@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b07m1e2gw7w4m"
 path.s3tc="res://.godot/imported/flag_BHPS_49StarFlag_Color_VR.png-de49f1f8c53a161e3d470131e4c97de0.s3tc.ctex"
+path.etc2="res://.godot/imported/flag_BHPS_49StarFlag_Color_VR.png-de49f1f8c53a161e3d470131e4c97de0.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/flag_BHPS_49StarFlag_Color_VR.png"
-dest_files=["res://.godot/imported/flag_BHPS_49StarFlag_Color_VR.png-de49f1f8c53a161e3d470131e4c97de0.s3tc.ctex"]
+dest_files=["res://.godot/imported/flag_BHPS_49StarFlag_Color_VR.png-de49f1f8c53a161e3d470131e4c97de0.s3tc.ctex", "res://.godot/imported/flag_BHPS_49StarFlag_Color_VR.png-de49f1f8c53a161e3d470131e4c97de0.etc2.ctex"]
 
 [params]
 

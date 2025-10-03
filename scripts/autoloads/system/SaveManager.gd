@@ -96,8 +96,8 @@ func load_game() -> void:
 			# Save the updated structure
 			save_game()
 			
-			# Load audio settings from save data
-			load_audio_settings()
+			# Audio settings are now handled by SettingsManager directly
+			# No need to load them from save data
 			
 			# Emit signal that save data is loaded (important for continue games)
 			# Only emit if this is not the initial app startup load
@@ -332,38 +332,27 @@ func add_to_backpack(item_id: String) -> void:
 func _on_setting_changed(category: String, key: String, old_value: Variant, new_value: Variant) -> void:
 	"""
 	Handle settings changes from SettingsManager
-	Only save audio settings to save data
+	Note: Audio settings are now handled by SettingsManager directly via user://settings.json
+	This method is kept for backwards compatibility but no longer saves audio settings
 	
 	@param category: Settings category
 	@param key: Setting key
 	@param old_value: Previous value
 	@param new_value: New value
 	"""
-	if category == "audio":
-		# Ensure audio settings structure exists
-		if not save_data.settings.has("audio"):
-			save_data.settings.audio = {}
-		
-		# Save the audio setting
-		save_data.settings.audio[key] = new_value
-		save_game()
-		print("SaveManager: Saved audio setting ", key, " = ", new_value)
+	# Audio settings are now persisted by SettingsManager directly
+	# No need to duplicate them in save data
+	pass
 
 func load_audio_settings() -> void:
 	"""
 	Load audio settings from save data to SettingsManager
-	Called when save data is loaded
+	Note: Audio settings are now handled by SettingsManager directly via user://settings.json
+	This method is kept for backwards compatibility but no longer loads audio settings
 	"""
-	var settings_manager = get_node_or_null("/root/SettingsManager")
-	if not settings_manager:
-		return
-	
-	if save_data.settings.has("audio"):
-		var audio_settings = save_data.settings.audio
-		for key in audio_settings:
-			# Use internal method to avoid triggering save loop
-			settings_manager._set_setting_internal("audio", key, audio_settings[key], false)
-		print("SaveManager: Loaded audio settings from save data")
+	# Audio settings are now loaded by SettingsManager directly from user://settings.json
+	# No need to load them from save data
+	pass
 
 func test_audio_persistence() -> void:
 	"""

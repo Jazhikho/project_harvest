@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://day00iqlp0bdp"
 path.s3tc="res://.godot/imported/brazier_Metal029_4K-PNG_Color.png-0ebadca03d42145e84073f2bf71a1668.s3tc.ctex"
+path.etc2="res://.godot/imported/brazier_Metal029_4K-PNG_Color.png-0ebadca03d42145e84073f2bf71a1668.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/brazier_Metal029_4K-PNG_Color.png"
-dest_files=["res://.godot/imported/brazier_Metal029_4K-PNG_Color.png-0ebadca03d42145e84073f2bf71a1668.s3tc.ctex"]
+dest_files=["res://.godot/imported/brazier_Metal029_4K-PNG_Color.png-0ebadca03d42145e84073f2bf71a1668.s3tc.ctex", "res://.godot/imported/brazier_Metal029_4K-PNG_Color.png-0ebadca03d42145e84073f2bf71a1668.etc2.ctex"]
 
 [params]
 

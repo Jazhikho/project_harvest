@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dh5kmhyae4nyb"
 path.s3tc="res://.godot/imported/effigy3_pumpkin-normal.png-7640def062c0dd58d8a911b4f4efdcfa.s3tc.ctex"
+path.etc2="res://.godot/imported/effigy3_pumpkin-normal.png-7640def062c0dd58d8a911b4f4efdcfa.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/effigy3_pumpkin-normal.png"
-dest_files=["res://.godot/imported/effigy3_pumpkin-normal.png-7640def062c0dd58d8a911b4f4efdcfa.s3tc.ctex"]
+dest_files=["res://.godot/imported/effigy3_pumpkin-normal.png-7640def062c0dd58d8a911b4f4efdcfa.s3tc.ctex", "res://.godot/imported/effigy3_pumpkin-normal.png-7640def062c0dd58d8a911b4f4efdcfa.etc2.ctex"]
 
 [params]
 

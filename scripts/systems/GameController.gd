@@ -52,6 +52,9 @@ func _initialize_game():
 		# Connect to item inspection events
 		message_bus.connect_event("open_inventory_to_item", _on_open_inventory_to_item)
 		message_bus.connect_event("open_journal_to_note", _on_open_journal_to_note)
+		
+		# Connect to screen effect events
+		message_bus.connect_event("screen_effect_requested", _on_screen_effect_requested)
 	
 	# Give TileManager a moment to finish initialization
 	await get_tree().create_timer(0.1).timeout
@@ -167,6 +170,19 @@ func _on_open_journal_to_note(note_id: String) -> void:
 		journal_open = true
 		get_tree().paused = true
 		journal_ui.show_journal_with_note(note_id)
+
+func _on_screen_effect_requested(effect_type: String, duration: float, intensity: float) -> void:
+	"""Handle screen effect requests from MessageBus"""
+	match effect_type:
+		"fade_black":
+			# Create custom fade with specified duration
+			var tween: Tween = create_tween()
+			tween.tween_property(fade_rect, "color:a", intensity, duration)
+		"fade_in":
+			var tween: Tween = create_tween()
+			tween.tween_property(fade_rect, "color:a", 0.0, duration)
+		_:
+			push_warning("GameController: Unknown screen effect type: %s" % effect_type)
 
 func _on_main_menu_requested():
 	_terminate_subject("Abandoned")

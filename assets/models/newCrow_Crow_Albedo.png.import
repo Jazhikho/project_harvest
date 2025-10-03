@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dng77sh53nrww"
 path.s3tc="res://.godot/imported/newCrow_Crow_Albedo.png-9807bd80eb92b3a98cd420a04cb379af.s3tc.ctex"
+path.etc2="res://.godot/imported/newCrow_Crow_Albedo.png-9807bd80eb92b3a98cd420a04cb379af.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/newCrow_Crow_Albedo.png"
-dest_files=["res://.godot/imported/newCrow_Crow_Albedo.png-9807bd80eb92b3a98cd420a04cb379af.s3tc.ctex"]
+dest_files=["res://.godot/imported/newCrow_Crow_Albedo.png-9807bd80eb92b3a98cd420a04cb379af.s3tc.ctex", "res://.godot/imported/newCrow_Crow_Albedo.png-9807bd80eb92b3a98cd420a04cb379af.etc2.ctex"]
 
 [params]
 

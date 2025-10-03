@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bgeol4ns6bwjd"
 path.s3tc="res://.godot/imported/well_Wood035_4K-PNG_Color.png-7190b95f7d261ebfa98ee72d84960f07.s3tc.ctex"
+path.etc2="res://.godot/imported/well_Wood035_4K-PNG_Color.png-7190b95f7d261ebfa98ee72d84960f07.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/well_Wood035_4K-PNG_Color.png"
-dest_files=["res://.godot/imported/well_Wood035_4K-PNG_Color.png-7190b95f7d261ebfa98ee72d84960f07.s3tc.ctex"]
+dest_files=["res://.godot/imported/well_Wood035_4K-PNG_Color.png-7190b95f7d261ebfa98ee72d84960f07.s3tc.ctex", "res://.godot/imported/well_Wood035_4K-PNG_Color.png-7190b95f7d261ebfa98ee72d84960f07.etc2.ctex"]
 
 [params]
 

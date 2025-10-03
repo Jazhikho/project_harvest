@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b473mr7gvn4py"
 path.s3tc="res://.godot/imported/effigy3_DirtyFlannel.png-b8b30821202261a22d6c52e2cdc0f32d.s3tc.ctex"
+path.etc2="res://.godot/imported/effigy3_DirtyFlannel.png-b8b30821202261a22d6c52e2cdc0f32d.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/effigy3_DirtyFlannel.png"
-dest_files=["res://.godot/imported/effigy3_DirtyFlannel.png-b8b30821202261a22d6c52e2cdc0f32d.s3tc.ctex"]
+dest_files=["res://.godot/imported/effigy3_DirtyFlannel.png-b8b30821202261a22d6c52e2cdc0f32d.s3tc.ctex", "res://.godot/imported/effigy3_DirtyFlannel.png-b8b30821202261a22d6c52e2cdc0f32d.etc2.ctex"]
 
 [params]
 

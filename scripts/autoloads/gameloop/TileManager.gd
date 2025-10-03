@@ -93,12 +93,17 @@ func _load_available_tiles() -> void:
 		
 		# If we have a puzzle ID, check if it's completed
 		if not puzzle_id.is_empty():
-			var save_manager: Node = get_node_or_null("/root/SaveManager")
-			if save_manager and save_manager.has_method("is_puzzle_completed"):
-				is_completed = save_manager.is_puzzle_completed(puzzle_id)
-				print("TileManager: Puzzle '%s' completed: %s" % [puzzle_id, is_completed])
+			# NEVER filter out the final gate - it should always be available
+			if puzzle_id == "final_gate":
+				is_completed = false
+				print("TileManager: Final gate tile always included (never marked complete)")
 			else:
-				push_warning("TileManager: SaveManager not available to check puzzle status")
+				var save_manager: Node = get_node_or_null("/root/SaveManager")
+				if save_manager and save_manager.has_method("is_puzzle_completed"):
+					is_completed = save_manager.is_puzzle_completed(puzzle_id)
+					print("TileManager: Puzzle '%s' completed: %s" % [puzzle_id, is_completed])
+				else:
+					push_warning("TileManager: SaveManager not available to check puzzle status")
 		else:
 			# No puzzle ID means it's not a puzzle tile, include it anyway
 			print("TileManager: Permanent tile has no puzzle ID: %s" % tile_scene.resource_path)

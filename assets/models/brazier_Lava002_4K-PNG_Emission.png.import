@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dm1y41s4qux2p"
 path.s3tc="res://.godot/imported/brazier_Lava002_4K-PNG_Emission.png-ab5fdb47a6cd945dd69fe063a220a966.s3tc.ctex"
+path.etc2="res://.godot/imported/brazier_Lava002_4K-PNG_Emission.png-ab5fdb47a6cd945dd69fe063a220a966.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/brazier_Lava002_4K-PNG_Emission.png"
-dest_files=["res://.godot/imported/brazier_Lava002_4K-PNG_Emission.png-ab5fdb47a6cd945dd69fe063a220a966.s3tc.ctex"]
+dest_files=["res://.godot/imported/brazier_Lava002_4K-PNG_Emission.png-ab5fdb47a6cd945dd69fe063a220a966.s3tc.ctex", "res://.godot/imported/brazier_Lava002_4K-PNG_Emission.png-ab5fdb47a6cd945dd69fe063a220a966.etc2.ctex"]
 
 [params]
 

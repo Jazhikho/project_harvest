@@ -44,6 +44,10 @@ func _initialize() -> void:
 	elif _message_bus:
 		# Wait for SettingsManager to be ready
 		call_deferred("_connect_to_settings")
+	
+	# Connect to audio fade requests
+	if _message_bus and _message_bus.has_signal("audio_fade_requested"):
+		_message_bus.connect_event("audio_fade_requested", _on_audio_fade_requested)
 
 func _ensure_audio_buses() -> void:
 	"""Create audio buses if they don't exist"""
@@ -173,6 +177,30 @@ func _connect_to_settings() -> void:
 	"""Connect to settings events after SettingsManager is ready"""
 	if _message_bus and _message_bus.has_signal("setting_changed"):
 		_message_bus.connect_event("setting_changed", _on_setting_changed)
+	
+	# Also request current settings from SettingsManager if it's ready
+	call_deferred("_request_current_settings")
+
+func _on_audio_fade_requested(duration: float) -> void:
+	"""Handle audio fade out requests from MessageBus"""
+	await stop_all_game_audio_fade(duration)
+
+func _request_current_settings() -> void:
+	"""Request current audio settings from SettingsManager"""
+	var settings_manager = get_node_or_null("/root/SettingsManager")
+	if not settings_manager:
+		return
+	
+	var audio_settings = settings_manager.get_audio_settings()
+	for key in audio_settings:
+		var value = audio_settings[key]
+		match key:
+			"master_volume":
+				set_bus_volume("Master", value)
+			"music_volume":
+				set_bus_volume("Music", value)
+			"sfx_volume":
+				set_bus_volume("SFX", value)
 
 func _on_setting_changed(category: String, key: String, old_value: Variant, new_value: Variant) -> void:
 	"""Handle settings changes from SettingsManager"""
@@ -585,3 +613,27 @@ func _choose_random_index(tracks: Array, last_index: int, allow_repeat: bool) ->
 	if idx >= last_index:
 		idx += 1
 	return idx
+
+## test_volume_persistence
+## Purpose: Test function to verify volume settings persistence
+## This can be called from debug console or UI for testing
+func test_volume_persistence() -> void:
+	"""Test function to verify volume settings persistence"""
+	print("=== Volume Persistence Test ===")
+	
+	# Get current volumes
+	var master_vol = get_bus_volume("Master")
+	var music_vol = get_bus_volume("Music")
+	var sfx_vol = get_bus_volume("SFX")
+	
+	print("Current volumes - Master: ", master_vol, ", Music: ", music_vol, ", SFX: ", sfx_vol)
+	
+	# Get settings from SettingsManager
+	var settings_manager = get_node_or_null("/root/SettingsManager")
+	if settings_manager:
+		var audio_settings = settings_manager.get_audio_settings()
+		print("SettingsManager audio settings: ", audio_settings)
+	else:
+		print("ERROR: SettingsManager not found")
+	
+	print("=== Test Complete ===")

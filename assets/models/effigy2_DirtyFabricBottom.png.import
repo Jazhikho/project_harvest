@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cw4333uh6upjq"
 path.s3tc="res://.godot/imported/effigy2_DirtyFabricBottom.png-6260eb82fd72b9c30d0b5356f21f48a9.s3tc.ctex"
+path.etc2="res://.godot/imported/effigy2_DirtyFabricBottom.png-6260eb82fd72b9c30d0b5356f21f48a9.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/effigy2_DirtyFabricBottom.png"
-dest_files=["res://.godot/imported/effigy2_DirtyFabricBottom.png-6260eb82fd72b9c30d0b5356f21f48a9.s3tc.ctex"]
+dest_files=["res://.godot/imported/effigy2_DirtyFabricBottom.png-6260eb82fd72b9c30d0b5356f21f48a9.s3tc.ctex", "res://.godot/imported/effigy2_DirtyFabricBottom.png-6260eb82fd72b9c30d0b5356f21f48a9.etc2.ctex"]
 
 [params]
 

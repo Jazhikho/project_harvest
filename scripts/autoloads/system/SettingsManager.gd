@@ -49,6 +49,9 @@ func _initialize() -> void:
 	
 	_load_settings()
 	_apply_all_settings()
+	
+	# Ensure AudioManager gets the loaded settings
+	call_deferred("_notify_audio_manager_settings_loaded")
 
 func get_setting(category: String, key: String) -> Variant:
 	"""
@@ -293,3 +296,21 @@ func get_gameplay_settings() -> Dictionary:
 func get_all_settings() -> Dictionary:
 	"""Get all settings"""
 	return _settings.duplicate(true)
+
+func _notify_audio_manager_settings_loaded() -> void:
+	"""Notify AudioManager that settings have been loaded and applied"""
+	var audio_manager = get_node_or_null("/root/AudioManager")
+	if not audio_manager:
+		return
+	
+	# Apply audio settings directly to AudioManager
+	var audio_settings = _settings.get("audio", {})
+	for key in audio_settings:
+		var value = audio_settings[key]
+		match key:
+			"master_volume":
+				audio_manager.set_bus_volume("Master", value)
+			"music_volume":
+				audio_manager.set_bus_volume("Music", value)
+			"sfx_volume":
+				audio_manager.set_bus_volume("SFX", value)
