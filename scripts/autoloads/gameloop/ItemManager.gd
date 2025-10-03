@@ -266,9 +266,23 @@ func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 		if item_id in collected_items:
 			return false
 
-	# Never random-spawn these.
-	if item_id == "hollow_key" or item_id == "flashlight" or item_id == "journal":
+	# Never random-spawn flashlight or journal
+	if item_id == "flashlight" or item_id == "journal":
 		return false
+	
+	# hollow_key can only spawn when all puzzles are completed
+	if item_id == "hollow_key":
+		if SaveManager != null and SaveManager.has_method("is_puzzle_completed"):
+			var required_puzzles: Array[String] = ["whispering_hollow", "watching_stones", "crows_parliament"]
+			var all_complete: bool = true
+			for puzzle in required_puzzles:
+				if not SaveManager.is_puzzle_completed(puzzle):
+					all_complete = false
+					break
+			if not all_complete:
+				return false
+		else:
+			return false
 
 	# Persistent save checks (optional).
 	if SaveManager != null and SaveManager.has_method("is_puzzle_item_used"):
@@ -454,6 +468,7 @@ func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""
 	_message_bus.item_collected.connect(_on_item_collected)
 	_message_bus.game_started.connect(_on_game_started)
+	_message_bus.game_ended.connect(_on_game_ended)
 
 func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
 	# Play the pickup SFX first, at the collector's position if available.
@@ -575,6 +590,18 @@ func _trigger_item_inspection(item_id: String) -> void:
 
 func _on_game_started() -> void:
 	reset_for_new_run()
+
+func _on_game_ended(cause: String, data: Dictionary) -> void:
+	"""Handle game end - cleanup any remaining item instances"""
+	print("ItemManager: Cleaning up items for game end")
+	
+	# Clean up any active collectibles still in the scene
+	var collectibles: Array = get_tree().get_nodes_in_group("collectibles")
+	for item_node in collectibles:
+		if is_instance_valid(item_node):
+			item_node.queue_free()
+	
+	print("ItemManager: Cleanup complete")
 
 ## _play_stream_3d_at
 ## Purpose: Play an AudioStream at a world position on the SFX bus and auto-free.

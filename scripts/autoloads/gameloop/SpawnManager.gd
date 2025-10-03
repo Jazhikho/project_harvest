@@ -113,7 +113,8 @@ func _is_permanent_tile(tile_node: Node3D) -> bool:
 
 func _spawn_items(tile_node: Node3D, context: Dictionary, spawn_points: Array[Vector3]) -> Array:
 	"""
-	Spawn regular items on tile (10% base chance per drop point)
+	Spawn regular items on tile (25% base chance per drop point)
+	50/50 split between objects and notes for better puzzle piece distribution
 	
 	@param tile_node: Tile node to spawn items on
 	@param context: Spawning context
@@ -127,22 +128,41 @@ func _spawn_items(tile_node: Node3D, context: Dictionary, spawn_points: Array[Ve
 	for i in range(shuffled_points.size()):
 		var spawn_point = shuffled_points[i]
 		
-		var roll = randf()
+		var roll: float = randf()
 		
 		if roll < ITEM_SPAWN_CHANCE:
-			var spawnable: Array[Dictionary] = _item_manager.get_spawnable_items(context, spawned_items)
-			if not spawnable.is_empty():
-				var item_id: String = _item_manager.select_random_item(spawnable)
+			# 50/50 split: first decide if we spawn an item or a note
+			var spawn_note: bool = randf() < 0.5
+			
+			# Get all spawnable items first
+			var all_spawnable: Array[Dictionary] = _item_manager.get_spawnable_items(context, spawned_items)
+			if all_spawnable.is_empty():
+				continue
+			
+			# Filter by category (notes vs items)
+			var filtered_spawnable: Array[Dictionary] = []
+			for item_entry in all_spawnable:
+				var item_id: String = item_entry.get("item_id", "")
+				var item_info: Dictionary = _item_manager.get_item_info(item_id)
+				var item_category: String = item_info.get("category", "")
+				
+				if spawn_note:
+					if item_category == "notes":
+						filtered_spawnable.append(item_entry)
+				else:
+					if item_category != "notes":
+						filtered_spawnable.append(item_entry)
+			
+			# If no items in preferred category, try the other category
+			if filtered_spawnable.is_empty():
+				filtered_spawnable = all_spawnable
+			
+			if not filtered_spawnable.is_empty():
+				var item_id: String = _item_manager.select_random_item(filtered_spawnable)
 				
 				if _spawn_item_visual(tile_node, item_id, spawn_point):
 					spawned_items.append(item_id)
 					_message_bus.emit_event("item_spawned", [item_id, spawn_point, context["tile_position"], {}])
-				else:
-					pass
-			else:
-				pass
-		else:
-			pass
 	
 	return spawned_items
 
@@ -478,9 +498,16 @@ func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""
 	_message_bus.tile_generated.connect(_on_tile_generated)
 	_message_bus.game_started.connect(_on_game_started)
+	_message_bus.game_ended.connect(_on_game_ended)
 
 func _on_tile_generated(tile_node: Node3D, position: Vector2i, tile_data: Dictionary) -> void:
 	process_tile_spawning(tile_node, position)
 
 func _on_game_started() -> void:
 	_spawn_history.clear()
+
+func _on_game_ended(cause: String, data: Dictionary) -> void:
+	"""Handle game end - cleanup spawn tracking"""
+	print("SpawnManager: Cleaning up for game end")
+	_spawn_history.clear()
+	print("SpawnManager: Cleanup complete")

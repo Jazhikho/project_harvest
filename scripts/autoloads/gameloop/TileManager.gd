@@ -73,28 +73,44 @@ func _load_available_tiles() -> void:
 		if tile_scene:
 			_normal_tiles.append(tile_scene)
 	
-	# Process permanent tiles - check which puzzles are completed
+	# Process permanent tiles - only include tiles with INCOMPLETE puzzles
 	for tile_scene in tile_database.permanent_tile_scenes:
 		if not tile_scene:
 			continue
 			
-		# Check if this permanent tile's puzzle is already completed
+		# Instantiate temporarily to check puzzle completion status
 		var temp_instance: Node3D = tile_scene.instantiate() as Node3D
-		if temp_instance:
-			var is_completed = false
-			
-			if temp_instance.has_method("get_puzzle_id"):
-				var puzzle_id = temp_instance.get_puzzle_id()
-				if not puzzle_id.is_empty() and SaveManager.has_method("is_puzzle_completed"):
-					is_completed = SaveManager.is_puzzle_completed(puzzle_id)
-					print("TileManager: Checking puzzle '%s' - completed: %s" % [puzzle_id, is_completed])
-				else:
-					print("TileManager: Warning - puzzle ID empty or SaveManager method missing for tile: %s" % tile_scene.resource_path)
-			
-			temp_instance.queue_free()
-			
-			if not is_completed:
-				_permanent_tiles_scenes.append(tile_scene)
+		if not temp_instance:
+			push_error("TileManager: Failed to instantiate tile scene: %s" % tile_scene.resource_path)
+			continue
+		
+		var puzzle_id: String = ""
+		var is_completed: bool = false
+		
+		# Try to get puzzle ID from the tile
+		if temp_instance.has_method("get_puzzle_id"):
+			puzzle_id = temp_instance.get_puzzle_id()
+		
+		# If we have a puzzle ID, check if it's completed
+		if not puzzle_id.is_empty():
+			var save_manager: Node = get_node_or_null("/root/SaveManager")
+			if save_manager and save_manager.has_method("is_puzzle_completed"):
+				is_completed = save_manager.is_puzzle_completed(puzzle_id)
+				print("TileManager: Puzzle '%s' completed: %s" % [puzzle_id, is_completed])
+			else:
+				push_warning("TileManager: SaveManager not available to check puzzle status")
+		else:
+			# No puzzle ID means it's not a puzzle tile, include it anyway
+			print("TileManager: Permanent tile has no puzzle ID: %s" % tile_scene.resource_path)
+		
+		temp_instance.queue_free()
+		
+		# Only add if puzzle is NOT completed
+		if not is_completed:
+			_permanent_tiles_scenes.append(tile_scene)
+			print("TileManager: Added incomplete puzzle tile: %s" % puzzle_id if not puzzle_id.is_empty() else "non-puzzle tile")
+		else:
+			print("TileManager: Skipped completed puzzle tile: %s" % puzzle_id)
 	
 	print("TileManager: Loaded ", _normal_tiles.size(), " normal tiles and ",
 		  _permanent_tiles_scenes.size(), " permanent tiles")
@@ -103,7 +119,7 @@ func _load_available_tiles() -> void:
 	_assign_permanent_tile_positions()
 	
 func _assign_permanent_tile_positions() -> void:
-	"""Pre-assign permanent tiles to specific grid positions"""
+	"""Pre-assign permanent tiles to specific grid positions - 3 locations per tile"""
 	_permanent_tile_assignments.clear()
 	
 	if _permanent_tiles_scenes.is_empty():
@@ -131,13 +147,40 @@ func _assign_permanent_tile_positions() -> void:
 	# Shuffle positions for randomness
 	valid_positions.shuffle()
 	
-	# Assign each permanent tile to a position (storing PackedScene)
-	var assignment_count: int = min(available_permanent_tiles.size(), valid_positions.size())
-	for i in range(assignment_count):
-		var pos: Vector2i = valid_positions[i]
-		var tile_scene: PackedScene = available_permanent_tiles[i]
-		_permanent_tile_assignments[pos] = tile_scene
-		print("TileManager: Assigned permanent tile to position ", pos)
+	# Assign each permanent tile to THREE positions
+	# Strategy: All tiles get 1 location, then all get 2, then all get 3
+	# Each location must be at least 2 tiles away from ANY other permanent tile location
+	var used_positions: Array[Vector2i] = []
+	
+	# Three passes: first location for all tiles, then second, then third
+	for location_pass in range(3):
+		for tile_scene in available_permanent_tiles:
+			var found_position: bool = false
+			
+			# Try to find a valid position for this tile
+			for pos in valid_positions:
+				# Skip if position is already used
+				if pos in used_positions:
+					continue
+				
+				# Check if position is at least 2 tiles away from ALL other permanent tile positions
+				var too_close: bool = false
+				for assigned_pos in used_positions:
+					var distance: int = abs(pos.x - assigned_pos.x) + abs(pos.y - assigned_pos.y)
+					if distance < 2:
+						too_close = true
+						break
+				
+				if not too_close:
+					used_positions.append(pos)
+					_permanent_tile_assignments[pos] = tile_scene
+					print("TileManager: Assigned permanent tile (pass ", location_pass + 1, ") to position ", pos)
+					found_position = true
+					break
+			
+			# Warn if we couldn't find a position for this tile on this pass
+			if not found_position:
+				print("TileManager: Warning - Could not find position for permanent tile on pass ", location_pass + 1)
 
 func initialize_game_tiles() -> void:
 	"""Called when the game scene is actually loaded"""
@@ -839,6 +882,7 @@ func get_active_tile_count() -> int:
 func _connect_to_events() -> void:
 	"""Connect to MessageBus events"""
 	_message_bus.game_started.connect(_on_game_started)
+	_message_bus.game_ended.connect(_on_game_ended)
 	_message_bus.maze_shift_triggered.connect(_on_maze_shift)
 	_message_bus.puzzle_completed.connect(_on_puzzle_completed)
 	
@@ -863,6 +907,36 @@ func _on_maze_shift(center: Vector2i, radius: int, affected_tiles: Array) -> voi
 func _on_puzzle_completed(puzzle_id: String, tile_pos: Vector2i, reward: Dictionary) -> void:
 	"""Handle puzzle completion"""
 	remove_permanent_tile(tile_pos)
+
+func _on_game_ended(cause: String, data: Dictionary) -> void:
+	"""Handle game end - cleanup all tiles and resources"""
+	print("TileManager: Cleaning up all tiles for game end")
+	
+	# Clean up all active tiles
+	var positions_to_clean: Array[Vector2i] = []
+	for pos in _active_tiles.keys():
+		positions_to_clean.append(pos)
+	
+	for pos in positions_to_clean:
+		_cleanup_single_tile(pos)
+	
+	# Clean up all wrap duplicates
+	for duplicate in _wrap_duplicates:
+		if is_instance_valid(duplicate):
+			duplicate.queue_free()
+	_wrap_duplicates.clear()
+	
+	# Clear all tracking dictionaries
+	_active_tiles.clear()
+	_permanent_tiles.clear()
+	_puzzle_tiles.clear()
+	_established_connections.clear()
+	_permanent_tile_assignments.clear()
+	
+	# Reset initialization flag
+	_start_tile_initialized = false
+	
+	print("TileManager: Cleanup complete")
 
 func _on_save_data_loaded() -> void:
 	"""Handle save data loaded signal - reload tiles to check puzzle completion status"""

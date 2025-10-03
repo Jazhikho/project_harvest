@@ -92,7 +92,7 @@ func _update_sanity_display(sanity: int):
 	sanity_bar.value = sanity
 	sanity_label.text = str(sanity) + "%"
 	
-		_add_screen_effects_critical()
+	_add_screen_effects_critical()
 
 func _update_weird_counter(count: int):
 	"""Update weird findings counter"""

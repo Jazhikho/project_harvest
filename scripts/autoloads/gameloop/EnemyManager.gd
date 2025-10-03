@@ -536,10 +536,9 @@ static func spawn_aggressive_effigies(count: int, puzzle_node: Node) -> Array:
 		effigy.global_position = spawn_pos
 		
 		# Ensure proper orientation - face player direction
-		var dir = (player.global_position - effigy.global_position).normalized()
-		# Add PI to account for effigy model's forward direction being -Z instead of +Z
-		var target_yaw = atan2(dir.x, dir.z)
-		effigy.rotation.y = lerp_angle(effigy.rotation.y + 90.0, target_yaw, clamp(999, 0.0, 1.0))
+		var dir: Vector3 = (player.global_position - effigy.global_position).normalized()
+		var target_yaw: float = atan2(dir.x, dir.z)
+		effigy.rotation.y = target_yaw
 		
 		# Set aggression mode after a brief delay to ensure initialization
 		effigy.call_deferred("set_aggression_mode", true, &"puzzle_completion")

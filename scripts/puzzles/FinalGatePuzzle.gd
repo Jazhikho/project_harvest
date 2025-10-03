@@ -42,6 +42,7 @@ func _initialize_systems() -> void:
 	
 	if _message_bus:
 		_message_bus.connect_event("tile_entered", _on_tile_entered)
+		_message_bus.connect_event("puzzle_completed", _on_puzzle_completed)
 	
 	_load_puzzle_state()
 	_check_key_spawn()
@@ -137,27 +138,33 @@ func _unlock_gate() -> void:
 
 func _play_ending_sequence() -> void:
 	"""Play the ending sequence with fade and sounds"""
-	# Start screen fade to black and audio fade out
-	var game_controller: Node = get_tree().current_scene.get_node_or_null("GameController")
-	if game_controller:
-		if game_controller.has_method("fade_out"):
-			game_controller.fade_out()
-		if game_controller.has_method("_fade_out_game_audio_and_wait"):
-			# Start audio fade out in parallel with visual fade
-			game_controller._fade_out_game_audio_and_wait(2.0)
-	
-	# Wait a moment for fade to start
-	await get_tree().create_timer(0.5).timeout
-	
-	# Play padlock sound
+	# Play padlock sound immediately
 	_play_sfx_stream(sfx_library.padlock)
 	await get_tree().create_timer(1.0).timeout
 	
 	# Play gate open sound
 	_play_sfx_stream(sfx_library.gate_open)
 	
-	# Wait for gate open sound to finish (estimate ~8.1 seconds)
-	await get_tree().create_timer(8.1).timeout
+	# Start screen fade to black and audio fade out while gate opens
+	var game_controller: Node = get_tree().current_scene.get_node_or_null("GameController")
+	if game_controller:
+		if game_controller.has_method("fade_out"):
+			game_controller.fade_out()
+		if game_controller.has_method("_fade_out_game_audio_and_wait"):
+			# Start audio fade out in parallel - await it properly
+			await game_controller._fade_out_game_audio_and_wait(2.5)
+	
+	# Wait for gate open sound to finish (estimate ~8.1 seconds from start)
+	await get_tree().create_timer(6.0).timeout
+	
+	# Trigger game end to cleanup everything properly
+	var game_director: Node = get_node_or_null("/root/GameDirector")
+	if game_director and game_director.has_method("end_game"):
+		var puzzle_data: Dictionary = _gather_puzzle_data()
+		game_director.end_game("Victory", puzzle_data)
+	
+	# Wait a moment for cleanup to process
+	await get_tree().create_timer(0.5).timeout
 	
 	# Transition to ending scene
 	_transition_to_ending()
@@ -190,6 +197,10 @@ func _transition_to_ending() -> void:
 		push_error("FinalGatePuzzle: SceneManager not found or missing load_ending_credits method")
 		get_tree().change_scene_to_file("res://scenes/ui/EndingCredits.tscn")
 
+func _on_puzzle_completed(puzzle_id: String, tile_pos: Vector2i, reward: Dictionary) -> void:
+	"""Handle when any puzzle is completed - check if key should spawn"""
+	_check_key_spawn()
+
 func _on_tile_entered(tile_node: Node3D, position: Vector2i, player: Node3D) -> void:
 	"""Handle when player enters this tile for the first time"""
 	if _first_tile_visit:
@@ -203,6 +214,9 @@ func _on_tile_entered(tile_node: Node3D, position: Vector2i, player: Node3D) -> 
 	_first_tile_visit = true
 	_save_puzzle_state()
 	_show_message("A gate... this must be the way out!")
+	
+	# Check if key should spawn when entering tile
+	_check_key_spawn()
 
 func _load_puzzle_state() -> void:
 	"""Load puzzle state from save"""
