@@ -19,7 +19,6 @@ var _player_inventory: Node
 
 # Pickup state
 var _is_collected: bool = false
-var _pickup_tween: Tween
 
 func _ready() -> void:
 	# Validate configuration
@@ -93,18 +92,27 @@ func _start_floating_animation() -> void:
 	tween.set_loops()
 	tween.tween_property(self, "position:y", start_y + 0.5, 1.0)
 	tween.tween_property(self, "position:y", start_y, 1.0)
+	
+	# Store tween reference so we can stop it later
+	set_meta("floating_tween", tween)
+
+func _stop_floating_animation() -> void:
+	"""Stop the floating animation to prevent tween warnings"""
+	if has_meta("floating_tween"):
+		var tween = get_meta("floating_tween")
+		if tween and is_instance_valid(tween):
+			tween.kill()
+		remove_meta("floating_tween")
 
 func _on_pickup_area_entered(body: Node3D) -> void:
 	"""Handle pickup area collision - now shows interaction prompt instead of auto-pickup"""
 	if _is_collected or not body.is_in_group("player"):
 		return
 	
-	# OLD AUTO-PICKUP CODE (commented out as requested):
+	# OLD AUTO-PICKUP CODE:
 	# if auto_pickup:
 	#	_trigger_pickup(body)
 	
-	# NEW INTERACTION-BASED PICKUP:
-	# Show interaction prompt to player
 	if _message_bus:
 		_message_bus.emit_event("show_interaction_prompt", ["Pickup " + display_name, self])
 
@@ -169,22 +177,20 @@ func _play_pickup_sound() -> void:
 			# Fallback to generic pickup sound
 			audio_manager.play_sound_3d("res://assets/audio/effects/item_pickup.ogg", global_position)
 
+func _exit_tree() -> void:
+	"""Clean up when node is removed"""
+	_stop_floating_animation()
+
 func _play_pickup_effect() -> void:
 	"""Play visual pickup effect and remove item"""
+	
+	# Stop floating animation to prevent tween warning
+	_stop_floating_animation()
 	
 	# Disable pickup area
 	if pickup_area:
 		pickup_area.set_deferred("monitoring", false)
 	
-	# Animate pickup effect
-	_pickup_tween = create_tween()
-	_pickup_tween.parallel().tween_property(self, "scale", Vector3.ZERO, 0.3)
-	_pickup_tween.parallel().tween_property(self, "position:y", position.y + 2.0, 0.3)
-	_pickup_tween.parallel().tween_property(self, "modulate:a", 0.0, 0.3)
-	
-	# Remove after animation
-	_pickup_tween.tween_callback(queue_free)
-
 # Public API
 
 func get_item_id() -> String:

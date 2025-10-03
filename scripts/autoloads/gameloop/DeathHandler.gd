@@ -4,6 +4,7 @@ extends Node
 var _save_manager: Node
 var _enemy_manager: Node
 var _message_bus: Node
+var _item_manager: Node
 
 # Reference to the start tile
 var _start_tile: Node3D
@@ -19,8 +20,9 @@ func _initialize() -> void:
 	_save_manager = get_node_or_null("/root/SaveManager")
 	_enemy_manager = get_node_or_null("/root/EnemyManager")
 	_message_bus = get_node_or_null("/root/MessageBus")
+	_item_manager = get_node_or_null("/root/ItemManager")
 	
-	if not _save_manager or not _enemy_manager or not _message_bus:
+	if not _save_manager or not _enemy_manager or not _message_bus or not _item_manager:
 		push_error("StartTileSpawner: Required systems not found")
 		return
 	
@@ -148,20 +150,14 @@ func _spawn_backpack(position: Vector3) -> void:
 	
 	@param position: World position to spawn at
 	"""
-	var backpack_scene_path = "res://scenes/misc/backpack.tscn"
-	
-	if not FileAccess.file_exists(backpack_scene_path):
-		push_error("DeathHandler: Backpack scene not found at ", backpack_scene_path)
+	if not _item_manager.has_method("spawn_item_instance"):
+		push_error("DeathHandler: ItemManager missing spawn_item_instance method")
 		return
 	
-	var backpack_scene: PackedScene = load(backpack_scene_path) as PackedScene
-	if not backpack_scene:
-		push_error("DeathHandler: Failed to load backpack scene")
-		return
-	
-	var backpack: Node3D = backpack_scene.instantiate() as Node3D
+	# Use ItemManager to spawn backpack from catalog
+	var backpack: Node3D = _item_manager.spawn_item_instance("backpack", position, _start_tile) as Node3D
 	if not backpack:
-		push_error("DeathHandler: Failed to instantiate backpack")
+		push_error("DeathHandler: Failed to spawn backpack via ItemManager")
 		return
 	
 	# Get previous run's inventory from backpack (notes and puzzle pieces persist)
@@ -171,9 +167,5 @@ func _spawn_backpack(position: Vector3) -> void:
 	# Set backpack metadata
 	backpack.set_meta("inventory", previous_inventory)
 	backpack.set_meta("is_backpack", true)
-	
-	# Add to start tile
-	_start_tile.add_child(backpack)
-	backpack.global_position = position
 	
 	print("DeathHandler: Spawned backpack at ", position, " with ", previous_inventory.size(), " items")

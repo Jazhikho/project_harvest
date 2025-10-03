@@ -10,13 +10,14 @@ config_version=5
 
 [application]
 
-config/name="Project Harvest *DEMO VERSION*"
+config/name="Project Harvest"
 config/description="A survival horror game set in a shifting corn maze where failed runs become part of future attempts."
-config/version="0.1a"
+config/version="1.0"
 run/main_scene="res://scenes/ui/TriggerWarning.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
-boot_splash/image="uid://bfcs07l4fo4rs"
+boot_splash/image="uid://xkwrrelcouwd"
 config/icon="uid://c86qjupnoisob"
+boot_splash/minimum_display_time=500
 
 [autoload]
 
@@ -50,7 +51,9 @@ gdscript/warnings/narrowing_conversion=0
 
 [display]
 
-window/stretch/mode="viewport"
+window/size/mode=3
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 window/stretch/scale_mode="integer"
 
 [dotnet]

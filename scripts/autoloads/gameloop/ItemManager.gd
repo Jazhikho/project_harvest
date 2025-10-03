@@ -78,8 +78,11 @@ func _build_item_scene_map() -> void:
 		push_warning("ItemManager: No item scenes in catalog.")
 		return
 
+	print("ItemManager: Building scene map from ", spawn_catalog.item_scenes.size(), " scenes")
+	
 	for scene_ps: PackedScene in spawn_catalog.item_scenes:
 		if scene_ps == null:
+			push_warning("ItemManager: Null scene in catalog")
 			continue
 
 		var temp: Node = scene_ps.instantiate()
@@ -98,6 +101,9 @@ func _build_item_scene_map() -> void:
 			push_warning("ItemManager: Item scene has no item_id: " + scene_ps.resource_path)
 		else:
 			_item_scene_map[item_id] = scene_ps
+			print("ItemManager: Mapped item_id '", item_id, "' to scene: ", scene_ps.resource_path)
+	
+	print("ItemManager: Built scene map with ", _item_scene_map.size(), " items")
 
 
 func get_all_item_scenes() -> Array[PackedScene]:
@@ -288,18 +294,28 @@ func get_spawnable_items(context: Dictionary, already_listed) -> Array[Dictionar
 
 	# Prefer JSON list; if empty (export miss), fall back to scenes we actually have.
 	if _item_definitions.size() > 0:
+		print("ItemManager: Using JSON definitions (", _item_definitions.size(), " items)")
 		for k in _item_definitions.keys():
 			candidate_ids.append(String(k))
 	else:
+		print("ItemManager: Using scene map fallback (", _item_scene_map.size(), " items)")
 		for k in _item_scene_map.keys():
 			candidate_ids.append(String(k))
 
+	print("ItemManager: Checking ", candidate_ids.size(), " candidate items for spawning")
+	
 	for id_str: String in candidate_ids:
 		if can_item_spawn(id_str, context):
 			var entry := {"item_id": id_str, "weight": 1.0}
 			if entry not in already_listed:
 				spawnable.append(entry)
+				print("ItemManager: Item '", id_str, "' can spawn")
+			else:
+				print("ItemManager: Item '", id_str, "' already listed")
+		else:
+			print("ItemManager: Item '", id_str, "' cannot spawn")
 
+	print("ItemManager: Returning ", spawnable.size(), " spawnable items")
 	return spawnable
 
 ## select_random_item
