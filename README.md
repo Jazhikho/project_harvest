@@ -89,8 +89,8 @@ This is currently a solo development project. Documentation and prototypes are a
 
 ## 📄 License
 
-- **Code** (Godot, shaders, tools): MIT License
-- **Original Art + Writing** (models, textures, sounds, notes): CC BY 4.0
+- **Code** (Godot, shaders, tools): [MIT License](LICENSE)
+- **Original Art + Writing** (models, textures, sounds, notes): [CC BY 4.0](LICENSE-CC-BY-4.0)
 - **Third Party Assets**: Retain their original copyright
 
 ---
