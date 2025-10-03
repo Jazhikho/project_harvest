@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creepy Maze - Simple Version</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Courier New', monospace;
+            color: #8a0303;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+        }
+        
+        canvas {
+            display: block;
+            box-shadow: 0 0 20px rgba(138, 3, 3, 0.7);
+            filter: contrast(1.1) brightness(0.9);
+        }
+        
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
+        <div id="hud">FPS: <span id="fps">0</span></div>
+    </div>
+
+    <script>
+        // Constants
+        const CELL_SIZE = 30;
+        const GRID_WIDTH = 20;
+        const GRID_HEIGHT = 20;
+        const CANVAS_WIDTH = CELL_SIZE * GRID_WIDTH;
+        const CANVAS_HEIGHT = CELL_SIZE * GRID_HEIGHT;
+        
+        // Get DOM elements
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const fpsElement = document.getElementById('fps');
+        
+        // Game state
+        let maze = [];
+        let playerX = 1;
+        let playerY = 1;
+        let lastFrameTime = 0;
+        let framesThisSecond = 0;
+        let lastFpsUpdateTime = 0;
+        
+        // Initialize the game
+        function initGame() {
+            console.log("Initializing game");
+            
+            // Initialize the maze grid
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                maze[y] = [];
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    maze[y][x] = {
+                        walls: {
+                            top: true,
+                            right: true,
+                            bottom: true,
+                            left: true
+                        },
+                        visited: false
+                    };
+                }
+            }
+            
+            // Generate a simple maze (just a few random openings for testing)
+            for (let y = 1; y < GRID_HEIGHT - 1; y++) {
+                for (let x = 1; x < GRID_WIDTH - 1; x++) {
+                    if (Math.random() < 0.4) {
+                        maze[y][x].walls.top = false;
+                        maze[y-1][x].walls.bottom = false;
+                    }
+                    if (Math.random() < 0.4) {
+                        maze[y][x].walls.left = false;
+                        maze[y][x-1].walls.right = false;
+                    }
+                }
+            }
+            
+            // Set up keyboard event listener
+            document.addEventListener('keydown', handleKeyDown);
+            
+            // Start the game loop
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Handle keyboard input
+        function handleKeyDown(event) {
+            let newX = playerX;
+            let newY = playerY;
+            
+            switch (event.key) {
+                case 'ArrowUp':
+                    if (!maze[playerY][playerX].walls.top) {
+                        newY--;
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (!maze[playerY][playerX].walls.right) {
+                        newX++;
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (!maze[playerY][playerX].walls.bottom) {
+                        newY++;
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (!maze[playerY][playerX].walls.left) {
+                        newX--;
+                    }
+                    break;
+            }
+            
+            // Update player position
+            if (newX !== playerX || newY !== playerY) {
+                playerX = newX;
+                playerY = newY;
+            }
+        }
+        
+        // Game loop
+        function gameLoop(timestamp) {
+            // Calculate FPS
+            if (timestamp > lastFpsUpdateTime + 1000) {
+                fpsElement.textContent = framesThisSecond;
+                framesThisSecond = 0;
+                lastFpsUpdateTime = timestamp;
+            }
+            framesThisSecond++;
+            
+            // Clear canvas
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // Draw maze
+            drawMaze();
+            
+            // Draw player
+            drawPlayer();
+            
+            // Request next frame
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Draw the maze
+        function drawMaze() {
+            ctx.strokeStyle = '#8a0303';
+            ctx.lineWidth = 2;
+            
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    const cellX = x * CELL_SIZE;
+                    const cellY = y * CELL_SIZE;
+                    
+                    // Draw walls
+                    const cell = maze[y][x];
+                    
+                    if (cell.walls.top) {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX, cellY);
+                        ctx.lineTo(cellX + CELL_SIZE, cellY);
+                        ctx.stroke();
+                    }
+                    
+                    if (cell.walls.right) {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX + CELL_SIZE, cellY);
+                        ctx.lineTo(cellX + CELL_SIZE, cellY + CELL_SIZE);
+                        ctx.stroke();
+                    }
+                    
+                    if (cell.walls.bottom) {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX, cellY + CELL_SIZE);
+                        ctx.lineTo(cellX + CELL_SIZE, cellY + CELL_SIZE);
+                        ctx.stroke();
+                    }
+                    
+                    if (cell.walls.left) {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX, cellY);
+                        ctx.lineTo(cellX, cellY + CELL_SIZE);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        
+        // Draw the player
+        function drawPlayer() {
+            const centerX = playerX * CELL_SIZE + CELL_SIZE / 2;
+            const centerY = playerY * CELL_SIZE + CELL_SIZE / 2;
+            const radius = CELL_SIZE / 3;
+            
+            // Draw player circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#aaa';
+            ctx.fill();
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Draw eyes
+            const eyeOffset = radius * 0.4;
+            const eyeRadius = radius * 0.2;
+            
+            ctx.beginPath();
+            ctx.arc(centerX - eyeOffset, centerY - eyeOffset, eyeRadius, 0, Math.PI * 2);
+            ctx.arc(centerX + eyeOffset, centerY - eyeOffset, eyeRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#000';
+            ctx.fill();
+        }
+        
+        // Initialize the game when the page loads
+        window.onload = initGame;
+    </script>
+</body>
+</html> 

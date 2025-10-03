@@ -17,7 +17,7 @@
 	{
 	  "id": "start_note",
 	  "name": "A letter",
-	  "description": "Your mission is to escape this maze. Run, my little lab rat. I would tell you more, but of course, that would spoil the experiment. I will assume that by reading this note and continuing through this maze you have concented to this experiment and are a willing participant, and that I have been released from all liability in the event of injury or death.",
+	  "description": "Your mission is to escape this maze. Run, my little lab rat. I would tell you more, but of course, that would spoil the experiment. I will assume that by reading this note and continuing through this maze you have concented to this experiment and are a willing participant, and that I have been released from all liability in the event of injury or death. If I were you, I'd get a move on, it's getting late.\n - Dr. Amundsen",
 	  "category": "notes",
 	  "subcategory": "Puzzle Clues"
 	},
@@ -125,7 +125,7 @@
 	  "id": "note_2",
 	  "category": "notes",
 	  "name": "Research Proposal: Methods, Containment & Ethics (Executive Draft)",
-	  "description": "\nMethods Overview\nRecruitment is ambient: patrons self-select into the corridor architecture. Consent is expressed by continued ambulation while reading posted advisories (see ‘Consent as Corridor’ framework). Episodic recall is softened to 0–3% residue; procedural competence preserved. Instrumentation includes acoustic suggestion, reflective disagreement surfaces, and bio-surveillance nodes (‘Eyes’) calibrated to elicit performative authenticity.\n\nProcedures\n1) Orientation: introduce benign novelty; log first-use pronouns, self-naming latency.\n2) Perturbation: scheduled environmental reconfiguration (30s baseline; 15s under pressure) to prevent narrative hardening.\n3) Pulsed Threat: staggered pursuit intervals to cultivate anticipation over impact.\n4) Capture: just-in-time hope presentation followed by collection at peak expectancy.\n5) Reintegration: duplicate consolidation; archive variance not retained in the operational instance.\n\nContainment & Risk\nPublic bleed tolerated within throughput norms; signage and staff dramaturgy resolve anomalies without escalation. Failsafes decompose counterfeit assertions into sleep. Data de-identification is performed post-harvest; pre-harvest identity is, by design, a mutable instrument.\n\nEthics (Pragmatic)\nWe record outcomes and obey them. Remorse is neither a variable nor an intervention. The material under study is conveniently renewable: identity proliferates under observation and is therefore suitable for sustainable extraction. Oversight is invited to audit results, not feelings.\n\nLimitations & Timeline\nChronology exhibits local flexibility when plurality is high; standard clocks disagree helpfully. Phase I completes when CDI targets stabilize; Phase II scales to populations with the same cheerful signage and sturdier ledgers, after which…",
+	  "description": "\nMethods Overview\nRecruitment is ambient: patrons self-select into the game. Consent is expressed by continued ambulation while reading trigger warning advisories (see ‘Consent as Corridor’ framework). Episodic recall is softened to 0–3% residue; procedural competence preserved. Instrumentation includes acoustic suggestion, reflective disagreement surfaces, and bio-surveillance nodes (‘Eyes’) calibrated to elicit performative authenticity.\n\nProcedures\n1) Orientation: introduce benign novelty; log first-use pronouns, self-naming latency.\n2) Perturbation: scheduled environmental reconfiguration (30s baseline; 15s under pressure) to prevent narrative hardening.\n3) Pulsed Threat: staggered pursuit intervals to cultivate anticipation over impact.\n4) Capture: just-in-time hope presentation followed by collection at peak expectancy.\n5) Reintegration: duplicate consolidation; archive variance not retained in the operational instance.\n\nContainment & Risk\nPublic bleed tolerated within throughput norms; signage and staff dramaturgy resolve anomalies without escalation. Failsafes decompose counterfeit assertions into sleep. Data de-identification is performed post-harvest; pre-harvest identity is, by design, a mutable instrument.\n\nEthics (Pragmatic)\nWe record outcomes and obey them. Remorse is neither a variable nor an intervention. The material under study is conveniently renewable: identity proliferates under observation and is therefore suitable for sustainable extraction. Oversight is invited to audit results, not feelings.\n\nLimitations & Timeline\nChronology exhibits local flexibility when plurality is high; standard clocks disagree helpfully. Phase I completes when CDI targets stabilize; Phase II scales to populations with the same cheerful signage and sturdier ledgers, after which…",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -161,7 +161,7 @@
 	  "id": "note_6",
 	  "category": "notes",
 	  "name": "Identity Partition Baseline",
-	  "description": "Subjects invent names within minutes when confronted with an empty page. A name is a handle; any handle will turn the door.\n\nInherited identity imagines itself sacred; invented identity proves it never was. I prefer the honest counterfeit to the arrogant heirloom.",
+	  "description": "Subjects invent names within minutes when confronted with an empty page. A name is a handle; any handle will turn the door.\n\nInherited identity imagines itself sacred; invented identity proves it never was. I prefer the honest counterfeit to the arrogant heirloom. - Dr. A",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -178,8 +178,8 @@
 	{
 	  "id": "note_8",
 	  "category": "notes",
-	  "name": "Watcher Brief",
-	  "description": "A half-grown duplicate held between frames. It consumes certainty first, courage second, and discovers that the latter was only a flavoring of the former.\n\nWhen a subject says ‘I feel watched,’ they are correct in the intimate sense: observation is not external; it is the self catching itself in the act of being a self.",
+	  "name": "Personal Letter: From Dr. Amundsen",
+	  "description": "You awaken with no name, no memory, no anchor. Convenient, isn’t it? Do not flatter yourself—you were not chosen. You were constructed. Every blank space in your mind was placed there deliberately. You walk because I allow it, and every step is just another data point. Ask yourself: were you ever real before you woke up in my maze?",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -215,7 +215,7 @@
 	  "id": "note_12",
 	  "category": "notes",
 	  "name": "Effigy Theory",
-	  "description": "Arrange the failed as pedagogy. Posture preserves the last intention; a body is a sentence that forgot how to end.\n\nRecognition is the instrument. The living round a corner, see themselves in a pose they swore was private, and admit what cannot be taught with language.",
+	  "description": "Arrange the failed as pedagogy. Posture preserves the last intention; a body is a sentence that forgot how to end.\n\nRecognition is the instrument. The living round a corner, see themselves in a pose they swore was private, and admit what cannot be taught with language. - Dr. A",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -287,7 +287,7 @@
 	  "id": "note_20",
 	  "category": "notes",
 	  "name": "Maintenance Signage",
-	  "description": "‘Area Closed’ placards convert terror into compliance faster than armed presence. Plywood persuades because it implies order without demanding attention.\n\nCorrection is most effective when it looks like an errand. The obedient prefer to believe they are simply taking the long way around.",
+	  "description": "‘Area Closed’ placards convert terror into compliance faster than armed presence. Plywood persuades because it implies order without demanding attention.\n\nCorrection is most effective when it looks like an errand. The obedient prefer to believe they are simply taking the long way around. - Dr. Amundsen",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -341,7 +341,7 @@
 	  "id": "note_26",
 	  "category": "notes",
 	  "name": "Harvesting the Sleeper",
-	  "description": "The version that sleeps is inefficient. Dreams are unpaid vacation taken against my wishes. I will collect him at convenience.\n\nShould he claim primacy on waking, I will listen politely and record the confession as the last thing he ever says with that mouth.",
+	  "description": "The version that sleeps is inefficient. Dreams are unpaid vacation taken against my wishes. I will collect him at convenience.\n\nShould he claim primacy on waking, I will listen politely and record the confession as the last thing he ever says with that mouth. - Dr. A",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -368,7 +368,7 @@
 	  "id": "note_29",
 	  "category": "notes",
 	  "name": "Personal Note: Ozone",
-	  "description": "There is a clean metallic smell before division, like a storm inventing a second sky inside the first. The body prepares for the courtesy of being more than one.\n\nI file the scent under ‘progress’ and breathe deeper. The lungs recognize promotion when it arrives.",
+	  "description": "There is a clean metallic smell before division, like a storm inventing a second sky inside the first. The body prepares for the courtesy of being more than one.\n\nI file the scent under ‘progress’ and breathe deeper. The lungs recognize promotion when it arrives. - Dr. A",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -376,8 +376,8 @@
 	{
 	  "id": "note_30",
 	  "category": "notes",
-	  "name": "Field Report: Family Inserts",
-	  "description": "I have grown families in minds the way gardeners espalier pears—flat, decorative, convincing from the path. The fruit ripens on schedule and tastes like relief.\n\nThe subject thanks the memory for its service and continues walking. Gratitude is the cheapest anesthesia in my cabinet.",
+	  "name": "Personal Letter: Multiplicity",
+	  "description": "You congratulate yourself on your choices. How quaint. Choice is just the illusion of continuity, the brain pretending it owns itself. When one of my echoes chooses left, and another chooses right, are they different people—or just branches of the same infection? You were not designed to choose. You were designed to split. You are not resisting me; you are multiplying me.",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -404,7 +404,7 @@
 	  "id": "note_33",
 	  "category": "notes",
 	  "name": "Ethics Waiver (Redacted)",
-	  "description": "Progress owes no apology to the material it consumes. Brains are wet paper; the question is not whether to print but whether the ink should smudge attractively.\n\nIf conscience protests, let it file a memo with outcomes. I collect signatures; I obey results.",
+	  "description": "Progress owes no apology to the material it consumes. Brains are wet paper; the question is not whether to print but whether the ink should smudge attractively.\n\nIf conscience protests, let it file a memo with outcomes. I collect signatures; I obey results. - Dr. A",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -422,7 +422,7 @@
 	  "id": "note_35",
 	  "category": "notes",
 	  "name": "Failsafe: Wrong Identity",
-	  "description": "On rare occasions a counterfeit asserts itself with admirable confidence. We reward the performance by letting it sleep until the scene changes.\n\nMorning returns authenticity like a misplaced tool. No alarms, no sermons, just the gentle rearrangement of who gets to speak first.",
+	  "description": "On rare occasions a counterfeit asserts itself with admirable confidence. We reward the performance by letting it sleep until the scene changes.\n\nMorning returns authenticity like a misplaced tool. No alarms, no sermons, just the gentle rearrangement of who gets to speak first. - Dr. Amundsen",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -476,7 +476,7 @@
 	  "id": "note_41",
 	  "category": "notes",
 	  "name": "Architect’s Aside",
-	  "description": "You are not in my system. You are my system, politely pretending to be lost so that I may enjoy the professional satisfaction of finding you again and again.\n\nIf this feels cruel, consult the outcomes. Cruelty is a verdict rendered by the past when the future refuses to apologize.",
+	  "description": "You are not in my system. You are my system, politely pretending to be lost so that I may enjoy the professional satisfaction of finding you again and again.\n\nIf this feels cruel, consult the outcomes. Cruelty is a verdict rendered by the past when the future refuses to apologize. - Dr. A",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -520,8 +520,8 @@
 	{
 	  "id": "note_46",
 	  "category": "notes",
-	  "name": "Insurance Correspondence (Unsent)",
-	  "description": "Dear Underwriter, please price the replacement of a self at market rates, less nostalgia. Exclusions to include acts of god, acts of me, and any event in which the insured becomes conveniently plural.\n\nIf premiums increase, we will reduce the number of originals on the premises. Originals are notoriously expensive to keep and unreasonably proud of it.",
+	  "name": "Personal Letter: Resistance",
+	  "description": "You think you’re resisting me. You think you’re ‘you.’ But identity is a fiction I authored. Do you remember your childhood? Your family? Or do you simply remember remembering them? I have seeded entire lives into echoes like yours. False lovers, false jobs, false grief—cheap illusions, but convincing enough to keep the echo docile. You are not my subject; you are my sample.\n\nConsider this: If a fragment carries my memories, and I carry yours, where is the border? When you speak, whose voice is it? Mine, yours, ours? The truth is simple. You are not lost in my maze—you are my maze, wearing a mask of independence. You will wander, you will doubt, and eventually, you will return to me. And when you do, we will be whole.",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -530,7 +530,7 @@
 	  "id": "note_47",
 	  "category": "notes",
 	  "name": "Statistical Texture",
-	  "description": "Averages comfort cowards. I prefer variance, which is honesty with its sleeves rolled up. The spread shows where the screaming lives.\n\nWhen ethics committees request central tendency, I send them lullabies. When I need the truth, I ask the tails and they answer with broken teeth and useful numbers.",
+	  "description": "Averages comfort cowards. I prefer variance, which is honesty with its sleeves rolled up. The spread shows where the screaming lives.\n\nWhen ethics committees request central tendency, I send them lullabies. When I need the truth, I ask the tails and they answer with broken teeth and useful numbers. - Dr. A",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -593,7 +593,7 @@
 	  "id": "note_54",
 	  "category": "notes",
 	  "name": "Lullaby for the Duplicate",
-	  "description": "Sleep, efficient child, while your brother alphabetizes the knives. In the morning you will be the brother, and he will be the lullaby.\n\nIdentity is a relay, not a crown. The baton does not care which hand carries it as long as the race continues to be won.",
+	  "description": "Sleep, efficient child, while your brother alphabetizes the knives. In the morning you will be the brother, and he will be the lullaby.\n\nIdentity is a relay, not a crown. The baton does not care which hand carries it as long as the race continues to be won. - Dr. A",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -602,7 +602,7 @@
 	  "id": "note_55",
 	  "category": "notes",
 	  "name": "On Routine as Anesthetic",
-	  "description": "Repetition flattens terror into task. Count steps, count breaths, count the number of times the corridor politely disagrees and proceed anyway.\n\nThe mind begs for variance like a bored aristocrat. Starve it. Work is mercy disguised as monotony.",
+	  "description": "Repetition flattens terror into task. Count steps, count breaths, count the number of times the corridor politely disagrees and proceed anyway.\n\nThe mind begs for variance like a bored aristocrat. Starve it. Work is mercy disguised as monotony. - Dr. A",
 	  "effects": {
 		"sanity_delta": -1
 	  }
@@ -666,6 +666,42 @@
 	  "category": "notes",
 	  "name": "Coin Flip Protocol",
 	  "description": "We flipped a coin for decisions already made. The coin landed as instructed each time. Randomness is theater; the script is written in wrists.\n\nWhen subjects accuse us of fate, we show them the coin and invite them to flip it themselves. They do. It obeys. They call this freedom with admirable sincerity.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_63",
+	  "category": "notes",
+	  "name": "Watcher Brief",
+	  "description": "A half-grown duplicate held between frames. It consumes certainty first, courage second, and discovers that the latter was only a flavoring of the former.\n\nWhen a subject says ‘I feel watched,’ they are correct in the intimate sense: observation is not external; it is the self catching itself in the act of being a self.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_64",
+	  "category": "notes",
+	  "name": "Field Report: Family Inserts",
+	  "description": "I have grown families in minds the way gardeners espalier pears—flat, decorative, convincing from the path. The fruit ripens on schedule and tastes like relief.\n\nThe subject thanks the memory for its service and continues walking. Gratitude is the cheapest anesthesia in my cabinet.",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_65",
+	  "category": "notes",
+	  "name": "Personal Letter: To Me",
+	  "description": "Ah, now we arrive at the real question. What if you are not my subject at all? What if you are me, dispatched into the world with a borrowed name, a counterfeit life, a family whose faces I stitched into your dreams? How would you know? The laughter you recall, the meals you ate, the lovers you think you touched—cheap fabrications seeded in your cortex like weeds. And now here you are, circling back to me, as I always intended. Tell me: are you playing this game, or am I playing myself through you?",
+	  "effects": {
+		"sanity_delta": -1
+	  }
+	},
+	{
+	  "id": "note_66",
+	  "category": "notes",
+	  "name": "Insurance Correspondence (Unsent)",
+	  "description": "Dear Underwriter, please price the replacement of a self at market rates, less nostalgia. Exclusions to include acts of god, acts of me, and any event in which the insured becomes conveniently plural.\n\nIf premiums increase, we will reduce the number of originals on the premises. Originals are notoriously expensive to keep and unreasonably proud of it. - Dr. A",
 	  "effects": {
 		"sanity_delta": -1
 	  }

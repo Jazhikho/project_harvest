@@ -175,6 +175,9 @@ func show_inventory_with_item(item_id: String) -> void:
 
 func hide_inventory():
 	"""Hide inventory and restore mouse state"""
+	# Stop rotation tween before hiding
+	_stop_model_rotation()
+	
 	visible = false
 	# Restore mouse state
 	if was_mouse_captured:
@@ -278,9 +281,27 @@ func _get_model_aabb(node: Node3D, aabb: AABB = AABB()) -> AABB:
 
 func _start_model_rotation(model: Node3D) -> void:
 	"""Start a slow rotation animation for the model"""
+	# Stop any existing rotation tween
+	_stop_model_rotation()
+	
 	var tween: Tween = create_tween()
 	tween.set_loops()
 	tween.tween_property(model, "rotation:y", TAU, 8.0)
+	
+	# Store tween reference for cleanup
+	set_meta("rotation_tween", tween)
+
+func _stop_model_rotation() -> void:
+	"""Stop the model rotation animation"""
+	if has_meta("rotation_tween"):
+		var tween = get_meta("rotation_tween")
+		if tween and is_instance_valid(tween):
+			tween.kill()
+		remove_meta("rotation_tween")
+
+func _exit_tree() -> void:
+	"""Clean up when node is removed"""
+	_stop_model_rotation()
 
 func _get_item_description(item_id: String) -> String:
 	"""Get item description from ItemManager"""
@@ -342,6 +363,9 @@ func _on_close_pressed():
 	hide_inventory()
 
 func _on_back_pressed():
+	# Stop rotation tween when going back to main panel
+	_stop_model_rotation()
+	
 	inspect_panel.visible = false
 	main_panel.visible = true
 	_populate_inventory()
@@ -394,7 +418,7 @@ func _create_item_slot(item_id: String, is_permanent: bool = false) -> Panel:
 	var thumbnail_path: String
 	if item_id == "hollow_key":
 		thumbnail_path = "res://assets/thumbnails/key.png"
-	else: 
+	else:
 		thumbnail_path = "res://assets/thumbnails/" + item_id + ".png"
 	if ResourceLoader.exists(thumbnail_path):
 		var thumbnail: Texture2D = load(thumbnail_path)

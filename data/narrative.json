@@ -3,9 +3,11 @@
 	"intro": [
 	  { "text": "Where... where am I? A corn maze? But how did I get here?" },
 	  { "text": "Wait... the farm. I remember the farm. I was just... somewhere else. But where?" },
+	  { "text": "It was like a Halloween carnival. Employees smiling at me... Why can't I remember what happened?" },
 	  { "text": "Maybe it's a dream. Maybe I'm just crazy. Or maybe...just temporary amnesia?" },
 	  { "text": "Whatever it is, I need to get out of here." },
-	  { "text": "It's just a corn maze, right? Corn mazes are supposed to be fun. Let me just find the exit, and I can figure things out later" }
+	  { "text": "It's just a corn maze, right? Corn mazes are supposed to be fun. Let me just find the exit, and I can figure things out later" },
+	  { "text": "Looks like there is a note here. Maybe it will help me figure out what's going on. \n [PRESS E TO INTERACT WITH OBJECTS]" }
 	]
   },
   "toasts": {
@@ -42,7 +44,7 @@
 	  "seconds": 5.0
 	},
 	"effigy_stage1_seen": {
-	  "text": "Hah. A scarecrow. Cute.",
+	  "text": "Just a scarecrow. Cute.",
 	  "seconds": 5.0
 	},
 	"effigy_stage2_seen": {
@@ -86,7 +88,7 @@
 	  "seconds": 3.0
 	},
 	"sanity_80": {
-	  "text": "The corn is too tall. The paths are too narrow.",
+	  "text": "I'm lost. This maze is bigger than I thought.",
 	  "seconds": 3.0
 	},
 	"sanity_70": {

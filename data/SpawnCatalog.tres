@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpawnCatalog" load_steps=16 format=3 uid="uid://b7375yaxa6php"]
+[gd_resource type="Resource" script_class="SpawnCatalog" load_steps=20 format=3 uid="uid://b7375yaxa6php"]
 
 [ext_resource type="Script" uid="uid://dlxejxpqfojiy" path="res://data/SpawnCatalog.gd" id="1_kbaq4"]
 [ext_resource type="PackedScene" uid="uid://c5rjon02p04c" path="res://scenes/entities/effigy.tscn" id="1_wy5ud"]
@@ -15,11 +15,10 @@
 [ext_resource type="PackedScene" uid="uid://du5jyfxdllxxw" path="res://scenes/misc/flashlight.tscn" id="12_kl1yn"]
 [ext_resource type="PackedScene" uid="uid://cfysh2178e3rc" path="res://scenes/misc/backpack.tscn" id="13_qx3ue"]
 [ext_resource type="PackedScene" uid="uid://chwvk4ss5vpx3" path="res://scenes/misc/journal.tscn" id="14_yt0hw"]
-
-[ext_resource type="PackedScene" uid="uid://b1234start5678" path="res://scenes/notes/start_note.tscn" id="15_start"]
-[ext_resource type="PackedScene" uid="uid://c1234crows5678" path="res://scenes/notes/crows_parliament_note.tscn" id="16_crows"]
-[ext_resource type="PackedScene" uid="uid://w1234watch5678" path="res://scenes/notes/watching_stones_note.tscn" id="17_watch"]
-[ext_resource type="PackedScene" uid="uid://h1234hollow678" path="res://scenes/notes/whispering_hollow_note.tscn" id="18_hollow"]
+[ext_resource type="PackedScene" uid="uid://c3y2xyh0d42ur" path="res://scenes/notes/start_note.tscn" id="15_start"]
+[ext_resource type="PackedScene" uid="uid://ccb76fmvab61v" path="res://scenes/notes/crows_parliament_note.tscn" id="16_crows"]
+[ext_resource type="PackedScene" uid="uid://b3i2wyyxjp5ob" path="res://scenes/notes/watching_stones_note.tscn" id="17_watch"]
+[ext_resource type="PackedScene" uid="uid://cadxdt3ha6oo8" path="res://scenes/notes/whispering_hollow_note.tscn" id="18_hollow"]
 
 [resource]
 script = ExtResource("1_kbaq4")

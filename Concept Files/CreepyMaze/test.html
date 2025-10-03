@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Test</title>
+</head>
+<body>
+    <h1>Module Test</h1>
+    <p>This file tests if all modules are loading correctly. Check the browser console for results.</p>
+    
+    <script type="module">
+        console.log("Testing module imports...");
+        
+        async function testModules() {
+            try {
+                console.log("Testing utils.js import");
+                const utils = await import('./js/utils.js');
+                console.log("Utils module loaded:", utils);
+                
+                console.log("Testing player.js import");
+                const player = await import('./js/player.js');
+                console.log("Player module loaded:", player);
+                
+                console.log("Testing renderer.js import");
+                const renderer = await import('./js/renderer.js');
+                console.log("Renderer module loaded:", renderer);
+                
+                console.log("Testing mazeGenerator.js import");
+                const mazeGenerator = await import('./js/mazeGenerator.js');
+                console.log("MazeGenerator module loaded:", mazeGenerator);
+                
+                console.log("Testing weirdThings.js import");
+                const weirdThings = await import('./js/weirdThings.js');
+                console.log("WeirdThings module loaded:", weirdThings);
+                
+                console.log("Testing gameLogic.js import");
+                const gameLogic = await import('./js/gameLogic.js');
+                console.log("GameLogic module loaded:", gameLogic);
+                
+                console.log("All modules loaded successfully!");
+            } catch (error) {
+                console.error("Error loading modules:", error);
+            }
+        }
+        
+        testModules();
+    </script>
+</body>
+</html> 
