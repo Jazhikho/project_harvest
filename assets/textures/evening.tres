@@ -1,6 +1,0 @@
-[gd_resource type="PanoramaSkyMaterial" load_steps=2 format=3 uid="uid://doj3kvkvx53lt"]
-
-[ext_resource type="Texture2D" uid="uid://c0nsssaorny41" path="res://assets/textures/EveningSkyHDRI040A_16K-HDR.exr" id="1_u6kxr"]
-
-[resource]
-panorama = ExtResource("1_u6kxr")
