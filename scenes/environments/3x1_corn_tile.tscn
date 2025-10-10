@@ -1,6 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://dxrwt86snuv1a"]
+[gd_scene load_steps=6 format=3 uid="uid://dxrwt86snuv1a"]
 
 [ext_resource type="PackedScene" uid="uid://bnu74fkbph6r1" path="res://assets/models/3x1CornTile.glb" id="1_mwhfx"]
+[ext_resource type="ArrayMesh" uid="uid://cqc4t75xd70tq" path="res://assets/models/corn.res" id="2_sg286"]
+[ext_resource type="Script" uid="uid://b3ge216nc7rm0" path="res://scripts/tiles/corn.gd" id="3_cdo0w"]
+
+[sub_resource type="MultiMesh" id="MultiMesh_2oq5b"]
+transform_format = 1
+custom_aabb = AABB(-1.375, 0, -0.25, 2.75, 3.5, 0.5)
+instance_count = 13
+mesh = ExtResource("2_sg286")
+buffer = PackedFloat32Array(1.07573, 0, 0.473543, -0.855754, 0, 1.17535, 0, 0, -0.473543, 0, 1.07573, -0.158921, -0.741112, 0, 0.630894, -0.142079, 0, 0.973281, 0, 0, -0.630894, 0, -0.741112, -0.178674, 1.13236, 0, 0.188667, 0.274221, 0, 1.14797, 0, 0, -0.188667, 0, 1.13236, -0.218915, -1.12617, 0, 0.378598, 1.14771, 0, 1.18811, 0, 0, -0.378598, 0, -1.12617, -0.221747, 0.883045, 0, -0.734659, -0.963463, 0, 1.14869, 0, 0, 0.734659, 0, 0.883045, -0.0930468, 0.209561, 0, -0.967644, -0.391837, 0, 0.990076, 0, 0, 0.967644, 0, 0.209561, -0.0625709, 0.758158, 0, 0.811591, 0.173712, 0, 1.11062, 0, 0, -0.811591, 0, 0.758158, -0.0566855, -0.939683, 0, -0.238234, 0.930269, 0, 0.969412, 0, 0, 0.238234, 0, -0.939683, -0.0489532, -0.812987, 0, -0.751947, -0.872484, 0, 1.10742, 0, 0, 0.751947, 0, -0.812987, 0.0274923, -0.0694613, 0, 0.808779, -0.264671, 0, 0.811756, 0, 0, -0.808779, 0, -0.0694613, 0.0792771, 0.777102, 0, 0.486418, 0.30951, 0, 0.916783, 0, 0, -0.486418, 0, 0.777102, 0.0300493, 0.899404, 0, -0.351272, 0.939603, 0, 0.965567, 0, 0, 0.351272, 0, 0.899404, 0.0991426, 0.692479, 0, -0.833759, -1.16742, 0, 1.08383, 0, 0, 0.833759, 0, 0.692479, 0.170062)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mwhfx"]
 size = Vector3(3, 3, 1)
@@ -9,8 +18,16 @@ size = Vector3(3, 3, 1)
 
 [node name="2x1" parent="." index="0"]
 transform = Transform3D(3, 0, 0, 0, 0.8, 0, 0, 0, 1, 0, 0, 0)
+visible = false
 
-[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+[node name="MultiMeshInstance3D" type="MultiMeshInstance3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00351572, -1.76343, 0.0064373)
+multimesh = SubResource("MultiMesh_2oq5b")
+script = ExtResource("3_cdo0w")
+stalks_per_meter = 10
+tile_size = Vector2(2.75, 0.5)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="2"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)

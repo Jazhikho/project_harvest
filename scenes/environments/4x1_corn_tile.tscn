@@ -1,6 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://572iojnx3jma"]
+[gd_scene load_steps=6 format=3 uid="uid://572iojnx3jma"]
 
 [ext_resource type="PackedScene" uid="uid://b4rteiuvtdd2k" path="res://assets/models/4x1CornTile.glb" id="1_2mkg7"]
+[ext_resource type="ArrayMesh" uid="uid://cqc4t75xd70tq" path="res://assets/models/corn.res" id="2_whbsb"]
+[ext_resource type="Script" uid="uid://b3ge216nc7rm0" path="res://scripts/tiles/corn.gd" id="3_8vsgm"]
+
+[sub_resource type="MultiMesh" id="MultiMesh_hs0js"]
+transform_format = 1
+custom_aabb = AABB(-1.875, 0, -0.25, 3.75, 3.5, 0.5)
+instance_count = 18
+mesh = ExtResource("2_whbsb")
+buffer = PackedFloat32Array(-0.243014, 0, 0.777967, -1.67173, 0, 0.815039, 0, 0, -0.777967, 0, -0.243014, -0.190458, 0.776197, 0, -0.322492, -0.633042, 0, 0.840525, 0, 0, 0.322492, 0, 0.776197, -0.220392, 0.766474, 0, 0.29962, -0.144515, 0, 0.822955, 0, 0, -0.29962, 0, 0.766474, -0.171893, 0.55496, 0, -0.812459, 0.531248, 0, 0.983906, 0, 0, 0.812459, 0, 0.55496, -0.185462, 0.108004, 0, -0.992531, 1.5675, 0, 0.99839, 0, 0, 0.992531, 0, 0.108004, -0.21433, -0.469696, 0, -0.756152, -1.30748, 0, 0.890158, 0, 0, 0.756152, 0, -0.469696, -0.0865441, -0.573353, 0, -0.791364, -0.737383, 0, 0.977236, 0, 0, 0.791364, 0, -0.573353, -0.07155, 0.226401, 0, 1.11802, -0.00923857, 0, 1.14071, 0, 0, -1.11802, 0, 0.226401, -0.106955, 0.13566, 0, -1.13186, 0.786572, 0, 1.13996, 0, 0, 1.13186, 0, 0.13566, -0.0929361, -0.273258, 0, 1.05784, 1.64315, 0, 1.09256, 0, 0, -1.05784, 0, -0.273258, -0.120314, 0.715116, 0, -0.8183, -1.69132, 0, 1.08674, 0, 0, 0.8183, 0, 0.715116, -0.00342266, -0.877598, 0, -0.386376, -0.645917, 0, 0.958887, 0, 0, 0.386376, 0, -0.877598, -0.0202552, 0.334684, 0, 0.761841, -0.0121048, 0, 0.832115, 0, 0, -0.761841, 0, 0.334684, -0.0246232, -0.440625, 0, 0.907977, 0.860378, 0, 1.00924, 0, 0, -0.907977, 0, -0.440625, -0.00606237, -0.871405, 0, -0.0538167, 1.32716, 0, 0.873065, 0, 0, 0.0538167, 0, -0.871405, 0.0281157, 1.05461, 0, 0.27367, -1.50859, 0, 1.08954, 0, 0, -0.27367, 0, 1.05461, 0.112289, -0.84349, 0, -0.236873, -0.658771, 0, 0.876119, 0, 0, 0.236873, 0, -0.84349, 0.102922, -0.0787834, 0, 0.875592, -0.00277135, 0, 0.879129, 0, 0, -0.875592, 0, -0.0787834, 0.106941)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_2mkg7"]
 size = Vector3(4, 2.75, 1)
@@ -9,8 +18,16 @@ size = Vector3(4, 2.75, 1)
 
 [node name="2x1" parent="." index="0"]
 transform = Transform3D(4, 0, 0, 0, 0.8, 0, 0, 0, 1, 0, 0, 0)
+visible = false
 
-[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+[node name="MultiMeshInstance3D" type="MultiMeshInstance3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.75, 0)
+multimesh = SubResource("MultiMesh_hs0js")
+script = ExtResource("3_8vsgm")
+stalks_per_meter = 10
+tile_size = Vector2(3.75, 0.5)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="2"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.375, 0)

@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://d1x1wcnvwxpdn"]
+
+[ext_resource type="PackedScene" uid="uid://dk0amcrrnn5wf" path="res://assets/models/corn.glb" id="1_8qq7q"]
+
+[node name="corn" instance=ExtResource("1_8qq7q")]

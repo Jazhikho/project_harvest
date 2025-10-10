@@ -10,7 +10,7 @@ size = Vector3(2, 2.75, 1.25)
 
 [node name="well" instance=ExtResource("1_ol60k")]
 
-[node name="Water" parent="." index="1"]
+[node name="Water" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." index="2"]

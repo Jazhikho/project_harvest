@@ -19,7 +19,6 @@ var _first_tile_visit: bool = false
 var _interaction_count: int = 0
 
 @onready var gate_area: Area3D = $gate/Area3D
-@onready var altar_node: Node3D = $altar
 
 func _ready() -> void:
 	set_meta("is_puzzle", true)
@@ -87,27 +86,6 @@ func _check_key_spawn() -> void:
 		if not _save_manager.is_puzzle_completed(puzzle):
 			all_complete = false
 			break
-	
-	if all_complete and not _key_spawned:
-		_spawn_key()
-
-func _spawn_key() -> void:
-	"""Spawn the key on the altar using ItemManager"""
-	if not altar_node:
-		push_error("FinalGatePuzzle: Altar node not found")
-		return
-	
-	print("FinalGatePuzzle: Spawning key on altar")
-	
-	var spawn_position: Vector3 = altar_node.global_position + Vector3(0, 1.5, 0)
-	var key_instance: Node3D = _item_manager.spawn_item_instance("hollow_key", spawn_position, get_tree().current_scene)
-	
-	if not key_instance:
-		push_error("FinalGatePuzzle: Failed to spawn hollow_key")
-		return
-	
-	_key_spawned = true
-	_save_puzzle_state()
 
 func interact() -> bool:
 	"""Called when player interacts with the gate"""

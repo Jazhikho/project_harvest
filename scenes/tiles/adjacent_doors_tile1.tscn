@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://d1a2b3c4d5e6f"]
+[gd_scene load_steps=9 format=3 uid="uid://d1a2b3c4d5e6f"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_6ghsk"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_53qvv"]
@@ -8,9 +8,6 @@
 [ext_resource type="PackedScene" uid="uid://bfmwipk4hpnoc" path="res://scenes/environments/5x1_corn_tile.tscn" id="6_eakba"]
 [ext_resource type="PackedScene" uid="uid://dmqog3kpkp6xe" path="res://scenes/environments/7x1_corn_tile.tscn" id="7_2m7o6"]
 [ext_resource type="PackedScene" uid="uid://t2ahnvllm6bf" path="res://scenes/environments/11x_1_corn_tile.tscn" id="8_fmd3u"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_fmd3u"]
-size = Vector3(20, 3, 20)
 
 [node name="AdjacentDoors_1" type="Node3D"]
 script = ExtResource("1_6ghsk")
@@ -104,10 +101,3 @@ transform = Transform3D(-1.49012e-08, 0, 1, 0, 1, 0, -1, 0, -1.49012e-08, 3.25, 
 
 [node name="EntityPoint4" type="Marker3D" parent="Maze/EntitySpawn"]
 transform = Transform3D(-7.25216e-08, 0, -1, 0, 1, 0, 1, 0, -7.25216e-08, 5.5, 0.25, 1.5)
-
-[node name="PlayerArea" type="Area3D" parent="."]
-collision_layer = 64
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-shape = SubResource("BoxShape3D_fmd3u")

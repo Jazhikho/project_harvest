@@ -1,6 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://dh2ksygtyattj"]
+[gd_scene load_steps=6 format=3 uid="uid://dh2ksygtyattj"]
 
 [ext_resource type="PackedScene" uid="uid://dtc05odm33kwr" path="res://assets/models/2x1CornTile.glb" id="1_ynrib"]
+[ext_resource type="ArrayMesh" uid="uid://cqc4t75xd70tq" path="res://assets/models/corn.res" id="2_adswm"]
+[ext_resource type="Script" uid="uid://b3ge216nc7rm0" path="res://scripts/tiles/corn.gd" id="3_xjont"]
+
+[sub_resource type="MultiMesh" id="MultiMesh_tygel"]
+transform_format = 1
+custom_aabb = AABB(-0.875, 0, -0.25, 1.75, 3.5, 0.5)
+instance_count = 8
+mesh = ExtResource("2_adswm")
+buffer = PackedFloat32Array(-0.243014, 0, 0.777967, -0.716904, 0, 0.815039, 0, 0, -0.777967, 0, -0.243014, -0.150763, 0.776197, 0, -0.322492, 0.0909673, 0, 0.840525, 0, 0, 0.322492, 0, 0.776197, -0.200653, 0.766474, 0, 0.29962, 0.470933, 0, 0.822955, 0, 0, -0.29962, 0, 0.766474, -0.119822, 0.55496, 0, -0.812459, -0.753474, 0, 0.983906, 0, 0, 0.812459, 0, 0.55496, 0.0242295, 0.108004, 0, -0.992531, 0.0524964, 0, 0.99839, 0, 0, 0.992531, 0, 0.108004, -0.0238828, -0.469696, 0, -0.756152, 0.733069, 0, 0.890158, 0, 0, 0.756152, 0, -0.469696, 0.0224266, -0.573353, 0, -0.791364, -0.57352, 0, 0.977236, 0, 0, 0.791364, 0, -0.573353, 0.214083, 0.226401, 0, 1.11802, -0.00718556, 0, 1.14071, 0, 0, -1.11802, 0, 0.226401, 0.155074)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ynrib"]
 size = Vector3(2, 2.75, 1)
@@ -9,8 +18,16 @@ size = Vector3(2, 2.75, 1)
 
 [node name="2x1" parent="." index="0"]
 transform = Transform3D(2, 0, 0, 0, 0.8, 0, 0, 0, 1, 0, 0, 0)
+visible = false
 
-[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+[node name="MultiMeshInstance3D" type="MultiMeshInstance3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.75, 0)
+multimesh = SubResource("MultiMesh_tygel")
+script = ExtResource("3_xjont")
+stalks_per_meter = 10
+tile_size = Vector2(1.75, 0.5)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="2"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.375, 0)

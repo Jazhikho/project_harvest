@@ -32,23 +32,11 @@
 	  "seconds": 5.0
 	},
 	"flashlight_after_3m": {
-	  "text": "It's getting dark. I should probably find the exit. Glad I brought a flashlight.",
-	  "seconds": 5.0
-	},
-	"entered_effigy_area": {
-	  "text": "Rope. Burlap. A shape pretending to be a person. Someone wanted me to see this.",
-	  "seconds": 5.0
-	},
-	"weird_thing_found": {
-	  "text": "Another trinket. Another whisper in my handwriting. How many versions of me are here?",
-	  "seconds": 5.0
-	},
-	"effigy_stage1_seen": {
-	  "text": "Just a scarecrow. Cute.",
+	  "text": "It's getting dark. I should probably find the exit. Glad I brought a flashlight.\n [PRESS F TO TURN ON FLASHLIGHT]",
 	  "seconds": 5.0
 	},
 	"effigy_stage2_seen": {
-	  "text": "Did the scarecrow... change? No, it's just my imagination.",
+	  "text": "These scarecrow... change? No, it's just my imagination.",
 	  "seconds": 5.0
 	},
 	"effigy_stage3_seen": {

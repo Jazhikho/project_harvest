@@ -21,5 +21,9 @@
 [resource]
 script = ExtResource("1_oj56e")
 normal_tile_scenes = Array[PackedScene]([ExtResource("1_fpblb"), ExtResource("2_q1ixp"), ExtResource("3_thfe5"), ExtResource("4_v4ts5"), ExtResource("5_u5t83"), ExtResource("6_8w1ns"), ExtResource("7_661ih"), ExtResource("8_kacjh"), ExtResource("9_wkob4"), ExtResource("10_ibih3"), ExtResource("11_ih5hy"), ExtResource("12_l3nte")])
+four_door_tile_scenes = Array[PackedScene]([ExtResource("3_thfe5"), ExtResource("4_v4ts5"), ExtResource("5_u5t83"), ExtResource("6_8w1ns"), ExtResource("7_661ih")])
+three_door_tile_scenes = Array[PackedScene]([ExtResource("10_ibih3"), ExtResource("11_ih5hy"), ExtResource("12_l3nte")])
+corner_tile_scenes = Array[PackedScene]([ExtResource("1_fpblb"), ExtResource("2_q1ixp")])
+straight_tile_scenes = Array[PackedScene]([ExtResource("8_kacjh"), ExtResource("9_wkob4")])
 permanent_tile_scenes = Array[PackedScene]([ExtResource("13_e0q3r"), ExtResource("14_qdhfu"), ExtResource("15_xdr4q"), ExtResource("16_y0qe8")])
 metadata/_custom_type_script = "uid://h72gr45lnh34"
