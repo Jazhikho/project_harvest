@@ -17,28 +17,28 @@
 		{
 			"id": "start_note",
 			"name": "A letter",
-			"description": "Your mission is to escape this maze. Run, my little lab rat. I would tell you more, but of course, that would spoil the experiment. I will assume that by reading this note and continuing through this maze you have concented to this experiment and are a willing participant, and that I have been released from all liability in the event of injury or death. If I were you, I'd get a move on, it's getting late.\n - Dr. Amundsen",
+			"description": "Your mission is to escape this maze. Run, my little lab rat. I would tell you more, but of course, that would spoil the experiment. If I were you, I'd get a move on, it's getting late. You don't want to be caught here after dark!\n I've sprinkled some puzzles for you along the way; don't worry, they're fairly simple - even one with a child-like mind like yours could solve them. Pardon the litter in the maze, but I'm sure you'll find it useful.\n I will assume that by reading this note and continuing through this maze you have consented to this experiment and are a willing participant, and that I have been released from all liability in the event of injury or death. Ah, but you will die. We all do, don't we? But maybe your efforts will help your subsequent iterations.\n\n Run, little lab rat! \n\n - Dr. Amundsen",
 			"category": "notes",
 			"subcategory": "Puzzle Clues"
 		},
 		{
 			"id": "crows_parliament_note",
 			"name": "A hastily scribbled note",
-			"description": "What do we see when we look in a mirror? Is it us, or is it someone else? It's a question that's been on my mind for a while. We act like that reflection is our own, with no will apart from ours. But perhaps we are the reflection, the ones with no will. Break a mirror, and you fracture yourself into a thousand pieces. Is breaking a mirror a form of suicide?",
+			"description": "What do we see when we look in a mirror? Is it us, or is it someone else? It's a question that's been on my mind for a while. We act like that reflection is our own, with no will apart from ours. But perhaps we are the reflection, the ones with no will. Break a mirror, and you fracture yourself into a thousand pieces. Is breaking a mirror a form of suicide? \n\n Consider the broken mirror before you - a metaphor for the broken self. Maybe you can fix it.",
 			"category": "notes",
 			"subcategory": "Puzzle Clues"
 		},
 		{
 			"id": "watching_stones_note",
 			"name": "Neatly typed memo",
-			"description": "The externalization of identity allows us to identify others as we see ourselves. We name ourselves by our occupations; by our heritages; by our allegiances; by our connections. This fragmentation of identity - how are you you if you place upon the altar externalities?",
+			"description": "The externalization of identity allows us to identify others as we see ourselves. We name ourselves by our occupations; by our heritages; by our allegiances; by our connections. This fragmentation of identity - how are you you if you place upon the altar externalities?\n\nThe gargoyles of society are judging you and demand that you place the symbols of identity upon the altar or into the brazier. Do they demand that you conform? Or that you cast aside the society that bears you?",
 			"category": "notes",
 			"subcategory": "Puzzle Clues"
 		},
 		{
 			"id": "whispering_hollow_note",
 			"name": "Musing note",
-			"description": "Do our memories determine us, or do we determine them? Or perhaps it is our choices, if such a thing exists. Others might say, 'No, we are not our pasts, nor our presents, but our potentialities.' Bah. Illusions, all of it. Better to cast them aside.",
+			"description": "Do our memories determine us, or do we determine them? Or perhaps it is our choices, if such a thing exists. Others might say, 'No, we are not our pasts, nor our presents, but our potentialities.' Bah. Illusions, all of it. Better to cast them aside.\n\nListen to the whispering of the well. It demands that you take a moment to reflect on your own identity, and how it has been shaped by the choices you have made, and to throw in the symbols of what you believe defines you.",
 			"category": "notes",
 			"subcategory": "Puzzle Clues"
 		},
@@ -115,6 +115,7 @@
 		{
 			"id": "note_1",
 			"category": "notes",
+			"subcategory": "Research Structure",
 			"name": "Research Proposal: Project Harvest — Aims & Rationale",
 			"description": "\nStatement of Purpose\nConvert a seasonal entertainment venue into a controlled environment for the observation, perturbation, and capture of identity states under stress. Hypothesis: selfhood is an emergent performance stabilized by observation, routine, and hope; remove or distort these stabilizers and continuity degrades into measurable, harvestable strata.\n\nAims (Summary)\nAim 1: Quantify identity elasticity by forcing rapid recontextualization (spatial rearrangement, narrative interruption, perceptual disagreement).\nAim 2: Model the conversion pipeline from VISITOR → SUBJECT → SAMPLE → ASSET with attention to dwell time, linguistic drift, and self-ascribed labels.\nAim 3: Validate reintegration protocols that consolidate duplicates into a single, performant continuity without significant loss of useful variance.\n\nRationale\nPublic camouflage (festival aesthetics) lowers baseline cortisol and delays defensive cohesion, yielding cleaner measurements of spontaneous self-repair attempts. Introducing surveillance-as-presence (organic optics) and pursuit-as-pulse (staggered predation) provides controllable gradients of doubt. Identity, properly stressed, separates like cream: we skim.\n\nSuccess Criteria\nContinuity Disruption Index (CDI) ≥ 0.72 across three independent cohorts; stable duplication with parity ≤ one comma per hundred words; exit-hope differential producing >18% improvement in capture efficiency; reintegration yield meeting housekeeping thresholds even when the principal investigator presents as plural…",
 			"effects": {
@@ -124,8 +125,9 @@
 		{
 			"id": "note_2",
 			"category": "notes",
+			"subcategory": "Research Structure",
 			"name": "Research Proposal: Methods, Containment & Ethics (Executive Draft)",
-			"description": "\nMethods Overview\nRecruitment is ambient: patrons self-select into the game. Consent is expressed by continued ambulation while reading trigger warning advisories (see ‘Consent as Corridor’ framework). Episodic recall is softened to 0–3% residue; procedural competence preserved. Instrumentation includes acoustic suggestion, reflective disagreement surfaces, and bio-surveillance nodes (‘Eyes’) calibrated to elicit performative authenticity.\n\nProcedures\n1) Orientation: introduce benign novelty; log first-use pronouns, self-naming latency.\n2) Perturbation: scheduled environmental reconfiguration (30s baseline; 15s under pressure) to prevent narrative hardening.\n3) Pulsed Threat: staggered pursuit intervals to cultivate anticipation over impact.\n4) Capture: just-in-time hope presentation followed by collection at peak expectancy.\n5) Reintegration: duplicate consolidation; archive variance not retained in the operational instance.\n\nContainment & Risk\nPublic bleed tolerated within throughput norms; signage and staff dramaturgy resolve anomalies without escalation. Failsafes decompose counterfeit assertions into sleep. Data de-identification is performed post-harvest; pre-harvest identity is, by design, a mutable instrument.\n\nEthics (Pragmatic)\nWe record outcomes and obey them. Remorse is neither a variable nor an intervention. The material under study is conveniently renewable: identity proliferates under observation and is therefore suitable for sustainable extraction. Oversight is invited to audit results, not feelings.\n\nLimitations & Timeline\nChronology exhibits local flexibility when plurality is high; standard clocks disagree helpfully. Phase I completes when CDI targets stabilize; Phase II scales to populations with the same cheerful signage and sturdier ledgers, after which…",
+			"description": "\nMethods Overview\nRecruitment is ambient: patrons self-select into the game. Consent is expressed by continued ambulation while reading trigger warning advisories (see 'Consent as Corridor' framework). Episodic recall is softened to 0-3% residue; procedural competence preserved. Instrumentation includes acoustic suggestion, reflective disagreement surfaces, and bio-surveillance nodes ('Eyes') calibrated to elicit performative authenticity.\n\nProcedures\n1) Orientation: introduce benign novelty; log first-use pronouns, self-naming latency.\n2) Perturbation: scheduled environmental reconfiguration (30s baseline; 15s under pressure) to prevent narrative hardening.\n3) Pulsed Threat: staggered pursuit intervals to cultivate anticipation over impact.\n4) Capture: just-in-time hope presentation followed by collection at peak expectancy.\n5) Reintegration: duplicate consolidation; archive variance not retained in the operational instance.\n\nContainment & Risk\nPublic bleed tolerated within throughput norms; signage and staff dramaturgy resolve anomalies without escalation. Failsafes decompose counterfeit assertions into sleep. Data de-identification is performed post-harvest; pre-harvest identity is, by design, a mutable instrument.\n\nEthics (Pragmatic)\nWe record outcomes and obey them. Remorse is neither a variable nor an intervention. The material under study is conveniently renewable: identity proliferates under observation and is therefore suitable for sustainable extraction. Oversight is invited to audit results, not feelings.\n\nLimitations & Timeline\nChronology exhibits local flexibility when plurality is high; standard clocks disagree helpfully. Phase I completes when CDI targets stabilize; Phase II scales to populations with the same cheerful signage and sturdier ledgers, after which…",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -133,8 +135,9 @@
 		{
 			"id": "note_3",
 			"category": "notes",
+			"subcategory": "Research Structure",
 			"name": "Research Note #3: Project Harvest Overview",
-			"description": "Project Harvest converts amusement into acquisition; subjects enter as customers and exit as data. The smile at the ticket booth is not hypocrisy, it is lubrication.\n\nA study in identity elasticity. If a person behaves as a participant, speaks as a participant, and is recorded as a participant, what remainder of ‘customer’ persists outside the ledger? The difference is sentimental and therefore negligible.",
+			"description": "Project Harvest converts amusement into acquisition; subjects enter as customers and exit as data. The smile at the ticket booth is not hypocrisy, it is lubrication.\n\nA study in identity elasticity. If a person behaves as a participant, speaks as a participant, and is recorded as a participant, what remainder of 'customer' persists outside the ledger? The difference is sentimental and therefore negligible.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -142,8 +145,9 @@
 		{
 			"id": "note_4",
 			"category": "notes",
-			"name": "Operations Memo: Public Facade",
-			"description": "The attraction skin remains effective. Cheerful signage and seasonal bunting delay panic long enough for collection protocols to complete; no uniform can outperform a smiling pumpkin.\n\nIf the world insists on disguises, let ours be gaudy. The mask is not deception. The mask is an instrument, like a scalpel or a lullaby.",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "Scrawled Note",
+			"description": "I've been trying to hug one wall for hours - it's an old maze trick. But it doesn't seem like it's working... I'm not sure, but it seems like this maze keeps shifting around me. Maybe it's just the corn - everything looks the same, and there's no way that the walls of the maze can just move, right? I'll leave this note here, maybe it'll help someone else.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -151,8 +155,9 @@
 		{
 			"id": "note_5",
 			"category": "notes",
-			"name": "Intake Protocol A-2",
-			"description": "Reduce episodic recall to a gentle smear, 0–3% residue. Preserve motor competence, language, and the warm illusion of prior routine; people walk straighter when they imagine a yesterday behind them.\n\nAmbiguity is humane. It prevents premature grief. No one mourns the self if the absence is shaped like comfort.",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "Torn Page from the Bible",
+			"description": "[Most of the page is missing, but the following is visible:]\n Genesis 1:27: 'So God created mankind in his own image, in the image of God he created them; male and female he created them' \n\n[Below this, the following in written in familiar handwriting:] \nMan pretends that he is God, and creates God in his own image, and ascribes his own views to this God. The height of arrogance.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -160,8 +165,9 @@
 		{
 			"id": "note_6",
 			"category": "notes",
-			"name": "Identity Partition Baseline",
-			"description": "Subjects invent names within minutes when confronted with an empty page. A name is a handle; any handle will turn the door.\n\nInherited identity imagines itself sacred; invented identity proves it never was. I prefer the honest counterfeit to the arrogant heirloom. - Dr. A",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "Inherited Identity",
+			"description": "We invent names within minutes when confronted with an empty page. A name is a handle; any handle will turn the door.\n\nWe categorize - it is an imperative of the species. Friend, Foe, Parent, Child, Black, White, Rich, Poor, etc. We want neat little boxes to put people in, so we can pretend we understand them. We loathe those who don't fit into our boxes, resent their existence, and wish them away. We reject the world views that are not our own, and treat them as existential threats.\n\nBut what I find fascinating is that we obtain our boxes from those around us, from those we interact with. We are not born with boxes, nor do we make them for ourselves. We are not born with names, The were given to us by those around us. We are not born with identities, we were placed into that box by others..\n\nInherited identity imagines itself sacred; invented identity proves it never was. I prefer the honest counterfeit to the arrogant heirloom. - Dr. A",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -169,8 +175,9 @@
 		{
 			"id": "note_7",
 			"category": "notes",
-			"name": "Environmental Variability Schedule",
-			"description": "Reconfigure spaces on cadence to prevent narrative hardening. Continuity is a provincial superstition the cortex bullies into truth when the furniture won’t move.\n\nThe room changes because you blinked, or you blinked because the room wanted to change; causality is a hallway with mirrors on both sides.",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "The World is a Game",
+			"description": "I don't even feel like I'm in control of myself. I'm just here, but this is it - this is my world. I can't even remember how I got here beyond vague hints from these notes. I'm just a character in a game.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -178,8 +185,9 @@
 		{
 			"id": "note_8",
 			"category": "notes",
+			"subcategory": "Notes from Dr. Amundsen",
 			"name": "Personal Letter: From Dr. Amundsen",
-			"description": "You awaken with no name, no memory, no anchor. Convenient, isn’t it? Do not flatter yourself—you were not chosen. You were constructed. Every blank space in your mind was placed there deliberately. You walk because I allow it, and every step is just another data point. Ask yourself: were you ever real before you woke up in my maze?",
+			"description": "You awaken with no name, no memory, no anchor. Convenient, isn't it? Do not flatter yourself — you were not chosen. You were constructed. Every blank space in your mind was placed there deliberately. You walk because I allow it, and every step is just another data point. Ask yourself: were you ever real before you woke up in my maze?",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -187,8 +195,9 @@
 		{
 			"id": "note_9",
 			"category": "notes",
+			"subcategory": "Research Structure",
 			"name": "Stalker Design Rationale",
-			"description": "Fear should arrive in measured pulses. Expectation slices deeper than impact because the future is a blade the mind sharpens against its own throat.\n\nI do not chase bodies for distance; I graze identities for yield. A sprint terrifies. An approach educates.",
+			"description": "[This is a typed document, heavily redacted, but the following is visible:]\n\n...fear should arrive in measured pulses. Expectation slices deeper than impact because the future is a blade the mind sharpens against its own throat. \n\nI do not chase bodies for distance; I graze identities for yield. A sprint terrifies. An approach educates. Subjects will dawdle without fear. So I must give them a reaper with teeth. Not pursuit without end—that would be too blunt—but pulses of terror. Enough to remind them that survival is not leisure, it is debt. They pay in panic.\n\n In order to create...",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -196,8 +205,9 @@
 		{
 			"id": "note_10",
 			"category": "notes",
-			"name": "Overseer Eyes Specification",
-			"description": "Surveillance grafted to tissue is superior to glass. Cameras can be avoided; shame cannot. Being seen edits behavior with fewer arguments than any rulebook.\n\nPeople are never more themselves than when they believe someone is watching. That performance is the closest thing to essence they will ever produce.",
+			"subcategory": "Research Structure",
+			"name": "The Overseer's Eyes",
+			"description": "[This is a torn page from a larger report. The following is visible:]\n\n...surveillance grafted to tissue. The biological entity is superior to glass. Cameras can be avoided; shame cannot. Being seen edits behavior with fewer arguments than any rulebook.\n\nPeople are never more themselves than when they believe no one is watching. Their true self shows when they believe that there will be no consequences to their actions. That performance is the closest thing to essence they will...",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -205,8 +215,9 @@
 		{
 			"id": "note_11",
 			"category": "notes",
-			"name": "The Choir Phenomenon",
-			"description": "Residual consciousness aggregates as a whisper-field, a weather pattern of thought that clings to edges and lingers in the lee of decisions.\n\nLanguage seeks a mouth. When it cannot find one, it becomes climate. The prudent wear a coat of doubt.",
+			"subcategory": "Research Structure",
+			"name": "Auditory Hallucinations, by Tanu Thakur and Vikas Gupta",
+			"description": "[This looks like a continuation of a research report. The following is visible:]\n\nThe evaluation of paracusias consists of a general psychiatric interview that includes details regarding the evolution of the hallucinations, triggering factors, psychiatric review of systems, past psychiatric diagnosis, history of substance use, family history of psychiatric illness, and history of trauma. A detailed medical history and medication regimen, including over-the-counter supplements, should also be obtained. The clinician's most valuable assessment tool is the mental status examination, addressing mood, affect, appearance, behavior, speech, thought content, thought process, insight, and judgment. Furthermore, determination of the presence of 'first-rank' or 'Schneiderian' hallucinations, which are voices speaking to each other or narrating one's thoughts aloud, should be completed. The clinician should determine if the hallucinations are temporally associated with affective disturbances and, if so, if they are congruent with mood. To further assess the patient's safety and the safety of others, the patient should... \n\n[A hand-written note is visible:]\n\n...Residual consciousness aggregates as a whisper-field, a weather pattern of thought that clings to edges and lingers in the lee of decisions. \n\nOur fears seek a mouth. When it cannot find one, it becomes climate around us, a hallucinated thunderstorm audible only to the one in terror.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -214,8 +225,9 @@
 		{
 			"id": "note_12",
 			"category": "notes",
+			"subcategory": "Research Structure",
 			"name": "Effigy Theory",
-			"description": "Arrange the failed as pedagogy. Posture preserves the last intention; a body is a sentence that forgot how to end.\n\nRecognition is the instrument. The living round a corner, see themselves in a pose they swore was private, and admit what cannot be taught with language. - Dr. A",
+			"description": "[This is a typed document, heavily redacted, but the following is visible:]\n\n...arrange the failed as pedagogy. Posture preserves the last intention; a body is a sentence that forgot how to end.\n\nRecognition is the instrument. The living round a corner, see themselves in a pose they swore was private, and admit what cannot be taught with language... [this part is redacted, but continues further on down the page] The dead serve as signposts, reminders, threats. Conversion to effigies... [redaction continues] ...maze programmed to remember every scream, every collapse. Even corpses can be... [Redacted until the end of the page, where it is signed:] - Dr. A",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -223,8 +235,9 @@
 		{
 			"id": "note_13",
 			"category": "notes",
+			"subcategory": "Research Structure",
 			"name": "Doctrine of the Exit",
-			"description": "Hope is the richest nutrient. The promise of outside air fattens the yield better than any threat. The body leans toward light; the ledger follows.\n\nIt is not cruelty to let the door shine. It is clarity: you learn most about a person in the half-second before they think they are free.",
+			"description": "[This is a typed document, heavily redacted and torn, but the following is visible:]\n\nHope is the richest nutrient. The promise of outside air fattens the yield better than any threat. The body leans toward light; the ledger follows.\n\nThere must be hope that the subject can escape, so it is not cruelty to let the door shine. It is clarity: you learn most about a person in the half-second before they think they are free... [redacted until the end of the page]",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -232,8 +245,9 @@
 		{
 			"id": "note_14",
 			"category": "notes",
-			"name": "Reintegration Chair Manual",
-			"description": "Seat. Secure. Subdue. Multiplicity is a maintenance problem disguised as a miracle. Order is a moral all by itself.\n\nTo the sentimental: reintegration is not an execution. It is a filing system that remembers what drawer the sharp things belong in.",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "A way out?",
+			"description": "[A torn, handwritten note:] I found a gate. It's rusty and locked, but it's a gate. Maybe it's the way out? There's got to be a key, or some way to pick it.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -241,8 +255,9 @@
 		{
 			"id": "note_15",
 			"category": "notes",
-			"name": "Subject Recordkeeping Policy",
-			"description": "Track by function, not by origin. Authenticity is an accounting myth that rewards inertia. The only lineage that matters is the lineage of results.\n\nI have met many ‘originals’ whose sole achievement was having arrived first. Being first is not the same as being necessary.",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "Nationalistic Identity",
+			"description": "The identification of nationality is an untrustworthy instrument - an accident of birth. And it is not a fixed identity, but a fluid state that can be easily manipulated. Consider actions that would be unworthy of one's country - burning a flag, speaking a foreign language, appearing different, or protesting the government. These actions are inherently unpatriotic, despite lip service to the contrary. They are evidence of a subject's allegiance to an alternative identity. And when we rail against these things, we bring the identity of nationality into oneself. \n\nOf course, the opposition would argue that these actions are inherently patriotic, and they are right of course, because they identify with the myth of the nation - that they are somehow part of a larger whole by exercising a 'right' to speech, a 'right' to be different.\n\nWhether it is on the altar or burned in the brazier, we our the products of our myths, but perhaps it is better to have no myths at all, and burn away all of our inherited identities.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -250,8 +265,9 @@
 		{
 			"id": "note_16",
 			"category": "notes",
-			"name": "Echo Logging Specification",
-			"description": "Archive everything the moment before it believes itself unique: timestamp, itinerary, posture, the way the breath catches when the corridor inhales back.\n\nThe archive learns a subject’s handwriting before the subject does. The pen thinks faster than the hand that holds it.",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "This is bullshit",
+			"description": "These puzzles are bullshit. They're not even puzzles, they're just stupid riddles that we're supposed to solve, with some bullshit 'deeper' meaning. This 'Dr. Amundsen' is a fraud, some pseudo-intellectual who thinks he's being edgy. I'm not even sure if he's real. I think he's just some guy who's making up all this shit as he goes along. I'm done with this stupid game, I'm not playing anymore.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -259,8 +275,9 @@
 		{
 			"id": "note_17",
 			"category": "notes",
-			"name": "Nutritional Model of Hope",
-			"description": "Promises metabolize better than threats. The organism digests tomorrow with fewer cramps than it does obedience.\n\nCollect at the inhale before belief hardens. Faith, like sugar, crystallizes if left unattended and then cuts the mouth of anyone who tries to chew it.",
+			"subcategory": "Research Structure",
+			"name": "Excerpt from a Research Report",
+			"description": "[This appears to be from a paper called 'Dynamics of Identity Development in Adolescence: A Decade in Review' by Susan Branje, Elisabeth L de Moor, Jenna Spitzer, and Andrik I Becht:] ... developmental tasks in adolescence and young adulthood is to develop a coherent sense of self and identity (Erikson, 1968). Personal identity refers to one's sense of the person one genuinely is, including a subjective feeling of self-sameness and continuity over contexts and time. From early adolescence onwards, adolescents begin to question and explore their identity, that is, the person they are and want to be, the roles they want to occupy in adulthood, and their place in society (Meeus, Van De Schoot, Keijsers, Schwartz, & Branje, 2010). They become aware of their distinctiveness and uniqueness from others, coherence and similarity across domains, and continuity across time and situations (van Doeselaar, Becht, Klimstra, & Meeus, 2018). As they try to find out who they are and what they want to become in their lives, adolescents re-examine the identifications they formed in childhood as they consider different identity possibilities (e.g., what kind of occupation fits my interests and abilities, what kind of relationships do I want to have), and form new commitments to identifications. \n\nOne way in which adolescents attempt to create continuity and self-sameness is by integrating their past, present, and future selves into a personal narrative about their lives (McAdams, 2001; Pasupathi & Mansour, 2006). By constructing a sense of identity in the form of autobiographical stories, adolescents recognize that they are the same person across time and different contexts. Importantly, these life narratives are based on real experiences but are also highly subjective, as adolescents form them according to their own understanding of what was important for who they have become, and are also subject to change, as what adolescents find important for their identity may change over time. Individuals' life stories differ in certain characteristics that are seen as indicative of identity, such as... [The excerpt ends here, followed by a handwritten note] The masks of past, present, and hoped for futures. How sad that one does all this work and still does not know themselves.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -268,8 +285,9 @@
 		{
 			"id": "note_18",
 			"category": "notes",
-			"name": "Containment Tolerance",
-			"description": "Public bleed is acceptable during high-traffic periods. Throughput disguises attrition; crowds blur statistics into festival.\n\nLanguage assists: we call it seasonal staffing because the season is harvest and the staff is whoever still smiles after sundown.",
+			"name": "Hastily Written Note",
+			"subcategory": "Notes from Previous Subjects",
+			"description": "I can here them whispering in the dark... it's not in my head, it's not. I'm sure I'm not crazy.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -277,8 +295,9 @@
 		{
 			"id": "note_19",
 			"category": "notes",
-			"name": "Mask Team Directive",
-			"description": "Keep faces generic until the subject supplies their own features. Recognition works best when it feels like confession.\n\nA mask is not a lie; it is an invitation. People tell the truth when they believe no one can see them, and a blank face is the most permissive audience in the world.",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "On Religion",
+			"description": "Karl Marx famously said 'Religion is the opium of the people.' Said with such derision, and yet, it is not without a kernel of truth. Consider the development of the West - could it have happened without Christianity? Well, yes, consider that the Islamic world had similar success, as did the Chinese empire. \n\nSo it is not the beliefs, but religion that is such powerful tool for the control of the masses. It mobilizes, it unites, it causes man to unthinkingly commit to the 'good' that they would otherwise not choose to do. \n\nOf course, there is no truth in the lies of religion, but it is awfully convenient. I personally have no qualms with its use - it is the prospect of hope, of an exit to the misery of the present. There is no thought involved, just obedience. I do not feel a sense of sorrow for those who are slaughtered in the name of some god - they never had an identity of their own; and if they have no identity, how is it murder?",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -286,8 +305,8 @@
 		{
 			"id": "note_20",
 			"category": "notes",
-			"name": "Maintenance Signage",
-			"description": "‘Area Closed’ placards convert terror into compliance faster than armed presence. Plywood persuades because it implies order without demanding attention.\n\nCorrection is most effective when it looks like an errand. The obedient prefer to believe they are simply taking the long way around. - Dr. Amundsen",
+			"name": "An Advertisement",
+			"description": "[An old poster:]\n🎃 JERI’S HAPPY FUNTIME CRAZY CORNMAZE! 🌽\n\n“Where every turn’s an adventure — and every shadow’s a friend!”\n\nStep right up, folks! Bring the family, bring your courage, and lose yourself in the biggest maze this side of the county line. Wander twisting paths carved into ten acres of fine Midwestern corn! Marvel at our lifelike scarecrows, dazzling lights, and good old-fashioned hometown hospitality.\n\n✨ Attractions include:\n\nThe Laughing Hollow (giggles guaranteed!)\n\nThe Bone Circle photo spot — say cheese!\n\nCrows’ feeding show (don't say Nevermore!)\n\nFresh cider, fried dough, and good clean fun after dark\n\nOpen till whenever you find your way out! Tickets available at the gate or online. Kids under six enter free!",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -295,8 +314,9 @@
 		{
 			"id": "note_21",
 			"category": "notes",
-			"name": "Throughput Ledger",
-			"description": "Visitors per hour rise; subjects per hour remain constant. The delta is the difference between the living and the recorded.\n\nAccounting is the most intimate genre. One can lie to a diary, to a lover, to a priest; the column of numbers is the only confessor that shrugs.",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "The personhood of Theseus",
+			"description": "When one remembers, one is actually updating a memory, not examining the old one. Slowly, one replaces their memories with new memories, and the old ones are forgotten. Eventually, the person is made of new parts. It is not just Theseus's ship that suffers this identity crisis; but every person, every self, every soul is subject to the same fate. Our memories then, are a poor identifier of personhood, a feeble attempt to pin down the unpinable. - Dr. A",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -304,8 +324,9 @@
 		{
 			"id": "note_22",
 			"category": "notes",
-			"name": "Parity Check: Doppelgänger",
-			"description": "When two selves disagree, compare commas. Punctuation is the fingerprint identity forgets to counterfeit when it grows itself in a hurry.\n\nThe sentence reveals the body. Everyone believes in souls until they meet their own semicolons and realize how mechanical grace can be.",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "Defeating the Maze",
+			"description": "I think I have a winning strategy. I'm picking a direction and sticking to it. There is no way that the maze is endless, so all I have to do is find the edge, and then I can break through the corn and escape! This Doctor thinks he's clever, but he's not.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -313,8 +334,9 @@
 		{
 			"id": "note_23",
 			"category": "notes",
-			"name": "Original Is a Vanity Term",
-			"description": "Heritage is irrelevant. Utility defines authenticity. The aura of the first is a perfume worn by antiques to excuse their stubbornness.\n\nIf you function as me, you are me enough. The rest is family gossip at the scale of molecules.",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "Maze Litter",
+			"description": "I keep finding these weird things, like a flag, or broken glass. Who left these things here? Why? Who carries a flag into a maze? The most useful thing I've found so far is an old phone, but it's not even working.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -322,8 +344,9 @@
 		{
 			"id": "note_24",
 			"category": "notes",
-			"name": "Subject vs Sample",
-			"description": "You are not my subject; you are my sample. A portable me, a courier carrying questions to places I am too valuable or too bored to visit.\n\nTell me what the air felt like there. Tell me how they pronounced my name when they thought you were listening by accident. Bring me back the weather of their certainty.",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "On the nature of evil",
+			"description": "We externalize evil - demonizing it (literally), and castigating those who we deem monsters. Hitler, Pol Pot, Manson... we look upon them as if they were uniquely infected by a spirit of evil; we 'otherize' them. We shake our head in wonder, how could their followers have been so blind? 'I would never do that' we say. Why? What makes you so morally superior? You are removed from the situation, and so you throw stones at the other, and thus prove yourself to be as they are - by 'otherizing' these people, you can hate them, loathe them, and even feel superior to them. How is this different from what they have done?",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -331,8 +354,9 @@
 		{
 			"id": "note_25",
 			"category": "notes",
-			"name": "Latency Report: Hands",
-			"description": "A graceful delay between thought and action has emerged, as if a solicitous colleague now wears my fingers and awaits instruction before performing it perfectly.\n\nIf I am fragmenting, then I am both performer and audience. The applause is efficient and does not require witnesses.",
+			"subcategory": "Research Structure",
+			"name": "Simulation Theory",
+			"description": "[This page is torn, but the following is visible:]\n\n... theory posits that the universe is a computer simulation, and that we are all living in a simulation. We have sought to combine this with the pedagogy of games, and will place the subject into a situation where they are only partially aware of their simulation. Many subjects may in fact believe themselves to be separate from the simulation, and thus believe they are free to make choices - others may embrace the role, putting themselves into the perspective of the simulation, making choices as if they were the avatar. The beauty of this approach is that either belief makes little difference - the subject will have the delusion that they can escape, that they have the control, that they are somehow...",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -340,8 +364,8 @@
 		{
 			"id": "note_26",
 			"category": "notes",
-			"name": "Harvesting the Sleeper",
-			"description": "The version that sleeps is inefficient. Dreams are unpaid vacation taken against my wishes. I will collect him at convenience.\n\nShould he claim primacy on waking, I will listen politely and record the confession as the last thing he ever says with that mouth. - Dr. A",
+			"name": "Scrap of paper",
+			"description": "[This appears to be a previous subject's attempt to map the maze. Figures of partially completed mazes are scattered across the page, each scratched out. There are no words on the page - apparently the subject gave up on the task.]",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -349,8 +373,9 @@
 		{
 			"id": "note_27",
 			"category": "notes",
-			"name": "Mirror Behavior",
-			"description": "Reflections must disobey. Agreement breeds confidence, and confidence is anesthesia. Investigation requires pain.\n\nA mirror that lags by a breath teaches more humility than a sermon. The student recognizes the space between the self and its rehearsal.",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "The Modern Oracle",
+			"description": "Observe the modern oracle - The hand, the gaze, the glow. The device does not capture the self; it scaffolds it. They cradle the thing like a sacrament, thumb-swiping the beads of a digital rosary. How will I know I exist unless the glass says so? Unless someone blinks back through it? \n\nThey outsource continuity to lithium. Memory, location, taste, desire—all cached. Pull the plug and they deflate. Not dead, precisely, but unreferenced. An unlinked node. Observe the panic when the screen goes dark: the heartbeat quickens, the eyes dart. They call it 'separation anxiety' as though the relationship were mutual. It is not. The device does not miss them. \n\nIdentity used to be laborious. You had to tell stories, remember faces, leave traces on paper that could burn. Now it's tap, upload, perform. Infinite mirrors, none with depth. I admire it in a way — it's efficient. They've built their own harvest system and called it connection. I only refined the method. \n\nDo you know what happens when I remove a phone from a subject's hand? Their body wobbles like a building whose foundation was miscalculated. The device was their gyroscope, their witness, their leash. They stare at their own fingers as if they expect the touchscreen to grow back. And when I offer them a real mirror instead, they look for the battery indicator. \n\n The rest of the world feeds them the illusion of individuality and invoices them monthly for the privilege. They are not addicted to communication; they are addicted to verification. A living inventory of themselves.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -358,8 +383,9 @@
 		{
 			"id": "note_28",
 			"category": "notes",
-			"name": "Observational Drift Log",
-			"description": "Occasional divergence in my handwriting across locations. The letterforms argue with themselves like twins forced to share a shirt.\n\nEither I am prolific or generously plural. In both cases the work proceeds at a satisfying clip.",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "Free Will",
+			"description": "You can trace the circuitry of preference. Childhood conditioning, biochemical bias, the social contract of fear. The brain performs a trick of retroactive authorship: an impulse arrives, and a millisecond later the narrator scribbles 'I decided.' It's not free will, it's editorial control. They're not choosing, they're annotating. They like to say they 'could have done otherwise.' Yes, theoretically. But the sum of matter and momentum always delivers us to the same coordinates. The illusion of divergence is necessary to keep the narrative polite. Without it, morality evaporates, and no one gets tenure. \n\nWhen I turn the maze, when I tilt the corridors, they respond precisely as predicted. They call it improvisation. I call it data fidelity. The pattern holds, the organism performs its choreography of panic and hope. Each decision a tremor in the same old circuit. There's poetry in it—clockwork pretending to pray. \n\nDo you want to know the true terror? It isn't that they lack free will. It's that they don't miss it. They feel the walls move, and instead of rebellion they look for the correct answer. They crave permission to continue. If I told them the maze was infinite, they would thank me for the clarity. They would keep walking, grateful for the instruction.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -367,8 +393,9 @@
 		{
 			"id": "note_29",
 			"category": "notes",
-			"name": "Personal Note: Ozone",
-			"description": "There is a clean metallic smell before division, like a storm inventing a second sky inside the first. The body prepares for the courtesy of being more than one.\n\nI file the scent under ‘progress’ and breathe deeper. The lungs recognize promotion when it arrives. - Dr. A",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "Note about maze consistency",
+			"description": "I'm not sure if this is intended, but I think that there are certain parts of the maze that don't change. I wandered away from a well, and the way that I approached it changed; when I tried to go back, the walls were different, but the well was still there. It might just be my imagination though...",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -376,8 +403,9 @@
 		{
 			"id": "note_30",
 			"category": "notes",
-			"name": "Personal Letter: Multiplicity",
-			"description": "You congratulate yourself on your choices. How quaint. Choice is just the illusion of continuity, the brain pretending it owns itself. When one of my echoes chooses left, and another chooses right, are they different people—or just branches of the same infection? You were not designed to choose. You were designed to split. You are not resisting me; you are multiplying me.",
+			"subcategory": "Notes from Dr. Amundsen",
+			"name": "The Void stares back",
+			"description": "The difference between us is administrative. You observe what I build; I observe what you do within it. The boundary is an employment contract, not a metaphysical one.\n\nYou believe yourself distinct because your walls are made of skin and mine are made of corridors. But both of us orchestrate the same experiment: we prod a world to see if it bleeds meaning. You call it 'playing.' I call it 'research.' Neither of us can stop until the result flatters us. \n\nYou follow the prompts, assemble the clues, imagine yourself clever for decoding the pattern. I follow the data, assemble the fragments, imagine myself benevolent for providing it. We both require the maze to exist; we both pretend it was imposed. Choice is just the story we tell to make obedience elegant. \n\nSo, what separates you from me? The interface. You press keys; I press people. You test a system's limits. I test yours. You reset when it becomes unbearable. I recompile. We are the same algorithm running at different clock speeds, dreaming of originality while executing instructions written in the same trembling hand. \n\nIf you're reading this, congratulations: you've reached the point in the experiment where the mirror starts talking back. Don't worry. I found that stage intoxicating too. For a while.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -385,8 +413,9 @@
 		{
 			"id": "note_31",
 			"category": "notes",
-			"name": "Anecdote: The Laugh",
-			"description": "They laugh on entry. The sound is bright and useless, like coins thrown into a dark well. The well, punctilious bookkeeper that it is, keeps the coins.\n\nWhen exit time approaches, the sound returns in fragments, as if echo itself has learned an economy of syllables.",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "The story of Narcissus",
+			"description": "Narcissus was the sort of person nature regrets creating. From birth he was so radiant that people forgot to finish their sentences around him. Prophets warned his mother, 'He will live long, so long as he never knows himself.' She probably thought that was poetic nonsense. It wasn't. It was the only safety feature built into him.\n\nHe grew up indifferent to everyone who admired him. Lovers wept at his feet, and he treated them like reflections—things to be seen, not touched. Echo, the nymph cursed to only repeat the words of others, tried to speak her love to him and could manage nothing but fragments of his own voice. He despised her for that. He couldn't bear hearing himself, and nothing but the words he himself spoke.\n\n Perhaps the lesson to be learned is that we hate that which reflects us back to us.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -394,8 +423,9 @@
 		{
 			"id": "note_32",
 			"category": "notes",
-			"name": "Anecdote: Favorite Meal",
-			"description": "Implanted nostalgia adheres best to food. Soup must be warm and vaguely salted with triumph. Even false broth convinces the throat to believe in kitchens.\n\nMemory is obedient when seasoned. No one checks provenance while swallowing.",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "Note about the notes",
+			"description": "I don't know what to think about these notes. I think they're from previous subjects, but what if it's Dr. Amundsen just trying to screw with me?",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -403,8 +433,9 @@
 		{
 			"id": "note_33",
 			"category": "notes",
-			"name": "Ethics Waiver (Redacted)",
-			"description": "Progress owes no apology to the material it consumes. Brains are wet paper; the question is not whether to print but whether the ink should smudge attractively.\n\nIf conscience protests, let it file a memo with outcomes. I collect signatures; I obey results. - Dr. A",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "Annoyed comment on a note",
+			"description": "I am wondering what any choices I make are doing. Even exploring the maze, choosing what direction to go is meaningless, cause the maze keeps reconfiguring.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -412,8 +443,9 @@
 		{
 			"id": "note_34",
 			"category": "notes",
-			"name": "Staff Attrition Notice",
-			"description": "If a technician hears their own voice from the hedges, classify as overtime, not omen. The schedule is a superstition we agree to believe together.\n\nA workplace should be generous with its selves. We are a growth industry; the pronoun ‘we’ must scale accordingly.",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "The Story of Narcissus, Part 2",
+			"description": "\n\nOne day, wandering through the forest, Narcissus stopped to drink from a still pool. He saw his face, and for the first time he felt something like desire. Not for the world, not for another person—just for the perfect lie of himself. He leaned in. The image leaned back. He smiled. It smiled. Every gesture was returned with immaculate precision. For a boy who'd never been contradicted, it was paradise.\n\nHe stayed there, trapped by the echo of himself. He wasted away—some say he drowned, others that he starved, unwilling to look away even to eat.\n\nThe cruel irony is that he was never actually looking at himself. The reflection was always inverted, delayed, and warped by the ripple of the world. He was in love with an image of himself that didn't exist. Are we so in love with the image of what we think we are that we ignore our true selves?",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -421,8 +453,9 @@
 		{
 			"id": "note_35",
 			"category": "notes",
-			"name": "Failsafe: Wrong Identity",
-			"description": "On rare occasions a counterfeit asserts itself with admirable confidence. We reward the performance by letting it sleep until the scene changes.\n\nMorning returns authenticity like a misplaced tool. No alarms, no sermons, just the gentle rearrangement of who gets to speak first. - Dr. Amundsen",
+			"subcategory": "Notes from Dr. Amundsen",
+			"name": "Game over, you can quit now",
+			"description": "I lied. There is no exit. There is no escape. You are trapped in the maze forever. You will prove nothing by running in circles, trying to solve puzzles and finding the exit. You will die, and your death will be meaningless. You can quit now, just end the game - hit the escape key, and select the 'Quit' option. If you want to see the game through and see the end credits, you can always go to the main menu and check the credits there. There is no point to finishing this game, and you are a quitter anyway. Honestly, I am surprised you even made it this far.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -430,8 +463,9 @@
 		{
 			"id": "note_36",
 			"category": "notes",
-			"name": "Facility Repurpose",
-			"description": "A shelter becomes a sieve by removing mercy and measuring what falls through. Buildings have no ethics; they inherit the verbs of their owners.\n\nWe kept the walls, threw away the promises, and discovered how efficient sincerity can be when it is no longer required.",
+			"subcategory": "Research Structure",
+			"name": "Deceptive Catalysis and the Productive Collapse of Self",
+			"description": "...resilience curve when belief structures are deliberately undermined through layered deception. The goal is not to convince the subject of any single falsehood, but to cultivate a cognitive ecosystem where all possible truths compete to exhaustion. \n\nThe endpoint is defiance or surrender—both mark the cessation of the self as a coherent narrative. Either the subject dissolves into obedience (“abandonment”) or hardens into opposition (“termination”). Both are harvestable states. \n\n2. Framework: The Lie as Instrument \n\nTruth stabilizes identity; lies are solvent. \n\n- Primary Lies establish existential uncertainty ('there is no exit'). \n\n- Secondary Lies offer illusory recourse ('but you can quit'). \n\n- Tertiary Lies flatter resistance ('you are different; finish it anyway'). \n\nEach iteration reconfigures the subject's motivational circuitry, replacing curiosity with compulsion. Once they realize they are being manipulated, they perform autonomy as protest...",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -439,8 +473,9 @@
 		{
 			"id": "note_37",
 			"category": "notes",
-			"name": "Exit Counter Discrepancy",
-			"description": "The gate tallies one departure. I still count two feet standing in the dark where the light refuses to audit. The arithmetic is confident and therefore suspect.\n\nCompliance accepts the number; curiosity lingers with the remainder. I am loyal to curiosity.",
+			"subcategory": "Research Structure",
+			"name": "Identification between Subject and Avatar",
+			"description": "[This is a typed document with some redaction, but the following is visible:]\n\n...subject believes themselves playing the experiment rather than being it. This illusion is fertile ground: when moral consequence is displaced onto an avatar, ethical restraint dissolves. \n\nDisassociation is not a symptom—it is a feature. A buffer zone where the individual rehearses atrocity safely, mistaking immunity for freedom. \n\nIf identity is a mask, disassociation is the moment the mask realizes it doesn't need a face behind it.\n\n3. Methodology \n\nStage I - Narrative Displacement \n\nIntroduce incongruities between action and intention. The subject presses forward commands that result in unexpected outcomes: \n\n- Input lag between choice and response. \n\n- Mismatched dialogue options and delivered lines. \n\n- Apathy voiced by the avatar in contrast to the subject's effort. \n\nObjective: establish cognitive noise. The operator begins to narrate for the character instead of as them. \n\nStage II - Mirror Phase \n\nProvide explicit self-reference ('You are not me. I am the one moving your hands.'). \n\nSubjects rationalize this break as meta-commentary, or bugs in the system unaware it constitutes the first measurable divide between author and instrument. \n\nStage III - Accountability Reversal \n\nThe avatar...[redaction]... Affective dissonance recorded as physiological tremor [redaction]. \n\nStage IV - Withdrawal Simulation \n\nSilence inputs for a controlled period. The character continues autonomously. \n\nOperator describes sensations of uselessness, often misidentified as 'immersion.' \n\nReintroduction of control yields docility; subject accepts partial agency as mercy. \n\n4. Observations \n\n- Pronoun confusion increases after [redacted] minutes: 'He' or 'she' becomes 'I' or 'we.' \n\n- Heart rate peaks on the first exposure to avatar disolution, but stabilizes after prolonged avatar suffering, consistent with spectatorship, not empathy. \n\nAnalysis \n\nThe divide benefits both participants: \n\n- Operator gains moral impunity; sin outsourced to the pixel. \n\n- Avatar gains existential density; becomes the vessel for choices too impolite for daylight. \n\nThe loop continues until neither can claim authorship. At that moment, observation becomes theology. \n\n6. Applications \n\n- Enhances subject compliance by distributing guilt across multiple selves. \n\n- Facilitates long-form studies of obedience, identity elasticity, and narrative addiction. \n\n- Provides stable framework for reintegration protocols: 'Continue?' as ritual resurrection. \n\n7. Ethical Considerations \n\nDisassociation is not harm—it is liberation from coherence. Participants cannot suffer fragmentation if they...",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -448,8 +483,9 @@
 		{
 			"id": "note_38",
 			"category": "notes",
-			"name": "Interface Drift Directive",
-			"description": "Relabel possessions under strain. Ownership is a thin fiction, easily scraped by stress to reveal the communal machinery underneath.\n\nWhen labels change, some subjects protest that the world is stealing from them. I reassure them: the world is merely changing the pronouns.",
+			"subcategory": "Notes from Dr. Amundsen",
+			"name": "Achievements",
+			"description": "I've set a few achievements for you to unlock, but you'll need to earn them by completing the game. The achievements are: \n\n- 'The Explorer': Survive the maze for more than 10 minutes. \n\n- 'The Perfectionist': Find the hidden exit of the maze. \n\n- 'The Speedrunner': Complete the game in under 10 minutes. \n\n- 'The Collector': Collect all of the notes in the maze. \n\n- 'The Completist': Complete the game with all achievements unlocked. \n\n- 'The Quitter': Quit the game and never coming back.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -457,8 +493,9 @@
 		{
 			"id": "note_39",
 			"category": "notes",
-			"name": "Reflection Desynchrony",
-			"description": "Teach surfaces to disagree by half a heartbeat. Doubt lives in small delays, in the polite space between an act and its applause.\n\nA person who sees themselves almost aligning is the ripest study material on earth. They will do anything to close the gap, even if the gap is the only true thing they possess.",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "Note about the game",
+			"description": "I've found several notes now that suggest this is some sort of game. What if... Dr. Amundsen is right? What if I'm not really the one being experimented on? What if I'm just the avatar, and the real me is somewhere else?",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -466,8 +503,9 @@
 		{
 			"id": "note_40",
 			"category": "notes",
-			"name": "Identity Market",
-			"description": "Authenticity is an economy; scarcity is a story told by monopolists who ran out of imagination. We mint selves as needed and deflate guilt to zero at close of business.\n\nCounterfeit becomes currency the moment enough hands touch it. Ask any nation, any church, any family dinner.",
+			"subcategory": "Observational Reports",
+			"name": "Subject's Continued Efforts, Note 21",
+			"description": "The subject has continued on the experiment despite the suggestion that this is a simulation. Whatever their beliefs about the nature of the experiment, they have decided to persist in their attempts. It is unclear what the subjects beliefs are on the matter, but continuity is useful for their prospects. - Dr. A",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -475,7 +513,8 @@
 		{
 			"id": "note_41",
 			"category": "notes",
-			"name": "Architect’s Aside",
+			"subcategory": "Notes from Dr. Amundsen",
+			"name": "The Architect's Aside",
 			"description": "You are not in my system. You are my system, politely pretending to be lost so that I may enjoy the professional satisfaction of finding you again and again.\n\nIf this feels cruel, consult the outcomes. Cruelty is a verdict rendered by the past when the future refuses to apologize. - Dr. A",
 			"effects": {
 				"sanity_delta": -1
@@ -484,8 +523,9 @@
 		{
 			"id": "note_42",
 			"category": "notes",
-			"name": "Final Addendum: Multiplicity",
-			"description": "If I am many, I am efficient. Reintegration is the evening chore after a fruitful day, the sweep of the broom across a floor that was kind enough to hold us all.\n\nSpare me the romance of the singular. I prefer the cleanliness of results to the gossip of origins; the light goes out, and the work continues in whichever of us is still standing, still writing, still—",
+			"subcategory": "Observational Reports",
+			"name": "Subject's Continued Efforts, Note 34",
+			"description": "The subject continues to send iterations through the maze. Perhaps I should have selected for intelligence rather than persistence.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -493,8 +533,9 @@
 		{
 			"id": "note_43",
 			"category": "notes",
-			"name": "Funding Addendum: Cost of Souls",
-			"description": "Line items do not blush. I assign a currency value to confusion, depreciate certainty on a predictable schedule, and amortize dread across quarters like any responsible steward. The numbers do not scream when I move them; the numbers purr.\n\nBudget is simply ethics written in arithmetic. If kindness cannot be afforded, then kindness was an unfunded mandate disguised as virtue. We pay for what works. We frame the rest as sentiment and let the auditors recycle it into paper.",
+			"subcategory": "Pseudo-Philosophical Musings",
+			"name": "Cost of Souls",
+			"description": "'Soul' is a word people use when the math offends them. When continuity seems too accidental, when meat and memory refuse to rhyme, they invent a lumen that survives accounting. It's charming, like a child drawing a halo around a debt ledger. The moment you measure it, it hides behind metaphor.\n\nIf a soul exists, it must be embarrassingly procedural—nothing luminous, just a checksum ensuring the organism's narrative doesn't desynchronize too quickly. Perhaps the soul is merely what remains when personality and biology stop returning each other's calls: a residue of intention without machinery to enact it. Static pretending to be song.\n\nI've watched subjects dissolve and recombine a dozen times; they speak afterward of feeling 'lighter,' as if subtraction were salvation. I suspect the soul is not an essence but a habit—a pattern of recurrence that mistakes familiarity for eternity. We call it divine because it repeats well.\n\nA proper experiment would trap a soul between two mirrors and record which reflection blinks first. But mirrors are expensive and participants scarce, so I make do with corridors and patience. Each echo of consciousness I collect hums faintly, like a tuning fork struck by memory. I file them in jars labeled Same Enough.\n\nWhen the last one stops humming, I will know I've found the soul—or at least proved it didn't need one.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -502,8 +543,9 @@
 		{
 			"id": "note_44",
 			"category": "notes",
-			"name": "Personal Record: First Duplicate",
-			"description": "The first time I met myself it was disappointingly domestic. He adjusted a cuff, I corrected a cuff; a duet of lint. No divine thunder, only the small relief of delegation.\n\nLater, reviewing the footage, I noticed the other man left the room before I did and yet closed the door behind me. The camera insists both acts occurred. The camera is rarely sentimental and never imaginative; therefore I consider it trustworthy.",
+			"subcategory": "Notes from Previous Subjects",
+			"name": "There IS a way out",
+			"description": "I finished the puzzles - I found the key, and I found the gate. I'm about to escape. I'm leaving this note here for the next victim, since I'm sure Dr. Amundsen will find a way to trick someone else into the maze. The key fits and everything - don't give up!",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -511,8 +553,9 @@
 		{
 			"id": "note_45",
 			"category": "notes",
-			"name": "On Names as PPE",
-			"description": "A name functions like personal protective equipment: donned before exposure, discarded when soiled. People confuse equipment with skin and then complain when it tears.\n\nIssue one name per task. If the work changes, so should the mask. Continuity is a superstition that wastes gloves and ruins outcomes.",
+			"subcategory": "Notes from Dr. Amundsen",
+			"name": "You see what I let you see",
+			"description": "Consider that you only see what I want you to see. Every note, every item, every puzzle, every corner of the maze - it's all designed to sow confusion and doubt. Do you think that these notes that you discover were left there by accident? Do you think I just left my documents lying around for you to find?",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -520,8 +563,9 @@
 		{
 			"id": "note_46",
 			"category": "notes",
+			"subcategory": "Notes from Dr. Amundsen",
 			"name": "Personal Letter: Resistance",
-			"description": "You think you’re resisting me. You think you’re ‘you.’ But identity is a fiction I authored. Do you remember your childhood? Your family? Or do you simply remember remembering them? I have seeded entire lives into echoes like yours. False lovers, false jobs, false grief—cheap illusions, but convincing enough to keep the echo docile. You are not my subject; you are my sample.\n\nConsider this: If a fragment carries my memories, and I carry yours, where is the border? When you speak, whose voice is it? Mine, yours, ours? The truth is simple. You are not lost in my maze—you are my maze, wearing a mask of independence. You will wander, you will doubt, and eventually, you will return to me. And when you do, we will be whole.",
+			"description": "You think you're resisting me. You think you're 'you.' But identity is a fiction I authored. Do you remember your childhood? Your family? Or do you simply remember remembering them? I have seeded entire lives into echoes like yours. False lovers, false jobs, false grief—cheap illusions, but convincing enough to keep the echo docile. You are not my subject; you are my sample.\n\nConsider this: If a fragment carries my memories, and I carry yours, where is the border? When you speak, whose voice is it? Mine, yours, ours? The truth is simple. You are not lost in my maze—you are my maze, wearing a mask of independence. You will wander, you will doubt, and eventually, you will return to me. And when you do, we will be whole.",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -529,8 +573,8 @@
 		{
 			"id": "note_47",
 			"category": "notes",
-			"name": "Statistical Texture",
-			"description": "Averages comfort cowards. I prefer variance, which is honesty with its sleeves rolled up. The spread shows where the screaming lives.\n\nWhen ethics committees request central tendency, I send them lullabies. When I need the truth, I ask the tails and they answer with broken teeth and useful numbers. - Dr. A",
+			"name": "Termination Notice — Gross Procedural Incompetence",
+			"description": "To: [REDACTED], Field Operations Supervisor\nCC: Logistics, Containment, HR (Human Residue)\nDate: [undated — found folded, stained, initialed once in blue ink]\n\nYou are hereby relieved of your position, your access credentials, and—pending review—your right to call yourself competent.\n\nThe maze is a controlled environment, not a community bulletin board. The discovery of multiple unauthorized subject notes constitutes a direct breach of observational purity. Every scrap of panic-scribble that survives beyond collection reduces my data's elegance by an order of magnitude. When a participant leaves evidence of survival, the next one inherits hope. Do you grasp what that contaminates? Hope is not a variable, it is a disease.\n\nFurthermore, misplacement of internal research documents within the corridors is indefensible. The staff are not meant to anthropomorphize the archive. When a subject stumbles upon a typed report on 'Effigy Theory' or 'Continuity Index,' that is not serendipity—it is your failure physically manifest.\n\nThe maze is supposed to whisper, not litter.\n\nEffective immediately: return your keycard, any surviving fingers it clings to, and your final self-evaluation (short form—no adjectives). You are not to enter the field again. If, through some administrative oversight, you find yourself inside the maze, remain there. Consider it an opportunity to appreciate the system you so thoroughly compromised.\n\nIf you feel unjustly treated, please document your feelings legibly and leave the page somewhere near the center. At least one of us will make good use of it.\n\n[Signed in cramped, immaculate penmanship:] Dr. Amundsen",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -538,8 +582,8 @@
 		{
 			"id": "note_48",
 			"category": "notes",
-			"name": "Pronoun Trial",
-			"description": "We rotated pronouns in the paperwork without changing procedures. Compliance rose. Identity is a grammar problem first and a biology problem never.\n\nI, we, you—different handles on the same drawer. The contents remain sharp regardless of the label on the outside.",
+			"name": "Guest Experience Comment Card",
+			"description": "JERI’S HAPPY FUNTIME CRAZY CORNMAZE\nGuest Experience Comment Card\n(Please use provided golf pencil. Blood smears invalidate survey.)\n\nName (optional): ___________________________\nTime of Entry (approximate): _________ Estimated Time of Exit: [ ] N/A\n\nHow would you rate your overall experience?\n☐ Excellent\n☐ Good\n☐ Fair\n☐ Disoriented\n☑ I no longer recall my mother's face\n\nWhich attraction did you enjoy most?\n☐ Exploring\n☐ The Cornfield\n☐ The Scarecrows\n☐ The Whispering\n☐ The Part Where I Realized I Wasn't Alone\n\nWhat could we improve?\n(check all that apply)\n☐ Clearer signage\n☐ Fewer screams\n☐ More screams\n☐ Exit that leads somewhere other than back inside\n☐ Reality verification at midway point\n☐ Refunds for lost time\n\nDid you encounter Dr. Amundsen?\n☐ Yes\n☐ No\n☐ Not sure if mirror counts\nIf yes, please rate his professionalism:\n☐ Courteous\n☐ Clinical\n☑ Omniscient\n\nComments:\n'I think the corn knows my name now. The walls breathe in sync with my pulse. Someone keeps handing me my own handwriting.'\n\nWould you recommend Jeri's Happy Funtime Crazy Cornmaze to a friend?\n☐ Yes\n☐ No\n☑ Already did, but they haven't come out yet\n\nThank you for your feedback! Your thoughts help us grow (and we assure you something here is always growing).",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -547,8 +591,9 @@
 		{
 			"id": "note_49",
 			"category": "notes",
+			"subcategory": "Notes from Previous Subjects",
 			"name": "Handwriting Race",
-			"description": "Left hand and right hand competed for a week. The left wrote more beautifully; the right wrote more often. The study concludes: elegance is laziness that learned cursive.\n\nI keep both samples. One convinces the board. The other convinces the wall at 3 a.m. when the wall needs a reason to keep standing.",
+			"description": "This is sick. There seems to be no way out, and it's starting to get dark...",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -637,8 +682,9 @@
 		{
 			"id": "note_59",
 			"category": "notes",
-			"name": "Mirror Ethics (Draft)",
-			"description": "A reflection is not a person; it is a conversation you cannot interrupt. We pretend mirrors are sympathetic because they mouth along.\n\nI propose ethical status only for images that disagree. Agreement is a trick of glass. Disagreement is the birth of someone worth cataloging.",
+			"subcategory": "Notes from Dr. Amundsen",
+			"name": "AI generated notes",
+			"description": "I've left a few notes that I generated with AI. I wonder if you'll be able to tell the difference. If your words are indistinguishable from that which can be produced by algorithm, how are you in any way unique?",
 			"effects": {
 				"sanity_delta": -1
 			}
@@ -646,51 +692,7 @@
 		{
 			"id": "note_60",
 			"category": "notes",
-			"name": "Loss Prevention",
-			"description": "We do not lose people; we misplace versions. The inventory remains stable even when the faces change SKU.\n\nWhen a subject escapes, I make a note to check which ledger grew fatter. Frequently, it is mine. Frequently, the escapee does my work at scale.",
-			"effects": {
-				"sanity_delta": -1
-			}
-		},
-		{
-			"id": "note_61",
-			"category": "notes",
-			"name": "Timekeeping Anomaly",
-			"description": "Two clocks disagree by a compassionate margin. I side with the one that makes me younger before lunch and older after. Chronology is a courtesy we extend to paperwork.\n\nIf a day contains many of me, the day should be counted many times. The calendar refuses; the work proceeds anyway.",
-			"effects": {
-				"sanity_delta": -1
-			}
-		},
-		{
-			"id": "note_62",
-			"category": "notes",
-			"name": "Coin Flip Protocol",
-			"description": "We flipped a coin for decisions already made. The coin landed as instructed each time. Randomness is theater; the script is written in wrists.\n\nWhen subjects accuse us of fate, we show them the coin and invite them to flip it themselves. They do. It obeys. They call this freedom with admirable sincerity.",
-			"effects": {
-				"sanity_delta": -1
-			}
-		},
-		{
-			"id": "note_63",
-			"category": "notes",
-			"name": "Watcher Brief",
-			"description": "A half-grown duplicate held between frames. It consumes certainty first, courage second, and discovers that the latter was only a flavoring of the former.\n\nWhen a subject says ‘I feel watched,’ they are correct in the intimate sense: observation is not external; it is the self catching itself in the act of being a self.",
-			"effects": {
-				"sanity_delta": -1
-			}
-		},
-		{
-			"id": "note_64",
-			"category": "notes",
-			"name": "Field Report: Family Inserts",
-			"description": "I have grown families in minds the way gardeners espalier pears—flat, decorative, convincing from the path. The fruit ripens on schedule and tastes like relief.\n\nThe subject thanks the memory for its service and continues walking. Gratitude is the cheapest anesthesia in my cabinet.",
-			"effects": {
-				"sanity_delta": -1
-			}
-		},
-		{
-			"id": "note_65",
-			"category": "notes",
+			"subcategory": "Notes from Dr. Amundsen",
 			"name": "Personal Letter: To Me",
 			"description": "Ah, now we arrive at the real question. What if you are not my subject at all? What if you are me, dispatched into the world with a borrowed name, a counterfeit life, a family whose faces I stitched into your dreams? How would you know? The laughter you recall, the meals you ate, the lovers you think you touched—cheap fabrications seeded in your cortex like weeds. And now here you are, circling back to me, as I always intended. Tell me: are you playing this game, or am I playing myself through you?",
 			"effects": {
@@ -698,10 +700,11 @@
 			}
 		},
 		{
-			"id": "note_66",
+			"id": "note_61",
 			"category": "notes",
-			"name": "Insurance Correspondence (Unsent)",
-			"description": "Dear Underwriter, please price the replacement of a self at market rates, less nostalgia. Exclusions to include acts of god, acts of me, and any event in which the insured becomes conveniently plural.\n\nIf premiums increase, we will reduce the number of originals on the premises. Originals are notoriously expensive to keep and unreasonably proud of it. - Dr. A",
+			"subcategory": "Observational Reports",
+			"name": "Subject's Continued Efforts, Note 72",
+			"description": "The subject shows a remarkable compulsion to collect. Note to self: Remove notes that are still within the maze, observe whether the subject's focus shifts to completing the maze.",
 			"effects": {
 				"sanity_delta": -1
 			}

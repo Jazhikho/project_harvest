@@ -20,7 +20,7 @@ class_name CornTileMultiMesh
 @export var rebuild_now: bool = false
 
 ## Seed for consistent random placement (0 = random seed each time)
-@export var random_seed: int = 42
+@export var random_seed: int = 0
 
 # ----------------------------
 # Internal state
