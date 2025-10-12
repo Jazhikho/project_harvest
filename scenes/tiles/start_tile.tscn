@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://c5yqrv82hov2i"]
+[gd_scene load_steps=10 format=3 uid="uid://c5yqrv82hov2i"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_fs0kh"]
 [ext_resource type="PackedScene" uid="uid://t2ahnvllm6bf" path="res://scenes/environments/11x_1_corn_tile.tscn" id="2_60arg"]
@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://b0nvjxcqa47ui" path="res://scenes/environments/8x1_corn_tile.tscn" id="6_xh5ey"]
 [ext_resource type="PackedScene" uid="uid://572iojnx3jma" path="res://scenes/environments/4x1_corn_tile.tscn" id="7_bsa85"]
 [ext_resource type="PackedScene" uid="uid://dh2ksygtyattj" path="res://scenes/environments/2x1_corn_tile.tscn" id="8_aq4jt"]
-[ext_resource type="PackedScene" uid="uid://b1234start5678" path="res://scenes/notes/start_note.tscn" id="9_start"]
+[ext_resource type="PackedScene" uid="uid://c3y2xyh0d42ur" path="res://scenes/notes/start_note.tscn" id="9_start"]
 
 [node name="StartTile" type="Node3D"]
 script = ExtResource("1_fs0kh")

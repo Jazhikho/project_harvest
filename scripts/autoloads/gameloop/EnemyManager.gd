@@ -232,12 +232,16 @@ func despawn_enemy(entity_id: String) -> bool:
 		return false
 	
 	var enemy = _active_enemies[entity_id]
+	
+	# Check if enemy is valid before trying to get metadata
+	if not is_instance_valid(enemy):
+		_active_enemies.erase(entity_id)
+		return false
+	
 	var enemy_type = enemy.get_meta("enemy_type", "unknown")
 	
 	_active_enemies.erase(entity_id)
-	
-	if is_instance_valid(enemy):
-		enemy.queue_free()
+	enemy.queue_free()
 	
 	return true
 
@@ -471,22 +475,10 @@ static func spawn_aggressive_effigies(count: int, puzzle_node: Node) -> Array:
 	if count <= 0:
 		return spawned_effigies
 	
-	# Get EnemyManager instance to access spawn_catalog
+	# Get EnemyManager instance
 	var enemy_manager: Node = puzzle_node.get_node_or_null("/root/EnemyManager")
 	if not enemy_manager:
 		push_error("EnemyManager not found")
-		return spawned_effigies
-	
-	# Get effigy scene from spawn catalog
-	var effigy_scene: PackedScene = null
-	if enemy_manager.spawn_catalog and not enemy_manager.spawn_catalog.enemy_scenes.is_empty():
-		for scene in enemy_manager.spawn_catalog.enemy_scenes:
-			if scene and scene.resource_path.ends_with("effigy.tscn"):
-				effigy_scene = scene
-				break
-	
-	if not effigy_scene:
-		push_error("Failed to load Effigy scene from SpawnCatalog")
 		return spawned_effigies
 	
 	# Find the tile by walking up from the puzzle node
@@ -500,7 +492,6 @@ static func spawn_aggressive_effigies(count: int, puzzle_node: Node) -> Array:
 	if not maze_objects:
 		maze_objects = current_tile.get_node_or_null("Objects")
 	
-	var spawn_parent: Node3D = null
 	var spawn_positions: Array[Vector3] = []
 	var player: Node3D = puzzle_node.get_tree().get_first_node_in_group("player")
 	
@@ -511,7 +502,6 @@ static func spawn_aggressive_effigies(count: int, puzzle_node: Node) -> Array:
 			var spawn_point: Node3D = maze_objects.get_node_or_null(spawn_point_name)
 			if spawn_point:
 				spawn_positions.append(spawn_point.global_position)
-		spawn_parent = maze_objects
 	
 	# If we didn't find any spawn points, create positions near player
 	if spawn_positions.is_empty():
@@ -525,27 +515,25 @@ static func spawn_aggressive_effigies(count: int, puzzle_node: Node) -> Array:
 		else:
 			push_error("Cannot spawn effigies: no spawn points and no player found")
 			return spawned_effigies
-		
-		# Use current scene as spawn parent if no Objects node exists
-		spawn_parent = puzzle_node.get_tree().current_scene
 	
-	# Spawn effigies at calculated positions
+	# Spawn effigies using normal spawn_enemy method, then set aggression
 	for spawn_pos in spawn_positions:
-		var effigy: Node3D = effigy_scene.instantiate()
-		spawn_parent.add_child(effigy)
-		effigy.global_position = spawn_pos
+		# Use standard spawn_enemy which handles all registration and setup
+		var effigy: Node3D = enemy_manager.spawn_enemy("effigy", spawn_pos, true)
 		
-		# Ensure proper orientation - face player direction
-		var dir: Vector3 = (player.global_position - effigy.global_position).normalized()
-		var target_yaw: float = atan2(dir.x, dir.z)
-		effigy.rotation.y = target_yaw
-		
-		# Set aggression mode after a brief delay to ensure initialization
-		effigy.call_deferred("set_aggression_mode", true, &"puzzle_completion")
-		
-		spawned_effigies.append(effigy)
-		
-		MessageBus.emit_event("entity_spawned", ["effigy", effigy, spawn_pos])
+		if effigy:
+			# Calculate direction to player for initial facing
+			if player:
+				var dir: Vector3 = (player.global_position - effigy.global_position).normalized()
+				var target_yaw: float = atan2(dir.x, dir.z)
+				effigy.rotation.y = target_yaw
+			
+			# Set aggression mode after a brief delay to ensure initialization
+			effigy.call_deferred("set_aggression_mode", true, &"puzzle_completion")
+			
+			spawned_effigies.append(effigy)
+		else:
+			push_warning("Failed to spawn aggressive effigy at position: ", spawn_pos)
 	
 	return spawned_effigies
 

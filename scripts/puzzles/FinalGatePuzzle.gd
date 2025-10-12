@@ -97,17 +97,23 @@ func interact() -> bool:
 		_unlock_gate()
 		return true
 	else:
+		# Emit object interaction event for toast system
+		if _message_bus:
+			_message_bus.emit_event("object_interacted", ["final_gate", _interaction_count, self])
+		
 		_interaction_count += 1
 		_save_puzzle_state()
 		
+		# Old message system (keeping for backwards compatibility)
 		if _interaction_count == 1:
 			_play_sfx_stream(sfx_library.stilllocked)
-			_show_message("It's locked. Figures. I wonder if there is a key around here?")
+			# Message now comes from object_interactions.json via toast
 		elif _interaction_count == 2:
 			_play_sfx_stream(sfx_library.kick)
-			_show_message("Oww... Ok, yeah, this gate is pretty solid.")
+			# Message now comes from object_interactions.json via toast
 		else:
-			_show_message("Still locked... I need to find the key...")
+			# Message now comes from object_interactions.json via toast
+			pass
 		
 		return false
 

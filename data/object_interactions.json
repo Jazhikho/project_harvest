@@ -1,0 +1,25 @@
+{
+  "interactions": {
+    "gargoyle1": {
+      "text": "Stone eyes watch. They've seen every soul that entered. None that left.",
+      "seconds": 4.0
+    },
+    "gargoyle2": {
+      "text": "Carved in judgment. The scales it holds are empty. What did they measure?",
+      "seconds": 4.0
+    },
+    "gargoyle3": {
+      "text": "Its mouth is open in a silent scream. Or perhaps a warning.",
+      "seconds": 4.0
+    },
+    "final_gate": {
+      "messages": [
+        "It's locked. Figures. I wonder if there is a key around here?",
+        "Still locked... maybe I should look around more.",
+        "I need to find that key to get out of here."
+      ],
+      "seconds": 4.0
+    }
+  }
+}
+

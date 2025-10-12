@@ -41,6 +41,7 @@ SpawnManager="*res://scripts/autoloads/gameloop/SpawnManager.gd"
 TileManager="*res://scripts/autoloads/gameloop/TileManager.gd"
 DeathHandler="*res://scripts/autoloads/gameloop/DeathHandler.gd"
 GameDirector="*res://scripts/autoloads/gameloop/GameDirector.gd"
+ObjectToastHandler="*res://scripts/systems/ObjectToastHandler.gd"
 
 [debug]
 

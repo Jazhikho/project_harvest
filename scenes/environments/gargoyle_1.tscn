@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://cpjs4arkauvsd"]
+[gd_scene load_steps=5 format=3 uid="uid://cpjs4arkauvsd"]
 
 [ext_resource type="PackedScene" uid="uid://cswvxbu1b1184" path="res://assets/models/gargoyle1.glb" id="1_el0yt"]
+[ext_resource type="Script" uid="uid://bohf30iutu5ns" path="res://scripts/tiles/InteractableTileObject.gd" id="2_interactable"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_pi1fg"]
 radius = 3.125
@@ -9,10 +10,12 @@ radius = 3.125
 size = Vector3(2.875, 2.5, 2.5)
 
 [node name="gargoyle1" instance=ExtResource("1_el0yt")]
+script = ExtResource("2_interactable")
+object_id = "gargoyle1"
 
 [node name="Area3D" type="Area3D" parent="." index="1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.337865, 0.00664137, 0.0658254)
-collision_layer = 16
+collision_layer = 8
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.374635, 0.881641, -0.00917441)
@@ -20,7 +23,7 @@ shape = SubResource("CylinderShape3D_pi1fg")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." index="2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30073, 0.0132827, 0.131651)
-collision_layer = 16
+collision_layer = 8
 collision_mask = 55
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]

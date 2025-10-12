@@ -5,11 +5,13 @@ extends Control
 @onready var backpack_icon: TextureRect = $MinimizedHints/BackpackHint/Icon
 @onready var flashlight_icon: TextureRect = $MinimizedHints/FlashlightHint/Icon
 @onready var journal_icon: TextureRect = $MinimizedHints/JournalHint/Icon
+@onready var interaction_prompt: Label = $InteractionPrompt
 
 const DISPLAY_DURATION: float = 5.0
 const FADE_DURATION: float = 0.5
 
 var _has_been_shown: bool = false
+var _current_interaction_target: Node = null
 
 ## _ready
 ## Purpose: Initialize the controls UI and set up event connections
@@ -62,7 +64,7 @@ func _setup_responsive_sizing() -> void:
 		print("ControlsUI: MinimizedHints positioned at offset_left=", minimized_hints.offset_left, ", offset_right=", minimized_hints.offset_right)
 
 ## _connect_to_events
-## Purpose: Connect to MessageBus events for player spawn
+## Purpose: Connect to MessageBus events for player spawn and interactions
 ## @return void.
 func _connect_to_events() -> void:
 	var bus: Node = get_node_or_null("/root/MessageBus")
@@ -72,8 +74,14 @@ func _connect_to_events() -> void:
 
 	if bus.has_method("connect_event"):
 		bus.connect_event("player_spawned", _on_player_spawned)
+		bus.connect_event("show_interaction_prompt", _on_show_interaction_prompt)
+		bus.connect_event("hide_interaction_prompt", _on_hide_interaction_prompt)
 	elif bus.has_signal("player_spawned"):
 		bus.player_spawned.connect(_on_player_spawned)
+		if bus.has_signal("show_interaction_prompt"):
+			bus.show_interaction_prompt.connect(_on_show_interaction_prompt)
+		if bus.has_signal("hide_interaction_prompt"):
+			bus.hide_interaction_prompt.connect(_on_hide_interaction_prompt)
 	
 	# Check if player already exists (in case we missed the spawn event)
 	call_deferred("_check_for_existing_player")
@@ -234,6 +242,45 @@ func _try_load_texture(paths: Array) -> Texture2D:
 		if ResourceLoader.exists(path):
 			return load(path)
 	return null
+
+## _on_show_interaction_prompt
+## Purpose: Show the interaction prompt when player is near an interactable object
+## @param prompt_text: The text to display (e.g., "Examine gargoyle")
+## @param target: The object that can be interacted with
+## @return void.
+func _on_show_interaction_prompt(prompt_text: String, target: Node) -> void:
+	if not interaction_prompt:
+		return
+	
+	_current_interaction_target = target
+	
+	# Format the prompt text to include "Press E to"
+	var formatted_text: String = "Press E to " + prompt_text
+	interaction_prompt.text = formatted_text
+	
+	# Fade in the prompt
+	interaction_prompt.visible = true
+	var tween: Tween = create_tween()
+	tween.tween_property(interaction_prompt, "modulate:a", 1.0, 0.3)
+
+## _on_hide_interaction_prompt
+## Purpose: Hide the interaction prompt when player leaves range
+## @param target: The object that was being interacted with
+## @return void.
+func _on_hide_interaction_prompt(target: Node) -> void:
+	if not interaction_prompt:
+		return
+	
+	# Only hide if this is the current target
+	if _current_interaction_target != target:
+		return
+	
+	_current_interaction_target = null
+	
+	# Fade out the prompt
+	var tween: Tween = create_tween()
+	tween.tween_property(interaction_prompt, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(func(): interaction_prompt.visible = false)
 
 ## _add_background_to_full_controls
 ## Purpose: Add a semi-transparent background panel to full controls

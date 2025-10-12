@@ -70,6 +70,7 @@ signal open_journal_to_note(note_id: String)
 signal show_interaction_prompt(prompt_text: String, target: Node)
 signal hide_interaction_prompt(target: Node)
 signal note_shown(note_id: String, note_text: String)
+signal object_interacted(object_id: String, interaction_count: int, object_node: Node3D)
 
 # === SETTINGS EVENTS ===
 signal setting_changed(category: String, key: String, old_value: Variant, new_value: Variant)
