@@ -17,4 +17,5 @@ tracks = Array[AudioStream]([ExtResource("2_yojmb"), ExtResource("3_xp7s7"), Ext
 weights = Array[float]([1.0, 1.0, 1.0, 1.0, 1.0, 0.3, 0.3, 0.3])
 main_theme = ExtResource("1_xp7s7")
 avoid_immediate_repeat = true
+low_sanity_tracks = Array[int]([])
 metadata/_custom_type_script = "uid://bwutcrrid646c"

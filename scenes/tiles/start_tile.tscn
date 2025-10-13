@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c5yqrv82hov2i"]
+[gd_scene load_steps=13 format=3 uid="uid://c5yqrv82hov2i"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_fs0kh"]
 [ext_resource type="PackedScene" uid="uid://t2ahnvllm6bf" path="res://scenes/environments/11x_1_corn_tile.tscn" id="2_60arg"]
@@ -9,6 +9,9 @@
 [ext_resource type="PackedScene" uid="uid://572iojnx3jma" path="res://scenes/environments/4x1_corn_tile.tscn" id="7_bsa85"]
 [ext_resource type="PackedScene" uid="uid://dh2ksygtyattj" path="res://scenes/environments/2x1_corn_tile.tscn" id="8_aq4jt"]
 [ext_resource type="PackedScene" uid="uid://c3y2xyh0d42ur" path="res://scenes/notes/start_note.tscn" id="9_start"]
+[ext_resource type="PackedScene" uid="uid://y3n3yl83883f" path="res://scenes/environments/tree.tscn" id="10_ij6o6"]
+[ext_resource type="PackedScene" uid="uid://d0psfvttebu0q" path="res://scenes/environments/tree_1.tscn" id="11_0mysc"]
+[ext_resource type="PackedScene" uid="uid://cqrt0gs7u2yq1" path="res://scenes/environments/tree_2.tscn" id="12_0mysc"]
 
 [node name="StartTile" type="Node3D"]
 script = ExtResource("1_fs0kh")
@@ -23,41 +26,93 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 0, -0.5)
 [node name="2x1CornTile" parent="Maze/Maze" instance=ExtResource("8_aq4jt")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 4, 1.75, 2.5)
 
+[node name="2x1" parent="Maze/Maze/2x1CornTile" index="0"]
+transform = Transform3D(2, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 1, 0, -0.5)
+visible = true
+
 [node name="2x1CornTile2" parent="Maze/Maze" instance=ExtResource("8_aq4jt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 1.75, -9)
+
+[node name="2x1" parent="Maze/Maze/2x1CornTile2" index="0"]
+transform = Transform3D(1, 0, 0, 0, 0.8, 0, 0, 0, 0.1, -0.5, 0, -0.5)
+visible = true
 
 [node name="2x1CornTile3" parent="Maze/Maze" instance=ExtResource("8_aq4jt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 1.75, -5)
 
+[node name="2x1" parent="Maze/Maze/2x1CornTile3" index="0"]
+transform = Transform3D(2, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 1, 0, -0.5)
+visible = true
+
 [node name="4x1CornTile" parent="Maze/Maze" instance=ExtResource("7_bsa85")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -4, 1.75, -7.5)
+
+[node name="2x1" parent="Maze/Maze/4x1CornTile" index="0"]
+transform = Transform3D(4, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0, 0, -0.5)
+visible = true
 
 [node name="5x1CornTile" parent="Maze/Maze" instance=ExtResource("4_qlonk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 1.75, 8)
 
+[node name="2x1" parent="Maze/Maze/5x1CornTile" index="0"]
+transform = Transform3D(6, 0, 0, 0, 0.8, 0, 0, 0, 0.1, -0.5, 0, 0.5)
+visible = true
+
 [node name="5x1CornTile2" parent="Maze/Maze" instance=ExtResource("4_qlonk")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -2, 1.75, -3)
+
+[node name="2x1" parent="Maze/Maze/5x1CornTile2" index="0"]
+transform = Transform3D(4, 0, 0, 0, 0.8, 0, 0, 0, 0.1, -0.5, 0, -0.5)
+visible = true
 
 [node name="6x1CornTile" parent="Maze/Maze" instance=ExtResource("3_du45t")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -8, 1.75, -5.5)
 
+[node name="2x1" parent="Maze/Maze/6x1CornTile" index="0"]
+transform = Transform3D(7, 0, 0, 0, 0.8, 0, 0, 0, 0.1, -0.5, 0, 0.5)
+visible = true
+
 [node name="6x1CornTile2" parent="Maze/Maze" instance=ExtResource("3_du45t")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.75, -1)
+
+[node name="2x1" parent="Maze/Maze/6x1CornTile2" index="0"]
+transform = Transform3D(6, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0, 0, -0.5)
+visible = true
 
 [node name="8x1CornTile" parent="Maze/Maze" instance=ExtResource("6_xh5ey")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -4, 1.75, 6.5)
 
+[node name="2x1" parent="Maze/Maze/8x1CornTile" index="0"]
+transform = Transform3D(6, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 1, 0, -0.5)
+visible = true
+
 [node name="8x1CornTile2" parent="Maze/Maze" instance=ExtResource("6_xh5ey")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.5, 1.75, -2)
+
+[node name="2x1" parent="Maze/Maze/8x1CornTile2" index="0"]
+transform = Transform3D(5, 0, 0, 0, 0.8, 0, 0, 0, 0.1, -2.5, 0, -0.5)
+visible = true
 
 [node name="8x1CornTile3" parent="Maze/Maze" instance=ExtResource("6_xh5ey")]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0.5, 1.75, 4)
 
+[node name="2x1" parent="Maze/Maze/8x1CornTile3" index="0"]
+transform = Transform3D(8, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0, 0, -0.5)
+visible = true
+
 [node name="11x1CornTile" parent="Maze/Maze" instance=ExtResource("2_60arg")]
 transform = Transform3D(1.31134e-07, 0, 1, 0, 1, 0, -1, 0, 1.31134e-07, -7, 1.75, 5)
 
+[node name="2x1" parent="Maze/Maze/11x1CornTile" index="0"]
+transform = Transform3D(2, 0, 0, 0, 0.8, 0, 0, 0, 0.1, -4.5, 0, -0.5)
+visible = true
+
 [node name="11x1CornTile2" parent="Maze/Maze" instance=ExtResource("2_60arg")]
 transform = Transform3D(1.31134e-07, 0, 1, 0, 1, 0, -1, 0, 1.31134e-07, -13, 1.75, 3)
+
+[node name="2x1" parent="Maze/Maze/11x1CornTile2" index="0"]
+transform = Transform3D(11, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0, 0, -0.5)
+visible = true
 
 [node name="Doors" type="Node3D" parent="Maze"]
 
@@ -90,3 +145,26 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.82339, 0.732866, 4)
 
 [node name="start_note" parent="Objects" instance=ExtResource("9_start")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.82339, 0.732866, 4)
+
+[node name="tree" parent="Objects" instance=ExtResource("10_ij6o6")]
+transform = Transform3D(1.48539, 0, 0, 0, 1.45677, 0, 0, 0, 1.25886, 6.51884, 0.226793, -4.65368)
+
+[node name="tree1" parent="Objects" instance=ExtResource("11_0mysc")]
+transform = Transform3D(0.996033, 0, 0, 0, 0.996033, 0, 0, 0, 0.996033, -6.50104, 0.164685, -5.99333)
+
+[node name="tree2" parent="Objects" instance=ExtResource("12_0mysc")]
+transform = Transform3D(0.907382, 0, 0, 0, 0.996033, 0, 0, 0, 0.996033, 6.98149, 0.000518307, 6.96737)
+
+[editable path="Maze/Maze/2x1CornTile"]
+[editable path="Maze/Maze/2x1CornTile2"]
+[editable path="Maze/Maze/2x1CornTile3"]
+[editable path="Maze/Maze/4x1CornTile"]
+[editable path="Maze/Maze/5x1CornTile"]
+[editable path="Maze/Maze/5x1CornTile2"]
+[editable path="Maze/Maze/6x1CornTile"]
+[editable path="Maze/Maze/6x1CornTile2"]
+[editable path="Maze/Maze/8x1CornTile"]
+[editable path="Maze/Maze/8x1CornTile2"]
+[editable path="Maze/Maze/8x1CornTile3"]
+[editable path="Maze/Maze/11x1CornTile"]
+[editable path="Maze/Maze/11x1CornTile2"]

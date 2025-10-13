@@ -336,6 +336,12 @@ func _play_next_track(is_initial: bool) -> void:
 		return
 
 	var next_index: int = -1
+	
+	# Get current sanity from GameStateManager
+	var current_sanity: int = 100
+	var state_manager = get_node_or_null("/root/GameStateManager")
+	if state_manager and state_manager.has_method("get_state"):
+		current_sanity = state_manager.get_state("sanity")
 
 	# First track: force random start
 	if is_initial:
@@ -343,8 +349,8 @@ func _play_next_track(is_initial: bool) -> void:
 	else:
 		# Prefer playlist logic if it exists
 		if _music_playlist.has_method("pick_random_index"):
-			next_index = _music_playlist.call("pick_random_index", _music_last_index)
-		# Fallback to our random picker if playlist didn’t return something valid
+			next_index = _music_playlist.call("pick_random_index", _music_last_index, current_sanity)
+		# Fallback to our random picker if playlist didn't return something valid
 		if next_index == null or next_index < 0 or next_index >= tracks.size():
 			next_index = _choose_random_index(tracks, _music_last_index, false)
 

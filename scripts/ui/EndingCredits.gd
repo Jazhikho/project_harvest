@@ -258,6 +258,15 @@ Corn stalks, well, scarecrow, environmental props
 [b]TwilightFox[/b] - Old Soviet Backpack
 [b]3D History[/b] - 49 Star Flag
 [b]Errlatte[/b] - Anubis bible
+[b]Arsen Ismailov[/b] - Damaged Chainlink Fence
+[b]Excessmensch[/b] - wheelbarrow prop
+[b]Ret-ouchs[/b] - Rusty Lamp
+[b]snofaeratu[/b] - old railway container, lowpoly
+[b]MrUnity[/b] - Old Soviet Transformer Low-Poly
+[b]Artyooooom[/b] - Dirty Water Closet
+[b]syedraza[/b] - Road Sign
+[b]Berk Gedik[/b] - Abandoned Toilet Cabin (Low Poly)
+[b]sergeilihandristov[/b] - Abandoned children's slide
 
 [b]Virtual Museums of Malopolska[/b]
 Pocket watch - CC0 Public Domain
@@ -343,7 +352,7 @@ All the creators of the free assets used in this project
 [b]DEDICATION[/b]
 
 This game is dedicated to Jeri
-You will be remembered
+You rat bastard.
 
 [b]═══════════════════════════════════[/b]
 

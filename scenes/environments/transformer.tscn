@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://b7r4f1ognp27j"]
+
+[ext_resource type="PackedScene" uid="uid://d2h5avkvvl2m0" path="res://assets/models/old_soviet_transformer_low-poly.glb" id="1_rdbg8"]
+
+[node name="Sketchfab_Scene" instance=ExtResource("1_rdbg8")]
+
+[node name="Sketchfab_model" parent="." index="0"]
+transform = Transform3D(0.006, 0, 0, 0, -2.62268e-10, 0.006, 0, -0.006, -2.62268e-10, 0, 0, 0)

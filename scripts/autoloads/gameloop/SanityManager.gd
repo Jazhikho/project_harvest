@@ -73,14 +73,14 @@ func _apply_passive_decay() -> void:
 	"""Apply gradual sanity decay over time"""
 	var current_sanity: int = _state_manager.get_state("sanity")
 	
-	# Decay is slower at high sanity, faster at low sanity
+	# Decay is slower at high sanity, slightly faster at low sanity (more gradual progression)
 	var decay_amount: int = PASSIVE_DECAY_AMOUNT
 	if current_sanity > GameConstants.SANITY_THRESHOLD_HIGH:
 		decay_amount = int(decay_amount * 0.75)
 	elif current_sanity < GameConstants.SANITY_THRESHOLD_LOW:
-		decay_amount = int(decay_amount * 1.5)
+		decay_amount = int(decay_amount * 1.2)
 	elif current_sanity < GameConstants.SANITY_THRESHOLD_MEDIUM:
-		decay_amount = int(decay_amount * 1.25)
+		decay_amount = int(decay_amount * 1.1)
 	
 	
 	_state_manager.modify_sanity(-decay_amount)

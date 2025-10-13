@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://d4l10horut8oj"]
+[gd_scene load_steps=13 format=3 uid="uid://d4l10horut8oj"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_ylhfr"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_x6rrm"]
@@ -9,9 +9,9 @@
 [ext_resource type="PackedScene" uid="uid://dmqog3kpkp6xe" path="res://scenes/environments/7x1_corn_tile.tscn" id="7_xeqaw"]
 [ext_resource type="PackedScene" uid="uid://b0nvjxcqa47ui" path="res://scenes/environments/8x1_corn_tile.tscn" id="8_a67cg"]
 [ext_resource type="PackedScene" uid="uid://2x2ikr7uqa8" path="res://scenes/environments/9x_1_corn_tile.tscn" id="9_2aj2k"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_xeqaw"]
-size = Vector3(20, 3, 20)
+[ext_resource type="PackedScene" uid="uid://hffj5ubn3mfq" path="res://assets/models/wheelbarrow.glb" id="10_xsjun"]
+[ext_resource type="PackedScene" uid="uid://b7r4f1ognp27j" path="res://scenes/environments/transformer.tscn" id="11_e66ce"]
+[ext_resource type="PackedScene" uid="uid://cqrt0gs7u2yq1" path="res://scenes/environments/tree_2.tscn" id="12_myfhh"]
 
 [node name="ThreeDoorTile4" type="Node3D"]
 script = ExtResource("1_ylhfr")
@@ -100,14 +100,15 @@ transform = Transform3D(1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, 1, 4, 0.25,
 
 [node name="Maze" type="Node3D" parent="Maze"]
 
-[node name="2x1CornTile" parent="Maze/Maze" instance=ExtResource("3_3ncpk")]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 5.5, 1.75, 2)
-
 [node name="2x1CornTile3" parent="Maze/Maze" instance=ExtResource("3_3ncpk")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -1.5, 1.75, 8)
 
 [node name="3x1CornTile" parent="Maze/Maze" instance=ExtResource("4_xsjun")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 9.5, 1.75, -3.5)
+
+[node name="2x1" parent="Maze/Maze/3x1CornTile" index="0"]
+transform = Transform3D(3, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0, 0, -0.5)
+visible = true
 
 [node name="3x1CornTile2" parent="Maze/Maze" instance=ExtResource("4_xsjun")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 1.75, 1.5)
@@ -117,9 +118,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 1.75, 1.5)
 
 [node name="3x1CornTile5" parent="Maze/Maze" instance=ExtResource("4_xsjun")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 1.75, 5.5)
-
-[node name="3x1CornTile6" parent="Maze/Maze" instance=ExtResource("4_xsjun")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 1.75, 2.5)
 
 [node name="3x1CornTile7" parent="Maze/Maze" instance=ExtResource("4_xsjun")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 1.75, -5.5)
@@ -139,6 +137,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1.75, 6.5)
 [node name="4x1CornTile2" parent="Maze/Maze" instance=ExtResource("5_e66ce")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 9.5, 1.75, -8)
 
+[node name="2x1" parent="Maze/Maze/4x1CornTile2" index="0"]
+transform = Transform3D(5, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0.5, 0, -0.5)
+visible = true
+
 [node name="5x1CornTile" parent="Maze/Maze" instance=ExtResource("6_myfhh")]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 7.5, 1.75, -1.5)
 
@@ -157,8 +159,16 @@ transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -0.5, 
 [node name="8x1CornTile" parent="Maze/Maze" instance=ExtResource("8_a67cg")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -9.5, 1.75, 5)
 
+[node name="2x1" parent="Maze/Maze/8x1CornTile" index="0"]
+transform = Transform3D(8, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 1, 0, 0.5)
+visible = true
+
 [node name="8x1CornTile2" parent="Maze/Maze" instance=ExtResource("8_a67cg")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -9.5, 1.75, -5)
+
+[node name="2x1" parent="Maze/Maze/8x1CornTile2" index="0"]
+transform = Transform3D(8, 0, 0, 0, 0.8, 0, 0, 0, 0.1, -1, 0, 0.5)
+visible = true
 
 [node name="8x1CornTile3" parent="Maze/Maze" instance=ExtResource("8_a67cg")]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 6, 1.75, -5.5)
@@ -166,21 +176,53 @@ transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 6, 1.7
 [node name="8x1CornTile4" parent="Maze/Maze" instance=ExtResource("8_a67cg")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 9.5, 1.75, 5)
 
+[node name="2x1" parent="Maze/Maze/8x1CornTile4" index="0"]
+transform = Transform3D(8, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 1, 0, -0.5)
+visible = true
+
 [node name="9x1CornTile" parent="Maze/Maze" instance=ExtResource("9_2aj2k")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 1.75, 9.5)
+
+[node name="2x1" parent="Maze/Maze/9x1CornTile" index="0"]
+transform = Transform3D(8, 0, 0, 0, 0.8, 0, 0, 0, 0.1, -0.5, 0, 0.5)
+visible = true
 
 [node name="9x1CornTile2" parent="Maze/Maze" instance=ExtResource("9_2aj2k")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 1.75, -9.5)
 
+[node name="2x1" parent="Maze/Maze/9x1CornTile2" index="0"]
+transform = Transform3D(10, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0.5, 0, -0.5)
+visible = true
+
 [node name="9x1CornTile3" parent="Maze/Maze" instance=ExtResource("9_2aj2k")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1.75, -9.5)
+
+[node name="2x1" parent="Maze/Maze/9x1CornTile3" index="0"]
+transform = Transform3D(10, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0.5, 0, -0.5)
+visible = true
 
 [node name="9x1CornTile4" parent="Maze/Maze" instance=ExtResource("9_2aj2k")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1.75, 9.5)
 
-[node name="PlayerArea" type="Area3D" parent="."]
-collision_layer = 64
+[node name="2x1" parent="Maze/Maze/9x1CornTile4" index="0"]
+transform = Transform3D(8, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0.5, 0, 0.5)
+visible = true
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-shape = SubResource("BoxShape3D_xeqaw")
+[node name="wheelbarrow" parent="Maze/Maze" instance=ExtResource("10_xsjun")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 3)
+
+[node name="Sketchfab_Scene" parent="Maze/Maze" instance=ExtResource("11_e66ce")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 6, 0, 2)
+
+[node name="tree2" parent="Maze/Maze" instance=ExtResource("12_myfhh")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -0.749872, 0.112182, -5.95749)
+
+[editable path="Maze/Maze/3x1CornTile"]
+[editable path="Maze/Maze/4x1CornTile2"]
+[editable path="Maze/Maze/8x1CornTile"]
+[editable path="Maze/Maze/8x1CornTile2"]
+[editable path="Maze/Maze/8x1CornTile4"]
+[editable path="Maze/Maze/9x1CornTile"]
+[editable path="Maze/Maze/9x1CornTile2"]
+[editable path="Maze/Maze/9x1CornTile3"]
+[editable path="Maze/Maze/9x1CornTile4"]

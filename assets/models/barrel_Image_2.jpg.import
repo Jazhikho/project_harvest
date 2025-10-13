@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dng77sh53nrww"
-path.s3tc="res://.godot/imported/newCrow_Crow_Albedo.png-9807bd80eb92b3a98cd420a04cb379af.s3tc.ctex"
-path.etc2="res://.godot/imported/newCrow_Crow_Albedo.png-9807bd80eb92b3a98cd420a04cb379af.etc2.ctex"
+uid="uid://dlckis02mgcur"
+path.s3tc="res://.godot/imported/barrel_Image_2.jpg-6d56494ee49b592d79e7c69bf74d0807.s3tc.ctex"
+path.etc2="res://.godot/imported/barrel_Image_2.jpg-6d56494ee49b592d79e7c69bf74d0807.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "e33460f022baaebeedaee278bdd88c58"
+"md5": "604dae350713d8ef163401dc540504ed"
 }
 
 [deps]
 
-source_file="res://assets/models/newCrow_Crow_Albedo.png"
-dest_files=["res://.godot/imported/newCrow_Crow_Albedo.png-9807bd80eb92b3a98cd420a04cb379af.s3tc.ctex", "res://.godot/imported/newCrow_Crow_Albedo.png-9807bd80eb92b3a98cd420a04cb379af.etc2.ctex"]
+source_file="res://assets/models/barrel_Image_2.jpg"
+dest_files=["res://.godot/imported/barrel_Image_2.jpg-6d56494ee49b592d79e7c69bf74d0807.s3tc.ctex", "res://.godot/imported/barrel_Image_2.jpg-6d56494ee49b592d79e7c69bf74d0807.etc2.ctex"]
 
 [params]
 
@@ -35,5 +35,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=1024
+process/size_limit=0
 detect_3d/compress_to=0

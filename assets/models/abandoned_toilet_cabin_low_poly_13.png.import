@@ -1,0 +1,39 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://jh4t4gchr7ut"
+path.s3tc="res://.godot/imported/abandoned_toilet_cabin_low_poly_13.png-eee5ae3ac43674ef0d7f44b1f7372e10.s3tc.ctex"
+path.etc2="res://.godot/imported/abandoned_toilet_cabin_low_poly_13.png-eee5ae3ac43674ef0d7f44b1f7372e10.etc2.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "e2a4d0b549b05ace4099916ba445a182"
+}
+
+[deps]
+
+source_file="res://assets/models/abandoned_toilet_cabin_low_poly_13.png"
+dest_files=["res://.godot/imported/abandoned_toilet_cabin_low_poly_13.png-eee5ae3ac43674ef0d7f44b1f7372e10.s3tc.ctex", "res://.godot/imported/abandoned_toilet_cabin_low_poly_13.png-eee5ae3ac43674ef0d7f44b1f7372e10.etc2.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=8
+roughness/src_normal="res://assets/models/abandoned_toilet_cabin_low_poly_14.png"
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=1024
+detect_3d/compress_to=0

@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://c2pkjrdeg5m3m"]
+
+[ext_resource type="Script" uid="uid://b48eca72a7a1" path="res://scripts/tiles/CrowFlock.gd" id="1_flock"]
+[ext_resource type="PackedScene" uid="uid://bo3d7bghd4qum" path="res://scenes/environments/crow.tscn" id="2_crow"]
+
+[node name="CrowFlockExample" type="Node3D"]
+
+[node name="CrowFlock" type="Node3D" parent="."]
+script = ExtResource("1_flock")
+crow_scene = ExtResource("2_crow")
+crow_positions = Array[Vector3]([Vector3(0, 0, 0), Vector3(2, 0, 1), Vector3(-2, 0, 1), Vector3(1, 0, -2), Vector3(-1, 0, -2)])
+crow_rotations = Array[float]([0.0, 45.0, 90.0, 180.0, 270.0])
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 5, 8)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 5, 0)

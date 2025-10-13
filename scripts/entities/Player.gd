@@ -15,7 +15,6 @@ var flashlight_enabled: bool = false
 var flashlight_battery_died: bool = false # Track if battery died (for one-time sanity loss)
 var darkness_timer: float = 0.0 # Timer for darkness sanity drain
 var game_timer: float = 0.0 # Total game time elapsed
-var toggle_once: bool = false
 
 # Audio state tracking
 var walking_player: AudioStreamPlayer3D
@@ -594,15 +593,9 @@ func _update_flashlight(delta: float) -> void:
 			
 			_toggle_flashlight()
 	
-	# Auto-toggle flashlight on when grace period ends (3 minutes)
-	if game_timer >= 180.0 and not flashlight_enabled and flashlight_battery > 0.0 and toggle_once == false:
-		_toggle_flashlight()
-		toggle_once = true
-		_update_flashlight_state()
-	
 	# Handle darkness sanity drain (1 sanity per 5 seconds when flashlight is off)
-	# Only start draining sanity after 3 minutes (180 seconds) of game time
-	if game_timer >= 180.0 and (not flashlight_enabled or flashlight_battery <= 0.0):
+	# Only start draining sanity after 4 minutes (240 seconds) of game time
+	if game_timer >= 240.0 and (not flashlight_enabled or flashlight_battery <= 0.0):
 		darkness_timer += delta
 		if darkness_timer >= 5.0: # 5 seconds
 			darkness_timer = 0.0

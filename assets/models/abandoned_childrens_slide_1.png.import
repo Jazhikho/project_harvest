@@ -1,0 +1,39 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://d7po4khji1ej"
+path.s3tc="res://.godot/imported/abandoned_childrens_slide_1.png-adc7c50243a16a94e2173c5795239b74.s3tc.ctex"
+path.etc2="res://.godot/imported/abandoned_childrens_slide_1.png-adc7c50243a16a94e2173c5795239b74.etc2.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "baa76e31d7f199f73c7c552281d8ce34"
+}
+
+[deps]
+
+source_file="res://assets/models/abandoned_childrens_slide_1.png"
+dest_files=["res://.godot/imported/abandoned_childrens_slide_1.png-adc7c50243a16a94e2173c5795239b74.s3tc.ctex", "res://.godot/imported/abandoned_childrens_slide_1.png-adc7c50243a16a94e2173c5795239b74.etc2.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=8
+roughness/src_normal="res://assets/models/abandoned_childrens_slide_2.png"
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=1024
+detect_3d/compress_to=0

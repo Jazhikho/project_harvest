@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://51qiqvy0tbeu"]
+
+[ext_resource type="PackedScene" uid="uid://hffj5ubn3mfq" path="res://assets/models/wheelbarrow.glb" id="1_mcmsv"]
+
+[node name="wheelbarrow" instance=ExtResource("1_mcmsv")]

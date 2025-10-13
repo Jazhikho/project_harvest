@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://csdcg8544av1p"
-path="res://.godot/imported/newCrow.glb-dc05ab2bb5b3968b1e2c421f551eb7f6.scn"
+uid="uid://j37lrm7m2o61"
+path="res://.godot/imported/old_railway_container_lowpoly.glb-b9e731617517d02102c882e65a68bf9f.scn"
 
 [deps]
 
-source_file="res://assets/models/newCrow.glb"
-dest_files=["res://.godot/imported/newCrow.glb-dc05ab2bb5b3968b1e2c421f551eb7f6.scn"]
+source_file="res://assets/models/old_railway_container_lowpoly.glb"
+dest_files=["res://.godot/imported/old_railway_container_lowpoly.glb-b9e731617517d02102c882e65a68bf9f.scn"]
 
 [params]
 
