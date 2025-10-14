@@ -1,0 +1,54 @@
+================================================================================
+                        PROJECT HARVEST - macOS USERS
+================================================================================
+
+🚨 IMPORTANT: This game is UNSIGNED and macOS will block it by default.
+This is NORMAL for indie games. The game is safe to run.
+
+================================================================================
+                            QUICK START GUIDE
+================================================================================
+
+METHOD 1 - RIGHT-CLICK TO OPEN (Easiest)
+----------------------------------------
+1. RIGHT-CLICK (or Control+Click) on "ProjectHarvest.app"
+2. Select "Open" from the menu
+3. Click "Open" when warned about unidentified developer
+4. Done! Future launches will work normally.
+
+METHOD 2 - TERMINAL COMMAND (Fast)
+-----------------------------------
+1. Open Terminal
+2. Type: cd ~/Downloads
+3. Type: xattr -cr ProjectHarvest.app
+4. Open the app normally
+
+METHOD 3 - SYSTEM SETTINGS
+---------------------------
+1. Try to open the app (it will be blocked)
+2. Go to System Settings → Privacy & Security
+3. Click "Open Anyway" next to the ProjectHarvest message
+4. Confirm
+
+================================================================================
+
+📖 FULL INSTRUCTIONS: See MACOS_INSTALL.md (included) or visit:
+   https://github.com/yourusername/project_harvest/blob/main/MACOS_INSTALL.md
+
+❓ TROUBLESHOOTING: "App is damaged" error?
+   Run this in Terminal: xattr -cr ProjectHarvest.app
+
+🎮 SYSTEM REQUIREMENTS:
+   - macOS 10.12+ (11.0+ for Apple Silicon)
+   - 4GB RAM minimum
+   - Metal-compatible graphics
+
+================================================================================
+
+Ready to enter the maze? 🌽👻
+
+Made with Godot Engine 4.4
+Project Harvest v1.5 - Christopher B. Del Gesso
+
+================================================================================
+

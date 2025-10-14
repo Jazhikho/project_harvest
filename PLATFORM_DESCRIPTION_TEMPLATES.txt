@@ -1,0 +1,308 @@
+================================================================================
+        COPY-PASTE TEMPLATES FOR GAME DISTRIBUTION PLATFORMS
+================================================================================
+
+These are ready-to-use descriptions for various platforms when distributing
+Project Harvest. Copy the relevant section and customize as needed.
+
+================================================================================
+                            ITCH.IO DESCRIPTION
+================================================================================
+
+⚠️ IMPORTANT FOR macOS USERS
+
+This game is not code-signed. macOS will show a security warning when you try 
+to open it. This is normal for indie games and the download is completely safe.
+
+🍎 How to open on Mac (takes 30 seconds):
+
+METHOD 1 - Right-Click (Easiest)
+1. Right-click (or Control+Click) on ProjectHarvest.app
+2. Select "Open" from the menu
+3. Click "Open" when warned about unidentified developer
+4. Done! The game will launch and remember your choice.
+
+METHOD 2 - Terminal Command
+1. Open Terminal
+2. Type: cd ~/Downloads
+3. Type: xattr -cr ProjectHarvest.app
+4. Open the app normally
+
+Full instructions available in MAC_USERS_READ_THIS.txt (included in download)
+
+Why isn't it signed? Apple charges $99/year for developer certificates. As a 
+student/portfolio project, Project Harvest is distributed unsigned to keep it 
+free for everyone!
+
+
+================================================================================
+                          GITHUB RELEASE NOTES
+================================================================================
+
+## Project Harvest v1.5
+
+### Downloads
+
+**Windows:** ProjectHarvest.exe
+**macOS:** ProjectHarvest.zip (Universal - Intel & Apple Silicon)
+
+### ⚠️ macOS Users - READ THIS FIRST
+
+The Mac version is **not code-signed** and will be blocked by Gatekeeper. 
+This is expected behavior.
+
+**Quick Fix:**
+- Right-click the .app and select "Open"
+- Or run: `xattr -cr ProjectHarvest.app` in Terminal
+
+📖 **Full instructions:** See [MACOS_INSTALL.md](MACOS_INSTALL.md)
+
+### System Requirements
+
+**Windows:**
+- Windows 10/11
+- 4GB RAM
+- DirectX 11 compatible GPU
+
+**macOS:**
+- macOS 10.12+ (11.0+ for Apple Silicon)
+- 4GB RAM
+- Metal-compatible GPU
+
+### Known Issues
+- macOS: First launch may take 30-60 seconds while system verifies the app
+
+
+================================================================================
+                          STEAM DESCRIPTION
+================================================================================
+
+SYSTEM REQUIREMENTS
+
+Windows:
+  OS: Windows 10/11 64-bit
+  Processor: Intel Core i5 or equivalent
+  Memory: 4 GB RAM
+  Graphics: DirectX 11 compatible
+  Storage: 2 GB available space
+
+macOS:
+  OS: macOS 10.12 or later (11.0+ for M1/M2)
+  Processor: Intel Core i5 or Apple Silicon M1+
+  Memory: 4 GB RAM
+  Graphics: Metal-compatible GPU
+  Storage: 2 GB available space
+  Additional Notes: Not code-signed. Use right-click → Open on first launch.
+
+
+================================================================================
+                      DISCORD ANNOUNCEMENT
+================================================================================
+
+🌽 **Project Harvest v1.5 is now available!** 👻
+
+Download now for Windows and macOS!
+
+**Mac users:** The game isn't code-signed, so right-click → Open on first 
+launch. See the included instructions for details.
+
+🎮 Windows: Just download and play!
+🍎 macOS: Universal binary (Intel & Apple Silicon)
+
+Link: [your-download-link]
+
+Enjoy your descent into the maze... 🌾
+
+
+================================================================================
+                        REDDIT POST
+================================================================================
+
+Title: [Release] Project Harvest v1.5 - First-Person Horror in a Living Corn Maze
+
+I'm excited to share Project Harvest, a survival horror walking sim where you 
+navigate a procedurally-shifting corn maze that remembers your previous deaths.
+
+**Platform:** Windows & macOS
+**Engine:** Godot 4.4
+**Price:** Free (student project)
+
+**macOS Note:** The game isn't code-signed. Just right-click and select "Open" 
+on first launch. Full instructions included.
+
+[Download Link]
+
+This is a portfolio/class project inspired by games like Silent Hill and 
+creepypastas like Petscop. Each failed run becomes part of the next playthrough.
+
+Feedback welcome!
+
+
+================================================================================
+                    TWITTER/X ANNOUNCEMENT
+================================================================================
+
+Short version:
+🌽 Project Harvest v1.5 is live! 
+
+First-person horror in a living corn maze. Your failed runs become part of 
+future attempts.
+
+Free | Windows + Mac | Made with Godot
+[link]
+
+Mac users: right-click → Open (not code-signed)
+
+Long version:
+🌽👻 Project Harvest v1.5 released!
+
+A survival horror walking sim where:
+• The maze shifts and remembers you
+• Your deaths echo in future runs
+• Sanity affects what hunts you
+
+Free download | Win + Mac
+Made with Godot 4.4
+
+⚠️ Mac: right-click the app to open (not signed)
+
+[Download link] [Screenshots]
+
+
+================================================================================
+                        EMAIL TO PLAYTESTERS
+================================================================================
+
+Subject: Project Harvest v1.5 - Mac Build Now Available
+
+Hi [Name],
+
+Thanks for offering to playtest Project Harvest! The Mac build is now ready.
+
+DOWNLOAD: [link]
+
+IMPORTANT FOR MAC:
+The game isn't code-signed, so macOS will block it. This is normal:
+1. Download and extract ProjectHarvest.zip
+2. RIGHT-CLICK on ProjectHarvest.app
+3. Select "Open"
+4. Click "Open" when warned
+5. Done!
+
+A text file with full instructions is included in the download.
+
+WHAT TO TEST:
+- Does the game launch on your Mac?
+- Any crashes or performance issues?
+- General gameplay feedback
+
+System info needed:
+- macOS version
+- Chip (Intel or Apple Silicon)
+- RAM amount
+
+Let me know if you have any issues getting it running!
+
+Thanks,
+[Your Name]
+
+
+================================================================================
+                    WEBSITE/PORTFOLIO DESCRIPTION
+================================================================================
+
+## Project Harvest
+
+A first-person survival horror game set in a procedural corn maze where failed 
+attempts become part of future runs.
+
+### Download
+
+Available for Windows and macOS. Free to play.
+
+[Download for Windows] [Download for macOS]
+
+**macOS Users:** This game is not code-signed. Right-click the app and select 
+"Open" to bypass Gatekeeper security. [Full Instructions →](link)
+
+### Tech Stack
+- Engine: Godot 4.4
+- Language: GDScript
+- Platforms: Windows, macOS (Intel & Apple Silicon)
+
+### Features
+- Procedural maze generation
+- Hidden sanity system
+- Meta-progression through run memory
+- Multiple AI-driven entities
+
+
+================================================================================
+                        GAMEJOLT DESCRIPTION
+================================================================================
+
+🌽 Welcome to Project Harvest
+
+Enter a corn maze that's more alive than you realize. Each time you fail, the 
+maze remembers. Your corpses, your notes, your attempts—they all become part 
+of the next run.
+
+💀 Features:
+• Procedural maze that shifts during gameplay
+• Hidden sanity system affecting entities
+• First-person exploration with puzzle elements
+• Meta-horror through run persistence
+
+⚙️ Requirements:
+Windows 10+ or macOS 10.12+
+4GB RAM minimum
+
+🍎 Mac Users: This game isn't code-signed. Right-click the app and choose 
+"Open" to bypass the security warning. Instructions included in download.
+
+Made with Godot Engine 4.4 as a student portfolio project.
+
+
+================================================================================
+                        GAME JAMS / SUBMISSIONS
+================================================================================
+
+Short Description (100 chars):
+Navigate a living corn maze where your failed attempts become part of future runs. First-person horror.
+
+Long Description (500 chars):
+Project Harvest is a first-person survival horror walking sim set in a 
+procedurally-generated corn maze. The maze actively reshapes during gameplay 
+and remembers your previous attempts—failed runs manifest as corpses, notes, 
+and environmental changes in subsequent playthroughs.
+
+Players manage a hidden sanity system while avoiding supernatural entities. 
+The game features meta-horror elements through run persistence, procedural 
+maze generation, and a narrative that questions identity and agency.
+
+Built with Godot 4.4. Available for Windows and macOS.
+
+Genre Tags:
+Horror, Walking Simulator, Procedural, First-Person, Psychological Horror, 
+Meta-Horror, Rogue-lite
+
+Platform Notes:
+macOS build is unsigned. Users must right-click → Open on first launch.
+
+
+================================================================================
+                            CLOSING NOTES
+================================================================================
+
+Remember to update:
+- [your-download-link] with actual download URLs
+- [Your Name] / [your-email] with your contact info
+- GitHub repository links
+- Any social media handles
+- Version numbers as you release updates
+
+These templates are designed to be informative while managing user expectations
+about the macOS signing situation upfront. Users appreciate transparency!
+
+================================================================================
+

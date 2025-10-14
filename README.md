@@ -63,11 +63,27 @@ project_harvest/
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### For Players
+
+#### Windows
+1. Download `ProjectHarvest-Windows.7z`
+2. Extract
+3. Run `ProjectHarvest.exe`
+4. Play!
+
+#### macOS
+1. Download `ProjectHarvest.zip`
+2. Extract the `.app` file
+3. **Important:** Follow the [macOS Installation Guide](MACOS_INSTALL.md) to run unsigned apps
+4. The game is safe but requires bypassing Gatekeeper (see guide for details)
+
+### For Developers
+
+#### Prerequisites
 - **Godot Engine 4.4** for main development
 - **Git** for version control
 
-### Development Setup
+#### Development Setup
 1. Clone the repository
 2. Open `project.godot` in Godot Engine 4.4
 3. Review `GDD.md` for full design specifications
