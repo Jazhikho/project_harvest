@@ -686,7 +686,7 @@ func on_player_entered_tile(tile_position: Vector2i) -> void:
 	
 	
 	# Then spawn new connections from current tile
-	await get_tree().process_frame
+	# await get_tree().process_frame
 	_spawn_tile_connections(entered_tile, tile_position)
 
 func _cleanup_tiles_for_position(player_pos: Vector2i) -> void:

@@ -5,7 +5,6 @@ extends Node
 const INTERACTIONS_PATH: String = "res://data/object_interactions.json"
 
 var _interactions_data: Dictionary = {}
-var _interaction_counts: Dictionary = {}
 var _message_bus: Node
 var _narrative_ui: Node
 
@@ -84,14 +83,14 @@ func _on_object_interacted(object_id: String, interaction_count: int, object_nod
 	
 	# Handle both single message and multiple messages format
 	if interaction_data.has("messages"):
-		# Multiple messages - cycle through them
+		# Multiple messages - select randomly
 		var messages: Array = interaction_data.messages
 		if messages.is_empty():
 			push_error("ObjectToastHandler: Empty messages array for object_id '%s'" % object_id)
 			return
 		
-		# Use modulo to cycle through messages
-		var message_index: int = interaction_count % messages.size()
+		# Randomly select a message
+		var message_index: int = randi() % messages.size()
 		message_text = messages[message_index]
 	elif interaction_data.has("text"):
 		# Single message

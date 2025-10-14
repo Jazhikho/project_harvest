@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://baru8fi3bxs0t"]
+[gd_scene load_steps=16 format=3 uid="uid://baru8fi3bxs0t"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_e6iyi"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_iuh5e"]
@@ -7,6 +7,9 @@
 [ext_resource type="PackedScene" uid="uid://t2ahnvllm6bf" path="res://scenes/environments/11x_1_corn_tile.tscn" id="5_040a4"]
 [ext_resource type="PackedScene" uid="uid://baktq46848232" path="res://scenes/environments/6x1_corn_tile.tscn" id="6_7dthd"]
 [ext_resource type="PackedScene" uid="uid://dmqog3kpkp6xe" path="res://scenes/environments/7x1_corn_tile.tscn" id="8_bmj2f"]
+[ext_resource type="PackedScene" uid="uid://bo3d7bghd4qum" path="res://scenes/environments/crow.tscn" id="8_crow"]
+[ext_resource type="Script" uid="uid://b48eca72a7a1" path="res://scripts/tiles/CrowFlock.gd" id="8_crowflock"]
+[ext_resource type="Script" uid="uid://dw020sveanil8" path="res://scripts/tiles/RandomCrowSounds.gd" id="8_crowsounds"]
 [ext_resource type="PackedScene" uid="uid://cmynr7gj25pbg" path="res://scenes/environments/slide.tscn" id="9_6klx4"]
 [ext_resource type="PackedScene" uid="uid://572iojnx3jma" path="res://scenes/environments/4x1_corn_tile.tscn" id="9_bp46l"]
 [ext_resource type="PackedScene" uid="uid://d0psfvttebu0q" path="res://scenes/environments/tree_1.tscn" id="10_oxctl"]
@@ -137,16 +140,46 @@ transform = Transform3D(-1.49012e-08, 0, 1, 0, 1, 0, -1, 0, -1.49012e-08, -0.25,
 [node name="EntityPoint4" type="Marker3D" parent="Maze/EntitySpawn"]
 transform = Transform3D(-7.25216e-08, 0, -1, 0, 1, 0, 1, 0, -7.25216e-08, 5.5, 0.25, 1.5)
 
-[node name="Slide" parent="Maze" instance=ExtResource("9_6klx4")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 0, 7)
+[node name="slide" parent="Maze" instance=ExtResource("9_6klx4")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, -0.0390148, 7)
 
 [node name="tree1" parent="." instance=ExtResource("10_oxctl")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.52886, 0.16482, 6.40535)
+transform = Transform3D(-0.359573, 0, 0.933117, 0, 1, 0, -0.933117, 0, -0.359573, -5.70462, 0.16482, 3.5906)
+
+[node name="CrowSounds" type="Node3D" parent="tree1"]
+script = ExtResource("8_crowsounds")
+height_offset = 3.5
 
 [node name="tree" parent="." instance=ExtResource("11_nk2se")]
-transform = Transform3D(1, 0, 0, 0, 1.37026, 0, 0, 0, 1.64806, 8.54794, 0.227176, 6.1722)
+transform = Transform3D(-1.01861, 0, -1.13053, 0, 1.8377, 0, 0.736108, 0, -1.5644, 8.54794, 0.227176, 6.1722)
 
-[node name="gastank" parent="." instance=ExtResource("12_oxctl")]
+[node name="CrowSounds" type="Node3D" parent="tree"]
+script = ExtResource("8_crowsounds")
+min_interval = 4.0
+max_interval = 6.0
+height_offset = 4.1
+
+[node name="crows" type="Node3D" parent="."]
+transform = Transform3D(0.999988, 0.00131418, -0.00472355, -0.00133079, 0.999993, -0.00352226, 0.00471889, 0.00352849, 0.999983, 0, 0, 0)
+script = ExtResource("8_crowflock")
+crow_scene = ExtResource("8_crow")
+crow_positions = Array[Vector3]([Vector3(-6.764, 3.902, 0.852), Vector3(-4.584, 3.285, 3.448), Vector3(6.321, 4.104, 4.843), Vector3(6.322, 5.361, 5.308)])
+crow_rotations = Array[float]([169.7, 111.4, -172.5, -88.4])
+max_animation_speed = 3.5
+
+[node name="Marker3D" type="Marker3D" parent="crows"]
+transform = Transform3D(-0.98375, -0.00200762, 0.179531, -0.00327227, 0.999972, -0.00674833, -0.179513, -0.00722614, -0.983729, -6.76415, 3.90151, 0.852319)
+
+[node name="Marker3D2" type="Marker3D" parent="crows"]
+transform = Transform3D(-0.364955, 0.00146284, 0.931024, -0.00509576, 0.999981, -0.0035687, -0.93101, -0.0060467, -0.364941, -4.58411, 3.28511, 3.44835)
+
+[node name="Marker3D3" type="Marker3D" parent="crows"]
+transform = Transform3D(-0.991375, -0.00311161, -0.131018, -0.00218858, 0.999972, -0.00718847, 0.131036, -0.00683972, -0.991353, 6.3213, 4.10445, 4.8433)
+
+[node name="Marker3D4" type="Marker3D" parent="crows"]
+transform = Transform3D(0.0278537, -0.00481461, -0.999599, 0.00222717, 0.999986, -0.00475441, 0.999609, -0.00209385, 0.0278639, 6.32184, 5.3613, 5.30812)
+
+[node name="gas tank" parent="." instance=ExtResource("12_oxctl")]
 transform = Transform3D(0.0233516, 0, 1.49982, 0, 1.5, 0, -1.49982, 0, 0.0233516, 5.41404, 0.112902, -5.39687)
 
 [editable path="Maze/Maze/2x1CornTile"]

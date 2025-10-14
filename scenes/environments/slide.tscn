@@ -1,16 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://cmynr7gj25pbg"]
+[gd_scene load_steps=4 format=3 uid="uid://cmynr7gj25pbg"]
 
 [ext_resource type="PackedScene" uid="uid://8p28o0avkq15" path="res://assets/models/abandoned_childrens_slide.glb" id="1_1ysa2"]
+[ext_resource type="Script" uid="uid://bohf30iutu5ns" path="res://scripts/tiles/InteractableTileObject.gd" id="2_interactable"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0lpj1"]
 size = Vector3(3.05499, 2.06635, 0.634857)
 
-[node name="Slide" type="Node3D"]
+[node name="slide" type="Node3D"]
+script = ExtResource("2_interactable")
+object_id = "slide"
+interaction_mode = "multiple"
 
 [node name="Sketchfab_Scene" parent="." instance=ExtResource("1_1ysa2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 0, 1.7)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
+collision_layer = 8
+collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.471832, 1.01553, 0.0395355)

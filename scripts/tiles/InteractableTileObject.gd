@@ -8,7 +8,7 @@ class_name InteractableTileObject
 @export var object_id: String = ""
 
 ## Action word shown in interaction prompt (e.g., "Examine", "Read", "Inspect")
-@export var interaction_prompt: String = "Examine"
+@export var interaction_prompt: String = "examine"
 
 ## Interaction mode: "single" shows same message every time, "multiple" cycles through messages
 @export var interaction_mode: String = "single"

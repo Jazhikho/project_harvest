@@ -59,7 +59,7 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_i87o5")
 
-[node name="tree2" instance=ExtResource("1_saf83")]
+[node name="tree" instance=ExtResource("1_saf83")]
 
 [node name="Tree_02" parent="." index="0"]
 mesh = SubResource("ArrayMesh_ctaxl")

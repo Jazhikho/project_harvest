@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://brjqpebl0t14f"]
+[gd_scene load_steps=14 format=3 uid="uid://brjqpebl0t14f"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_bemli"]
 [ext_resource type="Script" uid="uid://bl5snw1fbt5b3" path="res://scripts/puzzles/FinalGatePuzzle.gd" id="5_oclvx"]
@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" uid="uid://y3n3yl83883f" path="res://scenes/environments/tree.tscn" id="8_p3ja7"]
 [ext_resource type="PackedScene" uid="uid://dmqog3kpkp6xe" path="res://scenes/environments/7x1_corn_tile.tscn" id="8_ur14w"]
 [ext_resource type="PackedScene" uid="uid://d0psfvttebu0q" path="res://scenes/environments/tree_1.tscn" id="10_oclvx"]
+[ext_resource type="PackedScene" uid="uid://cni08c317og5" path="res://scenes/environments/porta_john.tscn" id="12_yi2lo"]
+[ext_resource type="PackedScene" uid="uid://cpkdg2qh4jep0" path="res://scenes/environments/lamp.tscn" id="13_o2efe"]
 
 [node name="FinalGate" type="Node3D"]
 script = ExtResource("1_bemli")
@@ -173,6 +175,12 @@ visible = true
 transform = Transform3D(-0.20371, 0, 0.979031, 0, 1, 0, -0.979031, 0, -0.20371, -0.993837, 2.64778, 1.63791)
 time_offset = 0.1
 behavior = "looking_around"
+
+[node name="porta-john" parent="." instance=ExtResource("12_yi2lo")]
+transform = Transform3D(0.866025, 0, 0.5, -0.0435779, 0.996195, 0.0754791, -0.498097, -0.0871558, 0.86273, 2, 0.882014, 6)
+
+[node name="lamp" parent="." instance=ExtResource("13_o2efe")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 4.63786, 0, -3.48033)
 
 [editable path="Maze/Maze/3x1CornTile"]
 [editable path="Maze/Maze/3x1CornTile5"]

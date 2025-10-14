@@ -1,5 +1,20 @@
-[gd_scene load_steps=2 format=3 uid="uid://51qiqvy0tbeu"]
+[gd_scene load_steps=4 format=3 uid="uid://51qiqvy0tbeu"]
 
 [ext_resource type="PackedScene" uid="uid://hffj5ubn3mfq" path="res://assets/models/wheelbarrow.glb" id="1_mcmsv"]
+[ext_resource type="Script" uid="uid://bohf30iutu5ns" path="res://scripts/tiles/InteractableTileObject.gd" id="2_interactable"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wheelbarrow"]
+size = Vector3(1.13098, 1.28574, 1.96277)
 
 [node name="wheelbarrow" instance=ExtResource("1_mcmsv")]
+script = ExtResource("2_interactable")
+object_id = "wheelbarrow"
+interaction_mode = "multiple"
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00872803, 0.642871, 0.0678101)
+shape = SubResource("BoxShape3D_wheelbarrow")

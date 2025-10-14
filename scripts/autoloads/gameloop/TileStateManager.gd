@@ -259,7 +259,9 @@ func _execute_tile_transition(new_tile_position: Vector2i) -> void:
 	_message_bus.emit_event("player_moved", [old_tile_position, new_tile_position])
 	
 	# Queue TileManager notification to prevent stack overflow
-	_queue_tile_notification(new_tile_position)
+	# _queue_tile_notification(new_tile_position)
+	if _tile_manager and _tile_manager.has_method("on_player_entered_tile"):
+		_tile_manager.call_deferred("on_player_entered_tile", new_tile_position)
 
 func _queue_tile_notification(position: Vector2i) -> void:
 	"""

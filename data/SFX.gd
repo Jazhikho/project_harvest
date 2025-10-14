@@ -15,3 +15,4 @@ class_name SFX
 @export var walking: AudioStream
 @export var whispers: Array[AudioStream]
 @export var screams: Array[AudioStream]
+@export var crows: Array[AudioStream]

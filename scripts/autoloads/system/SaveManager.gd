@@ -184,7 +184,7 @@ func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) 
 		
 func _transfer_collectibles_to_backpack() -> void:
 	"""
-	Transfer notes and puzzle pieces from collectibles to backpack
+	Transfer notes, puzzle pieces, and special items from collectibles to backpack
 	Called at start of new run
 	"""
 	var item_manager = get_node_or_null("/root/ItemManager")
@@ -204,8 +204,8 @@ func _transfer_collectibles_to_backpack() -> void:
 		var item_info = item_manager.get_item_info(item_id)
 		var category = item_info.get("category", "")
 		
-		# Only transfer notes and puzzle pieces
-		if category in ["notes", "puzzle_pieces"]:
+		# Only transfer notes, puzzle pieces, and special items
+		if category in ["notes", "puzzle_pieces", "special"]:
 			# Skip puzzle pieces that have already been used
 			if category == "puzzle_pieces" and is_puzzle_item_used(item_id):
 				print("SaveManager: Skipping used puzzle piece ", item_id)
@@ -256,7 +256,7 @@ func set_puzzle_state(puzzle_id: String, state: Dictionary) -> void:
 
 func transfer_inventory_to_backpack(current_inventory: Array) -> void:
 	"""
-	Transfer notes and puzzle pieces from current inventory to backpack
+	Transfer notes, puzzle pieces, and special items from current inventory to backpack
 	Called at the start of each run
 	
 	@param current_inventory: Current player inventory items
@@ -266,13 +266,13 @@ func transfer_inventory_to_backpack(current_inventory: Array) -> void:
 		push_error("SaveManager: ItemManager not found")
 		return
 	
-	# Get notes and puzzle pieces from inventory
+	# Get notes, puzzle pieces, and special items from inventory
 	for item_id in current_inventory:
 		var item_info = item_manager.get_item_info(item_id)
 		var category = item_info.get("category", "")
 		
-		# Only transfer notes and puzzle pieces
-		if category in ["notes", "puzzle_pieces"]:
+		# Only transfer notes, puzzle pieces, and special items
+		if category in ["notes", "puzzle_pieces", "special"]:
 			# Skip puzzle pieces that have already been used
 			if category == "puzzle_pieces" and is_puzzle_item_used(item_id):
 				print("SaveManager: Skipping used puzzle piece ", item_id, " from inventory transfer")

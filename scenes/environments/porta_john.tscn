@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://cni08c317og5"]
+
+[ext_resource type="PackedScene" uid="uid://dnm2g5wj44tc7" path="res://assets/models/abandoned_toilet_cabin_low_poly.glb" id="1_m82in"]
+[ext_resource type="Script" uid="uid://bohf30iutu5ns" path="res://scripts/tiles/InteractableTileObject.gd" id="2_xnd46"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_m82in"]
+size = Vector3(1, 2.08659, 1)
+
+[node name="porta-john" instance=ExtResource("1_m82in")]
+script = ExtResource("2_xnd46")
+object_id = "porta-john"
+interaction_mode = "multiple"
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0103073, 0)
+shape = SubResource("BoxShape3D_m82in")

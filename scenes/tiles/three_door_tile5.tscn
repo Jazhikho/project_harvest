@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://c1whv1q6ecsie"]
+[gd_scene load_steps=14 format=3 uid="uid://c1whv1q6ecsie"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_frivi"]
 [ext_resource type="PackedScene" uid="uid://dh2ksygtyattj" path="res://scenes/environments/2x1_corn_tile.tscn" id="2_grxhc"]
@@ -8,6 +8,9 @@
 [ext_resource type="PackedScene" uid="uid://bfmwipk4hpnoc" path="res://scenes/environments/5x1_corn_tile.tscn" id="6_85jqv"]
 [ext_resource type="PackedScene" uid="uid://dmqog3kpkp6xe" path="res://scenes/environments/7x1_corn_tile.tscn" id="7_lm151"]
 [ext_resource type="PackedScene" uid="uid://dxrwt86snuv1a" path="res://scenes/environments/3x1_corn_tile.tscn" id="8_cehgq"]
+[ext_resource type="PackedScene" uid="uid://bo3d7bghd4qum" path="res://scenes/environments/crow.tscn" id="8_crow"]
+[ext_resource type="Script" uid="uid://b48eca72a7a1" path="res://scripts/tiles/CrowFlock.gd" id="8_crowflock"]
+[ext_resource type="Script" uid="uid://dw020sveanil8" path="res://scripts/tiles/RandomCrowSounds.gd" id="8_crowsounds"]
 [ext_resource type="PackedScene" uid="uid://d0psfvttebu0q" path="res://scenes/environments/tree_1.tscn" id="9_grxhc"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="9_hyf8n"]
 
@@ -104,6 +107,27 @@ transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 5.5, 1
 
 [node name="tree1" parent="Maze/Maze" instance=ExtResource("9_grxhc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.32358, 0.16482, 4.77611)
+
+[node name="CrowSounds" type="Node3D" parent="Maze/Maze/tree1"]
+script = ExtResource("8_crowsounds")
+min_interval = 13.0
+height_offset = 3.5
+
+[node name="crows" type="Node3D" parent="Maze/Maze"]
+script = ExtResource("8_crowflock")
+crow_scene = ExtResource("8_crow")
+crow_positions = Array[Vector3]([Vector3(-6.478, 3.642, 5.314), Vector3(-4.355, 3.882, 4.781), Vector3(-4.897, 5.177, 4.766)])
+crow_rotations = Array[float]([36.5, 171.6, -163.3])
+max_animation_speed = 3.5
+
+[node name="Marker3D" type="Marker3D" parent="Maze/Maze/crows"]
+transform = Transform3D(0.803576, 0, 0.595201, 0, 1, 0, -0.595201, 0, 0.803576, -6.478, 3.64175, 5.31371)
+
+[node name="Marker3D2" type="Marker3D" parent="Maze/Maze/crows"]
+transform = Transform3D(-0.989157, 0, 0.14686, 0, 1, 0, -0.14686, 0, -0.989157, -4.3552, 3.88175, 4.78125)
+
+[node name="Marker3D3" type="Marker3D" parent="Maze/Maze/crows"]
+transform = Transform3D(-0.957647, 0, -0.287946, 0, 1, 0, 0.287946, 0, -0.957647, -4.89738, 5.17715, 4.76602)
 
 [node name="6x1CornTile2" parent="Maze/Maze" instance=ExtResource("3_8d3vh")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -8, 1.75, -3)

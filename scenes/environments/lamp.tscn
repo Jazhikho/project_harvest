@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://cpkdg2qh4jep0"]
+
+[ext_resource type="PackedScene" uid="uid://dwjsqca2ywl2g" path="res://assets/models/rusty_lamp.glb" id="1_hjsbj"]
+[ext_resource type="Script" uid="uid://bohf30iutu5ns" path="res://scripts/tiles/InteractableTileObject.gd" id="2_4gxd2"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lamp"]
+size = Vector3(0.5, 3.0, 0.5)
+
+[node name="lamp" instance=ExtResource("1_hjsbj")]
+script = ExtResource("2_4gxd2")
+object_id = "lamp"
+interaction_mode = "multiple"
+
+[node name="Sketchfab_model" parent="." index="0"]
+transform = Transform3D(0.646578, 0, 0, 0, 1.43569e-16, 0.646578, 0, -0.646578, 1.43569e-16, -0.585568, 0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("BoxShape3D_lamp")

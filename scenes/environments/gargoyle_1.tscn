@@ -9,7 +9,7 @@ radius = 3.125
 [sub_resource type="BoxShape3D" id="BoxShape3D_hvo7f"]
 size = Vector3(2.875, 2.5, 2.5)
 
-[node name="gargoyle1" instance=ExtResource("1_el0yt")]
+[node name="gargoyle" instance=ExtResource("1_el0yt")]
 script = ExtResource("2_interactable")
 object_id = "gargoyle1"
 

@@ -1,8 +1,23 @@
-[gd_scene load_steps=2 format=3 uid="uid://b7r4f1ognp27j"]
+[gd_scene load_steps=4 format=3 uid="uid://b7r4f1ognp27j"]
 
 [ext_resource type="PackedScene" uid="uid://d2h5avkvvl2m0" path="res://assets/models/old_soviet_transformer_low-poly.glb" id="1_rdbg8"]
+[ext_resource type="Script" uid="uid://bohf30iutu5ns" path="res://scripts/tiles/InteractableTileObject.gd" id="2_interactable"]
 
-[node name="Sketchfab_Scene" instance=ExtResource("1_rdbg8")]
+[sub_resource type="BoxShape3D" id="BoxShape3D_transformer"]
+size = Vector3(1.4, 3.1, 0.6)
+
+[node name="Transformer" instance=ExtResource("1_rdbg8")]
+script = ExtResource("2_interactable")
+object_id = "transformer"
+interaction_mode = "multiple"
 
 [node name="Sketchfab_model" parent="." index="0"]
 transform = Transform3D(0.006, 0, 0, 0, -2.62268e-10, 0.006, 0, -0.006, -2.62268e-10, 0, 0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.96046e-08, 1.45, 0.3)
+shape = SubResource("BoxShape3D_transformer")

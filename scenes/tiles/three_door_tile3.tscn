@@ -165,11 +165,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1.75, 9.5)
 transform = Transform3D(10, 0, 0, 0, 0.8, 0, 0, 0, 0.1, -0.5, 0, 0.5)
 visible = true
 
-[node name="Container" parent="." instance=ExtResource("8_8vngb")]
+[node name="container" parent="Maze/Maze" instance=ExtResource("8_8vngb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8418, -0.0251635, 3.5424)
+interaction_radius = 4.0
 
-[node name="gastank" parent="." instance=ExtResource("9_i6wcl")]
+[node name="gas tank" parent="Maze/Maze" instance=ExtResource("9_i6wcl")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.40159, 0.112902, 6.55018)
+interaction_radius = 4.0
 
 [editable path="Maze/Maze/8x1CornTile"]
 [editable path="Maze/Maze/8x1CornTile2"]

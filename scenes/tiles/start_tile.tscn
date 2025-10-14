@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://c5yqrv82hov2i"]
+[gd_scene load_steps=16 format=3 uid="uid://c5yqrv82hov2i"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_fs0kh"]
 [ext_resource type="PackedScene" uid="uid://t2ahnvllm6bf" path="res://scenes/environments/11x_1_corn_tile.tscn" id="2_60arg"]
@@ -8,6 +8,9 @@
 [ext_resource type="PackedScene" uid="uid://b0nvjxcqa47ui" path="res://scenes/environments/8x1_corn_tile.tscn" id="6_xh5ey"]
 [ext_resource type="PackedScene" uid="uid://572iojnx3jma" path="res://scenes/environments/4x1_corn_tile.tscn" id="7_bsa85"]
 [ext_resource type="PackedScene" uid="uid://dh2ksygtyattj" path="res://scenes/environments/2x1_corn_tile.tscn" id="8_aq4jt"]
+[ext_resource type="PackedScene" uid="uid://bo3d7bghd4qum" path="res://scenes/environments/crow.tscn" id="8_crow"]
+[ext_resource type="Script" uid="uid://b48eca72a7a1" path="res://scripts/tiles/CrowFlock.gd" id="8_crowflock"]
+[ext_resource type="Script" uid="uid://dw020sveanil8" path="res://scripts/tiles/RandomCrowSounds.gd" id="8_crowsounds"]
 [ext_resource type="PackedScene" uid="uid://c3y2xyh0d42ur" path="res://scenes/notes/start_note.tscn" id="9_start"]
 [ext_resource type="PackedScene" uid="uid://y3n3yl83883f" path="res://scenes/environments/tree.tscn" id="10_ij6o6"]
 [ext_resource type="PackedScene" uid="uid://d0psfvttebu0q" path="res://scenes/environments/tree_1.tscn" id="11_0mysc"]
@@ -149,11 +152,50 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.82339, 0.732866, 4)
 [node name="tree" parent="Objects" instance=ExtResource("10_ij6o6")]
 transform = Transform3D(1.48539, 0, 0, 0, 1.45677, 0, 0, 0, 1.25886, 6.51884, 0.226793, -4.65368)
 
+[node name="CrowSounds" type="Node3D" parent="Objects/tree"]
+script = ExtResource("8_crowsounds")
+min_interval = 3.0
+max_interval = 6.0
+height_offset = 3.5
+
 [node name="tree1" parent="Objects" instance=ExtResource("11_0mysc")]
-transform = Transform3D(0.996033, 0, 0, 0, 0.996033, 0, 0, 0, 0.996033, -6.50104, 0.164685, -5.99333)
+transform = Transform3D(0.98796, 0, 0.126561, 0, 0.996033, 0, -0.126561, 0, 0.98796, -4.74531, 0.164685, -4.08446)
+
+[node name="CrowSounds" type="Node3D" parent="Objects/tree1"]
+script = ExtResource("8_crowsounds")
+min_interval = 3.0
+max_interval = 8.0
+height_offset = 3.2
 
 [node name="tree2" parent="Objects" instance=ExtResource("12_0mysc")]
 transform = Transform3D(0.907382, 0, 0, 0, 0.996033, 0, 0, 0, 0.996033, 6.98149, 0.000518307, 6.96737)
+
+[node name="CrowSounds" type="Node3D" parent="Objects/tree2"]
+script = ExtResource("8_crowsounds")
+min_interval = 4.0
+max_interval = 9.0
+
+[node name="crows" type="Node3D" parent="Objects"]
+script = ExtResource("8_crowflock")
+crow_scene = ExtResource("8_crow")
+crow_positions = Array[Vector3]([Vector3(6.394, 3.93, 6.052), Vector3(-2.733, 3.846, -4.306), Vector3(-1.693, 3.881, -4.474), Vector3(-4.8, 4.873, -2.41), Vector3(7.149, 4.257, -4.306)])
+crow_rotations = Array[float]([-156.1, 14.2, 5.4, -1.5, -29.0])
+max_animation_speed = 3.5
+
+[node name="Marker3D3" type="Marker3D" parent="Objects/crows"]
+transform = Transform3D(-0.914248, -0.00491327, -0.405125, -0.00218858, 0.999972, -0.00718847, 0.405149, -0.00568539, -0.914232, 6.39383, 3.93033, 6.05239)
+
+[node name="Marker3D4" type="Marker3D" parent="Objects/crows"]
+transform = Transform3D(0.969398, 0.00388622, 0.245463, -0.00218858, 0.999972, -0.00718847, -0.245485, 0.00643127, 0.969379, -2.73273, 3.84551, -4.30595)
+
+[node name="Marker3D5" type="Marker3D" parent="Objects/crows"]
+transform = Transform3D(0.995521, 0.00285816, 0.0944986, -0.00218858, 0.999972, -0.00718847, -0.0945165, 0.00694945, 0.995498, -1.69265, 3.88102, -4.47406)
+
+[node name="Marker3D6" type="Marker3D" parent="Objects/crows"]
+transform = Transform3D(0.999643, 0.00199638, -0.0266367, -0.00218858, 0.999972, -0.00718847, 0.0266216, 0.0072442, 0.999619, -4.79997, 4.87318, -2.41017)
+
+[node name="Marker3D7" type="Marker3D" parent="Objects/crows"]
+transform = Transform3D(0.874605, -0.00157111, -0.484833, -0.00218858, 0.999972, -0.00718847, 0.484831, 0.00734816, 0.874576, 7.14897, 4.25716, -4.30595)
 
 [editable path="Maze/Maze/2x1CornTile"]
 [editable path="Maze/Maze/2x1CornTile2"]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dw6ialkbegvv"]
+[gd_scene load_steps=13 format=3 uid="uid://dw6ialkbegvv"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_56qkv"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_g6jje"]
@@ -10,6 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://dh2ksygtyattj" path="res://scenes/environments/2x1_corn_tile.tscn" id="8_jofjq"]
 [ext_resource type="PackedScene" uid="uid://bfmwipk4hpnoc" path="res://scenes/environments/5x1_corn_tile.tscn" id="9_un7pr"]
 [ext_resource type="PackedScene" uid="uid://t2ahnvllm6bf" path="res://scenes/environments/11x_1_corn_tile.tscn" id="10_l8suq"]
+[ext_resource type="PackedScene" uid="uid://b4sq3gpamx45g" path="res://scenes/environments/toilet.tscn" id="11_7hi5w"]
+[ext_resource type="PackedScene" uid="uid://cpkdg2qh4jep0" path="res://scenes/environments/lamp.tscn" id="12_su2a1"]
 
 [node name="CrossTile4" type="Node3D"]
 script = ExtResource("1_56qkv")
@@ -147,6 +149,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.75, -9.5)
 [node name="2x1" parent="Maze/Maze/8x1CornTile4" index="0"]
 transform = Transform3D(8, 0, 0, 0, 0.8, 0, 0, 0, 0.1, -1, 0, -0.5)
 visible = true
+
+[node name="toilet" parent="." instance=ExtResource("11_7hi5w")]
+transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, -0.71699, 0.25743, 1.21662)
+
+[node name="lamp" parent="." instance=ExtResource("12_su2a1")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -3.86458, 0, -0.755804)
 
 [editable path="Maze/Maze/9x1CornTile"]
 [editable path="Maze/Maze/8x1CornTile"]

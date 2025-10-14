@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://b1uuox01ohviu"]
 
 [ext_resource type="PackedScene" uid="uid://j1gxxp5jx7r" path="res://assets/models/gargoyle3.glb" id="1_kx7x7"]
-[ext_resource type="Script" path="res://scripts/tiles/InteractableTileObject.gd" id="2_interactable"]
+[ext_resource type="Script" uid="uid://bohf30iutu5ns" path="res://scripts/tiles/InteractableTileObject.gd" id="2_interactable"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_10b8g"]
 radius = 1.75
@@ -9,12 +9,9 @@ radius = 1.75
 [sub_resource type="BoxShape3D" id="BoxShape3D_c215d"]
 size = Vector3(1, 2.5, 1.125)
 
-[node name="gargoyle3" instance=ExtResource("1_kx7x7")]
+[node name="gargoyle" instance=ExtResource("1_kx7x7")]
 script = ExtResource("2_interactable")
 object_id = "gargoyle3"
-interaction_prompt = "Examine"
-interaction_mode = "single"
-interaction_radius = 2.5
 
 [node name="GargLP" parent="." index="0"]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)

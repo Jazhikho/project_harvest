@@ -21,6 +21,7 @@
 [ext_resource type="AudioStream" uid="uid://donucdt1axyo5" path="res://assets/audio/whispers3.ogg" id="19_7tva0"]
 [ext_resource type="AudioStream" uid="uid://oyp5ln71g5mx" path="res://assets/audio/whispers4.ogg" id="20_ukifc"]
 [ext_resource type="AudioStream" uid="uid://c8eb66vn6mnx4" path="res://assets/audio/whispers.ogg" id="21_tjbnc"]
+[ext_resource type="AudioStream" uid="uid://ciuv02omhshkq" path="res://assets/audio/crows_1.ogg" id="22_crows"]
 
 [resource]
 script = ExtResource("1_40wi3")
@@ -37,4 +38,5 @@ stilllocked = ExtResource("15_h8o4p")
 walking = ExtResource("16_knihv")
 whispers = Array[AudioStream]([ExtResource("17_13mny"), ExtResource("18_4l6l7"), ExtResource("19_7tva0"), ExtResource("20_ukifc"), ExtResource("21_tjbnc")])
 screams = Array[AudioStream]([ExtResource("9_sd81p"), ExtResource("10_std1t"), ExtResource("11_2tsge"), ExtResource("12_prqyg")])
+crows = Array[AudioStream]([ExtResource("22_crows")])
 metadata/_custom_type_script = "uid://ck6mfksth7lfi"

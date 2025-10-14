@@ -1,25 +1,172 @@
 {
   "interactions": {
-    "gargoyle1": {
-      "text": "Stone eyes watch. They've seen every soul that entered. None that left.",
-      "seconds": 4.0
-    },
-    "gargoyle2": {
-      "text": "Carved in judgment. The scales it holds are empty. What did they measure?",
-      "seconds": 4.0
-    },
-    "gargoyle3": {
-      "text": "Its mouth is open in a silent scream. Or perhaps a warning.",
-      "seconds": 4.0
-    },
-    "final_gate": {
-      "messages": [
-        "It's locked. Figures. I wonder if there is a key around here?",
-        "Still locked... maybe I should look around more.",
-        "I need to find that key to get out of here."
-      ],
-      "seconds": 4.0
-    }
+	"gargoyle1": {
+	  "text": "Stone eyes watch. They've seen every soul that entered. None that left.",
+	  "seconds": 4.0
+	},
+	"gargoyle2": {
+	  "text": "Carved in judgment. The scales it holds are empty. What did they measure?",
+	  "seconds": 4.0
+	},
+	"gargoyle3": {
+	  "text": "Its mouth is open in a silent scream. Or perhaps a warning.",
+	  "seconds": 4.0
+	},
+	"final_gate": {
+	  "messages": [
+		"It's locked. Figures. I wonder if there is a key around here?",
+		"Still locked... maybe I should look around more.",
+		"I need to find that key to get out of here."
+	  ],
+	  "seconds": 4.0
+	},
+	"container": {
+	  "messages": [
+		"This looks like it's been left out here for a long time.",
+		"I wonder what's inside it.",
+		"The door is rusted shut - I'd need a crowbar or something to open it.",
+		"Whatever's in here is staying in here.",
+		"Probably just more junk anyway."
+	  ],
+	  "seconds": 4.0
+	},
+	"gastank": {
+	  "messages": [
+		"An old gas tank. Probably empty by now.",
+		"I hope this thing isn't leaking. The smell is bad enough already.",
+		"Rusted through in places. Best not to touch it.",
+		"Why would anyone leave this out here?",
+		"Heavy. Not going anywhere without help."
+	  ],
+	  "seconds": 4.0
+	},
+	"slide": {
+	  "messages": [
+		"A child's slide. Out here in the middle of nowhere.",
+		"The paint is peeling off. How long has this been here?",
+		"I don't think anyone's played on this in years.",
+		"Something about this feels... wrong.",
+		"Rusty and weathered. Like everything else in this place."
+	  ],
+	  "seconds": 4.0
+	},
+	"wheelbarrow": {
+	  "messages": [
+		"An old wheelbarrow. The wheel's frozen solid.",
+		"Dirt caked on the inside. Wonder what it was used for.",
+		"This hasn't moved in ages.",
+		"Probably belonged to whoever farmed this land. Before.",
+		"Rusted metal and rotted wood. Nothing useful here."
+	  ],
+	  "seconds": 4.0
+	},
+	"transformer": {
+	  "messages": [
+		"An old electrical transformer. Looks ancient.",
+		"I can still hear a faint hum. Is it still on?",
+		"Hazard warnings are faded but still visible. I'll keep my distance.",
+		"This thing's ancient. Surprised it's still standing.",
+		"Better not touch it. Even dead, these things can be dangerous."
+	  ],
+	  "seconds": 4.0
+	},
+	"well": {
+	  "messages": [
+		"A stone well. Deep and dark.",
+		"I can't see the bottom. Maybe that's for the best.",
+		"Something about this well makes my skin crawl.",
+		"If I dropped something down there, I'd never get it back.",
+		"The stones are slick with moss and age."
+	  ],
+	  "seconds": 4.0
+	},
+	"tree": {
+	  "messages": [
+		"An old tree. Its branches reach out like skeletal fingers.",
+		"The bark is rough and weathered.",
+		"I can hear something rustling in the branches above.",
+		"Trees like this have seen everything. And remember nothing.",
+		"Gnarled and twisted. Like it's been here forever."
+	  ],
+	  "seconds": 4.0
+	},
+	"broken_mirror": {
+	  "messages": [
+		"A broken mirror. The cracks distort my reflection.",
+		"Seven years bad luck? I think I'm already there.",
+		"I can see myself... but something looks off.",
+		"The shards catch the light in unsettling ways.",
+		"Better not to look too closely."
+	  ],
+	  "seconds": 4.0
+	},
+	"altar": {
+	  "messages": [
+		"A crude altar. What were they worshipping out here?",
+		"Dark stains mark the stone surface.",
+		"This wasn't built for any god I know.",
+		"The air feels colder near this thing.",
+		"Some rituals are better left forgotten."
+	  ],
+	  "seconds": 4.0
+	},
+	"brazier": {
+	  "messages": [
+		"An old brazier. Cold ashes fill the bowl.",
+		"Whatever burned here last did so long ago.",
+		"I could light this... but should I?",
+		"The metal is blackened from countless fires.",
+		"Something about this feels ceremonial."
+	  ],
+	  "seconds": 4.0
+	},
+	"stump": {
+	  "messages": [
+		"An old tree stump. Cut down years ago.",
+		"The rings tell a story of seasons long past.",
+		"I could rest here for a moment. But I won't.",
+		"Moss and decay have claimed what's left.",
+		"A natural seat in this unnatural place."
+	  ],
+	  "seconds": 4.0
+	},
+	"toilet": {
+	  "messages": [
+		"A toilet sitting out in the open. That's... unsettling.",
+		"Porcelain stained with age and neglect.",
+		"Why would anyone put this here?",
+		"Some things are better left unused.",
+		"The seat is cracked and filthy. I'll pass."
+	  ],
+	  "seconds": 4.0
+	},
+	"lamp": {
+	  "messages": [
+		"An old lamp. The bulb is missing.",
+		"It must have lit this path once. Before the darkness came.",
+		"Rust has eaten through the metal in places."
+	  ],
+	  "seconds": 4.0
+	},
+	"porta-john": {
+	  "messages": [
+		"A porta-potty. Out here? That's bizarre.",
+		"The door hangs slightly ajar. I'm not looking inside.",
+		"The plastic is faded and cracked from years of exposure.",
+		"I can smell it from here. Definitely not going in.",
+		"Who would use this in a place like this? Who would BRING this here?"
+	  ],
+	  "seconds": 4.0
+	},
+	"gargoyle": {
+	  "messages": [
+		"A stone gargoyle. Its eyes seem to follow me.",
+		"Weathered by time, but still watching. Always watching.",
+		"The craftsmanship is crude, but effective. It unnerves me.",
+		"I feel judged by those hollow eyes.",
+		"Silent sentinels of this cursed place."
+	  ],
+	  "seconds": 4.0
+	}
   }
 }
-

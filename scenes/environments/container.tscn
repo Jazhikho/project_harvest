@@ -1,16 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://d4bldfhkoyni6"]
+[gd_scene load_steps=4 format=3 uid="uid://d4bldfhkoyni6"]
 
 [ext_resource type="PackedScene" uid="uid://j37lrm7m2o61" path="res://assets/models/old_railway_container_lowpoly.glb" id="1_4e5lc"]
+[ext_resource type="Script" uid="uid://bohf30iutu5ns" path="res://scripts/tiles/InteractableTileObject.gd" id="2_interactable"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7ceul"]
 size = Vector3(10.0038, 3.2948, 2.54236)
 
 [node name="Container" type="Node3D"]
+script = ExtResource("2_interactable")
+object_id = "container"
+interaction_mode = "multiple"
 
 [node name="Sketchfab_Scene" parent="." instance=ExtResource("1_4e5lc")]
 transform = Transform3D(0.798383, 0.0508455, 0, -0.0508455, 0.798383, 0, 0, 0, 0.8, 0, -0.151766, 0)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
+collision_layer = 8
+collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.106598, 1.1474, -0.00909424)

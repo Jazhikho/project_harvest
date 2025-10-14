@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://b4sq3gpamx45g"]
+
+[ext_resource type="PackedScene" uid="uid://dlpqm7eoqcsog" path="res://assets/models/dirty_water_closet.glb" id="1_bb8gm"]
+[ext_resource type="Script" uid="uid://bohf30iutu5ns" path="res://scripts/tiles/InteractableTileObject.gd" id="2_byhex"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_byhex"]
+size = Vector3(1, 1.77094, 1.55579)
+
+[node name="toilet" instance=ExtResource("1_bb8gm")]
+script = ExtResource("2_byhex")
+object_id = "toilet"
+interaction_mode = "multiple"
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="1"]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.420074, -0.404236)
+shape = SubResource("BoxShape3D_byhex")

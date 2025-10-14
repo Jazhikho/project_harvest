@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://csvqdq4bujhxi"]
+[gd_scene load_steps=16 format=3 uid="uid://csvqdq4bujhxi"]
 
 [ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_swik0"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_8ex31"]
@@ -8,8 +8,12 @@
 [ext_resource type="PackedScene" uid="uid://572iojnx3jma" path="res://scenes/environments/4x1_corn_tile.tscn" id="6_dk7nf"]
 [ext_resource type="PackedScene" uid="uid://dxrwt86snuv1a" path="res://scenes/environments/3x1_corn_tile.tscn" id="7_cs5o0"]
 [ext_resource type="PackedScene" uid="uid://bfmwipk4hpnoc" path="res://scenes/environments/5x1_corn_tile.tscn" id="8_5mayw"]
+[ext_resource type="PackedScene" uid="uid://bo3d7bghd4qum" path="res://scenes/environments/crow.tscn" id="8_crow"]
+[ext_resource type="Script" uid="uid://b48eca72a7a1" path="res://scripts/tiles/CrowFlock.gd" id="8_crowflock"]
+[ext_resource type="Script" uid="uid://dw020sveanil8" path="res://scripts/tiles/RandomCrowSounds.gd" id="8_crowsounds"]
 [ext_resource type="PackedScene" uid="uid://baktq46848232" path="res://scenes/environments/6x1_corn_tile.tscn" id="9_7ov3w"]
 [ext_resource type="PackedScene" uid="uid://d0psfvttebu0q" path="res://scenes/environments/tree_1.tscn" id="10_rsx6g"]
+[ext_resource type="PackedScene" uid="uid://b7r4f1ognp27j" path="res://scenes/environments/transformer.tscn" id="14_tjqgo"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_hd4v3"]
 size = Vector3(1.3, 2.1, 1)
@@ -168,11 +172,33 @@ visible = true
 [node name="tree1" parent="Maze/Maze" instance=ExtResource("10_rsx6g")]
 transform = Transform3D(0.0245544, 0, -0.999699, 0, 1, 0, 0.999699, 0, 0.0245544, -1.26812, -0.03518, 1.48105)
 
+[node name="CrowSounds" type="Node3D" parent="Maze/Maze/tree1"]
+script = ExtResource("8_crowsounds")
+min_interval = 2.0
+max_interval = 5.0
+height_offset = 3.3
+
 [node name="StaticBody3D" type="StaticBody3D" parent="Maze/Maze/tree1"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Maze/Maze/tree1/StaticBody3D"]
 transform = Transform3D(0.999981, 0, 1.24797e-07, 0, 1, 0, -1.24797e-07, 0, 0.999981, 0.449907, 1.05, 0.00736666)
 shape = SubResource("BoxShape3D_hd4v3")
+
+[node name="crows" type="Node3D" parent="Maze/Maze"]
+script = ExtResource("8_crowflock")
+crow_scene = ExtResource("8_crow")
+crow_positions = Array[Vector3]([Vector3(0, 2.178, 1.461), Vector3(-1.945, 3.411, 2.115), Vector3(-1.225, 3.582, 3.39)])
+crow_rotations = Array[float]([-151.7, 131.2, -75.0])
+max_animation_speed = 3.5
+
+[node name="Marker3D" type="Marker3D" parent="Maze/Maze/crows"]
+transform = Transform3D(-0.880361, 0, -0.474303, 0, 1, 0, 0.474303, 0, -0.880361, 0, 2.17828, 1.46062)
+
+[node name="Marker3D2" type="Marker3D" parent="Maze/Maze/crows"]
+transform = Transform3D(-0.659228, 0, 0.751943, 0, 1, 0, -0.751943, 0, -0.659228, -1.94519, 3.4115, 2.11458)
+
+[node name="Marker3D3" type="Marker3D" parent="Maze/Maze/crows"]
+transform = Transform3D(0.258836, 0, -0.965921, 0, 1, 0, 0.965921, 0, 0.258836, -1.22523, 3.58221, 3.38962)
 
 [node name="9x1CornTile4" parent="Maze/Maze" instance=ExtResource("5_aysf4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1.75, 9.5)
@@ -180,6 +206,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1.75, 9.5)
 [node name="2x1" parent="Maze/Maze/9x1CornTile4" index="0"]
 transform = Transform3D(8, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0.5, 0, 0.5)
 visible = true
+
+[node name="transformer" parent="." instance=ExtResource("14_tjqgo")]
+transform = Transform3D(-0.0619893, 0, -0.998077, 0, 1, 0, 0.998077, 0, -0.0619893, -1.33896, 0.0663681, -5.98903)
 
 [editable path="Maze/Maze/8x1CornTile"]
 [editable path="Maze/Maze/8x1CornTile2"]
