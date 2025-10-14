@@ -13,7 +13,7 @@ var _settings: Dictionary = {
 		"sfx_volume": 1.0
 	},
 	"graphics": {
-		"fullscreen": false,
+		"fullscreen": true,
 		"vsync": true,
 		"resolution": Vector2i(1920, 1080)
 	},
@@ -180,7 +180,7 @@ func _apply_graphics_setting(key: String, value: Variant) -> void:
 	match key:
 		"fullscreen":
 			if value:
-				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 			else:
 				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 		"vsync":

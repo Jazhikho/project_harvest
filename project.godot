@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Project Harvest"
 config/description="A survival horror game set in a shifting corn maze where failed runs become part of future attempts."
-config/version="1.0"
+config/version="1.5"
 run/main_scene="res://scenes/ui/TriggerWarning.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 boot_splash/image="uid://xkwrrelcouwd"
@@ -52,10 +52,11 @@ gdscript/warnings/narrowing_conversion=0
 
 [display]
 
-window/size/mode=3
-window/stretch/mode="viewport"
+window/size/viewport_width=1280
+window/size/viewport_height=800
+window/size/mode=4
+window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-window/stretch/scale_mode="integer"
 
 [dotnet]
 
@@ -124,6 +125,6 @@ journal={
 
 [rendering]
 
-textures/canvas_textures/default_texture_filter=0
 textures/vram_compression/import_etc2_astc=true
+textures/default_filters/anisotropic_filtering_level=3
 environment/defaults/default_clear_color=Color(0.552617, 0.557704, 0.742004, 1)

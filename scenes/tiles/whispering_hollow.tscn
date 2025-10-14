@@ -20,8 +20,8 @@ is_permanent = true
 [node name="RandomWhispers" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 script = ExtResource("5_whispers")
-min_interval = 8.0
-max_interval = 20.0
+min_interval = 4.0
+max_interval = 19.0
 spawn_radius = 10.0
 max_height = 3.0
 max_hearing_distance = 20.0
