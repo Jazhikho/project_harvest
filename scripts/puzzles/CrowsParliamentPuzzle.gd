@@ -11,7 +11,7 @@ var _player_inventory: Node
 var _save_manager: Node
 var _puzzle_ui: Control
 
-var _items_placed = []
+var _items_placed: Array = []
 var _completion_order: int = -1 # Which number puzzle this was (1st, 2nd, 3rd)
 
 @onready var mirror_area: Area3D = $Area3D

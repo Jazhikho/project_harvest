@@ -1,42 +1,36 @@
-extends Node
+extends BaseManager
 ## Manages spawning of items, entities, and environmental objects
 ## Coordinates with ItemManager for item spawning decisions
 
-var _message_bus: Node
 var _item_manager: Node
-var _state_manager: Node
 
 @onready var _items: Node = get_node_or_null("/root/ItemManager")
 @onready var _enemies: Node = get_node_or_null("/root/EnemyManager")
 
-var _spawn_history := {}
+var _spawn_history: Dictionary = {}
 
-const ITEM_SPAWN_CHANCE := 0.25 # 25% chance per spawn point
-const MAX_ITEMS_PER_TILE := 4
+const ITEM_SPAWN_CHANCE: float = 0.25 # 25% chance per spawn point
+const MAX_ITEMS_PER_TILE: int = 4
 
 func _ready() -> void:
 	name = "SpawnManager"
-	_validate_deps()
 	add_to_group("core_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus", "GameStateManager", "ItemManager"])
+	super._ready()
 
-func _initialize() -> void:
-	"""Initialize connections to other systems"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_item_manager = get_node_or_null("/root/ItemManager")
-	_state_manager = get_node_or_null("/root/GameStateManager")
-	
-	if not _message_bus or not _item_manager or not _state_manager:
-		push_error("SpawnManager: Required core systems not found")
-		return
-	
-	_connect_to_events()
-	
 func _validate_deps() -> void:
 	if _items == null:
 		push_error("SpawnManager: ItemManager not found.")
 	if _enemies == null:
 		push_error("SpawnManager: EnemyManager not found.")
+
+func _initialize_manager() -> void:
+	"""Initialize connections to other systems"""
+	_item_manager = get_system_node("ItemManager")
+	if not _item_manager:
+		return
+	_validate_deps()
+	_connect_to_events()
 
 func process_tile_spawning(tile_node: Node3D, tile_position: Vector2i) -> Dictionary:
 	"""
@@ -47,14 +41,14 @@ func process_tile_spawning(tile_node: Node3D, tile_position: Vector2i) -> Dictio
 	@return: Dictionary of spawned entities {entity_type: [positions]}
 	"""
 	
-	var spawn_results := {}
-	var item_spawn_points := _get_item_spawn_points(tile_node)
-	var entity_spawn_points := _get_entity_spawn_points(tile_node)
+	var spawn_results: Dictionary = {}
+	var item_spawn_points: Array[Vector3] = _get_item_spawn_points(tile_node)
+	var entity_spawn_points: Array[Vector3] = _get_entity_spawn_points(tile_node)
 	
 	if item_spawn_points.is_empty() and entity_spawn_points.is_empty():
 		return spawn_results
 	
-	var context := {
+	var context: Dictionary = {
 		"tile_position": tile_position,
 		"tile_node": tile_node,
 		"item_spawn_points": item_spawn_points,
@@ -78,7 +72,7 @@ func _get_item_spawn_points(tile_node: Node3D) -> Array[Vector3]:
 	var points: Array[Vector3] = []
 	
 	# Check for ItemSpawn points
-	var item_spawn_parent := tile_node.get_node_or_null("Maze/ItemSpawn")
+	var item_spawn_parent: Node = tile_node.get_node_or_null("Maze/ItemSpawn")
 	if item_spawn_parent:
 		for child in item_spawn_parent.get_children():
 			if child is Marker3D:
@@ -95,7 +89,7 @@ func _get_entity_spawn_points(tile_node: Node3D) -> Array[Vector3]:
 	var points: Array[Vector3] = []
 	
 	# Check for EntitySpawn points
-	var entity_spawn_parent := tile_node.get_node_or_null("Maze/EntitySpawn")
+	var entity_spawn_parent: Node = tile_node.get_node_or_null("Maze/EntitySpawn")
 	if entity_spawn_parent:
 		for child in entity_spawn_parent.get_children():
 			if child is Marker3D:
@@ -121,8 +115,8 @@ func _spawn_items(tile_node: Node3D, context: Dictionary, spawn_points: Array[Ve
 	@param spawn_points: Available spawn positions
 	@return: Array of spawned item IDs
 	"""
-	var spawned_items := []
-	var shuffled_points := spawn_points.duplicate()
+	var spawned_items: Array = []
+	var shuffled_points: Array = spawn_points.duplicate()
 	shuffled_points.shuffle()
 	
 	for i in range(shuffled_points.size()):
@@ -162,7 +156,7 @@ func _spawn_items(tile_node: Node3D, context: Dictionary, spawn_points: Array[Ve
 				
 				if _spawn_item_visual(tile_node, item_id, spawn_point):
 					spawned_items.append(item_id)
-					_message_bus.emit_event("item_spawned", [item_id, spawn_point, context["tile_position"], {}])
+					emit_event("item_spawned", [item_id, spawn_point, context["tile_position"], {}])
 	
 	return spawned_items
 
@@ -243,7 +237,6 @@ func _spawn_note_visual(tile_node: Node3D, note_id: String, position: Vector3, n
 			note_instance.set_script(research_note_script)
 	
 	note_instance.item_id = note_id
-	print("note has id: ", note_id)
 	note_instance.item_name = note_info.get("name", "Research Note")
 	note_instance.item_description = note_info.get("description", "")
 	note_instance.display_name = note_info.get("name", "Research Note")
@@ -267,12 +260,12 @@ func _spawn_placeholder_item(tile_node: Node3D, item_id: String, position: Vecto
 	@param item_id: Item identifier
 	@param position: World position to spawn at
 	"""
-	var placeholder := MeshInstance3D.new()
+	var placeholder: MeshInstance3D = MeshInstance3D.new()
 	placeholder.name = "Item_" + item_id
 	placeholder.mesh = SphereMesh.new()
 	placeholder.mesh.radius = 0.3
 	
-	var material := StandardMaterial3D.new()
+	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.albedo_color = _get_item_color(item_id)
 	placeholder.set_surface_override_material(0, material)
 	
@@ -306,9 +299,9 @@ func _setup_item_collision(item_node: Node3D) -> void:
 	
 	@param item_node: Item node to setup collision for
 	"""
-	var area := Area3D.new()
-	var collision := CollisionShape3D.new()
-	var shape := SphereShape3D.new()
+	var area: Area3D = Area3D.new()
+	var collision: CollisionShape3D = CollisionShape3D.new()
+	var shape: SphereShape3D = SphereShape3D.new()
 	
 	shape.radius = 0.5
 	collision.shape = shape
@@ -332,8 +325,8 @@ func _spawn_backpack_at_death(tile_node: Node3D, death_data: Dictionary, spawn_p
 	"""
 	if spawn_points.is_empty():
 		return []
-	var backpack_pos := spawn_points[0]
-	var effigy_pos := backpack_pos + Vector3(1.5, 0, 0)
+	var backpack_pos: Vector3 = spawn_points[0]
+	var effigy_pos: Vector3 = backpack_pos + Vector3(1.5, 0, 0)
 
 	_spawn_backpack(tile_node, backpack_pos, death_data.get("inventory", []))
 
@@ -347,7 +340,7 @@ func _spawn_backpack_at_death(tile_node: Node3D, death_data: Dictionary, spawn_p
 			modified_death["position"] = Vector2i(int(effigy_pos.x / 20.0), int(effigy_pos.z / 20.0))
 			effigy_manager.spawn_effigy_at_death_location(modified_death)
 		else:
-			var effigy := MeshInstance3D.new()
+			var effigy: MeshInstance3D = MeshInstance3D.new()
 			effigy.name = "Effigy_Debug"
 			effigy.mesh = CapsuleMesh.new()
 			(effigy.mesh as CapsuleMesh).height = 2.0
@@ -366,12 +359,12 @@ func _spawn_backpack(tile_node: Node3D, position: Vector3, inventory: Array) -> 
 	@param position: Spawn position
 	@param inventory: Items in backpack
 	"""
-	var backpack := MeshInstance3D.new()
+	var backpack: MeshInstance3D = MeshInstance3D.new()
 	backpack.name = "Backpack"
 	backpack.mesh = BoxMesh.new()
 	backpack.mesh.size = Vector3(0.5, 0.5, 0.5)
 	
-	var material := StandardMaterial3D.new()
+	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.albedo_color = Color(0.5, 0.3, 0.1)
 	backpack.set_surface_override_material(0, material)
 	
@@ -379,27 +372,6 @@ func _spawn_backpack(tile_node: Node3D, position: Vector3, inventory: Array) -> 
 	backpack.global_position = position
 	backpack.set_meta("inventory", inventory)
 	backpack.set_meta("is_backpack", true)
-
-func _spawn_effigy(tile_node: Node3D, position: Vector3) -> void:
-	"""
-	Spawn effigy entity (placeholder - actual spawning handled by Effi
-EffigyManager)
-	
-	@param tile_node: Parent tile
-	@param position: Spawn position
-	"""
-	# Effigy spawning is handled by EffigyManager
-	pass
-
-func _spawn_stalker(tile_node: Node3D, position: Vector3) -> void:
-	"""
-	Spawn stalker entity (placeholder - actual spawning handled by EnemyManager)
-	
-	@param tile_node: Parent tile
-	@param position: Spawn position
-	"""
-	# Stalker spawning is handled by EnemyManager
-	pass
 
 func _calculate_entity_spawn_chance(current_sanity: int, tiles_explored: int, weird_things_collected: int) -> float:
 	"""
@@ -440,7 +412,7 @@ func _spawn_entities(tile_node: Node3D, context: Dictionary, spawn_points: Array
 	@param spawn_points: Available entity spawn positions
 	@return: Array of spawned entity types
 	"""
-	var spawned_entities := []
+	var spawned_entities: Array = []
 	
 	if spawn_points.is_empty():
 		return spawned_entities
@@ -448,7 +420,11 @@ func _spawn_entities(tile_node: Node3D, context: Dictionary, spawn_points: Array
 	# Get current game state
 	var current_sanity: int = _state_manager.get_state("sanity")
 	var tiles_explored_value = _state_manager.get_state("tiles_explored")
-	var tiles_explored: int = tiles_explored_value if tiles_explored_value != null else 0
+	var tiles_explored: int
+	if tiles_explored_value != null:
+		tiles_explored = int(tiles_explored_value)
+	else:
+		tiles_explored = 0
 	var weird_things_collected: int = 1
 	
 	# Calculate spawn chance
@@ -490,15 +466,13 @@ func _on_item_pickup(body: Node3D, item_node: Node3D) -> void:
 		return
 	
 	var tile_pos: Vector2i = _state_manager.get_state("current_tile_position")
-	_message_bus.emit_event("item_collected", [item_id, body, tile_pos])
+	emit_event("item_collected", [item_id, body, tile_pos])
 	
 	item_node.queue_free()
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.tile_generated.connect(_on_tile_generated)
-	_message_bus.game_started.connect(_on_game_started)
-	_message_bus.game_ended.connect(_on_game_ended)
 
 func _on_tile_generated(tile_node: Node3D, position: Vector2i, tile_data: Dictionary) -> void:
 	process_tile_spawning(tile_node, position)
@@ -508,6 +482,4 @@ func _on_game_started() -> void:
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:
 	"""Handle game end - cleanup spawn tracking"""
-	print("SpawnManager: Cleaning up for game end")
 	_spawn_history.clear()
-	print("SpawnManager: Cleanup complete")

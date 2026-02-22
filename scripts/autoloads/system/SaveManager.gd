@@ -136,15 +136,6 @@ func start_run() -> void:
 	save_data.controls_shown_this_run = false
 	save_game()
 
-func mark_controls_shown() -> void:
-	"""Mark that controls have been shown this run"""
-	save_data.controls_shown_this_run = true
-	save_game()
-	
-func should_show_controls() -> bool:
-	"""Check if controls should be shown this run"""
-	return not save_data.get("controls_shown_this_run", false)
-
 func record_death() -> void:
 	"""Record death and save current run statistics"""
 	_transfer_collectibles_to_backpack()
@@ -179,7 +170,6 @@ func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) 
 	"""
 	if item_id not in save_data.collectibles:
 		save_data.collectibles.append(item_id)
-		print("SaveManager: Saved collected item: ", item_id, " (total: ", save_data.collectibles.size(), ")")
 		save_game()
 		
 func _transfer_collectibles_to_backpack() -> void:
@@ -208,12 +198,10 @@ func _transfer_collectibles_to_backpack() -> void:
 		if category in ["notes", "puzzle_pieces", "special"]:
 			# Skip puzzle pieces that have already been used
 			if category == "puzzle_pieces" and is_puzzle_item_used(item_id):
-				print("SaveManager: Skipping used puzzle piece ", item_id)
 				continue
 			
 			if item_id not in save_data.backpack_inventory:
 				save_data.backpack_inventory.append(item_id)
-				print("SaveManager: Moved ", item_id, " to backpack for next run")
 	
 	# Clear collectibles for new run
 	save_data.collectibles = []
@@ -231,8 +219,9 @@ func mark_puzzle_completed(puzzle_id: String) -> void:
 	
 	save_data.puzzles[puzzle_id]["completed"] = true
 	save_data.puzzles[puzzle_id]["completion_time"] = Time.get_unix_time_from_system()
-	if MessageBus:
-		MessageBus.emit_event("puzzle_completed", [puzzle_id, Vector2i.ZERO, {}])
+	var message_bus: Node = get_node_or_null("/root/MessageBus")
+	if message_bus and message_bus.has_method("emit_event"):
+		message_bus.emit_event("puzzle_completed", [puzzle_id, Vector2i.ZERO, {}])
 	save_game()
 
 func is_puzzle_item_used(item_id: String) -> bool:
@@ -275,12 +264,10 @@ func transfer_inventory_to_backpack(current_inventory: Array) -> void:
 		if category in ["notes", "puzzle_pieces", "special"]:
 			# Skip puzzle pieces that have already been used
 			if category == "puzzle_pieces" and is_puzzle_item_used(item_id):
-				print("SaveManager: Skipping used puzzle piece ", item_id, " from inventory transfer")
 				continue
 			
 			if item_id not in save_data.backpack_inventory:
 				save_data.backpack_inventory.append(item_id)
-				print("SaveManager: Transferred ", item_id, " to backpack")
 	
 	save_game()
 
@@ -292,7 +279,6 @@ func clear_backpack_inventory() -> void:
 	"""Clear backpack inventory (called when player collects backpack)"""
 	save_data.backpack_inventory = []
 	save_game()
-	print("SaveManager: Backpack inventory cleared")
 
 func get_all_collected_notes() -> Array:
 	"""
@@ -353,42 +339,3 @@ func load_audio_settings() -> void:
 	# Audio settings are now loaded by SettingsManager directly from user://settings.json
 	# No need to load them from save data
 	pass
-
-func test_audio_persistence() -> void:
-	"""
-	Test function to verify audio settings persistence
-	This can be called from debug console or UI for testing
-	"""
-	print("=== Audio Persistence Test ===")
-	
-	# Get current audio settings
-	var settings_manager = get_node_or_null("/root/SettingsManager")
-	if not settings_manager:
-		print("ERROR: SettingsManager not found")
-		return
-	
-	var current_audio = settings_manager.get_audio_settings()
-	print("Current audio settings: ", current_audio)
-	
-	# Check save data
-	if save_data.settings.has("audio"):
-		print("Save data audio settings: ", save_data.settings.audio)
-	else:
-		print("No audio settings in save data")
-	
-	# Test setting a value
-	var test_value = 0.5
-	settings_manager.set_setting("audio", "master_volume", test_value)
-	await get_tree().process_frame
-	
-	print("After setting master_volume to ", test_value, ":")
-	print("Current audio settings: ", settings_manager.get_audio_settings())
-	print("Save data audio settings: ", save_data.settings.audio)
-	
-	# Test loading
-	load_audio_settings()
-	await get_tree().process_frame
-	
-	print("After loading from save data:")
-	print("Current audio settings: ", settings_manager.get_audio_settings())
-	print("=== Test Complete ===")

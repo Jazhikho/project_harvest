@@ -3,15 +3,15 @@ extends Node3D
 ## State management is now handled by TileStateManager
 
 # Door constants
-enum DoorDirection { NORTH = 1, EAST = 2, SOUTH = 4, WEST = 8 }
+enum DoorDirection {NORTH = 1, EAST = 2, SOUTH = 4, WEST = 8}
 
 # Door detection - ONLY from Maze/Doors path
-var door_markers: Dictionary = {}  # DoorDirection -> Marker3D node
+var door_markers: Dictionary = {} # DoorDirection -> Marker3D node
 var current_rotation: int = 0
 
 # Global door tracking
 var global_north_door: Marker3D = null
-var global_east_door: Marker3D = null  
+var global_east_door: Marker3D = null
 var global_south_door: Marker3D = null
 var global_west_door: Marker3D = null
 
@@ -91,10 +91,10 @@ func _determine_door_direction_from_marker(marker: Marker3D) -> int:
 	
 	# Check which edge the marker is closest to
 	var distances: Dictionary = {
-		DoorDirection.NORTH: abs(local_pos.x - half_size.x),   # +X edge
-		DoorDirection.SOUTH: abs(local_pos.x + half_size.x),   # -X edge  
-		DoorDirection.EAST: abs(local_pos.z - half_size.y),    # +Z edge
-		DoorDirection.WEST: abs(local_pos.z + half_size.y)     # -Z edge
+		DoorDirection.NORTH: abs(local_pos.x - half_size.x), # +X edge
+		DoorDirection.SOUTH: abs(local_pos.x + half_size.x), # -X edge
+		DoorDirection.EAST: abs(local_pos.z - half_size.y), # +Z edge
+		DoorDirection.WEST: abs(local_pos.z + half_size.y) # -Z edge
 	}
 	
 	# Find closest edge
@@ -116,7 +116,7 @@ func _detect_doors_legacy() -> void:
 	"""Fallback to legacy door detection paths"""
 	var door_paths: Dictionary = {
 		DoorDirection.NORTH: "Maze/NDoor",
-		DoorDirection.SOUTH: "Maze/SDoor", 
+		DoorDirection.SOUTH: "Maze/SDoor",
 		DoorDirection.EAST: "Maze/EDoor",
 		DoorDirection.WEST: "Maze/WDoor"
 	}
@@ -166,7 +166,7 @@ func set_as_connecting_tile() -> void:
 func set_as_past_tile() -> void:
 	"""Called by TileStateManager when tile becomes past"""
 	is_active_tile = false
-	is_connecting_tile = true  # Past tiles are also connecting
+	is_connecting_tile = true # Past tiles are also connecting
 	is_past_tile = true
 
 func has_door(direction: int) -> bool:
@@ -195,7 +195,7 @@ func get_available_doors() -> Dictionary:
 		if marker:
 			available[global_direction] = {
 				"world_position": marker.global_position,
-				"world_orientation": -marker.global_transform.basis.z,
+				"world_orientation": - marker.global_transform.basis.z,
 				"marker": marker
 			}
 	
@@ -226,7 +226,7 @@ func set_tile_rotation(rotation_steps: int) -> void:
 	
 
 func get_current_rotation() -> int:
-	"""Get current rotation in steps (0-3)"""
+	"""Get rotation in steps (0-3)"""
 	return current_rotation
 
 func get_door_after_rotation(original_door: int, rotation_steps: int) -> int:
@@ -257,7 +257,7 @@ func get_direction_name(direction: int) -> String:
 	"""Helper function to get direction name from enum value"""
 	match direction:
 		DoorDirection.NORTH: return "North"
-		DoorDirection.EAST: return "East" 
+		DoorDirection.EAST: return "East"
 		DoorDirection.SOUTH: return "South"
 		DoorDirection.WEST: return "West"
 		_: return "Unknown"

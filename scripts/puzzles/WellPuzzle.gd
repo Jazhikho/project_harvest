@@ -3,7 +3,9 @@ extends Node3D
 
 class_name WellPuzzle
 
+## Unique puzzle identifier for save/events
 @export var puzzle_id: String = "whispering_hollow"
+## Item IDs required to complete puzzle
 @export var required_items: Array[String] = ["symbol_watch", "symbol_coin", "symbol_ticket"]
 
 var _message_bus: Node

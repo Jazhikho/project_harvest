@@ -1,9 +1,7 @@
-extends Node
+extends BaseManager
 ## Enemy Manager - Centralized management of enemy entities
 ## Handles enemy spawning, behavior coordination, and lifecycle
 
-var _message_bus: Node
-var _state_manager: Node
 var _sanity_manager: Node
 
 # Enemy tracking
@@ -41,18 +39,12 @@ func _ready() -> void:
 	name = "EnemyManager"
 	_resolve_catalog()
 	add_to_group("game_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus", "GameStateManager"])
+	super._ready()
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize connections to core systems"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_state_manager = get_node_or_null("/root/GameStateManager")
-	_sanity_manager = get_node_or_null("/root/SanityManager")
-	
-	if not _message_bus or not _state_manager:
-		push_error("EnemyManager: Required core systems not found")
-		return
-	
+	_sanity_manager = get_system_node("SanityManager")
 	_build_enemy_scene_map() # NEW: Build the scene map
 	_connect_to_events()
 	
@@ -94,11 +86,8 @@ func _build_enemy_scene_map() -> void:
 		
 		if not enemy_type.is_empty():
 			_enemy_scene_map[enemy_type] = scene
-			print("EnemyManager: Mapped enemy_type '", enemy_type, "' to scene")
 		else:
 			push_warning("EnemyManager: Enemy scene has no enemy_type: ", scene.resource_path)
-	
-	print("EnemyManager: Built scene map with ", _enemy_scene_map.size(), " enemies")
 
 func get_all_enemy_scenes() -> Array[PackedScene]:
 	if not spawn_catalog:
@@ -163,9 +152,7 @@ func spawn_enemy(enemy_type: String, position: Vector3 = Vector3.ZERO, force_spa
 	_enemy_spawn_cooldowns[enemy_type] = _get_spawn_cooldown(enemy_type)
 	
 	# Emit spawn event
-	_message_bus.emit_event("entity_spawned", [enemy_type, enemy_instance, position])
-	
-	print("EnemyManager: Spawned ", enemy_type, " at ", position)
+	emit_event("entity_spawned", [enemy_type, enemy_instance, position])
 	
 	return enemy_instance
 
@@ -216,8 +203,6 @@ func _spawn_placeholder_enemy(enemy_type: String, position: Vector3) -> Node3D:
 	_active_enemies[entity_id] = placeholder
 	placeholder.set_meta("entity_id", entity_id)
 	placeholder.set_meta("enemy_type", enemy_type)
-	
-	print("EnemyManager: Spawned placeholder ", enemy_type, " at ", position)
 	
 	return placeholder
 
@@ -404,17 +389,15 @@ func _generate_enemy_id(enemy_type: String) -> String:
 # Event handlers
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.weird_thing_collected.connect(_on_weird_thing_collected)
 	_message_bus.sanity_threshold_crossed.connect(_on_sanity_threshold_crossed)
 	_message_bus.player_died.connect(_on_player_died)
-	_message_bus.game_started.connect(_on_game_started)
-	_message_bus.game_ended.connect(_on_game_ended)
 
 func _on_weird_thing_collected(thing_id: String, position: Vector2i, effects: Dictionary) -> void:
 	"""Handle weird thing collection - may trigger stalker spawn"""
 	var weird_things_manager = get_node_or_null("/root/WeirdThingsManager")
-	if weird_things_manager and weird_things_manager.has_method("get_collecte d_count"):
+	if weird_things_manager and weird_things_manager.has_method("get_collected_count"):
 		var weird_count = weird_things_manager.get_collected_count()
 		if weird_count >= _stalker_spawn_conditions.min_weird_things:
 			if randf() < 0.3: # 30% chance to spawn stalker
@@ -551,7 +534,7 @@ static func _find_tile_from_puzzle(puzzle_node: Node) -> Node3D:
 		# Check if this node has the tile script
 		if current.get_script():
 			var script_path: String = current.get_script().resource_path
-			if script_path.ends_with("tile.gd"):
+			if script_path.ends_with("Tile.gd"):
 				return current as Node3D
 		
 		# Check if this node has is_permanent (tiles have this)

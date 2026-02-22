@@ -3,7 +3,7 @@ extends Node
 ## Centralized input handling for Project Harvest
 
 # Control scheme management
-var control_scheme = "keyboard"
+var control_scheme: String = "keyboard"
 
 # Input action mappings
 const INPUT_ACTIONS = {
@@ -47,30 +47,6 @@ func _input(event):
 # Control scheme management
 func set_control_scheme(scheme: String):
 	control_scheme = scheme
-
-func get_control_hint(action: String) -> String:
-	"""Return appropriate control hint based on input device"""
-	var hints = {
-		"keyboard": {
-			"move": "WASD",
-			"sprint": "Shift",
-			"interact": "E",
-			"flashlight": "F",
-			"inventory": "I",
-			"journal": "J",
-			"pause": "Escape"
-		},
-		"controller": {
-			"move": "Left Stick",
-			"sprint": "L3",
-			"interact": "A",
-			"flashlight": "X",
-			"inventory": "Select",
-			"journal": "Select",
-			"pause": "Start"
-		}
-	}
-	return hints[control_scheme].get(action, "")
 
 # Public API for other systems to check input state
 func is_action_just_pressed(action: String) -> bool:

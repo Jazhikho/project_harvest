@@ -1,6 +1,6 @@
 extends Control
 
-var dr_amundsen_quotes = [
+var dr_amundsen_quotes: Array[String] = [
 	"\"The maze remembers... even if you don't.\" - Dr. Amundsen",
 	"\"Every death teaches us something new about fear.\" - Dr. Amundsen",
 	"\"How fascinating... your heart rate peaked at exactly 187 BPM before cessation.\" - Dr. Amundsen",
@@ -20,7 +20,7 @@ var dr_amundsen_quotes = [
 @onready var fade_rect = get_node_or_null("FadeRect")
 @onready var quit_dialog = get_node_or_null("QuitConfirmDialog")
 
-var death_type = ""
+var death_type: String = ""
 
 func _ready() -> void:
 	# Check if all nodes exist
@@ -75,9 +75,9 @@ func _update_stats():
 	var state_manager = get_node_or_null("/root/GameStateManager")
 	var save_manager = get_node_or_null("/root/SaveManager")
 	
-	var time_played = 0.0
-	var tiles = 0
-	var collectibles = 0
+	var time_played: float = 0.0
+	var tiles: int = 0
+	var collectibles: int = 0
 	
 	# Get time from GameDirector session data
 	var game_director = get_node_or_null("/root/GameDirector")

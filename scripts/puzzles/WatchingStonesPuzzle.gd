@@ -3,17 +3,19 @@ extends Node3D
 
 class_name WatchingStonesPuzzle
 
+## Unique puzzle identifier for save/events
 @export var puzzle_id: String = "watching_stones"
-@export var required_items = ["phone", "holy_book", "flag"]
+## Item IDs required to complete puzzle
+@export var required_items: Array[String] = ["phone", "holy_book", "flag"]
 
 var _message_bus: Node
 var _player_inventory: Node
 var _save_manager: Node
 var _puzzle_ui: Control
 
-var _items_placed = []
-var _altar_items = [] # Track items placed on altar specifically
-var _brazier_items = [] # Track items placed in brazier
+var _items_placed: Array = []
+var _altar_items: Array = [] # Track items placed on altar specifically
+var _brazier_items: Array = [] # Track items placed in brazier
 
 @onready var altar_area: Area3D = $altar/Area3D
 @onready var brazier_area: Area3D = $brazier/Area3D
@@ -169,7 +171,11 @@ func _try_place_item(item_id: String, location: String) -> Dictionary:
 				"altar_count": altar_count
 			}
 		else:
-			var location_name: String = "altar" if location == "altar" else "brazier"
+			var location_name: String
+			if location == "altar":
+				location_name = "altar"
+			else:
+				location_name = "brazier"
 			return {
 				"success": true,
 				"completed": false
@@ -229,7 +235,3 @@ func _show_message(text: String) -> void:
 	"""Show message to player"""
 	if _message_bus:
 		_message_bus.emit_event("notification_requested", [text, 3.0, 1])
-
-func get_altar_count() -> int:
-	"""Get number of items on altar"""
-	return _altar_items.size()

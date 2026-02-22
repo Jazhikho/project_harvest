@@ -3,8 +3,11 @@ extends Node3D
 
 class_name FinalGatePuzzle
 
+## Unique puzzle identifier for save/events
 @export var puzzle_id: String = "final_gate"
+## Item ID required to open gate
 @export var required_item: String = "hollow_key"
+## SFX library for gate open sounds
 @export var sfx_library: SFX
 
 var _message_bus: Node

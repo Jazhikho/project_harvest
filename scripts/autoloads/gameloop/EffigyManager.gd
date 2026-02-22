@@ -1,9 +1,7 @@
-extends Node
+extends BaseManager
 ## Effigy Manager - Handles effigy creation and management based on death locations
 ## Implements GAMELOOP.md step 12: Effigy spawning at death locations
 
-var _message_bus: Node
-var _state_manager: Node
 var _harvest_logger: Node
 
 # Effigy tracking
@@ -78,7 +76,7 @@ func spawn_effigy_at_death_location(death_data: Dictionary) -> Node3D:
 	_update_effigy_stage(effigy, position, current_sanity)
 	
 	# Emit spawn event
-	_message_bus.emit_event("entity_spawned", ["effigy", effigy, world_pos])
+	emit_event("entity_spawned", ["effigy", effigy, world_pos])
 	
 	return effigy
 
@@ -245,12 +243,10 @@ func _generate_effigy_id() -> String:
 # Event handlers
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.sanity_changed.connect(_on_sanity_changed)
 	_message_bus.player_died.connect(_on_player_died)
 	_message_bus.entity_spawned.connect(_on_entity_spawned)
-	_message_bus.game_started.connect(_on_game_started)
-	_message_bus.game_ended.connect(_on_game_ended)
 
 func _on_sanity_changed(old_value: int, new_value: int, delta: int) -> void:
 	"""Handle sanity changes - update effigy stages"""

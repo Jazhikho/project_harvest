@@ -53,6 +53,8 @@ const PLAYER_WALK_SPEED: float = 3.0
 # Player interaction
 const INTERACTION_DISTANCE: float = 3.0
 const FLASHLIGHT_RANGE: float = 15.0
+const FLASHLIGHT_BATTERY_MIN: float = 120.0
+const FLASHLIGHT_BATTERY_MAX: float = 420.0
 const VISION_RANGE: float = 10.0
 
 # === ENEMY SYSTEM ===
@@ -131,6 +133,7 @@ const DIFFICULTY_HARD: String = "hard"
 const DIFFICULTY_NIGHTMARE: String = "nightmare"
 
 # Game timing
+const TIME_OF_DAY_DURATION_DEFAULT: float = 90.0
 const MAZE_SHIFT_INTERVAL_MIN: float = 30.0
 const MAZE_SHIFT_INTERVAL_MAX: float = 120.0
 const MAZE_SHIFT_DURATION: float = 3.0
@@ -209,4 +212,7 @@ static func clamp_sanity(value: int) -> int:
 static func linear_to_db_clamped(linear: float) -> float:
 	"""Convert linear volume to dB with proper clamping"""
 	linear = clampf(linear, VOLUME_MIN, VOLUME_MAX)
-	return linear_to_db(linear) if linear > 0.0 else -80.0
+	if linear > 0.0:
+		return linear_to_db(linear)
+	else:
+		return -80.0

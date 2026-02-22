@@ -1,9 +1,7 @@
-extends Node
+extends BaseManager
 ## Handles spawning effigy and backpack on start tile for continued games
 
-var _save_manager: Node
 var _enemy_manager: Node
-var _message_bus: Node
 var _item_manager: Node
 
 # Reference to the start tile
@@ -13,23 +11,18 @@ var _start_tile: Node3D
 var _is_continue: bool = false
 
 func _ready() -> void:
-	call_deferred("_initialize")
+	require_systems(["MessageBus", "GameStateManager", "SaveManager", "EnemyManager", "ItemManager"])
+	super._ready()
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize system connections"""
-	_save_manager = get_node_or_null("/root/SaveManager")
-	_enemy_manager = get_node_or_null("/root/EnemyManager")
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_item_manager = get_node_or_null("/root/ItemManager")
-	
-	if not _save_manager or not _enemy_manager or not _message_bus or not _item_manager:
-		push_error("StartTileSpawner: Required systems not found")
+	_enemy_manager = get_system_node("EnemyManager")
+	_item_manager = get_system_node("ItemManager")
+	if not _enemy_manager or not _item_manager:
+		push_error("DeathHandler: Required systems not found")
 		return
-	
-	# Connect to game started event
-	# We check for save data when the event fires, not now, because autoloads
-	# persist across scene changes and this only runs once at app startup
-	_message_bus.game_started.connect(_on_game_started)
+
+	# game_started connection comes from BaseManager._connect_base_events
 
 func _on_game_started() -> void:
 	"""Called when game starts - check if we should spawn continue items"""
@@ -37,8 +30,10 @@ func _on_game_started() -> void:
 	# Check if this is a continue using SaveManager's flag
 	# SaveManager sets had_existing_save before start_run() creates a new save
 	# This is the most reliable way to detect if this is a truly new game or a continue
-	_is_continue = _save_manager.had_existing_save
-	print("DeathHandler: SaveManager had_existing_save: ", _is_continue, ", is_continue: ", _is_continue)
+	if _save_manager:
+		_is_continue = _save_manager.had_existing_save
+	else:
+		_is_continue = false
 	
 	# Wait a few frames for start tile to be registered
 	await get_tree().process_frame
@@ -53,11 +48,10 @@ func _on_game_started() -> void:
 	
 	# Use the flag we checked before awaiting
 	if _is_continue:
-		print("StartTileSpawner: Continue detected, spawning effigy and backpack, hiding start note")
 		_hide_start_note()
 		_spawn_continue_items()
 	else:
-		print("StartTileSpawner: New game, start note available")
+		pass
 
 func _find_start_tile() -> Node3D:
 	"""Find the start tile in the scene"""
@@ -104,7 +98,6 @@ func _hide_start_note() -> void:
 	
 	var start_note = objects_node.get_node_or_null("start_note")
 	if start_note:
-		print("DeathHandler: Hiding start note for continue game")
 		start_note.queue_free()
 
 func _spawn_continue_items() -> void:
@@ -138,7 +131,7 @@ func _spawn_effigy(position: Vector3) -> void:
 	if _enemy_manager.has_method("spawn_enemy"):
 		var effigy = _enemy_manager.spawn_enemy("effigy", position, true)
 		if effigy:
-			print("StartTileSpawner: Spawned effigy at ", position)
+			pass
 		else:
 			push_warning("StartTileSpawner: Failed to spawn effigy")
 	else:
@@ -161,11 +154,10 @@ func _spawn_backpack(position: Vector3) -> void:
 		return
 	
 	# Get previous run's inventory from backpack (notes and puzzle pieces persist)
-	var previous_inventory: Array = _save_manager.get_backpack_inventory()
-	print("DeathHandler: Backpack inventory: ", previous_inventory)
+	var previous_inventory: Array = []
+	if _save_manager:
+		previous_inventory = _save_manager.get_backpack_inventory()
 	
 	# Set backpack metadata
 	backpack.set_meta("inventory", previous_inventory)
 	backpack.set_meta("is_backpack", true)
-	
-	print("DeathHandler: Spawned backpack at ", position, " with ", previous_inventory.size(), " items")

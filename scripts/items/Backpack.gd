@@ -9,7 +9,7 @@ var _player_in_range: bool = false
 var _message_bus: Node
 var _player_inventory: Node
 var _save_manager: Node
-var item_id = "backpack"
+var item_id: String = "backpack"
 
 # Visual components
 @onready var _mesh: MeshInstance3D = get_node_or_null("BackpackMesh")
@@ -95,13 +95,10 @@ func _hide_interaction_prompt() -> void:
 
 func interact() -> void:
 	"""Handle player interaction with backpack"""
-	print("Backpack: Player interacting")
-	
 	# Get items from backpack
 	var backpack_items = _save_manager.get_backpack_inventory()
 	
 	if backpack_items.is_empty():
-		print("Backpack: No items to collect")
 		if _message_bus:
 			_message_bus.emit_event("notification_requested", ["Backpack is empty", 2.0, 1])
 		return
@@ -113,10 +110,9 @@ func interact() -> void:
 	for collected_item_id in backpack_items:
 		if _player_inventory.has_method("add_item"):
 			var success = _player_inventory.add_item(collected_item_id, false) # Don't apply effects when restoring
-			if success: 
+			if success:
 				ItemManager._cleanup_duplicate_items(collected_item_id)
 				items_collected += 1
-				print("Backpack: Returned ", collected_item_id, " to player")
 				
 				# Mark item as collected in current run state
 				var item_manager = get_node_or_null("/root/ItemManager")
@@ -151,8 +147,6 @@ func interact() -> void:
 		if _message_bus:
 			_message_bus.emit_event("notification_requested",
 				["Collected %d items, %d remain (inventory full?)" % [items_collected, items_failed.size()], 3.0, 1])
-		
-		print("Backpack: ", items_failed.size(), " items remain due to full inventory")
 
 func _play_collection_effect() -> void:
 	"""Play visual effect and remove backpack"""

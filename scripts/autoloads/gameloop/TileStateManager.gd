@@ -1,9 +1,7 @@
-extends Node
+extends BaseManager
 ## TileStateManager - Centralized authority for all tile states and transitions
 ## Handles tile lifecycle, state changes, and player movement between tiles
 
-var _message_bus: Node
-var _state_manager: Node
 var _tile_manager: Node
 
 # Tile state tracking
@@ -38,7 +36,8 @@ const TILE_SIZE: float = 20.0
 func _ready() -> void:
 	name = "TileStateManager"
 	add_to_group("core_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus", "GameStateManager", "TileManager"])
+	super._ready()
 
 func _physics_process(delta: float) -> void:
 	"""Check player position for tile transitions"""
@@ -53,18 +52,15 @@ func _process(_delta: float) -> void:
 		_process_tile_notification(next_position)
 		_processing_notifications = false
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize connections to core systems"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_state_manager = get_node_or_null("/root/GameStateManager")
-	_tile_manager = get_node_or_null("/root/TileManager")
-	
-	if not _message_bus or not _state_manager or not _tile_manager:
+	_tile_manager = get_system_node("TileManager")
+	if not _tile_manager:
 		push_error("TileStateManager: Required core systems not found")
 		return
-	
+
 	_connect_to_events()
-	
+
 	# Try to find player
 	call_deferred("_find_player")
 
@@ -168,7 +164,7 @@ func set_tile_state(position: Vector2i, new_state: TileState) -> bool:
 
 func _emit_state_change_event(tile_node: Node3D, position: Vector2i, old_state_name: String, new_state_name: String) -> void:
 	"""Safely emit state change event"""
-	_message_bus.emit_event("tile_state_changed", [tile_node, position, old_state_name, new_state_name])
+	emit_event("tile_state_changed", [tile_node, position, old_state_name, new_state_name])
 
 func _setup_tile_for_state(tile_node: Node3D, position: Vector2i, state: TileState) -> void:
 	"""
@@ -254,9 +250,9 @@ func _execute_tile_transition(new_tile_position: Vector2i) -> void:
 	
 	# Emit transition events
 	if new_tile_node and _player_node:
-		_message_bus.emit_event("tile_entered", [new_tile_node, new_tile_position, _player_node])
+		emit_event("tile_entered", [new_tile_node, new_tile_position, _player_node])
 	
-	_message_bus.emit_event("player_moved", [old_tile_position, new_tile_position])
+	emit_event("player_moved", [old_tile_position, new_tile_position])
 	
 	# Queue TileManager notification to prevent stack overflow
 	# _queue_tile_notification(new_tile_position)
@@ -402,9 +398,7 @@ func _get_state_name(state: TileState) -> String:
 		_: return "UNKNOWN"
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
-	_message_bus.game_started.connect(_on_game_started)
-	_message_bus.game_ended.connect(_on_game_ended)
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.player_spawned.connect(_on_player_spawned)
 
 func _on_game_started() -> void:

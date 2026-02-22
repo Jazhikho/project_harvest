@@ -1,6 +1,6 @@
 [gd_scene load_steps=14 format=3 uid="uid://brjqpebl0t14f"]
 
-[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_bemli"]
+[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/Tile.gd" id="1_bemli"]
 [ext_resource type="Script" uid="uid://bl5snw1fbt5b3" path="res://scripts/puzzles/FinalGatePuzzle.gd" id="5_oclvx"]
 [ext_resource type="Resource" uid="uid://b11pmr7ctvqqy" path="res://data/SFX.tres" id="5_sfx"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="5_yi2lo"]

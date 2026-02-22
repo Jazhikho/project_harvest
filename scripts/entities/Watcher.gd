@@ -2,10 +2,15 @@ extends Node3D
 ## The Watcher - Half-formed duplicate entity that stalks the player
 ## Appears at edge of vision, causes sanity loss, represents unfinished experiments
 
-@export var spawn_rate_base: float = 0.1 # Base spawn chance per minute
-@export var visibility_duration: float = 2.0 # How long Watcher is visible
+## Base spawn chance per minute
+@export var spawn_rate_base: float = 0.1
+## How long Watcher is visible before despawning
+@export var visibility_duration: float = 2.0
+## Minimum distance from player for spawn
 @export var min_distance_from_player: float = 15.0
+## Maximum distance from player for spawn
 @export var max_distance_from_player: float = 25.0
+## Sanity loss when player sees or touches Watcher
 @export var sanity_loss_per_encounter: int = 15
 
 var current_spawn_rate: float = 0.1
@@ -13,6 +18,7 @@ var is_active: bool = false
 var visibility_timer: float = 0.0
 var spawn_timer: float = 0.0
 var player_reference: Node3D
+var _player_camera: Camera3D
 
 # Visual components
 @onready var mesh_instance: MeshInstance3D = $MeshInstance3D
@@ -29,17 +35,17 @@ enum WatcherState {
 
 var current_state: WatcherState = WatcherState.HIDDEN
 
-func _ready():
+func _ready() -> void:
 	add_to_group("watcher")
 	
 	# Initially hidden
 	visible = false
 	current_state = WatcherState.HIDDEN
 	
-	# Connect to sanity system
-	var sanity_manager = get_node("/root/SanityManager")
-	if sanity_manager:
-		sanity_manager.sanity_changed.connect(_on_sanity_changed)
+	# Connect to sanity system via MessageBus (SanityManager does not define sanity_changed)
+	var message_bus: Node = get_node_or_null("/root/MessageBus")
+	if message_bus and message_bus.has_signal("sanity_changed"):
+		message_bus.sanity_changed.connect(_on_sanity_changed)
 	
 	# Set up despawn timer
 	despawn_timer.wait_time = visibility_duration
@@ -68,7 +74,7 @@ func _update_spawn_logic(delta: float) -> void:
 		if randf() < spawn_chance_per_second:
 			_attempt_spawn()
 
-func _attempt_spawn():
+func _attempt_spawn() -> void:
 	"""Attempt to spawn the Watcher near the player"""
 	var player = _get_player()
 	if not player:
@@ -80,7 +86,7 @@ func _attempt_spawn():
 
 func _find_spawn_position(player_pos: Vector3) -> Vector3:
 	"""Find a valid position to spawn the Watcher"""
-	var maze_manager = get_node("/root/MazeManager")
+	var maze_manager = get_node_or_null("/root/MazeManager")
 	if not maze_manager:
 		return Vector3.INF
 	
@@ -121,7 +127,7 @@ func _is_valid_spawn_position(grid_pos: Vector2i, maze_manager: Node) -> bool:
 	
 	return wall_count < 3 # At least somewhat open
 
-func _manifest_at_position(pos: Vector3):
+func _manifest_at_position(pos: Vector3) -> void:
 	"""Manifest the Watcher at the specified position"""
 	global_position = pos
 	current_state = WatcherState.MANIFESTING
@@ -167,26 +173,27 @@ func _update_visible_behavior(_delta: float) -> void:
 
 func _is_player_looking_at_watcher(player: Node3D) -> bool:
 	"""Check if player is looking directly at the Watcher"""
-	var player_camera = player.get_node("Camera3D")
-	if not player_camera:
+	if not _player_camera or not is_instance_valid(_player_camera):
+		_player_camera = player.get_node_or_null("Camera3D") as Camera3D
+	if not _player_camera:
 		return false
 	
-	var to_watcher = (global_position - player_camera.global_position).normalized()
-	var camera_forward = - player_camera.global_transform.basis.z.normalized()
+	var to_watcher = (global_position - _player_camera.global_position).normalized()
+	var camera_forward = - _player_camera.global_transform.basis.z.normalized()
 	
 	var dot_product = to_watcher.dot(camera_forward)
 	return dot_product > 0.7 # Within field of view
 
 func _trigger_sanity_loss():
 	"""Trigger sanity loss when player sees Watcher"""
-	var sanity_manager = get_node("/root/SanityManager")
+	var sanity_manager = get_node_or_null("/root/SanityManager")
 	if sanity_manager:
 		sanity_manager.apply_sanity_loss("watcher_encounter", sanity_loss_per_encounter)
 	
 	# Despawn after being seen
 	_start_despawn()
 
-func _start_despawn():
+func _start_despawn() -> void:
 	"""Begin despawning process"""
 	if current_state != WatcherState.VISIBLE:
 		return
@@ -220,20 +227,22 @@ func _on_area_entered(body: Node3D) -> void:
 		_trigger_sanity_loss()
 		_start_despawn()
 
-func _on_sanity_changed(new_sanity: int) -> void:
-	"""React to player sanity changes"""
-	var sanity_manager = get_node("/root/SanityManager")
-	if sanity_manager:
+func _on_sanity_changed(_old_value: int, _new_value: int, _delta: int) -> void:
+	"""React to player sanity changes - MessageBus sanity_changed(old_value, new_value, delta)"""
+	var sanity_manager: Node = get_node_or_null("/root/SanityManager")
+	if sanity_manager and sanity_manager.has_method("get_sanity_spawn_rate"):
 		set_spawn_rate(sanity_manager.get_sanity_spawn_rate("watcher"))
 
 func _get_player() -> Node3D:
-	"""Get reference to player"""
+	"""Get reference to player and cache camera when found"""
 	if not player_reference:
 		player_reference = get_tree().get_first_node_in_group("player")
+		if player_reference:
+			_player_camera = player_reference.get_node_or_null("Camera3D") as Camera3D
 	return player_reference
 
 # Public API
-func set_spawn_rate(rate: float):
+func set_spawn_rate(rate: float) -> void:
 	"""Set the spawn rate for this Watcher"""
 	current_spawn_rate = rate
 

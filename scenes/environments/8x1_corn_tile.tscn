@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://bvk2lc8jdxr01" path="res://assets/models/8x1CornTile.glb" id="1_hi4sc"]
 [ext_resource type="ArrayMesh" uid="uid://cqc4t75xd70tq" path="res://assets/models/corn.res" id="2_ghsds"]
-[ext_resource type="Script" uid="uid://b3ge216nc7rm0" path="res://scripts/tiles/corn.gd" id="3_31ibw"]
+[ext_resource type="Script" uid="uid://b3ge216nc7rm0" path="res://scripts/tiles/Corn.gd" id="3_31ibw"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_hi4sc"]
 size = Vector3(8, 2.75, 1)

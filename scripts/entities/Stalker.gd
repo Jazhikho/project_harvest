@@ -1,6 +1,6 @@
 extends CharacterBody3D
 ## The Stalker - Apex predator entity that hunts the player
-## Activated when too many Weird Things are collectedor on low sanity
+## Activated when too many Weird Things are collected or on low sanity
 
 @export var movement_speed: float = 3.0
 @export var hunt_speed: float = 6.0
@@ -76,7 +76,7 @@ func _update_ai_logic(delta: float) -> void:
 	
 	_check_state_transitions()
 
-func _update_navigation():
+func _update_navigation() -> void:
 	"""Update navigation target based on current state"""
 	var player = _get_player()
 	if not player:
@@ -94,7 +94,7 @@ func _update_navigation():
 		StalkerState.CLOSING_IN:
 			_update_closing_navigation(player)
 
-func _update_patrol_navigation():
+func _update_patrol_navigation() -> void:
 	"""Update navigation during patrol state"""
 	patrol_change_timer += navigation_update_interval
 	
@@ -112,7 +112,7 @@ func _update_patrol_navigation():
 		
 		_convert_to_grid_target(current_target_position)
 
-func _update_hunt_navigation(player: Node3D):
+func _update_hunt_navigation(player: Node3D) -> void:
 	"""Update navigation during hunting state"""
 	last_known_player_position = player.global_position
 	
@@ -120,13 +120,13 @@ func _update_hunt_navigation(player: Node3D):
 	current_target_position = last_known_player_position
 	_convert_to_grid_target(current_target_position)
 
-func _update_closing_navigation(player: Node3D):
+func _update_closing_navigation(player: Node3D) -> void:
 	"""Update navigation when closing in on player"""
 	# Direct path to player
 	current_target_position = player.global_position
 	_convert_to_grid_target(current_target_position)
 
-func _convert_to_grid_target(world_pos: Vector3):
+func _convert_to_grid_target(world_pos: Vector3) -> void:
 	"""Convert world position to grid-based target"""
 	target_grid_position = Vector2i(
 		int(world_pos.x / grid_size),
@@ -138,7 +138,7 @@ func _update_movement(delta: float) -> void:
 	if target_grid_position == grid_position:
 		return
 	
-	var maze_manager = get_node("/root/MazeManager")
+	var maze_manager = get_node_or_null("/root/MazeManager")
 	if not maze_manager:
 		return
 	
@@ -148,7 +148,8 @@ func _update_movement(delta: float) -> void:
 		_move_to_grid_position(next_step, delta)
 
 func _calculate_next_pathfinding_step(maze_manager: Node) -> Vector2i:
-	"""Calculate next step towards target using simple pathfinding"""
+	"""Calculate next step towards target using simple pathfinding.
+	TODO: MazeManager.can_move() required - see Implementation Plan "The Stalker"."""
 	var dx = target_grid_position.x - grid_position.x
 	var dy = target_grid_position.y - grid_position.y
 	
@@ -156,9 +157,15 @@ func _calculate_next_pathfinding_step(maze_manager: Node) -> Vector2i:
 	var next_pos = grid_position
 	
 	if abs(dx) > abs(dy):
-		next_pos.x += 1 if dx > 0 else -1
+		if dx > 0:
+			next_pos.x += 1
+		else:
+			next_pos.x -= 1
 	else:
-		next_pos.y += 1 if dy > 0 else -1
+		if dy > 0:
+			next_pos.y += 1
+		else:
+			next_pos.y -= 1
 	
 	# Check if movement is valid
 	if maze_manager.can_move(grid_position.x, grid_position.y, next_pos.x, next_pos.y):
@@ -167,17 +174,23 @@ func _calculate_next_pathfinding_step(maze_manager: Node) -> Vector2i:
 	# Try alternative direction if primary is blocked
 	if abs(dx) > abs(dy):
 		next_pos = grid_position
-		next_pos.y += 1 if dy > 0 else -1
+		if dy > 0:
+			next_pos.y += 1
+		else:
+			next_pos.y -= 1
 	else:
 		next_pos = grid_position
-		next_pos.x += 1 if dx > 0 else -1
+		if dx > 0:
+			next_pos.x += 1
+		else:
+			next_pos.x -= 1
 	
 	if maze_manager.can_move(grid_position.x, grid_position.y, next_pos.x, next_pos.y):
 		return next_pos
 	
 	return Vector2i(-1, -1) # No valid move
 
-func _move_to_grid_position(new_grid_pos: Vector2i, delta: float):
+func _move_to_grid_position(new_grid_pos: Vector2i, delta: float) -> void:
 	"""Smoothly move to new grid position"""
 	grid_position = new_grid_pos
 	var target_world_pos = Vector3(
@@ -187,10 +200,14 @@ func _move_to_grid_position(new_grid_pos: Vector2i, delta: float):
 	)
 	
 	# Smooth movement
-	var speed = hunt_speed if current_state == StalkerState.HUNTING else movement_speed
+	var speed: float
+	if current_state == StalkerState.HUNTING:
+		speed = hunt_speed
+	else:
+		speed = movement_speed
 	global_position = global_position.move_toward(target_world_pos, speed * delta)
 
-func _check_state_transitions():
+func _check_state_transitions() -> void:
 	"""Check for state transitions based on player proximity and sanity"""
 	var player = _get_player()
 	if not player:
@@ -232,37 +249,21 @@ func _check_state_transitions():
 		if distance_to_player <= 1.0:
 			_trigger_player_caught()
 
-func _transition_to_patrolling():
-	"""Transition to patrolling state"""
-	current_state = StalkerState.PATROLLING
-	patrol_center = global_position
-	_play_state_audio("patrol")
-
 func _transition_to_hunting():
 	"""Transition to hunting state"""
 	current_state = StalkerState.HUNTING
 	_play_state_audio("hunt")
 	
 	# Trigger sanity loss when hunt begins
-	var sanity_manager = get_node("/root/SanityManager")
+	var sanity_manager = get_node_or_null("/root/SanityManager")
 	if sanity_manager:
 		sanity_manager.apply_sanity_loss("stalker_proximity", 20)
-
-func _transition_to_closing_in():
-	"""Transition to closing in state"""
-	current_state = StalkerState.CLOSING_IN
-	_play_state_audio("closing")
-	
-	# Heavy sanity loss when stalker gets close
-	var sanity_manager = get_node("/root/SanityManager")
-	if sanity_manager:
-		sanity_manager.apply_sanity_loss("stalker_proximity", 40)
 
 func _trigger_player_caught():
 	"""Handle player being caught by stalker"""
 	
 	# End game with consumed status
-	var game_director = get_node("/root/GameDirector")
+	var game_director = get_node_or_null("/root/GameDirector")
 	if game_director:
 		var player = _get_player()
 		var player_pos = Vector2.ZERO
@@ -292,11 +293,11 @@ func _apply_proximity_sanity_drain(_delta: float) -> void:
 	"""Apply gradual sanity drain when Stalker is nearby"""
 	# Occasional sanity drain instead of constant
 	if randf() < 0.05: # 5% chance per frame when close
-		var sanity_manager = get_node("/root/SanityManager")
+		var sanity_manager = get_node_or_null("/root/SanityManager")
 		if sanity_manager:
 			sanity_manager.apply_sanity_loss("stalker_proximity", 5)
 
-func _play_state_audio(state_type: String):
+func _play_state_audio(state_type: String) -> void:
 	"""Play audio appropriate for current state"""
 	match state_type:
 		"patrol":
@@ -324,7 +325,7 @@ func _get_player() -> Node3D:
 	return player_reference
 
 # Public API
-func activate():
+func activate() -> void:
 	"""Activate the Stalker (called when enough weird things collected)"""
 	if is_activated:
 		return
@@ -352,9 +353,3 @@ func activate():
 			int(global_position.x / grid_size),
 			int(global_position.z / grid_size)
 		)
-
-func is_stalker_active() -> bool:
-	return is_activated
-
-func get_stalker_state() -> StalkerState:
-	return current_state

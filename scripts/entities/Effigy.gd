@@ -5,14 +5,23 @@ extends BaseEntity
 
 signal stage_changed(new_stage: int)
 
-@export var turn_speed: float = 999.0 # Instant turning
-@export var follow_speed_base: float = 0.5 # Very slow base speed
+## Turn speed; 999 = instant turning
+@export var turn_speed: float = 999.0
+## Base follow speed when sanity high
+@export var follow_speed_base: float = 0.5
+## Follow speed at half sanity
 @export var follow_speed_half: float = 1
+## Follow speed at full sanity
 @export var follow_speed_full: float = 2
+## Speed when in aggression mode
 @export var aggressive_speed: float = 5
-@export var stop_distance: float = 1.5 # Distance to maintain from player
-@export var visibility_check_interval: float = 0.1 # How often to check if player is looking
+## Distance to maintain from player
+@export var stop_distance: float = 1.5
+## How often to check if player is looking
+@export var visibility_check_interval: float = 0.1
+## NodePath to player Camera3D for visibility checks
 @export var camera_path: NodePath
+## SFX library for dragging sounds
 @export var sfx_library: SFX
 
 var dragging_player: AudioStreamPlayer3D = null
@@ -209,6 +218,10 @@ func _manual_visibility_check() -> bool:
 	
 	return true
 
+
+## Gets the player's Camera3D for visibility/raycast checks.
+## Uses camera_path if set, else "Camera3D" child, else active viewport camera.
+## Returns the camera node or null if none found.
 func _get_player_camera() -> Camera3D:
 	var cam: Camera3D = null
 	if camera_path != NodePath() and is_instance_valid(player):
@@ -274,17 +287,6 @@ func _update_following_behavior() -> void:
 	elif was_following and not is_following and _message_bus:
 		_message_bus.emit_event("entity_lost_player", ["effigy", self])
 
-func _emit_detection_event_if_needed(was_following: bool) -> void:
-	"""Emit detection event when starting to follow"""
-	if not was_following and is_following and _message_bus:
-		var distance = get_distance_to_player()
-		_message_bus.emit_event("entity_detected_player", ["effigy", self, distance])
-
-func _emit_lost_player_event_if_needed(was_following: bool) -> void:
-	"""Emit lost player event when stopping follow"""
-	if was_following and not is_following and _message_bus:
-		_message_bus.emit_event("entity_lost_player", ["effigy", self])
-
 func _turn_toward_player() -> void:
 	"""Turn to face player - only happens when player is NOT looking"""
 	if not player: return
@@ -315,7 +317,11 @@ func _move_toward_player(delta: float) -> void:
 	direction = direction.normalized()
 	
 	# Apply horizontal movement only (preserve Y velocity for gravity)
-	var speed: float = aggressive_speed if aggression_mode else follow_speed
+	var speed: float
+	if aggression_mode:
+		speed = aggressive_speed
+	else:
+		speed = follow_speed
 	velocity.x = direction.x * speed
 	velocity.z = direction.z * speed
 
@@ -375,13 +381,11 @@ func _change_stage(new_stage: int) -> void:
 			if stage4: stage4.visible = true
 	
 	current_stage = new_stage
-	
+
 	# Emit stage change signal and event
-	if old_stage != new_stage:
-		stage_changed.emit(new_stage)
-		if _message_bus:
-			_message_bus.emit_event("entity_stage_changed", ["effigy", self, old_stage, new_stage])
-	
+	stage_changed.emit(new_stage)
+	if _message_bus:
+		_message_bus.emit_event("entity_stage_changed", ["effigy", self, old_stage, new_stage])
 
 # Detection Area Signal Handlers
 func _on_detection_area_entered(body: Node3D) -> void:
@@ -489,17 +493,27 @@ func get_stage() -> int:
 ## @param reason: Optional reason tag for telemetry/logging.
 ## @return void.
 func set_aggression_mode(active: bool, reason: StringName = &"") -> void:
-	aggression_mode = true
-	
+	var old_aggression: bool = aggression_mode
+	aggression_mode = active
+
 	if aggression_mode:
 		# Lock movement policy for aggression: always allowed and fast
 		follow_speed = aggressive_speed
 		turn_speed = 999.0
 		is_following = true
 		can_move = true
-		
+
 		# Force stage 4 appearance for aggressive effigies
 		_change_stage(4)
-		
+
 		if _message_bus:
-			_message_bus.emit_event("entity_state_changed", ["effigy", "aggression_started", reason])
+			var old_state_str: String = "aggressive" if old_aggression else "calm"
+			_message_bus.emit_event("entity_state_changed", ["effigy", self, old_state_str, reason])
+	else:
+		# Reset to sanity-based behavior when exiting aggression
+		is_following = false
+		can_move = false
+		_update_behavior_for_sanity()
+
+		if _message_bus:
+			_message_bus.emit_event("entity_state_changed", ["effigy", self, "aggressive", reason])

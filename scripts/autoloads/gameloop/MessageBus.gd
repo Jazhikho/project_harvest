@@ -197,7 +197,7 @@ func _log_event(signal_name: String, args: Array) -> void:
 	@param signal_name: Name of the emitted signal
 	@param args: Arguments passed with the signal
 	"""
-	var event := {
+	var event: Dictionary = {
 		"signal": signal_name,
 		"args": args.duplicate(),
 		"timestamp": Time.get_ticks_msec(),
@@ -212,20 +212,3 @@ func _log_event(signal_name: String, args: Array) -> void:
 	if _debug_mode:
 		var indent = "  ".repeat(_emission_stack.size())
 		# Debug print removed - not referencing gameloop steps
-
-func _format_args(args: Array) -> String:
-	"""
-	Format arguments array for debug printing
-	
-	@param args: Arguments to format
-	@return: Formatted string representation
-	"""
-	var formatted := []
-	for arg in args:
-		formatted.append(str(arg))
-	return ", ".join(formatted)
-
-# Debug functions
-func debug_print_emission_stack() -> void:
-	"""Print current emission stack for debugging"""
-	pass

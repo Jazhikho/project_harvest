@@ -57,8 +57,6 @@ func _initialize_systems() -> void:
 	if not _sfx_resource.whispers or _sfx_resource.whispers.size() == 0:
 		push_error("RandomWhispers: No whisper sounds found in SFX resource")
 		return
-	
-	print("RandomWhispers: Initialized with %d whisper sounds" % _sfx_resource.whispers.size())
 
 func _create_audio_pool() -> void:
 	"""Create a pool of AudioStreamPlayer3D nodes for playing whispers"""
@@ -125,8 +123,6 @@ func _play_random_whisper() -> void:
 	player.global_position = random_pos
 	player.stream = whisper_sound
 	player.play()
-	
-	print("RandomWhispers: Playing whisper at position %v" % random_pos)
 
 func _get_available_player() -> AudioStreamPlayer3D:
 	"""Get an available audio player from the pool"""

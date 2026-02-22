@@ -1,9 +1,6 @@
-extends Node
+extends BaseManager
 ## Settings Manager - Centralized game settings management
 ## Handles all game settings including audio, graphics, and controls
-
-var _message_bus: Node
-var _save_manager: Node
 
 # Settings data
 var _settings: Dictionary = {
@@ -36,20 +33,14 @@ func _ready() -> void:
 	name = "SettingsManager"
 	add_to_group("core_systems")
 	_defaults = _settings.duplicate(true)
-	call_deferred("_initialize")
+	require_systems(["MessageBus"])
+	super._ready()
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize connections to core systems"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_save_manager = get_node_or_null("/root/SaveManager")
-	
-	if not _message_bus:
-		push_error("SettingsManager: MessageBus not found")
-		return
-	
 	_load_settings()
 	_apply_all_settings()
-	
+
 	# Ensure AudioManager gets the loaded settings
 	call_deferred("_notify_audio_manager_settings_loaded")
 
@@ -82,35 +73,35 @@ func set_setting(category: String, key: String, value: Variant) -> bool:
 	"""
 	return _set_setting_internal(category, key, value, true)
 
-func _set_setting_internal(category: String, key: String, value: Variant, emit_event: bool) -> bool:
+func _set_setting_internal(category: String, key: String, value: Variant, should_emit: bool) -> bool:
 	"""
 	Internal method to set a setting value with optional event emission
-	
+
 	@param category: Settings category
 	@param key: Setting key within category
 	@param value: New value to set
-	@param emit_event: Whether to emit setting_changed event
+	@param should_emit: Whether to emit setting_changed event
 	@return: True if setting was changed successfully
 	"""
 	if not _settings.has(category):
 		push_error("SettingsManager: Cannot set unknown category '%s'" % category)
 		return false
-	
+
 	if not _settings[category].has(key):
 		push_error("SettingsManager: Cannot set unknown setting '%s.%s'" % [category, key])
 		return false
-	
+
 	var old_value = _settings[category][key]
 	if old_value == value:
 		return false # No change needed
-	
+
 	_settings[category][key] = value
 	_apply_setting(category, key, value)
 	_save_settings()
-	
+
 	# Emit change event only if requested
-	if emit_event and _message_bus:
-		_message_bus.emit_event("setting_changed", [category, key, old_value, value])
+	if should_emit and _message_bus:
+		emit_event("setting_changed", [category, key, old_value, value])
 	
 	return true
 
@@ -130,7 +121,7 @@ func reset_category(category: String) -> bool:
 	_save_settings()
 	
 	if _message_bus:
-		_message_bus.emit_event("settings_category_reset", [category])
+		emit_event("settings_category_reset", [category])
 	
 	return true
 
@@ -141,7 +132,7 @@ func reset_all_settings() -> void:
 	_save_settings()
 	
 	if _message_bus:
-		_message_bus.emit_event("settings_reset", [])
+		emit_event("settings_reset", [])
 
 func _apply_setting(category: String, key: String, value: Variant) -> void:
 	"""
@@ -184,9 +175,12 @@ func _apply_graphics_setting(key: String, value: Variant) -> void:
 			else:
 				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 		"vsync":
-			DisplayServer.window_set_vsync_mode(
-				DisplayServer.VSYNC_ENABLED if value else DisplayServer.VSYNC_DISABLED
-			)
+			var vsync_mode: DisplayServer.VSyncMode
+			if value:
+				vsync_mode = DisplayServer.VSYNC_ENABLED
+			else:
+				vsync_mode = DisplayServer.VSYNC_DISABLED
+			DisplayServer.window_set_vsync_mode(vsync_mode)
 		"resolution":
 			if value is Vector2i:
 				DisplayServer.window_set_size(value)

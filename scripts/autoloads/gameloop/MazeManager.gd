@@ -1,8 +1,7 @@
-extends Node
+extends BaseManager
 ## Maze Manager - Handles algorithmic maze generation patterns
 ## Provides maze generation utilities for TileManager
 
-var _message_bus: Node
 var _maze_data: Dictionary = {}
 
 # Maze generation parameters
@@ -13,16 +12,11 @@ var _generation_seed: int = 0
 func _ready() -> void:
 	name = "MazeManager"
 	add_to_group("game_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus"])
+	super._ready()
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize connections"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	
-	if not _message_bus:
-		push_error("MazeManager: MessageBus not found")
-		return
-	
 	_connect_to_events()
 
 func generate_maze_pattern(size: Vector2i, seed_value: int = -1) -> Dictionary:
@@ -49,7 +43,7 @@ func generate_maze_pattern(size: Vector2i, seed_value: int = -1) -> Dictionary:
 	}
 	
 	_maze_data = pattern
-	_message_bus.emit_event("maze_generated", [size, seed_value])
+	emit_event("maze_generated", [size, seed_value])
 	
 	return pattern
 
@@ -70,14 +64,14 @@ func _generate_connection_map() -> Dictionary:
 			var allowed_dirs: Array[int] = []
 			
 			# Randomly allow connections
-			if rng.randf() < 0.7:  # 70% chance for each direction
-				allowed_dirs.append(1)  # North
+			if rng.randf() < 0.7: # 70% chance for each direction
+				allowed_dirs.append(1) # North
 			if rng.randf() < 0.7:
-				allowed_dirs.append(2)  # East
+				allowed_dirs.append(2) # East
 			if rng.randf() < 0.7:
-				allowed_dirs.append(4)  # South
+				allowed_dirs.append(4) # South
 			if rng.randf() < 0.7:
-				allowed_dirs.append(8)  # West
+				allowed_dirs.append(8) # West
 			
 			# Ensure at least one connection
 			if allowed_dirs.is_empty():
@@ -197,7 +191,7 @@ func get_allowed_connections(position: Vector2i) -> Array[int]:
 	@return: Array of allowed direction flags
 	"""
 	if not _maze_data.has("connections"):
-		return [1, 2, 4, 8]  # Allow all directions by default
+		return [1, 2, 4, 8] # Allow all directions by default
 	
 	var connections: Dictionary = _maze_data.connections
 	return connections.get(position, [1, 2, 4, 8])
@@ -245,9 +239,8 @@ func get_maze_data() -> Dictionary:
 	return _maze_data.duplicate()
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.maze_shift_triggered.connect(_on_maze_shift_triggered)
-	_message_bus.game_started.connect(_on_game_started)
 
 func _on_maze_shift_triggered(center: Vector2i, radius: int, affected_tiles: Array) -> void:
 	"""Handle maze shift events"""

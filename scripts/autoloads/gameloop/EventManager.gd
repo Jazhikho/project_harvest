@@ -1,29 +1,20 @@
-extends Node
+extends BaseManager
 ## Event Manager - Processes events.json triggers and conditions
 ## Focused solely on event processing, delegates everything else to appropriate systems
 
-var _message_bus: Node
-var _state_manager: Node
-
 var _event_data: Dictionary = {}
-var _processed_events: Dictionary = {}  # Track once/once_per_run events
+var _processed_events: Dictionary = {} # Track once/once_per_run events
 
 const EVENTS_DATA_PATH: String = "res://data/events.json"
 
 func _ready() -> void:
 	name = "EventManager"
 	add_to_group("game_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus", "GameStateManager"])
+	super._ready()
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize connections and load event data"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_state_manager = get_node_or_null("/root/GameStateManager")
-	
-	if not _message_bus or not _state_manager:
-		push_error("EventManager: Required core systems not found")
-		return
-	
 	_connect_to_events()
 
 func _create_default_events() -> void:
@@ -191,38 +182,38 @@ func _execute_event_action(action: Dictionary, context: Dictionary) -> void:
 		"spawn_entity":
 			var entity_type: String = action.get("type", "")
 			var position: Vector3 = _get_spawn_position(action, context)
-			_message_bus.emit_event("entity_spawned", [entity_type, null, position])
+			emit_event("entity_spawned", [entity_type, null, position])
 		
 		"give_item":
 			var item_id: String = action.get("id", "")
-			_message_bus.emit_event("item_collected", [item_id, null, Vector2i.ZERO])
+			emit_event("item_collected", [item_id, null, Vector2i.ZERO])
 		
 		"trigger_effect":
 			var effect_type: String = action.get("type", "")
 			var intensity: float = action.get("intensity", 0.5)
-			_message_bus.emit_event("weird_effect_triggered", [effect_type, intensity, Vector3.ZERO])
+			emit_event("weird_effect_triggered", [effect_type, intensity, Vector3.ZERO])
 		
 		"show_notification":
 			var message: String = action.get("message", "")
 			var duration: float = action.get("duration", 3.0)
 			var priority: int = action.get("priority", 1)
-			_message_bus.emit_event("notification_requested", [message, duration, priority])
+			emit_event("notification_requested", [message, duration, priority])
 		
 		"screen_effect":
 			var effect_type: String = action.get("type", "")
 			var duration: float = action.get("duration", 2.0)
 			var intensity: float = action.get("intensity", 0.5)
-			_message_bus.emit_event("screen_effect_requested", [effect_type, duration, intensity])
+			emit_event("screen_effect_requested", [effect_type, duration, intensity])
 		
 		"maze_shift":
 			var center: Vector2i = _get_position_from_context(context)
 			var radius: int = action.get("radius", 3)
-			_message_bus.emit_event("maze_shift_triggered", [center, radius, []])
+			emit_event("maze_shift_triggered", [center, radius, []])
 		
 		"end_game":
 			var cause: String = action.get("cause", "Unknown")
 			var data: Dictionary = action.get("data", {})
-			_message_bus.emit_event("game_ended", [cause, data])
+			emit_event("game_ended", [cause, data])
 		
 		"play_sound":
 			var sound_id: String = action.get("id", "")
@@ -238,8 +229,8 @@ func _show_note(note_id: String) -> void:
 	"""
 	var note_text: String = _get_note_text(note_id)
 	if not note_text.is_empty():
-		_message_bus.emit_event("note_shown", [note_id, note_text])
-		_message_bus.emit_event("notification_requested", ["Found research note...", 2.0, 1])
+		emit_event("note_shown", [note_id, note_text])
+		emit_event("notification_requested", ["Found research note...", 2.0, 1])
 
 func _show_speech(speech_id: String) -> void:
 	"""
@@ -249,8 +240,8 @@ func _show_speech(speech_id: String) -> void:
 	"""
 	var speech_text: String = _event_data.get("speeches", {}).get(speech_id, "")
 	if not speech_text.is_empty():
-		_message_bus.emit_event("speech_played", [speech_id, speech_text])
-		_message_bus.emit_event("notification_requested", [speech_text, 4.0, 2])
+		emit_event("speech_played", [speech_id, speech_text])
+		emit_event("notification_requested", [speech_text, 4.0, 2])
 
 func _get_note_text(note_id: String) -> String:
 	"""
@@ -320,13 +311,12 @@ func get_event_data(category: String = "") -> Dictionary:
 	return _event_data.get(category, {})
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.tile_entered.connect(_on_tile_entered)
 	_message_bus.item_collected.connect(_on_item_collected)
 	_message_bus.player_interacted.connect(_on_player_interacted)
 	_message_bus.sanity_threshold_crossed.connect(_on_sanity_threshold_crossed)
 	_message_bus.puzzle_completed.connect(_on_puzzle_completed)
-	_message_bus.game_started.connect(_on_game_started)
 
 func _on_tile_entered(tile_node: Node3D, position: Vector2i, player: Node3D) -> void:
 	"""Handle tile entry events"""

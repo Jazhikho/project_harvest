@@ -300,6 +300,18 @@ func get_session_data() -> Dictionary:
 	"""Get current session data"""
 	return _game_session_data.duplicate()
 
+func get_weird_findings_count() -> int:
+	"""
+	Get count of weird things/objects collected this session.
+	Delegates to WeirdThingsManager if present; otherwise returns 0.
+
+	@return: Count of weird findings collected
+	"""
+	var weird_things_manager: Node = get_node_or_null("/root/WeirdThingsManager")
+	if weird_things_manager and weird_things_manager.has_method("get_collected_count"):
+		return weird_things_manager.get_collected_count()
+	return 0
+
 func is_finale_available() -> bool:
 	"""Check if finale events can trigger"""
 	return _state_manager.has_flag("final_event_available")
@@ -307,8 +319,7 @@ func is_finale_available() -> bool:
 # Event handlers
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
-	_message_bus.game_started.connect(_on_game_started)
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.player_died.connect(_on_player_died)
 	_message_bus.sanity_threshold_crossed.connect(_on_sanity_threshold_crossed)
 	_message_bus.puzzle_completed.connect(_on_puzzle_completed)

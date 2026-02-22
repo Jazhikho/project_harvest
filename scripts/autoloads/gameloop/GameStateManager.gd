@@ -2,7 +2,7 @@ extends Node
 ## Centralized game state management
 ## Single source of truth for all game state data
 
-var _state := {
+var _state: Dictionary = {
 	"sanity": 100,
 	"flags": {},
 	"inventory": [],
@@ -24,8 +24,8 @@ var _state_history: Array[Dictionary] = []
 var _max_history: int = 50
 var _message_bus: Node
 
-const MAX_SANITY := 100
-const MIN_SANITY := 0
+const MAX_SANITY: int = 100
+const MIN_SANITY: int = 0
 
 func _ready() -> void:
 	name = "GameStateManager"
@@ -100,7 +100,7 @@ func modify_sanity(delta: int) -> int:
 	@return: New sanity value after modification
 	"""
 	var old_sanity: int = _state.sanity
-	var new_sanity := clampi(old_sanity + delta, MIN_SANITY, MAX_SANITY)
+	var new_sanity: int = clampi(old_sanity + delta, MIN_SANITY, MAX_SANITY)
 	
 	if new_sanity != old_sanity:
 		_state.sanity = new_sanity
@@ -161,7 +161,7 @@ func record_death_location(position: Vector2i, cause: String) -> void:
 		# Pick a random adjacent tile for the backpack
 		final_position = adjacent_positions[randi() % adjacent_positions.size()]
 	
-	var death_data := {
+	var death_data: Dictionary = {
 		"position": final_position,
 		"original_death_position": position, # Keep track of actual death location
 		"cause": cause,
@@ -216,7 +216,7 @@ func save_state_snapshot() -> Dictionary:
 	
 	@return: Deep copy of current state
 	"""
-	var snapshot := _state.duplicate(true)
+	var snapshot: Dictionary = _state.duplicate(true)
 	snapshot["timestamp"] = Time.get_unix_time_from_system()
 	
 	_state_history.append(snapshot)
@@ -279,7 +279,7 @@ func _check_sanity_thresholds(old_value: int, new_value: int) -> void:
 	@param old_value: Previous sanity value
 	@param new_value: New sanity value
 	"""
-	var thresholds := {
+	var thresholds: Dictionary = {
 		"critical": 20,
 		"low": 40,
 		"normal": 60,

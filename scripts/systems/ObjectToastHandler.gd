@@ -38,25 +38,19 @@ func _load_interactions_data() -> void:
 		return
 	
 	_interactions_data = json.data
-	print("ObjectToastHandler: Loaded interactions data with %d entries" % _interactions_data.get("interactions", {}).size())
 
 func _connect_to_systems() -> void:
 	"""Connect to MessageBus (NarrativeUI will be found lazily when needed)"""
-	print("ObjectToastHandler: _connect_to_systems called")
-	
 	_message_bus = get_node_or_null("/root/MessageBus")
 	if not _message_bus:
 		push_error("ObjectToastHandler: MessageBus not found")
 		return
-	
-	print("ObjectToastHandler: MessageBus found")
 	
 	# Don't search for NarrativeUI yet - it won't exist until Game scene loads
 	# We'll find it lazily when first needed
 	
 	# Connect to object interaction event
 	_message_bus.connect_event("object_interacted", _on_object_interacted)
-	print("ObjectToastHandler: Connected to MessageBus events")
 
 func _on_object_interacted(object_id: String, interaction_count: int, object_node: Node3D) -> void:
 	"""
@@ -66,8 +60,6 @@ func _on_object_interacted(object_id: String, interaction_count: int, object_nod
 	@param interaction_count: How many times this object has been interacted with
 	@param object_node: The node that was interacted with
 	"""
-	print("ObjectToastHandler: Received object_interacted event for '%s' (count: %d)" % [object_id, interaction_count])
-	
 	if not _interactions_data.has("interactions"):
 		push_error("ObjectToastHandler: No interactions data loaded")
 		return
@@ -130,7 +122,6 @@ func _find_narrative_ui() -> bool:
 			_narrative_ui = narrative_nodes[0]
 	
 	if _narrative_ui:
-		print("ObjectToastHandler: Found NarrativeUI at: %s" % _narrative_ui.get_path())
 		return true
 	else:
 		push_error("ObjectToastHandler: NarrativeUI not found in scene tree")
@@ -161,27 +152,16 @@ func _queue_toast(text: String, duration: float) -> void:
 	@param text: The message text to display
 	@param duration: How long to display the message
 	"""
-	print("ObjectToastHandler: _queue_toast called with text: '%s', duration: %.1f" % [text.substr(0, 50), duration])
-	
 	# Lazily find NarrativeUI if we don't have it yet
 	if not _find_narrative_ui():
 		push_error("ObjectToastHandler: Cannot queue toast - NarrativeUI not available")
 		return
 	
-	print("ObjectToastHandler: NarrativeUI found, checking for _queue_message method...")
-	
 	if not _narrative_ui.has_method("_queue_message"):
 		push_error("ObjectToastHandler: NarrativeUI does not have _queue_message method")
-		print("ObjectToastHandler: Available methods: ", _narrative_ui.get_method_list().map(func(m): return m.name))
 		return
 	
-	print("ObjectToastHandler: Calling _narrative_ui._queue_message()")
-	print("ObjectToastHandler: NarrativeUI visible=%s, modulate.a=%.2f" % [_narrative_ui.visible, _narrative_ui.modulate.a])
-	
-	# Call NarrativeUI's queue method directly
 	_narrative_ui._queue_message(text, duration)
-	
-	print("ObjectToastHandler: _queue_message call completed")
 
 # Public API for debugging/testing
 

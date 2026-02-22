@@ -50,8 +50,6 @@ func _initialize_systems() -> void:
 	if not _sfx_resource.crows or _sfx_resource.crows.size() == 0:
 		push_error("RandomCrowSounds: No crow sounds found in SFX resource")
 		return
-	
-	print("RandomCrowSounds: Initialized with %d crow sounds" % _sfx_resource.crows.size())
 
 func _create_audio_player() -> void:
 	"""Create an AudioStreamPlayer3D node for playing crow sounds"""
@@ -111,5 +109,3 @@ func _play_random_crow_sound() -> void:
 	# Play the sound
 	_audio_player.stream = crow_sound
 	_audio_player.play()
-	
-	print("RandomCrowSounds: Playing crow sound at %s" % global_position)

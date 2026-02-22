@@ -72,7 +72,10 @@ func _connect_base_events() -> void:
 # Common utility methods
 func get_entity_name() -> String:
 	"""Get entity name for logging"""
-	return name if name != "" else entity_type
+	if name != "":
+		return name
+	else:
+		return entity_type
 
 func is_player_valid() -> bool:
 	"""Check if player reference is valid"""
@@ -86,7 +89,11 @@ func get_distance_to_player() -> float:
 
 func is_player_in_range(range_override: float = -1.0) -> bool:
 	"""Check if player is within detection range"""
-	var check_range = range_override if range_override > 0.0 else detection_range
+	var check_range: float
+	if range_override > 0.0:
+		check_range = range_override
+	else:
+		check_range = detection_range
 	return get_distance_to_player() <= check_range
 
 func get_direction_to_player() -> Vector3:
@@ -128,10 +135,6 @@ func emit_lost_player_event() -> void:
 	emit_entity_event("entity_lost_player")
 
 # Logging helpers
-func _log_info(message: String) -> void:
-	"""Log info message with entity name"""
-	# Debug print removed - not referencing gameloop steps
-
 func _log_warning(message: String) -> void:
 	"""Log warning message with entity name"""
 	push_warning("%s: %s" % [get_entity_name(), message])
@@ -176,8 +179,10 @@ func validate_required_nodes(node_paths: Array[String]) -> bool:
 func set_entity_active(active: bool) -> void:
 	"""Set entity active state with event emission"""
 	if is_active != active:
+		var old_state_str: String = "active" if is_active else "inactive"
+		var new_state_str: String = "active" if active else "inactive"
 		is_active = active
-		emit_entity_event("entity_state_changed", [is_active])
+		emit_entity_event("entity_state_changed", [old_state_str, new_state_str])
 
 func get_current_sanity() -> int:
 	"""Get current sanity from state manager"""

@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://3o1ack5rxymp" path="res://assets/models/6x1CornTile.glb" id="1_b5q2x"]
 [ext_resource type="ArrayMesh" uid="uid://cqc4t75xd70tq" path="res://assets/models/corn.res" id="2_g6erx"]
-[ext_resource type="Script" uid="uid://b3ge216nc7rm0" path="res://scripts/tiles/corn.gd" id="3_n1e1e"]
+[ext_resource type="Script" uid="uid://b3ge216nc7rm0" path="res://scripts/tiles/Corn.gd" id="3_n1e1e"]
 
 [sub_resource type="MultiMesh" id="MultiMesh_sqx65"]
 transform_format = 1

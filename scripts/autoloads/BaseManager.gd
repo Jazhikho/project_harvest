@@ -17,7 +17,7 @@ var _required_systems: Array[String] = []
 # Constants for system paths
 const SYSTEM_PATHS = {
 	"MessageBus": "/root/MessageBus",
-	"GameStateManager": "/root/GameStateManager", 
+	"GameStateManager": "/root/GameStateManager",
 	"SaveManager": "/root/SaveManager",
 	"TileManager": "/root/TileManager",
 	"SpawnManager": "/root/SpawnManager",
@@ -48,7 +48,7 @@ func _base_initialize() -> void:
 	
 	# Get core system references
 	_message_bus = get_system_node("MessageBus")
-	_state_manager = get_system_node("GameStateManager") 
+	_state_manager = get_system_node("GameStateManager")
 	_save_manager = get_system_node("SaveManager")
 	
 	# Check required systems
@@ -86,7 +86,7 @@ func get_system_node(system_name: String) -> Node:
 		push_warning("%s: Unknown system name '%s'" % [get_manager_name(), system_name])
 		return null
 	
-	var node = get_node_or_null(SYSTEM_PATHS[system_name])
+	var node: Node = get_node_or_null(SYSTEM_PATHS[system_name])
 	if not node:
 		push_warning("%s: System '%s' not found at %s" % [get_manager_name(), system_name, SYSTEM_PATHS[system_name]])
 	
@@ -101,13 +101,12 @@ func require_systems(systems: Array[String]) -> void:
 	_required_systems = systems
 
 func _validate_required_systems() -> bool:
-	"""
-	Validate that all required systems are available
-	
+	"""Validate that all required systems are available.
+
 	@return: True if all required systems are available
 	"""
 	for system_name in _required_systems:
-		var system_node = get_system_node(system_name)
+		var system_node: Node = get_system_node(system_name)
 		if not system_node:
 			push_error("%s: Required system '%s' not available" % [get_manager_name(), system_name])
 			return false
@@ -116,7 +115,10 @@ func _validate_required_systems() -> bool:
 
 func get_manager_name() -> String:
 	"""Get the name of this manager for logging"""
-	return name if name else get_script().get_path().get_file().get_basename()
+	if name:
+		return name
+	else:
+		return get_script().get_path().get_file().get_basename()
 
 func is_initialized() -> bool:
 	"""Check if manager is fully initialized"""
@@ -161,16 +163,12 @@ func connect_event(event_name: String, callable: Callable) -> bool:
 		push_warning("%s: Event '%s' not found in MessageBus" % [get_manager_name(), event_name])
 		return false
 	
-	var signal_obj = _message_bus.get(event_name)
+	var signal_obj: Variant = _message_bus.get(event_name)
 	if signal_obj and signal_obj is Signal:
 		signal_obj.connect(callable)
 		return true
 	
 	return false
-
-func log_info(message: String) -> void:
-	"""Log info message with manager name prefix"""
-	# Debug print removed - not referencing gameloop steps
 
 func log_warning(message: String) -> void:
 	"""Log warning message with manager name prefix"""

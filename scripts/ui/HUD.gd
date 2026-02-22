@@ -36,16 +36,16 @@ func _ready():
 
 func _connect_to_systems():
 	"""Connect to autoload systems for data updates"""
-	var sanity_manager = get_node("/root/SanityManager")
+	var sanity_manager = get_node_or_null("/root/SanityManager")
 	if sanity_manager:
 		sanity_manager.sanity_changed.connect(_on_sanity_changed)
 		sanity_manager.sanity_critical.connect(_on_sanity_critical)
 	
-	var game_director = get_node("/root/GameDirector")
+	var game_director = get_node_or_null("/root/GameDirector")
 	if game_director:
 		game_director.weird_thing_collected.connect(_on_weird_thing_collected)
 	
-	var weird_things_manager = get_node("/root/WeirdThingsManager")
+	var weird_things_manager = get_node_or_null("/root/WeirdThingsManager")
 	if weird_things_manager:
 		weird_things_manager.weird_thing_collected.connect(_on_weird_collected_update)
 
@@ -77,13 +77,13 @@ func _on_sanity_critical():
 
 func _on_weird_thing_collected(type: String):
 	"""Handle weird thing collection"""
-	var game_director = get_node("/root/GameDirector")
+	var game_director = get_node_or_null("/root/GameDirector")
 	if game_director:
 		_update_weird_counter(game_director.get_weird_findings_count())
 
 func _on_weird_collected_update(type: String, position: Vector2i):
 	"""Handle weird things manager update"""
-	var weird_things_manager = get_node("/root/WeirdThingsManager")
+	var weird_things_manager = get_node_or_null("/root/WeirdThingsManager")
 	if weird_things_manager:
 		_update_weird_counter(weird_things_manager.get_collected_count())
 

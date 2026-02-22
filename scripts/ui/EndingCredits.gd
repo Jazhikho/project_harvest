@@ -187,7 +187,7 @@ func _get_credits_text() -> String:
 [b]═══════════════════════════════════[/b]
 
 [b]CREATED BY[/b]
-Christopher B. Del Gesso
+jazhikho
 Chosen Gaming
 
 [b]═══════════════════════════════════[/b]
@@ -195,20 +195,20 @@ Chosen Gaming
 [b]DEVELOPMENT[/b]
 
 [b]Lead Developer & Designer[/b]
-Christopher B. Del Gesso
+jazhikho
 
 [b]Programming[/b]
-Christopher B. Del Gesso
+jazhikho
 with assistance from Anthropic Claude-4 Sonnet
 
 [b]3D Art & Modeling[/b]
-Christopher B. Del Gesso
+jazhikho
 
 [b]Audio Design[/b]
-Christopher B. Del Gesso
+jazhikho
 
 [b]Narrative Design[/b]
-Christopher B. Del Gesso
+jazhikho
 
 [b]═══════════════════════════════════[/b]
 
@@ -305,7 +305,7 @@ http://www.boundingboxsoftware.com/materialize/
 [b]AUDIO[/b]
 
 [b]Original Compositions[/b]
-Christopher B. Del Gesso
+jazhikho
 with assistance from ElevenLabs
 - Project Harvest Main Theme
 - Architect's Maze
@@ -316,7 +316,7 @@ with assistance from ElevenLabs
 - Who Am I (In the Cornfield) 1, 2, 3
 
 [b]Sound Effects[/b]
-Christopher B. Del Gesso
+jazhikho
 - Custom environmental audio
 - Gameplay sound effects
 
@@ -335,7 +335,7 @@ All licensed under Creative Commons 0
 [b]Family & Support[/b]
 Sarrah - For unwavering support and belief
 Dawn - For encouragement and family support
-The Del Gesso Family - For believing in this project
+The Family - For believing in this project
 
 [b]Academic Support[/b]
 Lindenwood University
@@ -359,18 +359,18 @@ You rat bastard.
 [b]LICENSING[/b]
 
 [b]Code & Game Engine[/b]
-MIT License - Christopher B. Del Gesso
+MIT License - jazhikho
 
 [b]Original Art & Assets[/b]
-CC BY 4.0 - Christopher B. Del Gesso
+CC BY 4.0 - jazhikho
 
 [b]Story & Writing[/b]
-All rights reserved - Christopher B. Del Gesso
+All rights reserved - jazhikho
 
 [b]Third Party Assets[/b]
 Retain their original copyright
 
-[b]© 2025 Christopher B. Del Gesso[/b]
+[b]© 2025 jazhikho[/b]
 [b]Chosen Gaming[/b]
 
 Thank you for playing PROJECT HARVEST

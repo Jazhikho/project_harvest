@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://dh72ewef2fkl7"]
 
-[ext_resource type="Script" uid="uid://b3ge216nc7rm0" path="res://scripts/tiles/corn.gd" id="1_ppjol"]
+[ext_resource type="Script" uid="uid://b3ge216nc7rm0" path="res://scripts/tiles/Corn.gd" id="1_ppjol"]
 [ext_resource type="ArrayMesh" uid="uid://cqc4t75xd70tq" path="res://assets/models/corn.res" id="2_corn_mesh"]
 
 [sub_resource type="MultiMesh" id="MultiMesh_corn"]

@@ -1,0 +1,1123 @@
+# General Application Architecture - Cursor Rules
+## Extracted from Project Harvest - Applicable to Any Godot Project
+
+This ruleset defines reusable architectural patterns for building maintainable, scalable applications in Godot. It is engine-specific but game-agnostic, focusing on systems architecture, UI patterns, and data management.
+
+---
+
+## Table of Contents
+1. [Core Architecture Patterns](#core-architecture-patterns)
+2. [Manager/Autoload System](#managerautoload-system)
+3. [Event Bus Pattern](#event-bus-pattern)
+4. [UI System Architecture](#ui-system-architecture)
+5. [Data Management](#data-management)
+6. [Save System Architecture](#save-system-architecture)
+7. [Settings Management](#settings-management)
+8. [Scene Management](#scene-management)
+9. [Resource Catalog Pattern](#resource-catalog-pattern)
+10. [Constants and Configuration](#constants-and-configuration)
+
+---
+
+## Core Architecture Patterns
+
+### Single Responsibility Principle (SRP)
+- **Each manager/autoload handles ONE domain**: audio, saves, settings, scenes, etc.
+- **Each UI component handles ONE concern**: inventory display, pause functionality, settings panel, etc.
+- **Never mix domains**: Don't put audio logic in SaveManager or UI logic in game entities.
+
+### Dependency Injection via Autoloads
+- Core systems are Godot autoloads (singletons) accessible globally via `/root/SystemName`.
+- **Access pattern**: Always use `get_node_or_null("/root/SystemName")` to prevent crashes.
+- **Validate references**: Check for null before calling methods on autoload references.
+
+```gdscript
+# GOOD: Safe autoload access
+var audio_manager = get_node_or_null("/root/AudioManager")
+if audio_manager:
+    audio_manager.play_sound("click")
+else:
+    push_error("AudioManager not found")
+
+# BAD: Unsafe autoload access (will crash if not found)
+AudioManager.play_sound("click")
+```
+
+### Deferred Initialization Pattern
+- **All autoloads use deferred initialization** to ensure proper load order.
+- Call `call_deferred("_initialize")` in `_ready()`.
+- Never assume other autoloads are ready in `_ready()`.
+
+```gdscript
+func _ready() -> void:
+    name = "MyManager"
+    add_to_group("core_systems")
+    call_deferred("_initialize")
+
+func _initialize() -> void:
+    """Initialize after all autoloads are loaded"""
+    _message_bus = get_node_or_null("/root/MessageBus")
+    if not _message_bus:
+        push_error("MyManager: MessageBus not found")
+        return
+    _connect_to_events()
+```
+
+---
+
+## Manager/Autoload System
+
+### BaseManager Pattern
+Create a `BaseManager` class that all manager autoloads extend. This centralizes:
+- System path constants
+- Deferred initialization
+- Event connection helpers
+- Common logging utilities
+- Validation of required dependencies
+
+**Structure:**
+
+```gdscript
+extends Node
+class_name BaseManager
+
+# Core system references
+var _message_bus: Node
+var _state_manager: Node
+var _save_manager: Node
+
+# Initialization state
+var _is_initialized: bool = false
+var _required_systems: Array[String] = []
+
+# System paths dictionary
+const SYSTEM_PATHS = {
+    "MessageBus": "/root/MessageBus",
+    "SaveManager": "/root/SaveManager",
+    "SettingsManager": "/root/SettingsManager",
+    # ... add your systems here
+}
+
+func _ready() -> void:
+    add_to_group("managers")
+    call_deferred("_base_initialize")
+
+func _base_initialize() -> void:
+    if _is_initialized:
+        return
+    
+    # Get core references
+    _message_bus = get_system_node("MessageBus")
+    _save_manager = get_system_node("SaveManager")
+    
+    # Validate required systems
+    if not _validate_required_systems():
+        push_error("%s: Required systems not available" % get_manager_name())
+        return
+    
+    # Call derived class initialization
+    _initialize_manager()
+    _connect_base_events()
+    _is_initialized = true
+
+func _initialize_manager() -> void:
+    """Override in derived classes"""
+    pass
+
+func get_system_node(system_name: String) -> Node:
+    """Safe system access with error handling"""
+    if not SYSTEM_PATHS.has(system_name):
+        push_warning("%s: Unknown system '%s'" % [get_manager_name(), system_name])
+        return null
+    
+    var node = get_node_or_null(SYSTEM_PATHS[system_name])
+    if not node:
+        push_warning("%s: System '%s' not found" % [get_manager_name(), system_name])
+    return node
+
+func require_systems(systems: Array[String]) -> void:
+    """Specify required dependencies"""
+    _required_systems = systems
+
+func _validate_required_systems() -> bool:
+    for system_name in _required_systems:
+        if not get_system_node(system_name):
+            push_error("%s: Required system '%s' missing" % [get_manager_name(), system_name])
+            return false
+    return true
+
+func get_manager_name() -> String:
+    return name if name else get_script().get_path().get_file().get_basename()
+
+func emit_event(event_name: String, args: Array = []) -> void:
+    """Emit event through MessageBus with validation"""
+    if not _message_bus:
+        push_warning("%s: Cannot emit event - MessageBus unavailable" % get_manager_name())
+        return
+    _message_bus.emit_event(event_name, args)
+
+func log_error(message: String) -> void:
+    push_error("%s: %s" % [get_manager_name(), message])
+
+func log_warning(message: String) -> void:
+    push_warning("%s: %s" % [get_manager_name(), message])
+```
+
+### Manager Categories
+
+**System Managers** (infrastructure):
+- `MessageBus`: Event communication hub
+- `SaveManager`: Persistence layer
+- `SettingsManager`: Configuration management
+- `SceneManager`: Scene transitions
+- `AudioManager`: Sound and music playback
+
+**Application Managers** (domain-specific):
+- Extend from your domain logic (e.g., `GameStateManager`, `InventoryManager`)
+- Always extend `BaseManager` if using the pattern
+- Keep focused on single responsibility
+
+---
+
+## Event Bus Pattern
+
+### MessageBus Architecture
+Implement a centralized `MessageBus` autoload for decoupled communication.
+
+**Key Features:**
+1. **Type-safe signal definitions**: Define all signals explicitly
+2. **Circular reference protection**: Prevent infinite loops
+3. **Event history logging**: Debug event flow
+4. **Safe emission wrapper**: Validate before emitting
+
+**Implementation:**
+
+```gdscript
+extends Node
+## Central communication hub for application-wide events
+
+# === LIFECYCLE EVENTS ===
+signal app_started()
+signal app_paused(paused: bool)
+signal app_exiting()
+
+# === UI EVENTS ===
+signal menu_opened(menu_name: String)
+signal menu_closed(menu_name: String)
+signal notification_requested(message: String, duration: float, priority: int)
+
+# === DATA EVENTS ===
+signal data_loaded(data_type: String, data: Dictionary)
+signal data_saved(data_type: String, success: bool)
+
+# === SETTINGS EVENTS ===
+signal setting_changed(category: String, key: String, old_value: Variant, new_value: Variant)
+
+var _event_history: Array[Dictionary] = []
+var _max_history: int = 100
+var _emission_stack: Array[String] = []
+var _max_stack_depth: int = 10
+
+func emit_event(signal_name: String, args: Array = []) -> bool:
+    """
+    Safely emit a signal with circular reference protection
+    
+    @param signal_name: Signal to emit
+    @param args: Arguments (max 5)
+    @return: True if emitted successfully
+    """
+    if not has_signal(signal_name):
+        push_error("MessageBus: Unknown signal '%s'" % signal_name)
+        return false
+    
+    if args.size() > 5:
+        push_error("MessageBus: Too many args for '%s' (max 5)" % signal_name)
+        return false
+    
+    # Circular reference check
+    if _is_circular_emission(signal_name):
+        push_warning("MessageBus: Circular emission detected for '%s'" % signal_name)
+        return false
+    
+    _emission_stack.append(signal_name)
+    _log_event(signal_name, args)
+    
+    # Emit with correct arg count
+    match args.size():
+        0: emit_signal(signal_name)
+        1: emit_signal(signal_name, args[0])
+        2: emit_signal(signal_name, args[0], args[1])
+        3: emit_signal(signal_name, args[0], args[1], args[2])
+        4: emit_signal(signal_name, args[0], args[1], args[2], args[3])
+        5: emit_signal(signal_name, args[0], args[1], args[2], args[3], args[4])
+    
+    _emission_stack.pop_back()
+    return true
+
+func _is_circular_emission(signal_name: String) -> bool:
+    if _emission_stack.size() >= _max_stack_depth:
+        return true
+    return signal_name in _emission_stack
+
+func connect_event(signal_name: String, callable: Callable, flags: int = 0) -> int:
+    """Safely connect to a signal"""
+    if not has_signal(signal_name):
+        push_error("MessageBus: Cannot connect to unknown signal '%s'" % signal_name)
+        return ERR_DOES_NOT_EXIST
+    
+    if is_connected(signal_name, callable):
+        push_warning("MessageBus: Already connected to '%s'" % signal_name)
+        return ERR_ALREADY_EXISTS
+    
+    return connect(signal_name, callable, flags)
+
+func _log_event(signal_name: String, args: Array) -> void:
+    var event := {
+        "signal": signal_name,
+        "args": args.duplicate(),
+        "timestamp": Time.get_ticks_msec(),
+        "stack_depth": _emission_stack.size()
+    }
+    
+    _event_history.append(event)
+    if _event_history.size() > _max_history:
+        _event_history.pop_front()
+```
+
+### Event Naming Conventions
+- **Past tense for completed actions**: `data_loaded`, `menu_closed`, `setting_changed`
+- **Present tense for requests**: `notification_requested`, `audio_fade_requested`
+- **Categorize events by domain**: Prefix with domain (e.g., `ui_*`, `data_*`, `audio_*`)
+
+---
+
+## UI System Architecture
+
+### UI Component Principles
+
+1. **Process Mode**: Set to `PROCESS_MODE_ALWAYS` (3) for pause menus
+2. **Dark Overlay Pattern**: Use semi-transparent ColorRect for modal backgrounds
+3. **Panel Centering**: Use anchor presets for responsive layouts
+4. **Signal-Based Communication**: Never call methods directly on parent scenes
+5. **Separation of Concerns**: UI only displays and emits signals; logic lives in managers
+
+### Standard UI Component Structure
+
+```gdscript
+extends Control
+## UI Component Description
+
+# Signals for communication with parent/controller
+signal opened()
+signal closed()
+signal action_requested(action_name: String, data: Dictionary)
+
+# Node references (use @onready)
+@onready var main_panel = $MainPanel
+@onready var close_button = $MainPanel/CloseButton
+
+# State
+var _is_open: bool = false
+
+func _ready() -> void:
+    # Connect internal signals
+    if close_button:
+        close_button.pressed.connect(_on_close_pressed)
+    
+    # Initialize state
+    hide()
+    _setup_ui()
+
+func _setup_ui() -> void:
+    """Initialize UI elements - override in derived classes"""
+    pass
+
+func open_ui() -> void:
+    """Open with animation"""
+    show()
+    _is_open = true
+    _animate_open()
+    emit_signal("opened")
+
+func close_ui() -> void:
+    """Close with animation"""
+    _animate_close()
+    await _get_animation_tween().finished
+    hide()
+    _is_open = false
+    emit_signal("closed")
+
+func _animate_open() -> void:
+    """Animate panel opening"""
+    var tween: Tween = create_tween()
+    main_panel.modulate.a = 0.0
+    main_panel.scale = Vector2(0.8, 0.8)
+    tween.tween_property(main_panel, "modulate:a", 1.0, 0.2)
+    tween.parallel().tween_property(main_panel, "scale", Vector2.ONE, 0.3).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
+func _animate_close() -> void:
+    var tween: Tween = create_tween()
+    tween.tween_property(main_panel, "modulate:a", 0.0, 0.15)
+    tween.parallel().tween_property(main_panel, "scale", Vector2(0.8, 0.8), 0.15)
+
+func _on_close_pressed() -> void:
+    close_ui()
+```
+
+### Common UI Components
+
+#### Pause Menu Pattern
+
+```gdscript
+extends Control
+
+signal resume_requested()
+signal settings_requested()
+signal main_menu_requested()
+signal quit_requested()
+
+@onready var menu_panel = $MenuPanel
+@onready var settings_panel = $SettingsPanel
+
+func _ready() -> void:
+    hide()
+    _create_confirmation_dialogs()
+
+func show_pause_menu() -> void:
+    show()
+    get_tree().paused = true
+    menu_panel.visible = true
+    settings_panel.visible = false
+    Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+func hide_pause_menu() -> void:
+    get_tree().paused = false
+    hide()
+    Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+func _on_resume_pressed() -> void:
+    emit_signal("resume_requested")
+    hide_pause_menu()
+
+func _on_settings_pressed() -> void:
+    menu_panel.visible = false
+    settings_panel.visible = true
+```
+
+#### Settings Panel Pattern
+
+```gdscript
+extends Control
+
+@onready var master_slider = $VBox/MasterVolume/Slider
+@onready var music_slider = $VBox/MusicVolume/Slider
+@onready var fullscreen_toggle = $VBox/FullscreenToggle
+
+func _ready() -> void:
+    _load_current_settings()
+    _connect_signals()
+
+func _load_current_settings() -> void:
+    var settings_manager = get_node_or_null("/root/SettingsManager")
+    if settings_manager:
+        master_slider.value = settings_manager.get_setting("audio", "master_volume")
+        music_slider.value = settings_manager.get_setting("audio", "music_volume")
+        fullscreen_toggle.button_pressed = settings_manager.get_setting("graphics", "fullscreen")
+
+func _on_master_volume_changed(value: float) -> void:
+    var settings_manager = get_node_or_null("/root/SettingsManager")
+    if settings_manager:
+        settings_manager.set_setting("audio", "master_volume", value)
+```
+
+#### Inventory/Grid UI Pattern
+
+```gdscript
+extends Control
+
+signal item_selected(item_id: String)
+signal closed()
+
+@onready var item_grid = $Panel/VBox/ScrollContainer/ItemGrid
+
+const ITEM_BUTTON_SCENE = preload("res://ui/ItemButton.tscn")
+
+func refresh_inventory(items: Array) -> void:
+    """Rebuild inventory display"""
+    # Clear existing
+    for child in item_grid.get_children():
+        child.queue_free()
+    
+    # Populate with items
+    for item_id in items:
+        var button = ITEM_BUTTON_SCENE.instantiate()
+        item_grid.add_child(button)
+        button.setup(item_id)
+        button.pressed.connect(_on_item_button_pressed.bind(item_id))
+
+func _on_item_button_pressed(item_id: String) -> void:
+    emit_signal("item_selected", item_id)
+```
+
+### UI Animation Guidelines
+- **Open animations**: 0.2-0.3s, use `TRANS_BACK` with `EASE_OUT` for bounce
+- **Close animations**: 0.15-0.2s, use `TRANS_CUBIC` with `EASE_IN` for quick exit
+- **Fade overlays**: 0.2s for dark background fades
+- **Always use tweens over AnimationPlayer** for simple UI transitions
+
+---
+
+## Data Management
+
+### Data-Driven Design
+- **Separate data from logic**: Store configuration in JSON or `.tres` Resource files
+- **JSON for structured data**: Item definitions, narrative text, object interactions
+- **Resources for editor-configurable data**: Catalogs, databases, settings
+
+### JSON Data Pattern
+
+```gdscript
+const DATA_PATH := "res://data/items.json"
+
+var _data_cache: Dictionary = {}
+
+func load_data() -> void:
+    """Load and parse JSON data"""
+    if not FileAccess.file_exists(DATA_PATH):
+        push_error("Data file not found: %s" % DATA_PATH)
+        return
+    
+    var file = FileAccess.open(DATA_PATH, FileAccess.READ)
+    if not file:
+        push_error("Failed to open data file: %s" % DATA_PATH)
+        return
+    
+    var json = JSON.new()
+    var parse_result = json.parse(file.get_as_text())
+    file.close()
+    
+    if parse_result != OK:
+        push_error("Failed to parse JSON: %s at line %d" % [json.get_error_message(), json.get_error_line()])
+        return
+    
+    _data_cache = json.data
+    _validate_data()
+
+func _validate_data() -> void:
+    """Validate loaded data structure"""
+    if not _data_cache.has("version"):
+        push_warning("Data file missing version field")
+    
+    if not _data_cache.has("items"):
+        push_error("Data file missing required 'items' field")
+
+func get_data(key: String) -> Variant:
+    """Safe data access"""
+    if not _data_cache.has(key):
+        push_warning("Data key not found: %s" % key)
+        return null
+    return _data_cache[key]
+```
+
+---
+
+## Save System Architecture
+
+### SaveManager Pattern
+
+**Key responsibilities:**
+- Save/load game state to persistent storage
+- Handle save file versioning and migration
+- Validate save data integrity
+- Emit events on save/load operations
+
+**Structure:**
+
+```gdscript
+extends Node
+
+const SAVE_PATH = "user://save_data.sav"
+const SAVE_VERSION = "1.0"
+
+signal save_completed(success: bool)
+signal load_completed(success: bool)
+
+var save_data: Dictionary = {}
+
+func _ready() -> void:
+    _initialize_save_structure()
+    load_game()
+
+func _initialize_save_structure() -> void:
+    """Define default save structure"""
+    save_data = {
+        "version": SAVE_VERSION,
+        "timestamp": 0,
+        "player_data": {},
+        "progress": {},
+        "settings": {},
+        "statistics": {}
+    }
+
+func save_game() -> bool:
+    """Save game state to disk"""
+    save_data.timestamp = Time.get_unix_time_from_system()
+    
+    var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+    if not file:
+        push_error("SaveManager: Failed to open save file for writing")
+        emit_signal("save_completed", false)
+        return false
+    
+    file.store_var(save_data)
+    file.close()
+    
+    emit_signal("save_completed", true)
+    return true
+
+func load_game() -> bool:
+    """Load game state from disk"""
+    if not has_save_data():
+        return false
+    
+    var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+    if not file:
+        push_error("SaveManager: Failed to open save file for reading")
+        emit_signal("load_completed", false)
+        return false
+    
+    save_data = file.get_var()
+    file.close()
+    
+    # Migrate old save formats
+    _migrate_save_data()
+    
+    emit_signal("load_completed", true)
+    return true
+
+func has_save_data() -> bool:
+    return FileAccess.file_exists(SAVE_PATH)
+
+func delete_save() -> void:
+    """Delete save file and reset data"""
+    if has_save_data():
+        DirAccess.remove_absolute(SAVE_PATH)
+    _initialize_save_structure()
+
+func _migrate_save_data() -> void:
+    """Handle save file version migration"""
+    var loaded_version = save_data.get("version", "0.0")
+    
+    if loaded_version != SAVE_VERSION:
+        push_warning("SaveManager: Migrating save from v%s to v%s" % [loaded_version, SAVE_VERSION])
+        
+        # Add missing keys from new structure
+        var default_structure = {}
+        _initialize_save_structure()
+        _merge_dictionaries(save_data, default_structure)
+        
+        # Update version
+        save_data.version = SAVE_VERSION
+        save_game()
+
+func _merge_dictionaries(target: Dictionary, source: Dictionary) -> void:
+    """Recursively merge source into target, preserving target values"""
+    for key in source:
+        if not target.has(key):
+            target[key] = source[key]
+        elif typeof(source[key]) == TYPE_DICTIONARY and typeof(target[key]) == TYPE_DICTIONARY:
+            _merge_dictionaries(target[key], source[key])
+
+# Public API
+func set_value(category: String, key: String, value: Variant) -> void:
+    if not save_data.has(category):
+        save_data[category] = {}
+    save_data[category][key] = value
+
+func get_value(category: String, key: String, default: Variant = null) -> Variant:
+    if not save_data.has(category):
+        return default
+    return save_data[category].get(key, default)
+```
+
+### Auto-Save Pattern
+
+```gdscript
+var _autosave_timer: Timer
+
+func _ready() -> void:
+    _setup_autosave()
+
+func _setup_autosave() -> void:
+    _autosave_timer = Timer.new()
+    _autosave_timer.wait_time = 60.0  # Save every 60 seconds
+    _autosave_timer.autostart = true
+    _autosave_timer.timeout.connect(_on_autosave_timer_timeout)
+    add_child(_autosave_timer)
+
+func _on_autosave_timer_timeout() -> void:
+    if _should_autosave():
+        save_game()
+
+func _should_autosave() -> bool:
+    # Only autosave during gameplay, not in menus
+    var tree = get_tree()
+    return tree and not tree.paused
+```
+
+---
+
+## Settings Management
+
+### SettingsManager Pattern
+
+**Responsibilities:**
+- Manage application settings (audio, graphics, controls, gameplay)
+- Apply settings changes immediately
+- Persist settings to separate file (not save data)
+- Emit events on setting changes
+
+**Structure:**
+
+```gdscript
+extends Node
+
+const SETTINGS_FILE_PATH = "user://settings.json"
+
+var _settings: Dictionary = {
+    "audio": {
+        "master_volume": 1.0,
+        "music_volume": 0.8,
+        "sfx_volume": 1.0
+    },
+    "graphics": {
+        "fullscreen": true,
+        "vsync": true,
+        "resolution": Vector2i(1920, 1080)
+    },
+    "controls": {
+        "mouse_sensitivity": 0.003
+    }
+}
+
+var _defaults: Dictionary
+
+func _ready() -> void:
+    _defaults = _settings.duplicate(true)
+    call_deferred("_initialize")
+
+func _initialize() -> void:
+    _load_settings()
+    _apply_all_settings()
+
+func get_setting(category: String, key: String) -> Variant:
+    if not _settings.has(category):
+        push_warning("SettingsManager: Unknown category '%s'" % category)
+        return null
+    
+    if not _settings[category].has(key):
+        push_warning("SettingsManager: Unknown setting '%s.%s'" % [category, key])
+        return null
+    
+    return _settings[category][key]
+
+func set_setting(category: String, key: String, value: Variant) -> bool:
+    if not _settings.has(category) or not _settings[category].has(key):
+        push_error("SettingsManager: Cannot set unknown setting '%s.%s'" % [category, key])
+        return false
+    
+    var old_value = _settings[category][key]
+    if old_value == value:
+        return false
+    
+    _settings[category][key] = value
+    _apply_setting(category, key, value)
+    _save_settings()
+    
+    # Emit change event
+    var message_bus = get_node_or_null("/root/MessageBus")
+    if message_bus:
+        message_bus.emit_event("setting_changed", [category, key, old_value, value])
+    
+    return true
+
+func _apply_setting(category: String, key: String, value: Variant) -> void:
+    match category:
+        "audio":
+            _apply_audio_setting(key, value)
+        "graphics":
+            _apply_graphics_setting(key, value)
+        "controls":
+            _apply_controls_setting(key, value)
+
+func _apply_audio_setting(key: String, value: Variant) -> void:
+    var audio_manager = get_node_or_null("/root/AudioManager")
+    if not audio_manager:
+        return
+    
+    match key:
+        "master_volume":
+            audio_manager.set_bus_volume("Master", value)
+        "music_volume":
+            audio_manager.set_bus_volume("Music", value)
+        "sfx_volume":
+            audio_manager.set_bus_volume("SFX", value)
+
+func _apply_graphics_setting(key: String, value: Variant) -> void:
+    match key:
+        "fullscreen":
+            if value:
+                DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+            else:
+                DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+        "vsync":
+            DisplayServer.window_set_vsync_mode(
+                DisplayServer.VSYNC_ENABLED if value else DisplayServer.VSYNC_DISABLED
+            )
+        "resolution":
+            if value is Vector2i:
+                DisplayServer.window_set_size(value)
+
+func _apply_all_settings() -> void:
+    for category in _settings:
+        for key in _settings[category]:
+            _apply_setting(category, key, _settings[category][key])
+
+func _save_settings() -> void:
+    var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.WRITE)
+    if not file:
+        push_error("SettingsManager: Could not save settings")
+        return
+    
+    var save_data = {
+        "version": "1.0",
+        "settings": _settings,
+        "timestamp": Time.get_datetime_string_from_system()
+    }
+    
+    file.store_string(JSON.stringify(save_data))
+    file.close()
+
+func _load_settings() -> void:
+    if not FileAccess.file_exists(SETTINGS_FILE_PATH):
+        return
+    
+    var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.READ)
+    if not file:
+        return
+    
+    var json = JSON.new()
+    var parse_result = json.parse(file.get_as_text())
+    file.close()
+    
+    if parse_result != OK:
+        push_error("SettingsManager: Failed to parse settings file")
+        return
+    
+    var data = json.data
+    if data.has("settings"):
+        _merge_settings(data.settings)
+
+func _merge_settings(loaded_settings: Dictionary) -> void:
+    """Merge loaded settings with defaults (handles new settings in updates)"""
+    for category in loaded_settings:
+        if _settings.has(category):
+            for key in loaded_settings[category]:
+                if _settings[category].has(key):
+                    _settings[category][key] = loaded_settings[category][key]
+
+func reset_category(category: String) -> void:
+    if not _defaults.has(category):
+        return
+    
+    _settings[category] = _defaults[category].duplicate(true)
+    _apply_category_settings(category)
+    _save_settings()
+
+func reset_all_settings() -> void:
+    _settings = _defaults.duplicate(true)
+    _apply_all_settings()
+    _save_settings()
+```
+
+---
+
+## Scene Management
+
+### SceneManager Pattern
+
+**Responsibilities:**
+- Handle scene transitions
+- Manage scene preloading
+- Provide transition effects (fades, etc.)
+- Track scene history for back navigation
+
+```gdscript
+extends Node
+
+const SCENES = {
+    "main_menu": "res://scenes/ui/MainMenu.tscn",
+    "game": "res://scenes/game/Game.tscn",
+    "settings": "res://scenes/ui/Settings.tscn",
+    "credits": "res://scenes/ui/Credits.tscn"
+}
+
+var _scene_history: Array[String] = []
+var _current_scene: String = ""
+var _transition_layer: CanvasLayer
+
+func _ready() -> void:
+    _setup_transition_layer()
+
+func _setup_transition_layer() -> void:
+    """Create overlay for fade transitions"""
+    _transition_layer = CanvasLayer.new()
+    _transition_layer.layer = 100
+    add_child(_transition_layer)
+    
+    var fade_rect = ColorRect.new()
+    fade_rect.name = "FadeRect"
+    fade_rect.color = Color.BLACK
+    fade_rect.modulate.a = 0.0
+    fade_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+    _transition_layer.add_child(fade_rect)
+
+func change_scene(scene_key: String, fade_duration: float = 0.5) -> void:
+    """Change scene with fade transition"""
+    if not SCENES.has(scene_key):
+        push_error("SceneManager: Unknown scene key '%s'" % scene_key)
+        return
+    
+    await _fade_out(fade_duration / 2.0)
+    
+    _scene_history.append(_current_scene)
+    _current_scene = scene_key
+    
+    get_tree().change_scene_to_file(SCENES[scene_key])
+    
+    await get_tree().process_frame
+    await _fade_in(fade_duration / 2.0)
+
+func go_back(fade_duration: float = 0.5) -> void:
+    """Return to previous scene"""
+    if _scene_history.is_empty():
+        push_warning("SceneManager: No scene history to go back to")
+        return
+    
+    var previous_scene = _scene_history.pop_back()
+    await change_scene(previous_scene, fade_duration)
+
+func reload_current_scene(fade_duration: float = 0.5) -> void:
+    """Reload the current scene"""
+    await change_scene(_current_scene, fade_duration)
+
+func _fade_out(duration: float) -> void:
+    var fade_rect = _transition_layer.get_node("FadeRect")
+    var tween = create_tween()
+    tween.tween_property(fade_rect, "modulate:a", 1.0, duration)
+    await tween.finished
+
+func _fade_in(duration: float) -> void:
+    var fade_rect = _transition_layer.get_node("FadeRect")
+    var tween = create_tween()
+    tween.tween_property(fade_rect, "modulate:a", 0.0, duration)
+    await tween.finished
+```
+
+---
+
+## Resource Catalog Pattern
+
+### Catalog System for PackedScenes and Resources
+
+Use custom Resource classes to manage collections of assets for spawning/instantiation.
+
+**Catalog Resource Definition:**
+
+```gdscript
+# res://data/AssetCatalog.gd
+extends Resource
+class_name AssetCatalog
+
+@export var scenes: Array[PackedScene]
+@export var textures: Array[Texture2D]
+@export var audio_clips: Array[AudioStream]
+
+func get_scene_by_name(scene_name: String) -> PackedScene:
+    """Find scene by filename"""
+    for scene in scenes:
+        if scene and scene.resource_path.get_file().get_basename() == scene_name:
+            return scene
+    push_warning("AssetCatalog: Scene '%s' not found" % scene_name)
+    return null
+
+func get_random_scene() -> PackedScene:
+    """Get random scene from catalog"""
+    if scenes.is_empty():
+        return null
+    return scenes[randi() % scenes.size()]
+```
+
+**Create `.tres` Resource in Editor:**
+1. Right-click in FileSystem → Create New Resource
+2. Select your custom Resource class (e.g., `AssetCatalog`)
+3. Populate arrays in Inspector
+4. Save as `.tres` file (e.g., `res://data/MyAssetCatalog.tres`)
+
+**Usage in Manager:**
+
+```gdscript
+@export var asset_catalog: AssetCatalog
+
+func _ready() -> void:
+    if not asset_catalog:
+        push_error("AssetCatalog not assigned!")
+        return
+    
+    _validate_catalog()
+
+func _validate_catalog() -> void:
+    """Validate catalog for export builds"""
+    for scene in asset_catalog.scenes:
+        if scene == null:
+            push_error("Null PackedScene in catalog")
+            continue
+        if not ResourceLoader.exists(scene.resource_path):
+            push_error("Scene not found: %s" % scene.resource_path)
+
+func spawn_asset(asset_name: String, position: Vector3) -> Node3D:
+    var scene = asset_catalog.get_scene_by_name(asset_name)
+    if not scene:
+        return null
+    
+    var instance = scene.instantiate()
+    instance.global_position = position
+    get_tree().current_scene.add_child(instance)
+    return instance
+```
+
+---
+
+## Constants and Configuration
+
+### GameConstants Pattern
+
+Centralize all magic numbers and configuration values.
+
+```gdscript
+# res://scripts/utils/AppConstants.gd
+extends Node
+class_name AppConstants
+
+# === AUDIO ===
+const AUDIO_BUS_MASTER = "Master"
+const AUDIO_BUS_MUSIC = "Music"
+const AUDIO_BUS_SFX = "SFX"
+
+const VOLUME_MIN: float = 0.0
+const VOLUME_MAX: float = 1.0
+const VOLUME_DEFAULT: float = 0.8
+
+# === UI ===
+const UI_FADE_DURATION: float = 0.3
+const UI_NOTIFICATION_DURATION: float = 3.0
+const UI_TRANSITION_SPEED: float = 0.2
+
+# === PATHS ===
+const PATH_SETTINGS_FILE = "user://settings.json"
+const PATH_SAVE_FILE = "user://save_data.sav"
+
+const SCENE_MAIN_MENU = "res://scenes/ui/MainMenu.tscn"
+const SCENE_GAME = "res://scenes/game/Game.tscn"
+
+# === ERROR MESSAGES ===
+const ERROR_SYSTEM_NOT_FOUND = "Required system not found: %s"
+const ERROR_INVALID_DATA = "Invalid data format: %s"
+const ERROR_FILE_NOT_FOUND = "File not found: %s"
+
+# === ENUMS ===
+enum AppState {
+    INITIALIZING,
+    MENU,
+    LOADING,
+    RUNNING,
+    PAUSED,
+    EXITING
+}
+
+enum NotificationPriority {
+    LOW = 1,
+    MEDIUM = 2,
+    HIGH = 3,
+    CRITICAL = 4
+}
+```
+
+**Usage:**
+
+```gdscript
+# Import and use
+var fade_duration = AppConstants.UI_FADE_DURATION
+var current_state = AppConstants.AppState.RUNNING
+push_error(AppConstants.ERROR_SYSTEM_NOT_FOUND % "AudioManager")
+```
+
+---
+
+## Summary Checklist
+
+When starting a new Godot project, implement these patterns:
+
+**Core Systems:**
+- [ ] Create `MessageBus` autoload for event communication
+- [ ] Create `BaseManager` class for manager inheritance
+- [ ] Create `SaveManager` for persistence
+- [ ] Create `SettingsManager` for configuration
+- [ ] Create `SceneManager` for transitions
+- [ ] Create `AppConstants` for centralized constants
+
+**Data Management:**
+- [ ] Define data schemas (JSON structure or Resource classes)
+- [ ] Create Resource catalogs for asset collections
+- [ ] Implement data validation on load
+
+**UI System:**
+- [ ] Create base UI component scripts with signals
+- [ ] Implement standard animations (open/close/fade)
+- [ ] Build pause menu with settings panel
+- [ ] Implement notification/toast system
+
+**Architecture:**
+- [ ] Use deferred initialization for all autoloads
+- [ ] Validate system dependencies on startup
+- [ ] Emit events through MessageBus, never call directly
+- [ ] Keep UI, logic, and data separate
+
+---
+
+## Integration with Game-Specific Rules
+
+This ruleset is **complementary** to your game-specific rules. Apply these patterns for:
+- Application infrastructure (managers, UI, saves, settings)
+- Non-gameplay systems (menus, audio management, scene transitions)
+
+Use your game-specific rules for:
+- Gameplay logic (player, enemies, items, puzzles)
+- Game mechanics (combat, inventory, progression)
+- Domain-specific systems (game-specific managers)
+
+Both rulesets share:
+- Explicit typing requirements
+- No ternaries, no `:=`
+- Engine-first configuration
+- Documentation standards
+- Error handling expectations
+- PascalCase files, snake_case functions (GDScript)
+
+---
+
+**Version:** 1.0  
+**Last Updated:** Dec 4, 2025  
+**Source Project:** Project Harvest (architectural patterns only)
+
+

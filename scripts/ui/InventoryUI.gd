@@ -12,9 +12,9 @@ signal closed
 @onready var description_label = $InspectPanel/VBoxContainer/Description
 
 var inventory_manager: Node
-var selected_item = null
-var is_rotating = false
-var last_mouse_pos = Vector2.ZERO
+var selected_item: Node = null
+var is_rotating: bool = false
+var last_mouse_pos: Vector2 = Vector2.ZERO
 var was_mouse_captured: bool = false
 var permanent_items: Array = ["flashlight", "journal"]
 
@@ -42,7 +42,6 @@ func _ready() -> void:
 func _setup_responsive_sizing() -> void:
 	"""Setup responsive sizing for different screen resolutions"""
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
-	print("InventoryUI: Setting up responsive sizing for viewport: ", viewport_size)
 	
 	# Calculate responsive panel size (80% of screen width, 70% of screen height, with minimums)
 	var panel_width: float = viewport_size.x * 0.8
@@ -203,8 +202,6 @@ func _load_item_model(item_id: String) -> void:
 	else:
 		model_path = "res://scenes/items/" + item_id + ".tscn"
 	
-	print("InventoryUI: Attempting to load model from: ", model_path)
-	
 	if ResourceLoader.exists(model_path):
 		var model_scene: PackedScene = load(model_path) as PackedScene
 		if model_scene:
@@ -229,8 +226,6 @@ func _load_item_model(item_id: String) -> void:
 			
 			# Start a slow rotation for visual effect
 			_start_model_rotation(model)
-			
-			print("InventoryUI: Successfully loaded model for ", item_id)
 		else:
 			push_warning("InventoryUI: Failed to instantiate model for ", item_id)
 			_create_placeholder_model()
@@ -334,7 +329,6 @@ func _create_placeholder_model() -> void:
 	placeholder.set_surface_override_material(0, item_material)
 	
 	item_model_node.add_child(placeholder)
-	print("InventoryUI: Created placeholder model")
 
 func _input(event: InputEvent) -> void:
 	# Only handle input if inventory is visible

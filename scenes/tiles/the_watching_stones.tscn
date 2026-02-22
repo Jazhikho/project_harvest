@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=3 uid="uid://cv8rrbhuahlg0"]
 
-[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_30xlj"]
+[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/Tile.gd" id="1_30xlj"]
 [ext_resource type="Script" uid="uid://cnwoaemax8pcb" path="res://scripts/puzzles/WatchingStonesPuzzle.gd" id="2_8ekj8"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_ehbk0"]
 [ext_resource type="PackedScene" uid="uid://cfjbmrppn8dad" path="res://scenes/environments/altar.tscn" id="2_v6rkl"]

@@ -1,10 +1,8 @@
-extends Node
+extends BaseManager
 ## TileManager - Handles tile generation, connections, and cleanup
 ## State management delegated to TileStateManager
 @export var tile_database: TileDatabase = preload("res://data/TileDatabase.tres")
 
-var _message_bus: Node
-var _state_manager: Node
 var _spawn_manager: Node
 var _tile_state_manager: Node
 
@@ -39,24 +37,21 @@ const TILE_SIZE: float = 20.0
 func _ready() -> void:
 	name = "TileManager"
 	add_to_group("core_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus", "GameStateManager", "SpawnManager", "TileStateManager"])
+	super._ready()
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize connections and load tile scenes"""
-	
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_state_manager = get_node_or_null("/root/GameStateManager")
-	_spawn_manager = get_node_or_null("/root/SpawnManager")
-	_tile_state_manager = get_node_or_null("/root/TileStateManager")
-	
-	if not _message_bus or not _state_manager or not _spawn_manager or not _tile_state_manager:
+	_spawn_manager = get_system_node("SpawnManager")
+	_tile_state_manager = get_system_node("TileStateManager")
+	if not _spawn_manager or not _tile_state_manager:
 		push_error("TileManager: Required core systems not found")
 		return
-	
+
 	_load_available_tiles()
-	
+
 	_connect_to_events()
-	
+
 	# DON'T spawn start tile here - wait for game scene
 
 func _load_available_tiles() -> void:
@@ -96,29 +91,28 @@ func _load_available_tiles() -> void:
 			# NEVER filter out the final gate - it should always be available
 			if puzzle_id == "final_gate":
 				is_completed = false
-				print("TileManager: Final gate tile always included (never marked complete)")
 			else:
 				var save_manager: Node = get_node_or_null("/root/SaveManager")
 				if save_manager and save_manager.has_method("is_puzzle_completed"):
 					is_completed = save_manager.is_puzzle_completed(puzzle_id)
-					print("TileManager: Puzzle '%s' completed: %s" % [puzzle_id, is_completed])
 				else:
 					push_warning("TileManager: SaveManager not available to check puzzle status")
 		else:
-			# No puzzle ID means it's not a puzzle tile, include it anyway
-			print("TileManager: Permanent tile has no puzzle ID: %s" % tile_scene.resource_path)
+			pass
 		
 		temp_instance.queue_free()
 		
 		# Only add if puzzle is NOT completed
 		if not is_completed:
 			_permanent_tiles_scenes.append(tile_scene)
-			print("TileManager: Added incomplete puzzle tile: %s" % puzzle_id if not puzzle_id.is_empty() else "non-puzzle tile")
+			var display_id: String
+			if not puzzle_id.is_empty():
+				display_id = puzzle_id
+			else:
+				display_id = "non-puzzle tile"
 		else:
-			print("TileManager: Skipped completed puzzle tile: %s" % puzzle_id)
+			pass
 	
-	print("TileManager: Loaded ", _normal_tiles.size(), " normal tiles and ",
-		  _permanent_tiles_scenes.size(), " permanent tiles")
 	
 	# Pre-assign permanent tiles to positions
 	_assign_permanent_tile_positions()
@@ -137,7 +131,6 @@ func _assign_permanent_tile_positions() -> void:
 			available_permanent_tiles.append(tile_scene)
 	
 	if available_permanent_tiles.is_empty():
-		print("TileManager: No permanent tiles to assign")
 		return
 	
 	# Generate valid spawn positions (outside forbidden zone)
@@ -179,13 +172,12 @@ func _assign_permanent_tile_positions() -> void:
 				if not too_close:
 					used_positions.append(pos)
 					_permanent_tile_assignments[pos] = tile_scene
-					print("TileManager: Assigned permanent tile (pass ", location_pass + 1, ") to position ", pos)
 					found_position = true
 					break
 			
 			# Warn if we couldn't find a position for this tile on this pass
 			if not found_position:
-				print("TileManager: Warning - Could not find position for permanent tile on pass ", location_pass + 1)
+				pass
 
 func initialize_game_tiles() -> void:
 	"""Called when the game scene is actually loaded"""
@@ -248,7 +240,7 @@ func _spawn_start_tile() -> void:
 	
 	# Spawn connections
 	_spawn_tile_connections(start_tile, Vector2i(0, 0))
-	_message_bus.emit_event("tile_generated", [start_tile, Vector2i(0, 0), {}])
+	emit_event("tile_generated", [start_tile, Vector2i(0, 0), {}])
 	
 
 func _create_tile_from_scene(scene: Variant, grid_pos: Vector2i) -> Node3D:
@@ -341,8 +333,6 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 		var wrapped_connecting_pos: Vector2i = _apply_world_wrapping(raw_connecting_pos)
 		var did_wrap: bool = (raw_connecting_pos != wrapped_connecting_pos)
 		
-		print("TileManager: Checking connection from ", source_pos, " ", _get_direction_name(door_direction),
-			  " to raw: ", raw_connecting_pos, " wrapped: ", wrapped_connecting_pos)
 		
 		# Skip if connection already established FROM THIS SOURCE
 		if _is_connection_established(source_pos, wrapped_connecting_pos):
@@ -368,8 +358,7 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 			else:
 				# Existing tile is NOT physically adjacent - this is a wrapped duplicate
 				# Don't reuse it, spawn a new instance below
-				print("TileManager: Tile at ", wrapped_connecting_pos, " exists but not adjacent (distance: ",
-					  distance_to_existing, "). Creating new instance due to wrapping.")
+				pass
 		elif _active_tiles.has(wrapped_connecting_pos):
 			_active_tiles.erase(wrapped_connecting_pos)
 		
@@ -409,7 +398,7 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 		_establish_connection(source_pos, wrapped_connecting_pos)
 		
 		# Emit tile generated event
-		_message_bus.emit_event("tile_generated", [new_tile, wrapped_connecting_pos, {}])
+		emit_event("tile_generated", [new_tile, wrapped_connecting_pos, {}])
 		
 func _rotate_permanent_tile_to_connect(permanent_tile: Node3D, approaching_from_direction: int) -> void:
 	"""
@@ -421,8 +410,6 @@ func _rotate_permanent_tile_to_connect(permanent_tile: Node3D, approaching_from_
 	# Calculate the opposite direction (where permanent tile needs a door)
 	var required_door_direction: int = _get_opposite_direction(approaching_from_direction)
 	
-	print("TileManager: Need to rotate permanent tile ", permanent_tile.name,
-		  " to have door facing ", _get_direction_name(required_door_direction))
 	
 	# Get the permanent tile's available doors in their ORIGINAL orientations
 	if not permanent_tile.has_method("door_markers"):
@@ -443,8 +430,6 @@ func _rotate_permanent_tile_to_connect(permanent_tile: Node3D, approaching_from_
 				if rotated_direction == required_door_direction:
 					best_rotation = rotation_steps
 					door_found = true
-					print("TileManager: Found door at ", _get_direction_name(check_direction),
-						  " that needs ", rotation_steps, " rotations")
 					break
 		
 		if door_found:
@@ -457,9 +442,6 @@ func _rotate_permanent_tile_to_connect(permanent_tile: Node3D, approaching_from_
 			current_rotation = permanent_tile.get_current_rotation()
 		
 		if current_rotation != best_rotation:
-			print("TileManager: Rotating permanent tile from rotation ", current_rotation,
-				  " to ", best_rotation)
-			
 			if permanent_tile.has_method("set_tile_rotation"):
 				permanent_tile.set_tile_rotation(best_rotation)
 			else:
@@ -543,10 +525,9 @@ func _align_tiles(source_tile: Node3D, target_tile: Node3D, door_direction: int,
 			target_tile.position = Vector3(source_center.x - offset, source_center.y, source_center.z)
 		DoorDirection.WEST:
 			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
-	
+
 	if did_wrap:
-		print("TileManager: Tile at wrapped grid ", target_grid_pos, " positioned at world ", target_tile.position,
-			  " (adjacent to source at ", source_center, ")")
+		pass
 
 func _calculate_rotation_needed(original_door: int, target_door: int) -> int:
 	"""
@@ -643,10 +624,10 @@ func _apply_world_wrapping(position: Vector2i) -> Vector2i:
 		wrapped_pos.y -= 7
 	while wrapped_pos.y < -3:
 		wrapped_pos.y += 7
-	
+
 	if wrapped_pos != position:
-		print("TileManager: World wrapped position from ", position, " to ", wrapped_pos)
-	
+		pass
+
 	return wrapped_pos
 
 func _has_permanent_tile_at(position: Vector2i) -> bool:
@@ -761,7 +742,6 @@ func _cleanup_distant_wrap_duplicates(player_pos: Vector2i) -> void:
 		
 		var distance: float = duplicate.position.distance_to(player_physical_pos)
 		if distance > cleanup_distance:
-			print("TileManager: Cleaning up distant wrap duplicate at ", duplicate.position, " (distance: ", distance, ")")
 			duplicates_to_remove.append(duplicate)
 			
 			# Free the duplicate
@@ -786,7 +766,6 @@ func _cleanup_single_tile(pos: Vector2i) -> void:
 	
 	# Check if tile reference is valid first, before doing anything
 	if not is_instance_valid(tile):
-		print("TileManager: Tile at ", pos, " was already freed, cleaning up reference")
 		_active_tiles.erase(pos)
 		_remove_connections_for_position(pos)
 		_tile_state_manager.cleanup_tile(pos)
@@ -812,7 +791,7 @@ func _cleanup_single_tile(pos: Vector2i) -> void:
 			entities_removed.append(child.name)
 	
 	# Emit cleanup event
-	_message_bus.emit_event("tile_cleaned_up", [pos, items_removed])
+	emit_event("tile_cleaned_up", [pos, items_removed])
 	
 	# Remove from tracking
 	_active_tiles.erase(pos)
@@ -845,7 +824,7 @@ func shift_maze_section(center: Vector2i = Vector2i.ZERO) -> void:
 	
 	@param center: Center position for shift
 	"""
-	_message_bus.emit_event("maze_shift_triggered", [center, 3, []])
+	emit_event("maze_shift_triggered", [center, 3, []])
 
 func remove_permanent_tile(position: Vector2i) -> void:
 	"""
@@ -885,9 +864,7 @@ func get_active_tile_count() -> int:
 	return _active_tiles.size()
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
-	_message_bus.game_started.connect(_on_game_started)
-	_message_bus.game_ended.connect(_on_game_ended)
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.maze_shift_triggered.connect(_on_maze_shift)
 	_message_bus.puzzle_completed.connect(_on_puzzle_completed)
 	
@@ -915,7 +892,6 @@ func _on_puzzle_completed(puzzle_id: String, tile_pos: Vector2i, reward: Diction
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:
 	"""Handle game end - cleanup all tiles and resources"""
-	print("TileManager: Cleaning up all tiles for game end")
 	
 	# Clean up all active tiles
 	var positions_to_clean: Array[Vector2i] = []
@@ -940,28 +916,10 @@ func _on_game_ended(cause: String, data: Dictionary) -> void:
 	
 	# Reset initialization flag
 	_start_tile_initialized = false
-	
-	print("TileManager: Cleanup complete")
 
 func _on_save_data_loaded() -> void:
 	"""Handle save data loaded signal - reload tiles to check puzzle completion status"""
-	print("TileManager: Save data loaded, reloading available tiles")
 	_load_available_tiles()
-
-# Debug functions
-func debug_print_active_tiles() -> void:
-	"""Print all active tiles for debugging"""
-	pass
-
-func force_cleanup_debug() -> void:
-	"""Force cleanup for debugging purposes"""
-	var current_pos = _tile_state_manager.get_current_player_tile()
-	_cleanup_tiles_for_position(current_pos)
-	debug_print_active_tiles()
-
-func debug_check_start_tile() -> void:
-	"""Debug function to check start tile status"""
-	pass
 
 func _get_permanent_tile_at_position(position: Vector2i) -> PackedScene:
 	"""
@@ -1015,11 +973,6 @@ func _spawn_permanent_tile(tile_scene: PackedScene, grid_pos: Vector2i, source_t
 	@param is_duplicate: If true, this is a duplicate instance for wrapping (won't be tracked in _active_tiles)
 	@return: Spawned tile or null
 	"""
-	if is_duplicate:
-		print("TileManager: Spawning DUPLICATE permanent tile at ", grid_pos, " (wrapping instance)")
-	else:
-		print("TileManager: Spawning pre-assigned permanent tile at ", grid_pos)
-	
 	var permanent_tile: Node3D = _create_tile_from_scene(tile_scene, grid_pos)
 	if not permanent_tile:
 		return null
@@ -1043,7 +996,7 @@ func _spawn_permanent_tile(tile_scene: PackedScene, grid_pos: Vector2i, source_t
 		_wrap_duplicates.append(permanent_tile)
 	
 	# Emit tile generated event
-	_message_bus.emit_event("tile_generated", [permanent_tile, grid_pos, {}])
+	emit_event("tile_generated", [permanent_tile, grid_pos, {}])
 	
 	return permanent_tile
 
@@ -1086,7 +1039,6 @@ func _align_tiles_with_rotation_requirement(source_tile: Node3D, target_tile: No
 		
 		# Apply the rotation
 		if best_rotation != -1:
-			print("TileManager: Rotating permanent tile ", target_tile.name, " by ", best_rotation, " steps")
 			if target_tile.has_method("set_tile_rotation"):
 				target_tile.set_tile_rotation(best_rotation)
 			else:
@@ -1107,7 +1059,6 @@ func _align_tiles_with_rotation_requirement(source_tile: Node3D, target_tile: No
 		DoorDirection.WEST:
 			target_tile.position = Vector3(source_center.x, source_center.y, source_center.z - offset)
 	
-	print("TileManager: Permanent tile at wrapped grid ", target_grid_pos, " positioned at world ", target_tile.position)
 
 func _get_opposite_direction(direction: int) -> int:
 	"""
@@ -1162,12 +1113,11 @@ func cleanup_invalid_tile_references() -> void:
 			invalid_positions.append(pos)
 	
 	for pos in invalid_positions:
-		print("TileManager: Removing invalid tile reference at ", pos)
 		_active_tiles.erase(pos)
 		_remove_connections_for_position(pos)
 	
 	if invalid_positions.size() > 0:
-		print("TileManager: Cleaned up ", invalid_positions.size(), " invalid tile references")
+		pass
 	
 	# Also cleanup invalid wrap duplicates
 	var invalid_duplicates: Array[Node3D] = []
@@ -1179,4 +1129,4 @@ func cleanup_invalid_tile_references() -> void:
 		_wrap_duplicates.erase(duplicate)
 	
 	if invalid_duplicates.size() > 0:
-		print("TileManager: Cleaned up ", invalid_duplicates.size(), " invalid wrap duplicates")
+		pass

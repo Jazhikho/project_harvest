@@ -17,7 +17,7 @@ extends Control
 @onready var master_value_label = $SettingsPanel/SettingsContainer/MasterVolume/Value
 @onready var music_value_label = $SettingsPanel/SettingsContainer/MusicVolume/Value
 @onready var sfx_value_label = $SettingsPanel/SettingsContainer/SFXVolume/Value
-
+## Music playlist resource for main menu theme
 @export var music_playlist: Resource # MusicPlaylist.tres
 
 func _ready() -> void:
@@ -68,9 +68,9 @@ func _load_settings():
 	await get_tree().process_frame
 	
 	# Load volume settings with fallbacks
-	var master_vol = 1.0
-	var music_vol = 0.8
-	var sfx_vol = 1.0
+	var master_vol: float = 1.0
+	var music_vol: float = 0.8
+	var sfx_vol: float = 1.0
 	
 	if AudioManager:
 		master_vol = AudioManager.get_bus_volume("Master")
@@ -107,7 +107,7 @@ func _on_start_pressed():
 
 func _start_new_game():
 	fade_out()
-	var am := get_node_or_null("/root/AudioManager")
+	var am: Node = get_node_or_null("/root/AudioManager")
 	if am != null:
 		await am.stop_theme_fade(1.5)
 	await get_tree().create_timer(0.5).timeout
@@ -116,7 +116,7 @@ func _start_new_game():
 
 func _on_continue_pressed():
 	fade_out()
-	var am := get_node_or_null("/root/AudioManager")
+	var am: Node = get_node_or_null("/root/AudioManager")
 	if am != null:
 		await am.stop_theme_fade(1.5)
 	await get_tree().create_timer(0.5).timeout
@@ -137,7 +137,7 @@ func _on_quit_pressed():
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		var am := get_node_or_null("/root/AudioManager")
+		var am: Node = get_node_or_null("/root/AudioManager")
 		if am != null:
 			await am.stop_theme_fade(1.0)
 		get_tree().quit()

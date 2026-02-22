@@ -1,4 +1,4 @@
-extends Node
+extends BaseManager
 ## Audio Manager - Handles audio bus management and sound playback
 ## Simplified to focus only on audio functionality, settings delegated to SettingsManager
 
@@ -15,8 +15,6 @@ var _music_gap_max: float = 2.0
 var _music_gap_timer: Timer = null
 var _music_fade_tween: Tween = null
 
-var _message_bus: Node
-
 # Audio bus management
 var _audio_buses: Dictionary = {
 	"Master": 0,
@@ -31,23 +29,23 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	name = "AudioManager"
 	add_to_group("core_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus"])
+	super._ready()
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize audio system"""
-	_message_bus = get_node_or_null("/root/MessageBus")
 	_ensure_audio_buses()
-	
+
 	# Connect to settings events after ensuring buses exist
 	if _message_bus and _message_bus.has_signal("setting_changed"):
-		_message_bus.connect_event("setting_changed", _on_setting_changed)
-	elif _message_bus:
+		connect_event("setting_changed", _on_setting_changed)
+	else:
 		# Wait for SettingsManager to be ready
 		call_deferred("_connect_to_settings")
-	
+
 	# Connect to audio fade requests
 	if _message_bus and _message_bus.has_signal("audio_fade_requested"):
-		_message_bus.connect_event("audio_fade_requested", _on_audio_fade_requested)
+		connect_event("audio_fade_requested", _on_audio_fade_requested)
 
 func _ensure_audio_buses() -> void:
 	"""Create audio buses if they don't exist"""
@@ -176,7 +174,7 @@ func stop_all_sounds_on_bus(bus_name: String) -> void:
 func _connect_to_settings() -> void:
 	"""Connect to settings events after SettingsManager is ready"""
 	if _message_bus and _message_bus.has_signal("setting_changed"):
-		_message_bus.connect_event("setting_changed", _on_setting_changed)
+		connect_event("setting_changed", _on_setting_changed)
 	
 	# Also request current settings from SettingsManager if it's ready
 	call_deferred("_request_current_settings")
@@ -625,21 +623,10 @@ func _choose_random_index(tracks: Array, last_index: int, allow_repeat: bool) ->
 ## This can be called from debug console or UI for testing
 func test_volume_persistence() -> void:
 	"""Test function to verify volume settings persistence"""
-	print("=== Volume Persistence Test ===")
+	var _master_vol = get_bus_volume("Master")
+	var _music_vol = get_bus_volume("Music")
+	var _sfx_vol = get_bus_volume("SFX")
 	
-	# Get current volumes
-	var master_vol = get_bus_volume("Master")
-	var music_vol = get_bus_volume("Music")
-	var sfx_vol = get_bus_volume("SFX")
-	
-	print("Current volumes - Master: ", master_vol, ", Music: ", music_vol, ", SFX: ", sfx_vol)
-	
-	# Get settings from SettingsManager
 	var settings_manager = get_node_or_null("/root/SettingsManager")
 	if settings_manager:
-		var audio_settings = settings_manager.get_audio_settings()
-		print("SettingsManager audio settings: ", audio_settings)
-	else:
-		print("ERROR: SettingsManager not found")
-	
-	print("=== Test Complete ===")
+		var _audio_settings = settings_manager.get_audio_settings()

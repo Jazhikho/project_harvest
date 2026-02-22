@@ -109,7 +109,6 @@ func interact() -> bool:
 	
 	@return: True if interaction was successful
 	"""
-	print("InteractableTileObject: interact() called on '%s' (object_id: %s, count: %d)" % [name, object_id, _interaction_count])
 	
 	if not _message_bus:
 		push_error("InteractableTileObject: MessageBus not available for %s" % name)
@@ -117,7 +116,6 @@ func interact() -> bool:
 	
 	# Emit interaction event with current count
 	_message_bus.emit_event("object_interacted", [object_id, _interaction_count, self])
-	print("InteractableTileObject: Emitted object_interacted event")
 	
 	# Increment count for multiple mode
 	if interaction_mode == "multiple":

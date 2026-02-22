@@ -1,25 +1,22 @@
-extends Node
+extends BaseManager
 ## Manages item definitions, availability, and effects
 ## Handles item data loading and gameplay logic
 
 @export var spawn_catalog: SpawnCatalog
 @export var sfx_library: SFX
 
-var _item_definitions := {}
-var _item_categories := {
+var _item_definitions: Dictionary = {}
+var _item_categories: Dictionary = {
 	"notes": [],
 	"items": [],
 }
 
-var _item_effects := {}
-var _unlocked_notes := []
-var _puzzle_notes := []
+var _item_effects: Dictionary = {}
+var _unlocked_notes: Array = []
+var _puzzle_notes: Array = []
 
-var _message_bus: Node
-var _state_manager: Node
-
-const ITEM_DATA_PATH := "res://data/items.json"
-const MAX_UNLOCKED_NOTES := 10
+const ITEM_DATA_PATH: String = "res://data/items.json"
+const MAX_UNLOCKED_NOTES: int = 10
 const PICKUP_ITEM_DB: float = -8.0
 const PICKUP_NOTE_DB: float = -12.0
 
@@ -30,7 +27,8 @@ func _ready() -> void:
 	name = "ItemManager"
 	_resolve_catalog()
 	add_to_group("core_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus", "GameStateManager"])
+	super._ready()
 	_export_sanity()
 
 func _export_sanity() -> void:
@@ -43,19 +41,12 @@ func _export_sanity() -> void:
 		if ps == null:
 			push_error("ItemManager: Null PackedScene found in catalog")
 			continue
-		var p := ps.resource_path
+		var p: String = ps.resource_path
 		if not ResourceLoader.exists(p, "PackedScene"):
 			push_error("ItemManager: PackedScene not found in export: " + p)
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize connections and load data"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_state_manager = get_node_or_null("/root/GameStateManager")
-	
-	if not _message_bus or not _state_manager:
-		push_error("ItemManager: Required core systems not found")
-		return
-	
 	_load_item_definitions()
 	_build_item_scene_map() # NEW: Build the scene map after loading definitions
 	_connect_to_events()
@@ -77,8 +68,6 @@ func _build_item_scene_map() -> void:
 	if spawn_catalog == null or spawn_catalog.item_scenes.is_empty():
 		push_warning("ItemManager: No item scenes in catalog.")
 		return
-
-	print("ItemManager: Building scene map from ", spawn_catalog.item_scenes.size(), " scenes")
 	
 	for scene_ps: PackedScene in spawn_catalog.item_scenes:
 		if scene_ps == null:
@@ -101,9 +90,6 @@ func _build_item_scene_map() -> void:
 			push_warning("ItemManager: Item scene has no item_id: " + scene_ps.resource_path)
 		else:
 			_item_scene_map[item_id] = scene_ps
-			print("ItemManager: Mapped item_id '", item_id, "' to scene: ", scene_ps.resource_path)
-	
-	print("ItemManager: Built scene map with ", _item_scene_map.size(), " items")
 
 
 func get_all_item_scenes() -> Array[PackedScene]:
@@ -175,7 +161,7 @@ func _load_item_definitions() -> void:
 	var txt: String = file.get_as_text()
 	file.close()
 
-	var json := JSON.new()
+	var json: JSON = JSON.new()
 	var parse_code: int = json.parse(txt)
 	if parse_code != OK:
 		push_error("ItemManager: Failed to parse items.json, code=" + str(parse_code))
@@ -293,7 +279,6 @@ func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 	if item_info.has("puzzle_id") and SaveManager != null and SaveManager.has_method("is_puzzle_completed"):
 		var puzzle_id: String = String(item_info.get("puzzle_id", ""))
 		if not puzzle_id.is_empty() and SaveManager.is_puzzle_completed(puzzle_id):
-			print("ItemManager: ", item_id, " cannot spawn - puzzle ", puzzle_id, " is completed")
 			return false
 
 	return true
@@ -308,28 +293,18 @@ func get_spawnable_items(context: Dictionary, already_listed) -> Array[Dictionar
 
 	# Prefer JSON list; if empty (export miss), fall back to scenes we actually have.
 	if _item_definitions.size() > 0:
-		print("ItemManager: Using JSON definitions (", _item_definitions.size(), " items)")
 		for k in _item_definitions.keys():
 			candidate_ids.append(String(k))
 	else:
-		print("ItemManager: Using scene map fallback (", _item_scene_map.size(), " items)")
 		for k in _item_scene_map.keys():
 			candidate_ids.append(String(k))
-
-	print("ItemManager: Checking ", candidate_ids.size(), " candidate items for spawning")
 	
 	for id_str: String in candidate_ids:
 		if can_item_spawn(id_str, context):
-			var entry := {"item_id": id_str, "weight": 1.0}
+			var entry: Dictionary = {"item_id": id_str, "weight": 1.0}
 			if entry not in already_listed:
 				spawnable.append(entry)
-				print("ItemManager: Item '", id_str, "' can spawn")
-			else:
-				print("ItemManager: Item '", id_str, "' already listed")
-		else:
-			print("ItemManager: Item '", id_str, "' cannot spawn")
 
-	print("ItemManager: Returning ", spawnable.size(), " spawnable items")
 	return spawnable
 
 ## select_random_item
@@ -418,7 +393,7 @@ func _unlock_next_note(collected_note_id: String) -> void:
 		if note_id not in _puzzle_notes:
 			regular_notes.append(note_id)
 	
-	var next_index := _unlocked_notes.size()
+	var next_index: int = _unlocked_notes.size()
 	
 	if next_index < regular_notes.size() and regular_notes[next_index] not in _unlocked_notes:
 		_unlocked_notes.append(regular_notes[next_index])
@@ -462,13 +437,10 @@ func reset_for_new_run() -> void:
 		notes_to_unlock = min(MAX_UNLOCKED_NOTES + collected_regular_notes, regular_notes.size())
 	
 	_unlocked_notes = regular_notes.slice(0, notes_to_unlock)
-	print("ItemManager: Unlocked ", notes_to_unlock, " notes for new run (previously collected: ", previously_collected_notes.size(), ")")
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.item_collected.connect(_on_item_collected)
-	_message_bus.game_started.connect(_on_game_started)
-	_message_bus.game_ended.connect(_on_game_ended)
 
 func _on_item_collected(item_id: String, collector: Node3D, tile_pos: Vector2i) -> void:
 	# Play the pickup SFX first, at the collector's position if available.
@@ -518,7 +490,6 @@ func mark_item_collected(item_id: String) -> void:
 	if item_id not in collected_items:
 		collected_items.append(item_id)
 		_state_manager.set_state("collected_items", collected_items)
-		print("ItemManager: Marked ", item_id, " as collected. Total collected: ", collected_items.size())
 		
 func remove_item_from_inventory(item_id: String) -> void:
 	"""
@@ -529,7 +500,6 @@ func remove_item_from_inventory(item_id: String) -> void:
 	var player_inventory = get_node_or_null("/root/PlayerInventory")
 	if player_inventory and player_inventory.has_method("remove_item"):
 		player_inventory.remove_item(item_id)
-		print("ItemManager: Removed ", item_id, " from inventory")
 
 func _cleanup_duplicate_items(item_id: String) -> void:
 	"""
@@ -538,10 +508,10 @@ func _cleanup_duplicate_items(item_id: String) -> void:
 	
 	@param item_id: Item identifier to remove duplicates of
 	"""
-	var items_removed := 0
+	var items_removed: int = 0
 	
 	# Get all collectible nodes in the scene
-	var collectibles := get_tree().get_nodes_in_group("collectibles")
+	var collectibles: Array = get_tree().get_nodes_in_group("collectibles")
 	
 	for collectible in collectibles:
 		if not is_instance_valid(collectible):
@@ -561,12 +531,8 @@ func _cleanup_duplicate_items(item_id: String) -> void:
 		
 		# If this is a duplicate of the collected item, remove it
 		if collectible_item_id == item_id:
-			print("ItemManager: Removing duplicate instance of ", item_id, " at ", collectible.global_position)
 			collectible.queue_free()
 			items_removed += 1
-	
-	if items_removed > 0:
-		print("ItemManager: Cleaned up ", items_removed, " duplicate instances of ", item_id)
 
 func _trigger_item_inspection(item_id: String) -> void:
 	"""
@@ -583,25 +549,21 @@ func _trigger_item_inspection(item_id: String) -> void:
 	
 	if category == "notes":
 		# Open journal to show the note
-		_message_bus.emit_event("open_journal_to_note", [item_id])
+		emit_event("open_journal_to_note", [item_id])
 	else:
 		# Open inventory to show the item
-		_message_bus.emit_event("open_inventory_to_item", [item_id])
+		emit_event("open_inventory_to_item", [item_id])
 
 func _on_game_started() -> void:
 	reset_for_new_run()
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:
 	"""Handle game end - cleanup any remaining item instances"""
-	print("ItemManager: Cleaning up items for game end")
-	
 	# Clean up any active collectibles still in the scene
 	var collectibles: Array = get_tree().get_nodes_in_group("collectibles")
 	for item_node in collectibles:
 		if is_instance_valid(item_node):
 			item_node.queue_free()
-	
-	print("ItemManager: Cleanup complete")
 
 ## _play_stream_3d_at
 ## Purpose: Play an AudioStream at a world position on the SFX bus and auto-free.

@@ -1,9 +1,6 @@
-extends Node
+extends BaseManager
 ## Manages run persistence and death location tracking
 ## Handles saving/loading run data for echo system
-
-var _message_bus: Node
-var _state_manager: Node
 
 var _save_file_path: String = "user://harvest_runs.json"
 var _max_stored_runs: int = 10
@@ -11,17 +8,11 @@ var _max_stored_runs: int = 10
 func _ready() -> void:
 	name = "HarvestLogger"
 	add_to_group("game_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus", "GameStateManager"])
+	super._ready()
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize connections to core systems"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_state_manager = get_node_or_null("/root/GameStateManager")
-	
-	if not _message_bus or not _state_manager:
-		push_error("HarvestLogger: Required core systems not found")
-		return
-	
 	_connect_to_events()
 	_load_previous_runs()
 
@@ -49,7 +40,7 @@ func log_run_completion(cause: String, final_position: Vector2i) -> void:
 	}
 	
 	_save_run_log(log_entry)
-	_message_bus.emit_event("echo_spawned", ["run_logged", Vector3.ZERO, log_entry])
+	emit_event("echo_spawned", ["run_logged", Vector3.ZERO, log_entry])
 
 func get_recent_runs(count: int = 5) -> Array:
 	"""
@@ -67,7 +58,7 @@ func clear_run_history() -> void:
 		var dir: DirAccess = DirAccess.open("user://")
 		if dir:
 			dir.remove("harvest_runs.json")
-	_message_bus.emit_event("notification_requested", ["Run history cleared", 2.0, 1])
+	emit_event("notification_requested", ["Run history cleared", 2.0, 1])
 
 func _save_run_log(run_data: Dictionary) -> void:
 	"""
@@ -129,8 +120,7 @@ func _load_previous_runs() -> void:
 		_state_manager.record_death_location(pos, run_data.cause)
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
-	_message_bus.game_ended.connect(_on_game_ended)
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.player_died.connect(_on_player_died)
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:

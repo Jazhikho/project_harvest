@@ -1,9 +1,6 @@
-extends Node
+extends BaseManager
 ## Manages sanity system and psychological effects
 ## Responds to sanity changes and triggers appropriate effects
-
-var _message_bus: Node
-var _state_manager: Node
 
 var _passive_decay_timer: float = 0.0
 var _last_sanity_value: int = 100
@@ -22,17 +19,11 @@ const PASSIVE_DECAY_AMOUNT: int = 1
 func _ready() -> void:
 	name = "SanityManager"
 	add_to_group("game_systems")
-	call_deferred("_initialize")
+	require_systems(["MessageBus", "GameStateManager"])
+	super._ready()
 
-func _initialize() -> void:
+func _initialize_manager() -> void:
 	"""Initialize connections to core systems"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_state_manager = get_node_or_null("/root/GameStateManager")
-	
-	if not _message_bus or not _state_manager:
-		push_error("SanityManager: Required core systems not found")
-		return
-	
 	_connect_to_events()
 	_last_sanity_value = _state_manager.get_state("sanity")
 
@@ -56,7 +47,7 @@ func apply_sanity_loss(cause: String, base_amount: int, position: Vector3 = Vect
 	
 	_state_manager.modify_sanity(-final_amount)
 	
-	_message_bus.emit_event("sanity_effect_triggered", [cause, final_amount / 100.0])
+	emit_event("sanity_effect_triggered", [cause, final_amount / 100.0])
 
 func _calculate_sanity_loss(cause: String, base_amount: int) -> int:
 	"""
@@ -117,15 +108,15 @@ func _enter_critical_state() -> void:
 	"""Handle entering critical sanity state"""
 	
 	# Increase entity spawn rates
-	_message_bus.emit_event("entity_spawned", ["watcher", null, Vector3.ZERO])
+	emit_event("entity_spawned", ["watcher", null, Vector3.ZERO])
 
 func _enter_low_state() -> void:
 	"""Handle entering low sanity state"""
-	_message_bus.emit_event("notification_requested", ["The shadows seem to move on their own...", 3.0, 2])
+	emit_event("notification_requested", ["The shadows seem to move on their own...", 3.0, 2])
 
 func _exit_high_state() -> void:
 	"""Handle exiting high sanity state"""
-	_message_bus.emit_event("notification_requested", ["Something feels wrong...", 2.0, 1])
+	emit_event("notification_requested", ["Something feels wrong...", 2.0, 1])
 
 func get_current_sanity() -> int:
 	"""
@@ -143,6 +134,25 @@ func get_sanity_ratio() -> float:
 	"""
 	return get_current_sanity() / 100.0
 
+func get_sanity_spawn_rate(entity_type: String) -> float:
+	"""
+	Get spawn rate for entity type based on current sanity level.
+	Lower sanity increases spawn rate for horror entities.
+
+	@param entity_type: Entity type (e.g. "watcher")
+	@return: Spawns per minute
+	"""
+	var current: int = get_current_sanity()
+	if entity_type == "watcher":
+		if current <= _sanity_thresholds.critical:
+			return 6.0
+		if current <= _sanity_thresholds.low:
+			return 3.0
+		if current <= _sanity_thresholds.normal:
+			return 1.0
+		return 0.1
+	return 0.1
+
 func is_sanity_critical() -> bool:
 	"""
 	Check if sanity is at critical level
@@ -152,18 +162,16 @@ func is_sanity_critical() -> bool:
 	return get_current_sanity() <= _sanity_thresholds.critical
 
 func _connect_to_events() -> void:
-	"""Connect to MessageBus events"""
+	"""Connect to MessageBus events (game_started/game_ended from BaseManager)"""
 	_message_bus.sanity_changed.connect(_on_sanity_changed)
 	_message_bus.sanity_threshold_crossed.connect(_on_sanity_threshold_crossed)
 	_message_bus.weird_effect_triggered.connect(_on_weird_effect_triggered)
 	_message_bus.sanity_delta_requested.connect(_on_sanity_delta_requested)
-	_message_bus.game_started.connect(_on_game_started)
 
 func _on_sanity_changed(old_value: int, new_value: int, delta: int) -> void:
 	"""Handle sanity value changes"""
 	_apply_sanity_effects(old_value, new_value)
 	_last_sanity_value = new_value
-	print("Sanity is now ", new_value, " with a delta of ", delta)
 	var player = get_tree().get_first_node_in_group("player")
 	if player and player.has_method("_update_sanity_audio"):
 		player._update_sanity_audio()
@@ -188,7 +196,7 @@ func _on_sanity_delta_requested(delta: int, source: String) -> void:
 	@param source: Source of the sanity change request
 	"""
 	_state_manager.modify_sanity(delta)
-	_message_bus.emit_event("sanity_effect_triggered", [source, abs(delta) / 100.0])
+	emit_event("sanity_effect_triggered", [source, abs(delta) / 100.0])
 
 func _on_game_started() -> void:
 	"""Reset sanity effects for new game"""

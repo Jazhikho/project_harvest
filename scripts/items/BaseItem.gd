@@ -199,7 +199,10 @@ func get_item_id() -> String:
 
 func get_item_name() -> String:
 	"""Get display name"""
-	return item_name if not item_name.is_empty() else item_id
+	if not item_name.is_empty():
+		return item_name
+	else:
+		return item_id
 
 func get_item_description() -> String:
 	"""Get item description"""

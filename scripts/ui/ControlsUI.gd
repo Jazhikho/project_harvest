@@ -61,7 +61,6 @@ func _setup_responsive_sizing() -> void:
 		minimized_hints.offset_top = 10.0
 		minimized_hints.offset_right = -10.0 # Negative offset from right edge
 		minimized_hints.offset_bottom = hints_height
-		print("ControlsUI: MinimizedHints positioned at offset_left=", minimized_hints.offset_left, ", offset_right=", minimized_hints.offset_right)
 
 ## _connect_to_events
 ## Purpose: Connect to MessageBus events for player spawn and interactions
@@ -90,15 +89,11 @@ func _connect_to_events() -> void:
 ## Purpose: Check if player already spawned (fallback for race condition)
 ## @return void.
 func _check_for_existing_player() -> void:
-	print("ControlsUI: _check_for_existing_player called, _has_been_shown=", _has_been_shown)
-	
 	if _has_been_shown:
-		print("ControlsUI: Already shown, skipping fallback check")
 		return
 	
 	var players: Array = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
-		print("ControlsUI: Found player via fallback check")
 		_on_player_spawned(players[0])
 
 ## _on_player_spawned
@@ -106,36 +101,21 @@ func _check_for_existing_player() -> void:
 ## @param player_node: The spawned player node
 ## @return void.
 func _on_player_spawned(player_node: Node3D) -> void:
-	print("ControlsUI: player_spawned received, _has_been_shown=", _has_been_shown)
-	
 	if _has_been_shown:
-		print("ControlsUI: Already shown, skipping")
 		return
 	
 	# Wait for narrative intro to finish (if it's playing)
 	var narrative_ui: Control = get_node_or_null("../NarrativeUI")
 	if narrative_ui:
-		print("ControlsUI: Found NarrativeUI, checking if intro is playing...")
 		if narrative_ui.has_method("is_intro_playing"):
 			var intro_playing: bool = narrative_ui.is_intro_playing()
-			print("ControlsUI: Intro playing status=", intro_playing)
 			if intro_playing:
 				var wait_count: int = 0
 				while narrative_ui.is_intro_playing():
-					print("ControlsUI: Waiting for intro to finish... (", wait_count, ")")
 					await get_tree().create_timer(0.1).timeout
 					wait_count += 1
-					# Safety timeout to prevent infinite loop
-					if wait_count > 300: # 30 seconds max wait
-						print("ControlsUI: WARNING - Intro wait timeout, forcing continuation")
+					if wait_count > 300:
 						break
-				print("ControlsUI: Intro finished, showing controls")
-			else:
-				print("ControlsUI: Intro not playing, proceeding immediately")
-		else:
-			print("ControlsUI: NarrativeUI doesn't have is_intro_playing method")
-	else:
-		print("ControlsUI: NarrativeUI not found")
 	
 	# Show controls every run
 	_show_controls_sequence()
@@ -144,20 +124,16 @@ func _on_player_spawned(player_node: Node3D) -> void:
 ## Purpose: Show full controls, wait, then transition to minimized hints
 ## @return void.
 func _show_controls_sequence() -> void:
-	print("ControlsUI: Starting controls sequence")
 	_has_been_shown = true
 	
-	# Make absolutely sure we're not blocking input
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	full_controls.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	minimized_hints.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
 	_fade_in_full_controls()
 	
-	print("ControlsUI: Controls visible, waiting ", DISPLAY_DURATION, " seconds...")
 	await get_tree().create_timer(DISPLAY_DURATION).timeout
 	
-	print("ControlsUI: Transitioning to minimized")
 	_transition_to_minimized()
 
 ## _fade_in_full_controls
@@ -173,7 +149,6 @@ func _fade_in_full_controls() -> void:
 ## Purpose: Transition from full controls to minimized hints
 ## @return void.
 func _transition_to_minimized() -> void:
-	print("ControlsUI: Fading out full controls")
 	var tween: Tween = create_tween()
 	tween.set_parallel(true)
 	
@@ -182,7 +157,6 @@ func _transition_to_minimized() -> void:
 	tween.chain()
 	tween.tween_callback(func():
 		full_controls.visible = false
-		print("ControlsUI: Full controls hidden")
 	)
 	tween.tween_callback(_fade_in_minimized)
 
@@ -190,27 +164,21 @@ func _transition_to_minimized() -> void:
 ## Purpose: Fade in the minimized hints
 ## @return void.
 func _fade_in_minimized() -> void:
-	print("ControlsUI: Fading in minimized hints")
-	print("ControlsUI: MinimizedHints global_position=", minimized_hints.global_position, ", size=", minimized_hints.size)
-	print("ControlsUI: MinimizedHints anchors=", minimized_hints.anchor_left, ",", minimized_hints.anchor_right, ",", minimized_hints.anchor_top, ",", minimized_hints.anchor_bottom)
 	minimized_hints.visible = true
 	minimized_hints.modulate.a = 0.0
 	var tween: Tween = create_tween()
 	tween.tween_property(minimized_hints, "modulate:a", 1.0, FADE_DURATION)
 	await tween.finished
-	print("ControlsUI: Minimized hints visible, controls sequence complete")
 
 ## force_show_minimized_hints
 ## Purpose: Force show minimized hints (for debugging or fallback)
 ## @return void.
 func force_show_minimized_hints() -> void:
-	print("ControlsUI: Force showing minimized hints")
 	if minimized_hints:
 		minimized_hints.visible = true
 		minimized_hints.modulate.a = 1.0
-		print("ControlsUI: Minimized hints force-shown")
 	else:
-		print("ControlsUI: ERROR - minimized_hints node not found!")
+		push_error("ControlsUI: minimized_hints node not found")
 
 
 ## _load_icons

@@ -7,12 +7,14 @@ extends Node3D
 @onready var journal_ui = $UI/JournalUI
 @onready var control_hints = $UI/ControlsUI
 @onready var narrative_ui = $UI/NarrativeUI
+## Music playlist resource for game audio
 @export var music_playlist: MusicPlaylist
+## SFX library resource for sound effects
 @export var sfx_library: SFX
 
-var game_paused = false
-var inventory_open = false
-var journal_open = false
+var game_paused: bool = false
+var inventory_open: bool = false
+var journal_open: bool = false
 
 func _ready():
 	# Connect signals
@@ -242,7 +244,7 @@ func trigger_death(death_type: String):
 	SceneManager.load_death_screen(death_type)
 
 func _fade_out_game_audio_and_wait(seconds: float) -> void:
-	var am := get_node_or_null("/root/AudioManager")
+	var am: Node = get_node_or_null("/root/AudioManager")
 	if am == null:
 		return
 	await am.stop_all_game_audio_fade(seconds)
@@ -303,8 +305,7 @@ func _start_game_audio() -> void:
 ## Purpose: Debug method to force show minimized hints
 ## @return void.
 func debug_force_show_minimized_hints() -> void:
-	print("GameController: Debug - Force showing minimized hints")
 	if control_hints and control_hints.has_method("force_show_minimized_hints"):
 		control_hints.force_show_minimized_hints()
 	else:
-		print("GameController: ERROR - ControlsUI not found or missing force_show_minimized_hints method")
+		push_error("GameController: ControlsUI not found or missing force_show_minimized_hints method")

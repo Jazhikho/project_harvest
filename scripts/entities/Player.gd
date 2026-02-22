@@ -5,7 +5,7 @@ extends CharacterBody3D
 @export var movement_speed: float = 4.5
 @export var sprint_mult: float = 1.6
 @export var mouse_sensitivity: float = 0.003
-@export var flashlight_battery_max: float = 420.0
+@export var flashlight_battery_max: float = GameConstants.FLASHLIGHT_BATTERY_MAX
 @export var flashlight_drain_rate: float = 1.0
 @export var sfx_lib: SFX
 
@@ -35,6 +35,9 @@ var is_sprinting: bool = false
 
 # System references
 var _message_bus: Node
+var _state_manager: Node
+var _save_manager: Node
+var _game_controller: Node
 
 # Input handling
 var mouse_captured: bool = false
@@ -59,13 +62,16 @@ func _ready() -> void:
 	call_deferred("_setup_audio_players")
 	
 	# Initialize flashlight
-	flashlight_battery = randf_range(120.0, 420.0)
+	flashlight_battery = randf_range(GameConstants.FLASHLIGHT_BATTERY_MIN, GameConstants.FLASHLIGHT_BATTERY_MAX)
 	flashlight_battery_max = flashlight_battery
 	_update_flashlight_state()
 
 func _initialize_systems() -> void:
 	"""Initialize connections to core systems"""
 	_message_bus = get_node_or_null("/root/MessageBus")
+	_state_manager = get_node_or_null("/root/GameStateManager")
+	_save_manager = get_node_or_null("/root/SaveManager")
+	_game_controller = get_node_or_null("/root/Game/GameController")
 	
 	if not _message_bus:
 		push_error("Player: MessageBus not found")
@@ -82,17 +88,15 @@ func _connect_to_events() -> void:
 	_message_bus.game_started.connect(_on_game_started)
 	
 func _make_player3d(name_str: String) -> AudioStreamPlayer3D:
-		var p := AudioStreamPlayer3D.new()
-		p.name = name_str
-		p.bus = "SFX"
-		# Keep volume spatially constant since it’s glued to the player/camera.
-		p.attenuation_filter_cutoff_hz = 20500.0
-		p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
-		p.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
-		add_child(p)
-		return p
+	var p: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+	p.name = name_str
+	p.bus = "SFX"
+	p.attenuation_filter_cutoff_hz = 20500.0
+	p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
+	p.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
+	add_child(p)
+	return p
 
-	# Loop continuous streams as appropriate
 func _enable_loop(stream: AudioStream) -> void:
 	if stream == null:
 		return
@@ -120,7 +124,7 @@ func _setup_audio_players() -> void:
 	if heartbeat_player == null or not is_instance_valid(heartbeat_player):
 		heartbeat_player = _make_player3d("HeartbeatPlayer")
 
-	# Assign streams from SFX library (after you fix the heartbeat typo)
+	# Assign streams from SFX library
 	if sfx_lib:
 		if sfx_lib.walking is AudioStream:
 			walking_player.stream = sfx_lib.walking
@@ -128,18 +132,19 @@ func _setup_audio_players() -> void:
 			sprinting_player.stream = sfx_lib.sprinting
 		if "heartbeat" in sfx_lib and sfx_lib.heartbeat is AudioStream:
 			heartbeat_player.stream = sfx_lib.heartbeat
-		elif "hearbeat" in sfx_lib and sfx_lib.hearbeat is AudioStream:
-			heartbeat_player.stream = sfx_lib.hearbeat # temporary fallback if you refuse to rename
 
 	_enable_loop(walking_player.stream)
 	_enable_loop(sprinting_player.stream)
 	_enable_loop(heartbeat_player.stream)
 
 	# Prepare whispers: up to 4 players, each with a different whisper
-	var max_whispers: int = min(4, sfx_lib.whispers.size() if sfx_lib else 0)
+	var whisper_count: int = 0
+	if sfx_lib:
+		whisper_count = sfx_lib.whispers.size()
+	var max_whispers: int = min(4, whisper_count)
 	# Create missing players
 	while whisper_players.size() < max_whispers:
-		var wp := _make_player3d("WhisperPlayer_%d" % whisper_players.size())
+		var wp: AudioStreamPlayer3D = _make_player3d("WhisperPlayer_%d" % whisper_players.size())
 		whisper_players.append(wp)
 	# Assign streams
 	for i in range(max_whispers):
@@ -147,9 +152,12 @@ func _setup_audio_players() -> void:
 		_enable_loop(whisper_players[i].stream)
 
 	# Prepare screams similarly
-	var max_screams: int = min(4, sfx_lib.screams.size() if sfx_lib else 0)
+	var scream_count: int = 0
+	if sfx_lib:
+		scream_count = sfx_lib.screams.size()
+	var max_screams: int = min(4, scream_count)
 	while scream_players.size() < max_screams:
-		var sp := _make_player3d("ScreamPlayer_%d" % scream_players.size())
+		var sp: AudioStreamPlayer3D = _make_player3d("ScreamPlayer_%d" % scream_players.size())
 		scream_players.append(sp)
 	for i in range(max_screams):
 		scream_players[i].stream = sfx_lib.screams[i]
@@ -214,16 +222,18 @@ func _input(event: InputEvent) -> void:
 		if event.keycode >= KEY_0 and event.keycode <= KEY_9:
 			var digit = event.keycode - KEY_0
 			var new_sanity = digit * 10 # 0 = 0%, 1 = 10%, etc.
-			var state_manager = get_node_or_null("/root/GameStateManager")
-			if state_manager:
-				var current_sanity = state_manager.get_state("sanity")
+			if _state_manager:
+				var current_sanity = _state_manager.get_state("sanity")
 				var delta = new_sanity - current_sanity
-				state_manager.modify_sanity(delta)
+				_state_manager.modify_sanity(delta)
 				# Debug message removed - not referencing gameloop steps
 	
 	if event.is_action_pressed("ui_cancel"):
 		mouse_captured = !mouse_captured
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED if mouse_captured else Input.MOUSE_MODE_VISIBLE)
+		if mouse_captured:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 func _handle_mouse_look(relative_motion: Vector2) -> void:
 	"""
@@ -249,7 +259,7 @@ func _is_ui_open() -> bool:
 		return false
 	
 	# Check pause menu
-	if game_controller.get("game_paused") and game_controller.pause_menu and game_controller.pause_menu.visible:
+	if _game_controller.get("game_paused") and _game_controller.pause_menu and _game_controller.pause_menu.visible:
 		return true
 	
 	# Check inventory
@@ -257,7 +267,7 @@ func _is_ui_open() -> bool:
 		return true
 	
 	# Check journal
-	if game_controller.get("journal_open") and game_controller.journal_ui and game_controller.journal_ui.visible:
+	if _game_controller.get("journal_open") and _game_controller.journal_ui and _game_controller.journal_ui.visible:
 		return true
 	
 	# Check narrative UI
@@ -282,13 +292,11 @@ func ensure_mouse_capture_state() -> void:
 		mouse_captured = true
 		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-			print("Player: Mouse capture restored")
 	else:
 		# UI is open, keep mouse visible
 		mouse_captured = false
 		if Input.get_mouse_mode() != Input.MOUSE_MODE_VISIBLE:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-			print("Player: Mouse set to visible")
 
 func _physics_process(delta: float) -> void:
 	game_timer += delta
@@ -306,29 +314,7 @@ func _handle_movement(delta: float) -> void:
 	var input_dir: Vector3 = Vector3.ZERO
 	var was_moving = is_moving
 	var was_sprinting = is_sprinting
-	
-	#if debug_mode:
-		## Flight mode
-		#if Input.is_action_pressed("move_forward"):
-			#input_dir -= transform.basis.z
-		#if Input.is_action_pressed("move_back"):
-			#input_dir += transform.basis.z
-		#if Input.is_action_pressed("move_left"):
-			#input_dir -= transform.basis.x
-		#if Input.is_action_pressed("move_right"):
-			#input_dir += transform.basis.x
-		## Z to go up, C to go down
-		#if Input.is_key_pressed(KEY_Z):
-			#input_dir += Vector3.UP
-		#if Input.is_key_pressed(KEY_C):
-			#input_dir += Vector3.DOWN
-		#
-		#if input_dir.length() > 0:
-			#global_position += input_dir.normalized() * movement_speed * delta * 3.0
-		#
-		#velocity = Vector3.ZERO
-	#else:
-	## Normal movement with collision
+
 	if Input.is_action_pressed("move_forward"):
 		input_dir -= transform.basis.z
 	if Input.is_action_pressed("move_back"):
@@ -455,8 +441,8 @@ func _try_interact() -> void:
 			return
 	
 	# Second try: Sphere cast for items near the player
-	var items_to_check: Array = []
-	
+	var items_to_check: Array[Dictionary] = []
+
 	# Collect all potential items
 	for node in get_tree().get_nodes_in_group("collectibles"):
 		if is_instance_valid(node):
@@ -474,12 +460,11 @@ func _try_interact() -> void:
 		var closest_item: Node = items_to_check[0].node
 		
 		if closest_item.has_method("interact"):
-			print("Player: Interacting with nearby item: ", closest_item.name)
 			closest_item.interact()
 		elif closest_item.has_meta("is_collectible"):
 			_interact_with_object(closest_item)
 
-func _check_node_for_items_recursive(node: Node, items_array: Array) -> void:
+func _check_node_for_items_recursive(node: Node, items_array: Array[Dictionary]) -> void:
 	"""Recursively check nodes for collectible items"""
 	if not is_instance_valid(node):
 		return
@@ -499,10 +484,9 @@ func _interact_with_object(obj: Node) -> void:
 	
 	@param obj: Object to interact with
 	"""
-	var state_manager = get_node_or_null("/root/GameStateManager")
-	var current_tile = Vector2i.ZERO
-	if state_manager:
-		current_tile = state_manager.get_state("current_tile_position")
+	var current_tile: Vector2i = Vector2i.ZERO
+	if _state_manager:
+		current_tile = _state_manager.get_state("current_tile_position")
 	
 	# Check the parent node first if this is a collision body
 	var check_node: Node = obj
@@ -562,15 +546,20 @@ func _show_interaction_prompt(obj: Node) -> void:
 	
 	@param obj: Object that can be interacted with
 	"""
+	if not _message_bus:
+		return
+	var prompt_text: String = ""
 	if obj.has_meta("is_collectible"):
-		# Show collect prompt
-		pass
+		if obj.has_method("get_pickup_prompt_text"):
+			prompt_text = obj.get_pickup_prompt_text()
+		else:
+			prompt_text = "Press E to pick up"
 	elif obj.has_meta("is_backpack"):
-		# Show backpack prompt
-		pass
+		prompt_text = "Press E to search backpack"
 	elif obj.has_meta("is_puzzle"):
-		# Show puzzle prompt
-		pass
+		prompt_text = "Press E to interact"
+	if not prompt_text.is_empty():
+		_message_bus.emit_event("show_interaction_prompt", [prompt_text, obj])
 
 func _update_flashlight(delta: float) -> void:
 	"""
@@ -585,11 +574,10 @@ func _update_flashlight(delta: float) -> void:
 			# One-time sanity loss when battery dies
 			if not flashlight_battery_died:
 				flashlight_battery_died = true
-				var state_manager = get_node_or_null("/root/GameStateManager")
-				if state_manager:
+				if _state_manager:
 					# Delay next action for 2 seconds after flashlight battery dies
 					await get_tree().create_timer(2.0).timeout
-					state_manager.modify_sanity(-100)
+					_state_manager.modify_sanity(-100)
 			
 			_toggle_flashlight()
 	
@@ -599,9 +587,8 @@ func _update_flashlight(delta: float) -> void:
 		darkness_timer += delta
 		if darkness_timer >= 5.0: # 5 seconds
 			darkness_timer = 0.0
-			var state_manager = get_node_or_null("/root/GameStateManager")
-			if state_manager:
-				state_manager.modify_sanity(-1)
+			if _state_manager:
+				_state_manager.modify_sanity(-1)
 	else:
 		# Reset timer when flashlight is on or before grace period
 		darkness_timer = 0.0
@@ -646,9 +633,8 @@ func _handle_force_quit() -> void:
 	die("Force Quit")
 	
 	# Also record death in SaveManager for persistent tracking
-	var save_manager = get_node_or_null("/root/SaveManager")
-	if save_manager and save_manager.has_method("record_death"):
-		save_manager.record_death()
+	if _save_manager and _save_manager.has_method("record_death"):
+		_save_manager.record_death()
 
 func die(cause: String) -> void:
 	"""
@@ -657,10 +643,9 @@ func die(cause: String) -> void:
 	@param cause: Cause of death
 	"""
 	
-	var state_manager = get_node_or_null("/root/GameStateManager")
-	var current_tile = Vector2i.ZERO
-	if state_manager:
-		current_tile = state_manager.get_state("current_tile_position")
+	var current_tile: Vector2i = Vector2i.ZERO
+	if _state_manager:
+		current_tile = _state_manager.get_state("current_tile_position")
 	
 	var death_data: Dictionary = {
 		"position": current_tile,
@@ -682,8 +667,7 @@ func use_inventory_item(item_id: String) -> bool:
 	@param item_id: ID of item to use
 	@return: True if item was used successfully
 	"""
-	var state_manager = get_node_or_null("/root/GameStateManager")
-	if state_manager and state_manager.has_item(item_id):
+	if _state_manager and _state_manager.has_method("has_item") and _state_manager.has_item(item_id):
 		_message_bus.emit_event("item_used", [item_id, null, self])
 		return true
 	return false
@@ -701,7 +685,7 @@ func get_flashlight_battery_ratio() -> float:
 func reset_for_new_run() -> void:
 	"""Reset player state for new game run"""
 	# Reset flashlight state
-	flashlight_battery = randf_range(120.0, 420.0)
+	flashlight_battery = randf_range(GameConstants.FLASHLIGHT_BATTERY_MIN, GameConstants.FLASHLIGHT_BATTERY_MAX)
 	flashlight_battery_max = flashlight_battery
 	flashlight_battery_died = false
 	flashlight_enabled = false
@@ -713,8 +697,6 @@ func reset_for_new_run() -> void:
 	
 	# Update flashlight visual state
 	_update_flashlight_state()
-	
-	print("Player: Reset for new run - flashlight battery: ", flashlight_battery, " seconds")
 
 func is_flashlight_enabled() -> bool:
 	"""Check if flashlight is enabled and has battery"""
@@ -778,11 +760,10 @@ func _update_sanity_audio() -> void:
 	if heartbeat_player == null:
 		return
 
-	var state_manager: Node = get_node_or_null("/root/GameStateManager")
-	if state_manager == null:
+	if _state_manager == null:
 		return
 
-	var current_sanity: int = state_manager.get_state("sanity")
+	var current_sanity: int = _state_manager.get_state("sanity")
 	var current_state: String = _get_sanity_state(current_sanity)
 
 	# Heartbeat control

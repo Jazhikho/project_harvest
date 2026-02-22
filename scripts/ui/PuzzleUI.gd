@@ -46,7 +46,7 @@ func show_well_puzzle(well_puzzle: Node3D) -> void:
 func show_watching_stones_puzzle(puzzle: Node3D, interaction_type: String) -> void:
 	"""Show UI for Watching Stones puzzle"""
 	current_puzzle = puzzle
-	current_interaction_type = interaction_type  # Add this as a class variable
+	current_interaction_type = interaction_type # Add this as a class variable
 	
 	get_tree().paused = true
 	was_mouse_captured = Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
@@ -83,8 +83,6 @@ func _populate_item_list() -> void:
 	
 	var puzzle_pieces: Array = current_puzzle.get_available_puzzle_pieces()
 	
-	print("PuzzleUI: Found ", puzzle_pieces.size(), " puzzle pieces")
-	
 	if puzzle_pieces.is_empty():
 		var no_items_label: Label = Label.new()
 		no_items_label.text = "You don't have any items to drop in."
@@ -106,8 +104,6 @@ func _populate_item_list() -> void:
 		item_button.pressed.connect(on_pressed)
 		
 		item_list.add_child(item_button)
-		
-		print("PuzzleUI: Added button for ", item_id)
 
 func _on_item_selected(item_id: String) -> void:
 	"""Handle item selection"""

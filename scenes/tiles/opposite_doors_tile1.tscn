@@ -1,6 +1,6 @@
 [gd_scene load_steps=16 format=3 uid="uid://baru8fi3bxs0t"]
 
-[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/tile.gd" id="1_e6iyi"]
+[ext_resource type="Script" uid="uid://b6cat3xlx4ye3" path="res://scripts/tiles/Tile.gd" id="1_e6iyi"]
 [ext_resource type="PackedScene" uid="uid://dxq10h1o2g1nw" path="res://scenes/environments/ground.tscn" id="2_iuh5e"]
 [ext_resource type="PackedScene" uid="uid://dh2ksygtyattj" path="res://scenes/environments/2x1_corn_tile.tscn" id="3_oxaxu"]
 [ext_resource type="PackedScene" uid="uid://bfmwipk4hpnoc" path="res://scenes/environments/5x1_corn_tile.tscn" id="4_w5qcs"]
