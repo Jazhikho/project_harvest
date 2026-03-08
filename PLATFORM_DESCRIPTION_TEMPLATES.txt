@@ -39,7 +39,7 @@ free for everyone!
                           GITHUB RELEASE NOTES
 ================================================================================
 
-## Project Harvest v1.5
+## Project Harvest v1.6
 
 ### Downloads
 
@@ -99,7 +99,7 @@ macOS:
                       DISCORD ANNOUNCEMENT
 ================================================================================
 
-🌽 **Project Harvest v1.5 is now available!** 👻
+🌽 **Project Harvest v1.6 is now available!** 👻
 
 Download now for Windows and macOS!
 
@@ -118,7 +118,7 @@ Enjoy your descent into the maze... 🌾
                         REDDIT POST
 ================================================================================
 
-Title: [Release] Project Harvest v1.5 - First-Person Horror in a Living Corn Maze
+Title: [Release] Project Harvest v1.6 - First-Person Horror in a Living Corn Maze
 
 I'm excited to share Project Harvest, a survival horror walking sim where you 
 navigate a procedurally-shifting corn maze that remembers your previous deaths.
@@ -143,7 +143,7 @@ Feedback welcome!
 ================================================================================
 
 Short version:
-🌽 Project Harvest v1.5 is live! 
+🌽 Project Harvest v1.6 is live! 
 
 First-person horror in a living corn maze. Your failed runs become part of 
 future attempts.
@@ -154,7 +154,7 @@ Free | Windows + Mac | Made with Godot
 Mac users: right-click → Open (not code-signed)
 
 Long version:
-🌽👻 Project Harvest v1.5 released!
+🌽👻 Project Harvest v1.6 released!
 
 A survival horror walking sim where:
 • The maze shifts and remembers you
@@ -173,7 +173,7 @@ Made with Godot 4.4
                         EMAIL TO PLAYTESTERS
 ================================================================================
 
-Subject: Project Harvest v1.5 - Mac Build Now Available
+Subject: Project Harvest v1.6 - Mac Build Now Available
 
 Hi [Name],
 

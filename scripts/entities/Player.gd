@@ -5,6 +5,7 @@ extends CharacterBody3D
 @export var movement_speed: float = 4.5
 @export var sprint_mult: float = 1.6
 @export var mouse_sensitivity: float = 0.003
+@export var controller_look_sensitivity: float = 2.5
 @export var flashlight_battery_max: float = GameConstants.FLASHLIGHT_BATTERY_MAX
 @export var flashlight_drain_rate: float = 1.0
 @export var sfx_lib: SFX
@@ -42,6 +43,8 @@ var _game_controller: Node
 # Input handling
 var mouse_captured: bool = false
 var debug_mode: bool = false
+var _nearby_interactables: Dictionary = {}
+var _sprint_toggled: bool = true
 
 # Health system
 var last_sanity_state: String = "normal"
@@ -189,60 +192,116 @@ func _notification(what: int) -> void:
 		_handle_force_quit()
 
 func _input(event: InputEvent) -> void:
-	# Handle mouse recapture on click when mouse is visible but should be captured
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		# Only recapture if we're in gameplay (not paused, no menus open)
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE and mouse_captured:
-			# Check if game is paused or UI is open
 			if not get_tree().paused and not _is_ui_open():
 				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 				get_viewport().set_input_as_handled()
 				return
-	
-	# Debug mode toggle
 	if event is InputEventKey and event.pressed and event.keycode == KEY_TAB:
 		debug_mode = !debug_mode
-		# Debug messages removed - not referencing gameloop steps
 		return
-	
-	if not mouse_captured:
-		return
-	
-	if event is InputEventMouseMotion:
+	if event is InputEventMouseMotion and mouse_captured and not _is_ui_open():
 		_handle_mouse_look(event.relative)
-	
 	if event.is_action_pressed("toggle_flashlight"):
 		_toggle_flashlight()
-	
 	if event.is_action_pressed("interact"):
 		_try_interact()
-	
-	# Debug sanity controls
+	if event.is_action_pressed("sprint"):
+		_handle_sprint_input()
 	if debug_mode and event is InputEventKey and event.pressed:
 		if event.keycode >= KEY_0 and event.keycode <= KEY_9:
 			var digit = event.keycode - KEY_0
-			var new_sanity = digit * 10 # 0 = 0%, 1 = 10%, etc.
+			var new_sanity = digit * 10
 			if _state_manager:
 				var current_sanity = _state_manager.get_state("sanity")
 				var delta = new_sanity - current_sanity
 				_state_manager.modify_sanity(delta)
-				# Debug message removed - not referencing gameloop steps
-	
-	if event.is_action_pressed("ui_cancel"):
+	if event is InputEventKey and event.pressed and event.is_action_pressed("ui_cancel"):
 		mouse_captured = !mouse_captured
-		if mouse_captured:
+		if mouse_captured and not _is_ui_open():
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 func _handle_mouse_look(relative_motion: Vector2) -> void:
-	"""
-	Handle mouse look for camera rotation
-	
-	@param relative_motion: Mouse movement delta
-	"""
 	camera.rotation.x = clamp(camera.rotation.x - relative_motion.y * mouse_sensitivity, -PI / 2, PI / 2)
 	rotation.y -= relative_motion.x * mouse_sensitivity
+
+func _handle_controller_look(delta: float) -> void:
+	if not mouse_captured or _is_ui_open():
+		return
+	var look_vector: Vector2 = InputManager.get_look_vector()
+	if look_vector == Vector2.ZERO:
+		return
+	camera.rotation.x = clamp(camera.rotation.x + look_vector.y * controller_look_sensitivity * delta, -PI / 2, PI / 2)
+	rotation.y -= look_vector.x * controller_look_sensitivity * delta
+
+func _handle_sprint_input() -> void:
+	if _is_hold_to_sprint_enabled():
+		return
+	_sprint_toggled = not _sprint_toggled
+
+func _is_hold_to_sprint_enabled() -> bool:
+	var settings_manager = get_node_or_null("/root/SettingsManager")
+	return settings_manager != null and bool(settings_manager.get_setting("controls", "hold_to_sprint"))
+
+func _is_sprint_requested() -> bool:
+	if _is_hold_to_sprint_enabled():
+		return InputManager.is_action_pressed("sprint")
+	return _sprint_toggled
+
+func register_nearby_interactable(node: Node) -> void:
+	if node == null:
+		return
+	_nearby_interactables[node.get_instance_id()] = node
+
+func unregister_nearby_interactable(node: Node) -> void:
+	if node == null:
+		return
+	_nearby_interactables.erase(node.get_instance_id())
+
+func _get_best_nearby_interactable() -> Node:
+	var closest_node: Node = null
+	var closest_distance: float = INF
+	var stale_ids: Array[int] = []
+	for interactable_id in _nearby_interactables.keys():
+		var candidate: Node = _nearby_interactables[interactable_id]
+		if not is_instance_valid(candidate):
+			stale_ids.append(interactable_id)
+			continue
+		if not (candidate is Node3D):
+			continue
+		var candidate_3d := candidate as Node3D
+		var distance: float = global_position.distance_to(candidate_3d.global_position)
+		if distance <= 2.5 and distance < closest_distance:
+			closest_distance = distance
+			closest_node = candidate
+	for stale_id in stale_ids:
+		_nearby_interactables.erase(stale_id)
+	return closest_node
+
+func _resolve_parent_puzzle(node: Node) -> Node:
+	if node == null:
+		return null
+	if node.has_meta("parent_puzzle"):
+		var parent_puzzle: Variant = node.get_meta("parent_puzzle")
+		if parent_puzzle is Node and is_instance_valid(parent_puzzle):
+			return parent_puzzle
+	return null
+
+func _resolve_interaction_target(collider: Node) -> Node:
+	var current: Node = collider
+	while current:
+		var parent_puzzle: Node = _resolve_parent_puzzle(current)
+		if parent_puzzle:
+			return current
+		if current.has_method("interact") or current.has_method("get_pickup_prompt_text"):
+			return current
+		if current.has_meta("is_collectible") or current.has_meta("is_backpack") or current.has_meta("is_puzzle") or current.has_meta("is_puzzle_part") or current.has_meta("is_interactable"):
+			return current
+		current = current.get_parent()
+	return collider
 
 func _is_ui_open() -> bool:
 	"""
@@ -300,42 +359,27 @@ func ensure_mouse_capture_state() -> void:
 
 func _physics_process(delta: float) -> void:
 	game_timer += delta
+	_handle_controller_look(delta)
 	_handle_movement(delta)
 	_update_flashlight(delta)
 	_check_interactions()
 	_update_sanity_audio()
 	
 func _handle_movement(delta: float) -> void:
-	"""
-	Handle player movement input and physics
-	
-	@param delta: Frame time delta
-	"""
-	var input_dir: Vector3 = Vector3.ZERO
+	var movement_input: Vector2 = InputManager.get_movement_vector()
+	var input_dir: Vector3 = (transform.basis.x * movement_input.x) + (transform.basis.z * movement_input.y)
 	var was_moving = is_moving
 	var was_sprinting = is_sprinting
-
-	if Input.is_action_pressed("move_forward"):
-		input_dir -= transform.basis.z
-	if Input.is_action_pressed("move_back"):
-		input_dir += transform.basis.z
-	if Input.is_action_pressed("move_left"):
-		input_dir -= transform.basis.x
-	if Input.is_action_pressed("move_right"):
-		input_dir += transform.basis.x
-	
-	is_moving = input_dir.length() > 0
-	is_sprinting = is_moving and Input.is_action_pressed("sprint")
-		
+	is_moving = movement_input.length() > 0.0
+	is_sprinting = is_moving and _is_sprint_requested()
 	if is_moving:
 		var speed: float = movement_speed
 		if is_sprinting:
 			speed *= sprint_mult
-		
 		velocity = input_dir.normalized() * speed
-		move_and_slide()
-
-	# Handle movement audio
+	else:
+		velocity = Vector3.ZERO
+	move_and_slide()
 	_update_movement_audio(was_moving, was_sprinting)
 
 func _update_movement_audio(was_moving: bool, was_sprinting: bool) -> void:
@@ -361,122 +405,36 @@ func _update_movement_audio(was_moving: bool, was_sprinting: bool) -> void:
 		sprinting_player.stop()
 
 func _check_interactions() -> void:
-	"""Check for nearby interactive objects using both raycast and area detection"""
-	# First try precise raycast
+	var interaction_target: Node = _get_raycast_interaction_target()
+	if interaction_target:
+		_show_interaction_prompt(interaction_target)
+		return
+	interaction_target = _get_best_nearby_interactable()
+	if interaction_target:
+		_show_interaction_prompt(interaction_target)
+
+func _get_raycast_interaction_target() -> Node:
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		camera.global_position,
-		camera.global_position - camera.global_transform.basis.z * 3.0 # Increased from 2.0
+		camera.global_position - camera.global_transform.basis.z * 3.0
 	)
 	CollisionHelper.setup_interaction_raycast(query)
-	
 	var result: Dictionary = space_state.intersect_ray(query)
 	if result and result.has("collider"):
-		var collider: Node = result.collider
-		
-		# Check parent if this is a collision body
-		var check_node: Node = collider
-		if collider is CollisionObject3D:
-			var parent_node = collider.get_parent()
-			if parent_node and (parent_node.has_meta("is_collectible") or parent_node.has_method("get_pickup_prompt_text")):
-				check_node = parent_node
-		
-		_show_interaction_prompt(check_node)
-		return
-	
-	# Fallback: Check for items in a radius around the player
-	_check_nearby_items_fallback()
-	
-func _check_nearby_items_fallback() -> void:
-	"""Fallback method to detect items in a sphere around the player"""
-	var interaction_radius: float = 2.5
-	var items_in_range: Array = []
-	
-	# Check all nodes in the collectibles group
-	for node in get_tree().get_nodes_in_group("collectibles"):
-		if not is_instance_valid(node):
-			continue
-			
-		var distance: float = global_position.distance_to(node.global_position)
-		if distance <= interaction_radius:
-			items_in_range.append({"node": node, "distance": distance})
-	
-	# Also check for items that might not be in the group but have the meta
-	for node in get_tree().get_nodes_in_group("items"):
-		if not is_instance_valid(node):
-			continue
-			
-		if node.has_meta("is_collectible"):
-			var distance: float = global_position.distance_to(node.global_position)
-			if distance <= interaction_radius:
-				items_in_range.append({"node": node, "distance": distance})
-	
-	# Sort by distance and show prompt for closest
-	if not items_in_range.is_empty():
-		items_in_range.sort_custom(func(a, b): return a.distance < b.distance)
-		_show_interaction_prompt(items_in_range[0].node)
+		return _resolve_interaction_target(result.collider)
+	return null
 
 func _try_interact() -> void:
-	"""Attempt to interact with object in front of player - more forgiving detection"""
-	# First try: Precise raycast
-	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
-	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
-		camera.global_position,
-		camera.global_position - camera.global_transform.basis.z * 3.0 # Increased range
-	)
-	CollisionHelper.setup_interaction_raycast(query)
-	
-	var result: Dictionary = space_state.intersect_ray(query)
-	if result and result.has("collider"):
-		var collider: Node = result.collider
-		
-		# Check if collider has a parent that's a BaseItem
-		var parent_node: Node = collider.get_parent()
-		if parent_node and parent_node.has_method("interact"):
-			parent_node.interact()
-			return
-		else:
-			# Try old interaction system
-			_interact_with_object(collider)
-			return
-	
-	# Second try: Sphere cast for items near the player
-	var items_to_check: Array[Dictionary] = []
-
-	# Collect all potential items
-	for node in get_tree().get_nodes_in_group("collectibles"):
-		if is_instance_valid(node):
-			var distance: float = global_position.distance_to(node.global_position)
-			if distance <= 2.5: # Within interaction range
-				items_to_check.append({"node": node, "distance": distance})
-	
-	# Also check nodes with collectible meta
-	for child in get_tree().current_scene.get_children():
-		_check_node_for_items_recursive(child, items_to_check)
-	
-	# Try to interact with the closest item
-	if not items_to_check.is_empty():
-		items_to_check.sort_custom(func(a, b): return a.distance < b.distance)
-		var closest_item: Node = items_to_check[0].node
-		
-		if closest_item.has_method("interact"):
-			closest_item.interact()
-		elif closest_item.has_meta("is_collectible"):
-			_interact_with_object(closest_item)
-
-func _check_node_for_items_recursive(node: Node, items_array: Array[Dictionary]) -> void:
-	"""Recursively check nodes for collectible items"""
-	if not is_instance_valid(node):
+	var interaction_target: Node = _get_raycast_interaction_target()
+	if interaction_target == null:
+		interaction_target = _get_best_nearby_interactable()
+	if interaction_target == null:
 		return
-	
-	if node.has_meta("is_collectible") or node.has_method("interact"):
-		if node is Node3D:
-			var distance: float = global_position.distance_to(node.global_position)
-			if distance <= 2.5:
-				items_array.append({"node": node, "distance": distance})
-	
-	for child in node.get_children():
-		_check_node_for_items_recursive(child, items_array)
+	if interaction_target.has_method("interact"):
+		interaction_target.interact()
+		return
+	_interact_with_object(interaction_target)
 
 func _interact_with_object(obj: Node) -> void:
 	"""
@@ -494,6 +452,19 @@ func _interact_with_object(obj: Node) -> void:
 		var parent_node = obj.get_parent()
 		if parent_node and parent_node.has_meta("is_collectible"):
 			check_node = parent_node
+
+	var parent_puzzle: Node = _resolve_parent_puzzle(check_node)
+	if parent_puzzle:
+		var interaction_type: String = str(check_node.get_meta("interaction_type", ""))
+		if interaction_type == "altar" and parent_puzzle.has_method("interact_with_altar"):
+			parent_puzzle.interact_with_altar()
+			return
+		if interaction_type == "brazier" and parent_puzzle.has_method("interact_with_brazier"):
+			parent_puzzle.interact_with_brazier()
+			return
+		if parent_puzzle.has_method("interact"):
+			parent_puzzle.interact()
+			return
 	
 	# Handle item collection
 	if check_node.has_meta("is_collectible"):
@@ -541,23 +512,21 @@ func _collect_backpack_contents(inventory: Array) -> void:
 		_show_message("Found %d items from a previous explorer..." % inventory.size())
 
 func _show_interaction_prompt(obj: Node) -> void:
-	"""
-	Show interaction prompt for object
-	
-	@param obj: Object that can be interacted with
-	"""
-	if not _message_bus:
+	if not _message_bus or obj == null:
 		return
 	var prompt_text: String = ""
-	if obj.has_meta("is_collectible"):
-		if obj.has_method("get_pickup_prompt_text"):
-			prompt_text = obj.get_pickup_prompt_text()
-		else:
-			prompt_text = "Press E to pick up"
+	if obj.has_method("get_pickup_prompt_text"):
+		prompt_text = obj.get_pickup_prompt_text()
+	elif obj.has_meta("is_collectible"):
+		prompt_text = "pick up"
 	elif obj.has_meta("is_backpack"):
-		prompt_text = "Press E to search backpack"
+		prompt_text = "search backpack"
 	elif obj.has_meta("is_puzzle"):
-		prompt_text = "Press E to interact"
+		prompt_text = "interact"
+	elif obj.has_meta("is_puzzle_part"):
+		prompt_text = "interact"
+	elif obj.has_meta("is_interactable"):
+		prompt_text = "interact"
 	if not prompt_text.is_empty():
 		_message_bus.emit_event("show_interaction_prompt", [prompt_text, obj])
 
@@ -583,7 +552,7 @@ func _update_flashlight(delta: float) -> void:
 	
 	# Handle darkness sanity drain (1 sanity per 5 seconds when flashlight is off)
 	# Only start draining sanity after 4 minutes (240 seconds) of game time
-	if game_timer >= 240.0 and (not flashlight_enabled or flashlight_battery <= 0.0):
+	if game_timer >= GameConstants.DARKNESS_SANITY_GRACE_PERIOD and (not flashlight_enabled or flashlight_battery <= 0.0):
 		darkness_timer += delta
 		if darkness_timer >= 5.0: # 5 seconds
 			darkness_timer = 0.0
@@ -691,6 +660,7 @@ func reset_for_new_run() -> void:
 	flashlight_enabled = false
 	darkness_timer = 0.0
 	game_timer = 0.0
+	_sprint_toggled = true
 	
 	# Reset audio state
 	last_sanity_state = "normal"
@@ -802,11 +772,11 @@ func _get_sanity_state(sanity: int) -> String:
 	"""Get sanity state name based on value"""
 	if sanity <= 0:
 		return "zero"
-	elif sanity <= 20: # CRITICAL threshold
+	elif sanity <= GameConstants.SANITY_THRESHOLD_CRITICAL:
 		return "critical"
-	elif sanity <= 40:
+	elif sanity <= GameConstants.SANITY_THRESHOLD_LOW:
 		return "low"
-	elif sanity <= 60:
+	elif sanity <= GameConstants.SANITY_THRESHOLD_MEDIUM:
 		return "normal"
 	else:
 		return "high"

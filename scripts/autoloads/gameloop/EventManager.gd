@@ -2,6 +2,8 @@ extends BaseManager
 ## Event Manager - Processes events.json triggers and conditions
 ## Focused solely on event processing, delegates everything else to appropriate systems
 
+const BuildInfoData = preload("res://scripts/utils/BuildInfo.gd")
+
 var _event_data: Dictionary = {}
 var _processed_events: Dictionary = {} # Track once/once_per_run events
 
@@ -20,7 +22,7 @@ func _initialize_manager() -> void:
 func _create_default_events() -> void:
 	"""Create minimal default events as fallback"""
 	_event_data = {
-		"version": "1.0",
+		"version": BuildInfoData.GAME_VERSION,
 		"tiles": {},
 		"speeches": {},
 		"notes": {},

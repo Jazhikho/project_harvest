@@ -7,7 +7,7 @@
 			{ "text": "Maybe it's a dream. Maybe I'm just crazy. Or maybe...just temporary amnesia?" },
 			{ "text": "Whatever it is, I need to get out of here." },
 			{ "text": "It's just a corn maze, right? Corn mazes are supposed to be fun. Let me just find the exit, and I can figure things out later" },
-			{ "text": "Looks like there is a note here. Maybe it will help me figure out what's going on. \n [PRESS E TO INTERACT WITH OBJECTS]" }
+			{ "text": "Looks like there is a note here. Maybe it will help me figure out what's going on. \n [PRESS {interact} TO INTERACT WITH OBJECTS]" }
 		]
 	},
 "toasts": {
@@ -32,7 +32,7 @@
 	"seconds": 5.0
 },
 "flashlight_after_3m": {
-"text": "It's getting dark. I should probably find the exit. Glad I brought a flashlight.\n [PRESS F TO TURN ON FLASHLIGHT]",
+"text": "It's getting dark. I should probably find the exit. Glad I brought a flashlight.\n [PRESS {toggle_flashlight} TO TURN ON FLASHLIGHT]",
 	"seconds": 5.0
 },
 "effigy_stage2_seen": {
@@ -44,7 +44,7 @@
 	"seconds": 5.0
 },
 "effigy_stage4_seen": {
-"text": "They're coming for me! [PRESS SPACE TO SPRINT]",
+"text": "They're coming for me! [PRESS {sprint} TO SPRINT]",
 	"seconds": 5.0
 },
 "item_broken_glass": {
@@ -88,7 +88,7 @@
 	"seconds": 3.0
 },
 "sanity_50": {
-"text": "I need to get out. Now. Something's very wrong here. [PRESS SPACE TO SPRINT]",
+"text": "I need to get out. Now. Something's very wrong here. [PRESS {sprint} TO SPRINT]",
 	"seconds": 3.0
 },
 "sanity_40": {

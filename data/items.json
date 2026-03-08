@@ -196,7 +196,7 @@
 			"id": "note_9",
 			"category": "notes",
 			"subcategory": "Research Structure",
-			"name": "Stalker Design Rationale",
+			"name": "Pursuer Design Rationale",
 			"description": "[This is a typed document, heavily redacted, but the following is visible:]\n\n...fear should arrive in measured pulses. Expectation slices deeper than impact because the future is a blade the mind sharpens against its own throat. \n\nI do not chase bodies for distance; I graze identities for yield. A sprint terrifies. An approach educates. Subjects will dawdle without fear. So I must give them a reaper with teeth. Not pursuit without end—that would be too blunt—but pulses of terror. Enough to remind them that survival is not leisure, it is debt. They pay in panic.\n\n In order to create...",
 			"effects": {
 				"sanity_delta": -1

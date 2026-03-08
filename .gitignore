@@ -4,5 +4,8 @@
 ASSET_TRACKER.md
 *.docx
 
+# Concept art and legacy prototypes (reference only)
+Concept Files/
+
 # Archives / builds
 project.zip

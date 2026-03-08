@@ -23,7 +23,7 @@ var _start_tile_scene: PackedScene = preload("res://scenes/tiles/start_tile.tscn
 
 # Initialization flag
 var _start_tile_initialized: bool = false
-var _permanent_tile_assignments: Dictionary = {}
+var _permanent_tile_assignments: Dictionary = {} # Vector2i -> {scene: PackedScene, puzzle_id: String}
 
 # Forbidden zone for permanent tiles (1,1) to (-1,-1)
 const FORBIDDEN_MIN: Vector2i = Vector2i(-1, -1)
@@ -33,6 +33,12 @@ const FORBIDDEN_MAX: Vector2i = Vector2i(1, 1)
 enum DoorDirection {NORTH = 1, EAST = 2, SOUTH = 4, WEST = 8}
 
 const TILE_SIZE: float = 20.0
+const WORLD_GRID_RADIUS: int = 3
+const WORLD_GRID_SIZE: int = 7
+const MIN_PERMANENT_SLOT_COUNT: int = 12
+const MAX_PERMANENT_SLOT_COUNT: int = 16
+const PREFERRED_PERMANENT_DISTANCE: int = 3
+const MIN_PERMANENT_DISTANCE: int = 2
 
 func _ready() -> void:
 	name = "TileManager"
@@ -68,116 +74,184 @@ func _load_available_tiles() -> void:
 		if tile_scene:
 			_normal_tiles.append(tile_scene)
 	
-	# Process permanent tiles - only include tiles with INCOMPLETE puzzles
-	for tile_scene in tile_database.permanent_tile_scenes:
-		if not tile_scene:
-			continue
-			
-		# Instantiate temporarily to check puzzle completion status
-		var temp_instance: Node3D = tile_scene.instantiate() as Node3D
-		if not temp_instance:
-			push_error("TileManager: Failed to instantiate tile scene: %s" % tile_scene.resource_path)
-			continue
-		
-		var puzzle_id: String = ""
-		var is_completed: bool = false
-		
-		# Try to get puzzle ID from the tile
-		if temp_instance.has_method("get_puzzle_id"):
-			puzzle_id = temp_instance.get_puzzle_id()
-		
-		# If we have a puzzle ID, check if it's completed
-		if not puzzle_id.is_empty():
-			# NEVER filter out the final gate - it should always be available
-			if puzzle_id == "final_gate":
-				is_completed = false
-			else:
-				var save_manager: Node = get_node_or_null("/root/SaveManager")
-				if save_manager and save_manager.has_method("is_puzzle_completed"):
-					is_completed = save_manager.is_puzzle_completed(puzzle_id)
-				else:
-					push_warning("TileManager: SaveManager not available to check puzzle status")
-		else:
-			pass
-		
-		temp_instance.queue_free()
-		
-		# Only add if puzzle is NOT completed
-		if not is_completed:
+	for entry in _get_available_permanent_entries():
+		var tile_scene: PackedScene = entry.get("scene") as PackedScene
+		if tile_scene:
 			_permanent_tiles_scenes.append(tile_scene)
-			var display_id: String
-			if not puzzle_id.is_empty():
-				display_id = puzzle_id
-			else:
-				display_id = "non-puzzle tile"
-		else:
-			pass
 	
 	
 	# Pre-assign permanent tiles to positions
 	_assign_permanent_tile_positions()
+
+func _get_available_permanent_entries() -> Array[Dictionary]:
+	var available_entries: Array[Dictionary] = []
+	if not tile_database:
+		return available_entries
+	for entry in tile_database.get_permanent_tile_entries():
+		var tile_scene: PackedScene = entry.get("scene") as PackedScene
+		var puzzle_id: String = str(entry.get("puzzle_id", ""))
+		if not tile_scene:
+			continue
+		if _is_permanent_puzzle_completed(puzzle_id):
+			continue
+		available_entries.append(_make_permanent_assignment_info(tile_scene, puzzle_id))
+	return available_entries
+
+func _is_permanent_puzzle_completed(puzzle_id: String) -> bool:
+	if puzzle_id.is_empty() or puzzle_id == "final_gate":
+		return false
+	var save_manager: Node = get_node_or_null("/root/SaveManager")
+	if save_manager and save_manager.has_method("is_puzzle_completed"):
+		return save_manager.is_puzzle_completed(puzzle_id)
+	return false
+
+func _make_permanent_assignment_info(tile_scene: PackedScene, puzzle_id: String) -> Dictionary:
+	return {
+		"scene": tile_scene,
+		"puzzle_id": puzzle_id
+	}
+
+func _get_permanent_assignment_info(position: Vector2i) -> Dictionary:
+	if not _permanent_tile_assignments.has(position):
+		return {}
+	var assignment: Variant = _permanent_tile_assignments[position]
+	if assignment is Dictionary:
+		return assignment
+	if assignment is PackedScene:
+		return _make_permanent_assignment_info(assignment, _get_puzzle_id_for_scene(assignment))
+	return {}
+
+func _get_puzzle_id_for_scene(tile_scene: PackedScene) -> String:
+	if not tile_scene or not tile_database:
+		return ""
+	for entry in tile_database.get_permanent_tile_entries():
+		var entry_scene: PackedScene = entry.get("scene") as PackedScene
+		if entry_scene == tile_scene:
+			return str(entry.get("puzzle_id", ""))
+		if entry_scene and tile_scene.resource_path == entry_scene.resource_path:
+			return str(entry.get("puzzle_id", ""))
+	return ""
+
+func _get_puzzle_id_for_tile(tile: Node) -> String:
+	if not tile or not is_instance_valid(tile):
+		return ""
+	var puzzle_id: String = str(tile.get_meta("permanent_assignment_puzzle_id", tile.get_meta("puzzle_id", "")))
+	if not puzzle_id.is_empty():
+		return puzzle_id
+	if tile.has_method("get_puzzle_id"):
+		return str(tile.get_puzzle_id())
+	return ""
 	
 func _assign_permanent_tile_positions() -> void:
-	"""Pre-assign permanent tiles to specific grid positions - 3 locations per tile"""
+	"""Pre-assign permanent tiles to the shared permanent slots for this run"""
 	_permanent_tile_assignments.clear()
-	
-	if _permanent_tiles_scenes.is_empty():
-		return
-	
-	# Filter out permanent tiles whose puzzles are completed
-	var available_permanent_tiles: Array[PackedScene] = []
-	for tile_scene in _permanent_tiles_scenes:
-		if tile_scene:
-			available_permanent_tiles.append(tile_scene)
-	
+
+	var available_permanent_tiles: Array[Dictionary] = _get_available_permanent_entries()
 	if available_permanent_tiles.is_empty():
 		return
-	
-	# Generate valid spawn positions (outside forbidden zone)
+
+	var valid_positions: Array[Vector2i] = _get_valid_permanent_positions()
+	if valid_positions.is_empty():
+		return
+
+	var target_slot_count: int = mini(valid_positions.size(), randi_range(MIN_PERMANENT_SLOT_COUNT, MAX_PERMANENT_SLOT_COUNT))
+	target_slot_count = maxi(target_slot_count, available_permanent_tiles.size())
+
+	var selected_positions: Array[Vector2i] = _select_permanent_slot_positions(valid_positions, target_slot_count)
+	if selected_positions.is_empty():
+		return
+
+	var target_counts: Dictionary = _build_target_assignment_counts(available_permanent_tiles, selected_positions.size())
+	var assignment_order: Array[Dictionary] = _build_assignment_order(available_permanent_tiles, target_counts)
+	if assignment_order.is_empty():
+		return
+
+	selected_positions.shuffle()
+	for index in range(mini(selected_positions.size(), assignment_order.size())):
+		_permanent_tile_assignments[selected_positions[index]] = assignment_order[index].duplicate(true)
+
+func _get_valid_permanent_positions() -> Array[Vector2i]:
 	var valid_positions: Array[Vector2i] = []
-	
-	for x in range(-3, 4):
-		for y in range(-3, 4):
-			var pos: Vector2i = Vector2i(x, y)
-			if _can_permanent_tile_spawn_at(pos):
-				valid_positions.append(pos)
-	
-	# Shuffle positions for randomness
-	valid_positions.shuffle()
-	
-	# Assign each permanent tile to THREE positions
-	# Strategy: All tiles get 1 location, then all get 2, then all get 3
-	# Each location must be at least 2 tiles away from ANY other permanent tile location
-	var used_positions: Array[Vector2i] = []
-	
-	# Three passes: first location for all tiles, then second, then third
-	for location_pass in range(3):
-		for tile_scene in available_permanent_tiles:
-			var found_position: bool = false
-			
-			# Try to find a valid position for this tile
-			for pos in valid_positions:
-				# Skip if position is already used
-				if pos in used_positions:
-					continue
-				
-				# Check if position is at least 2 tiles away from ALL other permanent tile positions
-				var too_close: bool = false
-				for assigned_pos in used_positions:
-					var distance: int = abs(pos.x - assigned_pos.x) + abs(pos.y - assigned_pos.y)
-					if distance < 2:
-						too_close = true
-						break
-				
-				if not too_close:
-					used_positions.append(pos)
-					_permanent_tile_assignments[pos] = tile_scene
-					found_position = true
-					break
-			
-			# Warn if we couldn't find a position for this tile on this pass
-			if not found_position:
-				pass
+	for x in range(-WORLD_GRID_RADIUS, WORLD_GRID_RADIUS + 1):
+		for y in range(-WORLD_GRID_RADIUS, WORLD_GRID_RADIUS + 1):
+			var position: Vector2i = Vector2i(x, y)
+			if _can_permanent_tile_spawn_at(position):
+				valid_positions.append(position)
+	return valid_positions
+
+func _select_permanent_slot_positions(valid_positions: Array[Vector2i], target_slot_count: int) -> Array[Vector2i]:
+	var preferred_positions: Array[Vector2i] = _select_positions_with_spacing(valid_positions, target_slot_count, PREFERRED_PERMANENT_DISTANCE)
+	if preferred_positions.size() >= target_slot_count:
+		return preferred_positions
+	return _select_positions_with_spacing(valid_positions, target_slot_count, MIN_PERMANENT_DISTANCE)
+
+func _select_positions_with_spacing(valid_positions: Array[Vector2i], target_slot_count: int, minimum_distance: int) -> Array[Vector2i]:
+	var best_positions: Array[Vector2i] = []
+	for _attempt in range(32):
+		var shuffled_positions: Array[Vector2i] = valid_positions.duplicate()
+		shuffled_positions.shuffle()
+		var selected_positions: Array[Vector2i] = []
+		for position in shuffled_positions:
+			if not _position_meets_spacing(position, selected_positions, minimum_distance):
+				continue
+			selected_positions.append(position)
+			if selected_positions.size() >= target_slot_count:
+				return selected_positions
+		if selected_positions.size() > best_positions.size():
+			best_positions = selected_positions
+	return best_positions
+
+func _position_meets_spacing(position: Vector2i, selected_positions: Array[Vector2i], minimum_distance: int) -> bool:
+	for selected_position in selected_positions:
+		if _get_wrapped_tile_distance(position, selected_position) < minimum_distance:
+			return false
+	return true
+
+func _get_wrapped_tile_distance(pos1: Vector2i, pos2: Vector2i) -> int:
+	return _get_wrapped_axis_distance(pos1.x, pos2.x) + _get_wrapped_axis_distance(pos1.y, pos2.y)
+
+func _get_wrapped_axis_distance(a: int, b: int) -> int:
+	var distance: int = absi(a - b)
+	return mini(distance, WORLD_GRID_SIZE - distance)
+
+func _build_target_assignment_counts(available_entries: Array[Dictionary], total_slot_count: int) -> Dictionary:
+	var target_counts: Dictionary = {}
+	if available_entries.is_empty() or total_slot_count <= 0:
+		return target_counts
+
+	var shuffled_entries: Array[Dictionary] = available_entries.duplicate()
+	shuffled_entries.shuffle()
+
+	var base_count: int = total_slot_count / shuffled_entries.size()
+	var remainder: int = total_slot_count % shuffled_entries.size()
+	for index in range(shuffled_entries.size()):
+		var puzzle_id: String = str(shuffled_entries[index].get("puzzle_id", ""))
+		target_counts[puzzle_id] = base_count + (1 if index < remainder else 0)
+
+	return target_counts
+
+func _build_assignment_order(available_entries: Array[Dictionary], target_counts: Dictionary) -> Array[Dictionary]:
+	var assignment_order: Array[Dictionary] = []
+	if available_entries.is_empty() or target_counts.is_empty():
+		return assignment_order
+
+	var shuffled_entries: Array[Dictionary] = available_entries.duplicate()
+	shuffled_entries.shuffle()
+
+	var assignments_remaining: int = 0
+	for puzzle_id in target_counts.keys():
+		assignments_remaining += int(target_counts[puzzle_id])
+
+	while assignments_remaining > 0:
+		for entry in shuffled_entries:
+			var puzzle_id: String = str(entry.get("puzzle_id", ""))
+			var remaining: int = int(target_counts.get(puzzle_id, 0))
+			if remaining <= 0:
+				continue
+			assignment_order.append(entry)
+			target_counts[puzzle_id] = remaining - 1
+			assignments_remaining -= 1
+	return assignment_order
 
 func initialize_game_tiles() -> void:
 	"""Called when the game scene is actually loaded"""
@@ -302,10 +376,9 @@ func _register_tile(tile: Node3D, position: Vector2i) -> void:
 	if tile.has_method("is_tile_permanent") and tile.is_tile_permanent():
 		_permanent_tiles[position] = tile
 		
-		if tile.has_method("get_puzzle_id"):
-			var puzzle_id: String = tile.get_puzzle_id()
-			if not puzzle_id.is_empty():
-				_puzzle_tiles[position] = puzzle_id
+		var puzzle_id: String = _get_puzzle_id_for_tile(tile)
+		if not puzzle_id.is_empty():
+			_puzzle_tiles[position] = puzzle_id
 
 func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 	"""
@@ -363,11 +436,12 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 			_active_tiles.erase(wrapped_connecting_pos)
 		
 		# Check for pre-assigned permanent tile at this position
-		var permanent_scene_at_pos: PackedScene = _get_permanent_tile_at_position(wrapped_connecting_pos)
+		var assignment_info: Dictionary = _get_permanent_assignment_info(wrapped_connecting_pos)
+		var permanent_scene_at_pos: PackedScene = assignment_info.get("scene") as PackedScene
 		if permanent_scene_at_pos != null:
 			# Check if we already have a permanent tile at this wrapped position
 			var is_duplicate: bool = _has_permanent_tile_at(wrapped_connecting_pos)
-			var permanent_tile: Node3D = _spawn_permanent_tile(permanent_scene_at_pos, wrapped_connecting_pos, source_tile, door_direction, is_duplicate)
+			var permanent_tile: Node3D = _spawn_permanent_tile(assignment_info, wrapped_connecting_pos, source_tile, door_direction, is_duplicate)
 			if permanent_tile:
 				_establish_connection(source_pos, wrapped_connecting_pos)
 			continue
@@ -614,16 +688,16 @@ func _apply_world_wrapping(position: Vector2i) -> Vector2i:
 	var wrapped_pos: Vector2i = position
 	
 	# Wrap X coordinate: -3 to 3 (7 total positions)
-	while wrapped_pos.x > 3:
-		wrapped_pos.x -= 7
-	while wrapped_pos.x < -3:
-		wrapped_pos.x += 7
+	while wrapped_pos.x > WORLD_GRID_RADIUS:
+		wrapped_pos.x -= WORLD_GRID_SIZE
+	while wrapped_pos.x < -WORLD_GRID_RADIUS:
+		wrapped_pos.x += WORLD_GRID_SIZE
 	
 	# Wrap Y coordinate: -3 to 3 (7 total positions)
-	while wrapped_pos.y > 3:
-		wrapped_pos.y -= 7
-	while wrapped_pos.y < -3:
-		wrapped_pos.y += 7
+	while wrapped_pos.y > WORLD_GRID_RADIUS:
+		wrapped_pos.y -= WORLD_GRID_SIZE
+	while wrapped_pos.y < -WORLD_GRID_RADIUS:
+		wrapped_pos.y += WORLD_GRID_SIZE
 
 	if wrapped_pos != position:
 		pass
@@ -733,25 +807,22 @@ func _cleanup_distant_wrap_duplicates(player_pos: Vector2i) -> void:
 	var player_physical_pos: Vector3 = player.global_position
 	var cleanup_distance: float = TILE_SIZE * 3.0 # Clean up duplicates more than 3 tiles away
 	
-	var duplicates_to_remove: Array[Node3D] = []
-	
-	for duplicate in _wrap_duplicates:
-		if not is_instance_valid(duplicate):
-			duplicates_to_remove.append(duplicate)
+	var remaining_duplicates: Array[Node3D] = []
+
+	for wrap_dup in _wrap_duplicates:
+		if not is_instance_valid(wrap_dup):
 			continue
-		
-		var distance: float = duplicate.position.distance_to(player_physical_pos)
+
+		var distance: float = wrap_dup.position.distance_to(player_physical_pos)
 		if distance > cleanup_distance:
-			duplicates_to_remove.append(duplicate)
-			
 			# Free the duplicate
-			if duplicate.get_parent():
-				duplicate.get_parent().remove_child(duplicate)
-			duplicate.queue_free()
-	
-	# Remove from tracking
-	for duplicate in duplicates_to_remove:
-		_wrap_duplicates.erase(duplicate)
+			if wrap_dup.get_parent():
+				wrap_dup.get_parent().remove_child(wrap_dup)
+			wrap_dup.queue_free()
+			continue
+		remaining_duplicates.append(wrap_dup)
+
+	_wrap_duplicates = remaining_duplicates
 
 func _cleanup_single_tile(pos: Vector2i) -> void:
 	"""
@@ -826,17 +897,54 @@ func shift_maze_section(center: Vector2i = Vector2i.ZERO) -> void:
 	"""
 	emit_event("maze_shift_triggered", [center, 3, []])
 
-func remove_permanent_tile(position: Vector2i) -> void:
+func remove_permanent_tile(position: Vector2i, puzzle_id: String = "") -> void:
 	"""
 	Remove a tile from permanent status (when puzzle completed)
 	
 	@param position: Position of tile to remove from permanent
 	"""
+	var resolved_puzzle_id: String = puzzle_id
+	if resolved_puzzle_id.is_empty():
+		if _puzzle_tiles.has(position):
+			resolved_puzzle_id = str(_puzzle_tiles[position])
+		elif _active_tiles.has(position):
+			resolved_puzzle_id = _get_puzzle_id_for_tile(_active_tiles[position])
+
+	if _active_tiles.has(position) and is_instance_valid(_active_tiles[position]):
+		_mark_tile_non_permanent(_active_tiles[position])
+
+	_permanent_tile_assignments.erase(position)
 	if _permanent_tiles.has(position):
 		_permanent_tiles.erase(position)
 	
 	if _puzzle_tiles.has(position):
 		_puzzle_tiles.erase(position)
+
+	if resolved_puzzle_id.is_empty():
+		return
+
+	var freed_positions: Array[Vector2i] = []
+	var positions_to_clear: Array[Vector2i] = []
+	for assigned_pos in _permanent_tile_assignments.keys():
+		var assignment_info: Dictionary = _get_permanent_assignment_info(assigned_pos)
+		if str(assignment_info.get("puzzle_id", "")) != resolved_puzzle_id:
+			continue
+		positions_to_clear.append(assigned_pos)
+		if assigned_pos != position:
+			freed_positions.append(assigned_pos)
+
+	for assigned_pos in positions_to_clear:
+		_permanent_tile_assignments.erase(assigned_pos)
+		if _puzzle_tiles.has(assigned_pos):
+			_puzzle_tiles.erase(assigned_pos)
+		if assigned_pos != position and _permanent_tiles.has(assigned_pos):
+			_permanent_tiles.erase(assigned_pos)
+		if assigned_pos != position and _active_tiles.has(assigned_pos) and is_instance_valid(_active_tiles[assigned_pos]):
+			_mark_tile_non_permanent(_active_tiles[assigned_pos])
+			_cleanup_single_tile(assigned_pos)
+
+	_cleanup_wrap_duplicates_for_puzzle(resolved_puzzle_id)
+	_reassign_freed_permanent_positions(freed_positions)
 
 func _position_player_at_start(start_tile: Node3D) -> void:
 	"""
@@ -876,19 +984,31 @@ func _connect_to_events() -> void:
 func _on_game_started() -> void:
 	"""Handle game start - initialize tiles when game actually starts"""
 	# Clear all previous run data
+	_active_tiles.clear()
+	_permanent_tiles.clear()
+	_puzzle_tiles.clear()
 	_established_connections.clear()
+	_permanent_tile_assignments.clear()
 	_start_tile_initialized = false
 	_wrap_duplicates.clear()
 	cleanup_invalid_tile_references()
+	_load_available_tiles()
 	initialize_game_tiles()
 
 func _on_maze_shift(center: Vector2i, radius: int, affected_tiles: Array) -> void:
 	"""Handle maze shift request"""
-	shift_maze_section(center)
+	cleanup_invalid_tile_references()
 
 func _on_puzzle_completed(puzzle_id: String, tile_pos: Vector2i, reward: Dictionary) -> void:
 	"""Handle puzzle completion"""
-	remove_permanent_tile(tile_pos)
+	if tile_pos == Vector2i.ZERO:
+		var current_tile_pos: Vector2i = get_current_player_tile()
+		if not _active_tiles.has(current_tile_pos):
+			return
+		if _get_puzzle_id_for_tile(_active_tiles[current_tile_pos]) != puzzle_id:
+			return
+		tile_pos = current_tile_pos
+	remove_permanent_tile(tile_pos, puzzle_id)
 
 func _on_game_ended(cause: String, data: Dictionary) -> void:
 	"""Handle game end - cleanup all tiles and resources"""
@@ -902,9 +1022,9 @@ func _on_game_ended(cause: String, data: Dictionary) -> void:
 		_cleanup_single_tile(pos)
 	
 	# Clean up all wrap duplicates
-	for duplicate in _wrap_duplicates:
-		if is_instance_valid(duplicate):
-			duplicate.queue_free()
+	for wrap_dup in _wrap_duplicates:
+		if is_instance_valid(wrap_dup):
+			wrap_dup.queue_free()
 	_wrap_duplicates.clear()
 	
 	# Clear all tracking dictionaries
@@ -928,8 +1048,9 @@ func _get_permanent_tile_at_position(position: Vector2i) -> PackedScene:
 	@param position: Grid position to check
 	@return: PackedScene of permanent tile assigned here, or null
 	"""
-	if _permanent_tile_assignments.has(position):
-		return _permanent_tile_assignments[position]
+	var assignment_info: Dictionary = _get_permanent_assignment_info(position)
+	if not assignment_info.is_empty():
+		return assignment_info.get("scene") as PackedScene
 	
 	return null
 
@@ -962,20 +1083,27 @@ func _can_permanent_tile_spawn_at(position: Vector2i) -> bool:
 	
 	return true
 
-func _spawn_permanent_tile(tile_scene: PackedScene, grid_pos: Vector2i, source_tile: Node3D, door_direction: int, is_duplicate: bool = false) -> Node3D:
+func _spawn_permanent_tile(assignment_info: Dictionary, grid_pos: Vector2i, source_tile: Node3D, door_direction: int, is_duplicate: bool = false) -> Node3D:
 	"""
 	Spawn a pre-assigned permanent tile at position
 	
-	@param tile_scene: PackedScene of the permanent tile
+	@param assignment_info: Permanent tile assignment metadata
 	@param grid_pos: Position to spawn at (wrapped world position)
 	@param source_tile: Tile we're connecting from
 	@param door_direction: Direction we're connecting from
 	@param is_duplicate: If true, this is a duplicate instance for wrapping (won't be tracked in _active_tiles)
 	@return: Spawned tile or null
 	"""
+	var tile_scene: PackedScene = assignment_info.get("scene") as PackedScene
+	if not tile_scene:
+		return null
 	var permanent_tile: Node3D = _create_tile_from_scene(tile_scene, grid_pos)
 	if not permanent_tile:
 		return null
+	var puzzle_id: String = str(assignment_info.get("puzzle_id", ""))
+	if not puzzle_id.is_empty():
+		permanent_tile.set_meta("permanent_assignment_puzzle_id", puzzle_id)
+		permanent_tile.set_meta("puzzle_id", puzzle_id)
 	
 	# Permanent tiles must rotate to connect
 	_align_tiles_with_rotation_requirement(source_tile, permanent_tile, door_direction, grid_pos)
@@ -1114,19 +1242,79 @@ func cleanup_invalid_tile_references() -> void:
 	
 	for pos in invalid_positions:
 		_active_tiles.erase(pos)
+		_permanent_tiles.erase(pos)
+		_puzzle_tiles.erase(pos)
 		_remove_connections_for_position(pos)
 	
 	if invalid_positions.size() > 0:
 		pass
 	
 	# Also cleanup invalid wrap duplicates
-	var invalid_duplicates: Array[Node3D] = []
-	for duplicate in _wrap_duplicates:
-		if not is_instance_valid(duplicate):
-			invalid_duplicates.append(duplicate)
+	var valid_duplicates: Array[Node3D] = []
+	var previous_duplicate_count: int = _wrap_duplicates.size()
+	for wrap_dup in _wrap_duplicates:
+		if is_instance_valid(wrap_dup):
+			valid_duplicates.append(wrap_dup)
+	_wrap_duplicates = valid_duplicates
 	
-	for duplicate in invalid_duplicates:
-		_wrap_duplicates.erase(duplicate)
-	
-	if invalid_duplicates.size() > 0:
+	if previous_duplicate_count != _wrap_duplicates.size():
 		pass
+
+func _mark_tile_non_permanent(tile: Node3D) -> void:
+	if not tile or not is_instance_valid(tile):
+		return
+	var is_permanent_value: Variant = tile.get("is_permanent")
+	if is_permanent_value is bool:
+		tile.set("is_permanent", false)
+	tile.set_meta("permanent_assignment_completed", true)
+
+func _get_assignment_counts_by_puzzle_id() -> Dictionary:
+	var counts: Dictionary = {}
+	for position in _permanent_tile_assignments.keys():
+		var assignment_info: Dictionary = _get_permanent_assignment_info(position)
+		var puzzle_id: String = str(assignment_info.get("puzzle_id", ""))
+		if puzzle_id.is_empty():
+			continue
+		counts[puzzle_id] = int(counts.get(puzzle_id, 0)) + 1
+	return counts
+
+func _cleanup_wrap_duplicates_for_puzzle(puzzle_id: String) -> void:
+	var remaining_duplicates: Array[Node3D] = []
+	for wrap_dup in _wrap_duplicates:
+		if not is_instance_valid(wrap_dup):
+			continue
+		if _get_puzzle_id_for_tile(wrap_dup) == puzzle_id:
+			if wrap_dup.get_parent():
+				wrap_dup.get_parent().remove_child(wrap_dup)
+			wrap_dup.queue_free()
+			continue
+		remaining_duplicates.append(wrap_dup)
+	_wrap_duplicates = remaining_duplicates
+
+func _reassign_freed_permanent_positions(freed_positions: Array[Vector2i]) -> void:
+	if freed_positions.is_empty():
+		return
+	var available_entries: Array[Dictionary] = _get_available_permanent_entries()
+	if available_entries.is_empty():
+		return
+	var assignment_counts: Dictionary = _get_assignment_counts_by_puzzle_id()
+	var target_counts: Dictionary = _build_target_assignment_counts(available_entries, _permanent_tile_assignments.size() + freed_positions.size())
+	freed_positions.shuffle()
+	for position in freed_positions:
+		var selected_entry: Dictionary = {}
+		for entry in available_entries:
+			var candidate_id: String = str(entry.get("puzzle_id", ""))
+			var candidate_count: int = int(assignment_counts.get(candidate_id, 0))
+			var candidate_target: int = int(target_counts.get(candidate_id, 0))
+			var selected_id: String = str(selected_entry.get("puzzle_id", ""))
+			var selected_count: int = int(assignment_counts.get(selected_id, 0))
+			var selected_target: int = int(target_counts.get(selected_id, 0))
+			var candidate_deficit: int = candidate_target - candidate_count
+			var selected_deficit: int = selected_target - selected_count
+			if selected_entry.is_empty() or candidate_deficit > selected_deficit or (candidate_deficit == selected_deficit and candidate_count < selected_count):
+				selected_entry = entry
+		if selected_entry.is_empty():
+			continue
+		var selected_id: String = str(selected_entry.get("puzzle_id", ""))
+		_permanent_tile_assignments[position] = selected_entry.duplicate(true)
+		assignment_counts[selected_id] = int(assignment_counts.get(selected_id, 0)) + 1

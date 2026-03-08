@@ -51,7 +51,8 @@ func _connect_to_systems():
 
 func _initialize_hud():
 	"""Initialize HUD with starting values"""
-	_update_sanity_display(100)
+	sanity_bar.max_value = GameConstants.MAX_SANITY
+	_update_sanity_display(GameConstants.MAX_SANITY)
 	_update_weird_counter(0)
 	_update_flashlight_battery(1.0)
 
@@ -90,7 +91,8 @@ func _on_weird_collected_update(type: String, position: Vector2i):
 func _update_sanity_display(sanity: int):
 	"""Update sanity bar and color"""
 	sanity_bar.value = sanity
-	sanity_label.text = str(sanity) + "%"
+	var sanity_percent: int = int(round((float(sanity) / float(GameConstants.MAX_SANITY)) * 100.0))
+	sanity_label.text = str(sanity_percent) + "%"
 	
 	_add_screen_effects_critical()
 

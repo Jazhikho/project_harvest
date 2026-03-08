@@ -46,18 +46,20 @@ func _process(delta: float) -> void:
 	_update_difficulty_scaling()
 
 func start_new_game() -> void:
-	"""Initialize a new game session"""
-	
-	_session_start_time = Time.get_unix_time_from_system()
-	_maze_shift_timer = 0.0
-	_current_difficulty = "normal"
-	_current_shift_interval = _base_shift_interval
-	
-	_initialize_session_data()
+	"""Initialize a new game session and emit game_started (single entry point when starting from menu etc.)."""
+	_apply_new_game_session_state()
 	_message_bus.emit_event("game_started", [])
 	
 	# Process initial game events
 	_event_manager.process_global_events("on_game_start", {})
+
+func _apply_new_game_session_state() -> void:
+	"""Set session timing and data without emitting. Called on game_started to avoid re-emitting."""
+	_session_start_time = Time.get_unix_time_from_system()
+	_maze_shift_timer = 0.0
+	_current_difficulty = "normal"
+	_current_shift_interval = _base_shift_interval
+	_initialize_session_data()
 
 func end_game(cause: String, additional_data: Dictionary = {}) -> void:
 	"""
@@ -227,13 +229,13 @@ func _update_difficulty_scaling() -> void:
 	var old_difficulty: String = _current_difficulty
 	
 	# Difficulty based on sanity and time
-	if current_sanity <= 20:
+	if current_sanity <= GameConstants.SANITY_THRESHOLD_CRITICAL:
 		_current_difficulty = "nightmare"
 		_current_shift_interval = _stressed_shift_interval * 0.5
-	elif current_sanity <= 40:
+	elif current_sanity <= GameConstants.SANITY_THRESHOLD_LOW:
 		_current_difficulty = "hard"
 		_current_shift_interval = _stressed_shift_interval
-	elif session_time > 300: # 5 minutes
+	elif session_time > GameConstants.SESSION_TIME_STRESSED_THRESHOLD:
 		_current_difficulty = "hard"
 		_current_shift_interval = _stressed_shift_interval
 	else:
@@ -327,8 +329,9 @@ func _connect_to_events() -> void:
 	_message_bus.maze_shift_triggered.connect(_on_maze_shift_triggered)
 
 func _on_game_started() -> void:
-	"""Handle game start event - initialize session timing"""
-	start_new_game()
+	"""Handle game start event - initialize session timing without re-emitting game_started."""
+	_apply_new_game_session_state()
+	_event_manager.process_global_events("on_game_start", {})
 
 func _on_player_died(cause: String, position: Vector2i, data: Dictionary) -> void:
 	"""Handle player death"""

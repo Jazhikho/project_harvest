@@ -95,7 +95,7 @@ offset_right = -10.0
 offset_bottom = -10.0
 grow_horizontal = 0
 grow_vertical = 0
-text = "v1.5"
+text = "v1.6"
 horizontal_alignment = 2
 vertical_alignment = 2
 
@@ -258,7 +258,7 @@ Christopher B. Del Gesso
 
 [b]Programming[/b]
 Christopher B. Del Gesso
-with assistance from Anthropic Claude-4 Sonnet
+with assistance from Anthropic Claude-4 Sonnet and GPT-5.4 (Codex)
 
 [b]3D Art & Modeling[/b]
 Christopher B. Del Gesso
@@ -382,7 +382,7 @@ All rights reserved - Christopher B. Del Gesso
 [b]Third Party Assets[/b]
 Retain their original copyright
 
-[b]© 2025 Christopher B. Del Gesso[/b]
+[b]© 2026 Christopher B. Del Gesso[/b]
 [b]Chosen Gaming[/b][/center]"
 fit_content = true
 

@@ -3,7 +3,7 @@ extends Node
 ## Single source of truth for all game state data
 
 var _state: Dictionary = {
-	"sanity": 100,
+	"sanity": GameConstants.MAX_SANITY,
 	"flags": {},
 	"inventory": [],
 	"visited_tiles": {},
@@ -24,8 +24,8 @@ var _state_history: Array[Dictionary] = []
 var _max_history: int = 50
 var _message_bus: Node
 
-const MAX_SANITY: int = 100
-const MIN_SANITY: int = 0
+const MAX_SANITY: int = GameConstants.MAX_SANITY
+const MIN_SANITY: int = GameConstants.MIN_SANITY
 
 func _ready() -> void:
 	name = "GameStateManager"
@@ -280,10 +280,10 @@ func _check_sanity_thresholds(old_value: int, new_value: int) -> void:
 	@param new_value: New sanity value
 	"""
 	var thresholds: Dictionary = {
-		"critical": 20,
-		"low": 40,
-		"normal": 60,
-		"high": 80
+		"critical": GameConstants.SANITY_THRESHOLD_CRITICAL,
+		"low": GameConstants.SANITY_THRESHOLD_LOW,
+		"normal": GameConstants.SANITY_THRESHOLD_MEDIUM,
+		"high": GameConstants.SANITY_THRESHOLD_HIGH
 	}
 	
 	for threshold_name in thresholds:

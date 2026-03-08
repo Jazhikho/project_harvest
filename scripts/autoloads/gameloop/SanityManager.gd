@@ -3,12 +3,12 @@ extends BaseManager
 ## Responds to sanity changes and triggers appropriate effects
 
 var _passive_decay_timer: float = 0.0
-var _last_sanity_value: int = 100
+var _last_sanity_value: int = GameConstants.MAX_SANITY
 var _sanity_thresholds: Dictionary = {
-	"critical": 20,
-	"low": 40,
-	"normal": 60,
-	"high": 80
+	"critical": GameConstants.SANITY_THRESHOLD_CRITICAL,
+	"low": GameConstants.SANITY_THRESHOLD_LOW,
+	"normal": GameConstants.SANITY_THRESHOLD_MEDIUM,
+	"high": GameConstants.SANITY_THRESHOLD_HIGH
 }
 
 var _current_effects: Array = []
@@ -47,7 +47,7 @@ func apply_sanity_loss(cause: String, base_amount: int, position: Vector3 = Vect
 	
 	_state_manager.modify_sanity(-final_amount)
 	
-	emit_event("sanity_effect_triggered", [cause, final_amount / 100.0])
+	emit_event("sanity_effect_triggered", [cause, float(final_amount) / float(GameConstants.MAX_SANITY)])
 
 func _calculate_sanity_loss(cause: String, base_amount: int) -> int:
 	"""
@@ -83,7 +83,7 @@ func _apply_sanity_effects(old_sanity: int, new_sanity: int) -> void:
 	@param old_sanity: Previous sanity value
 	@param new_sanity: Current sanity value
 	"""
-	var intensity: float = 1.0 - (new_sanity / 100.0)
+	var intensity: float = 1.0 - (float(new_sanity) / float(GameConstants.MAX_SANITY))
 
 func _handle_threshold_crossed(threshold_name: String, new_value: int, crossed_down: bool) -> void:
 	"""
@@ -106,9 +106,7 @@ func _handle_threshold_crossed(threshold_name: String, new_value: int, crossed_d
 
 func _enter_critical_state() -> void:
 	"""Handle entering critical sanity state"""
-	
-	# Increase entity spawn rates
-	emit_event("entity_spawned", ["watcher", null, Vector3.ZERO])
+	emit_event("notification_requested", ["The maze feels hungry.", 3.0, 2])
 
 func _enter_low_state() -> void:
 	"""Handle entering low sanity state"""
@@ -132,26 +130,11 @@ func get_sanity_ratio() -> float:
 	
 	@return: Sanity ratio
 	"""
-	return get_current_sanity() / 100.0
+	return float(get_current_sanity()) / float(GameConstants.MAX_SANITY)
 
-func get_sanity_spawn_rate(entity_type: String) -> float:
-	"""
-	Get spawn rate for entity type based on current sanity level.
-	Lower sanity increases spawn rate for horror entities.
-
-	@param entity_type: Entity type (e.g. "watcher")
-	@return: Spawns per minute
-	"""
-	var current: int = get_current_sanity()
-	if entity_type == "watcher":
-		if current <= _sanity_thresholds.critical:
-			return 6.0
-		if current <= _sanity_thresholds.low:
-			return 3.0
-		if current <= _sanity_thresholds.normal:
-			return 1.0
-		return 0.1
-	return 0.1
+func get_sanity_spawn_rate(_entity_type: String) -> float:
+	"""Legacy API retained for compatibility with existing callers."""
+	return 0.0
 
 func is_sanity_critical() -> bool:
 	"""
@@ -196,10 +179,10 @@ func _on_sanity_delta_requested(delta: int, source: String) -> void:
 	@param source: Source of the sanity change request
 	"""
 	_state_manager.modify_sanity(delta)
-	emit_event("sanity_effect_triggered", [source, abs(delta) / 100.0])
+	emit_event("sanity_effect_triggered", [source, float(abs(delta)) / float(GameConstants.MAX_SANITY)])
 
 func _on_game_started() -> void:
 	"""Reset sanity effects for new game"""
 	_current_effects.clear()
 	_passive_decay_timer = 0.0
-	_last_sanity_value = 100
+	_last_sanity_value = GameConstants.MAX_SANITY

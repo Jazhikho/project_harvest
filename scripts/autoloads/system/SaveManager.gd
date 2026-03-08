@@ -215,13 +215,9 @@ func mark_puzzle_completed(puzzle_id: String) -> void:
 	"""Mark a puzzle as permanently completed"""
 	if not save_data.puzzles.has(puzzle_id):
 		save_data.puzzles[puzzle_id] = {}
-		save_game()
 	
 	save_data.puzzles[puzzle_id]["completed"] = true
 	save_data.puzzles[puzzle_id]["completion_time"] = Time.get_unix_time_from_system()
-	var message_bus: Node = get_node_or_null("/root/MessageBus")
-	if message_bus and message_bus.has_method("emit_event"):
-		message_bus.emit_event("puzzle_completed", [puzzle_id, Vector2i.ZERO, {}])
 	save_game()
 
 func is_puzzle_item_used(item_id: String) -> bool:

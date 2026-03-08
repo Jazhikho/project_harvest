@@ -23,5 +23,7 @@
 [resource]
 script = ExtResource("1_kbaq4")
 item_scenes = Array[PackedScene]([ExtResource("2_qx3ue"), ExtResource("3_xaxqc"), ExtResource("4_kl1yn"), ExtResource("5_yt0hw"), ExtResource("6_sgvry"), ExtResource("7_ybxci"), ExtResource("8_wkdlw"), ExtResource("9_8laut"), ExtResource("10_847mp"), ExtResource("11_b11ws"), ExtResource("12_kl1yn"), ExtResource("13_qx3ue"), ExtResource("14_yt0hw"), ExtResource("15_start"), ExtResource("16_crows"), ExtResource("17_watch"), ExtResource("18_hollow")])
+item_scene_ids = PackedStringArray("broken_glass_1", "broken_glass_2", "broken_glass_3", "flag", "holy_book", "phone", "symbol_coin", "symbol_ticket", "symbol_watch", "hollow_key", "flashlight", "backpack", "journal", "start_note", "crows_parliament_note", "watching_stones_note", "whispering_hollow_note")
 enemy_scenes = Array[PackedScene]([ExtResource("1_wy5ud")])
+enemy_scene_ids = PackedStringArray("effigy")
 metadata/_custom_type_script = "uid://dlxejxpqfojiy"

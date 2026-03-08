@@ -7,4 +7,3 @@
 script = ExtResource("2_hr5uk")
 item_id = &"journal"
 display_name = "Research Journal"
-body_path = NodePath(".")

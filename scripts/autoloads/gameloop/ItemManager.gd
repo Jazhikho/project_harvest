@@ -68,28 +68,13 @@ func _build_item_scene_map() -> void:
 	if spawn_catalog == null or spawn_catalog.item_scenes.is_empty():
 		push_warning("ItemManager: No item scenes in catalog.")
 		return
-	
-	for scene_ps: PackedScene in spawn_catalog.item_scenes:
+
+	for entry in spawn_catalog.get_item_catalog_entries():
+		var item_id: String = entry.id
+		var scene_ps: PackedScene = entry.scene
 		if scene_ps == null:
-			push_warning("ItemManager: Null scene in catalog")
 			continue
-
-		var temp: Node = scene_ps.instantiate()
-		var item_id: String = ""
-
-		if temp.has_method("get_item_id"):
-			item_id = String(temp.get_item_id())
-		elif "item_id" in temp:
-			item_id = String(temp.item_id)
-		elif temp.has_meta("item_id"):
-			item_id = String(temp.get_meta("item_id"))
-
-		temp.queue_free()
-
-		if item_id.is_empty():
-			push_warning("ItemManager: Item scene has no item_id: " + scene_ps.resource_path)
-		else:
-			_item_scene_map[item_id] = scene_ps
+		_item_scene_map[item_id] = scene_ps
 
 
 func get_all_item_scenes() -> Array[PackedScene]:

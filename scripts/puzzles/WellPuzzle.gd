@@ -53,9 +53,20 @@ func _setup_interaction_area() -> void:
 		collision.shape = shape
 		interaction_area.add_child(collision)
 	
-	# Set collision for interaction
-	interaction_area.collision_layer = 8 # Objects layer
-	interaction_area.collision_mask = 1 # Player layer
+	interaction_area.collision_layer = 1 << (CollisionHelper.LAYER_PUZZLE_OBJECTS - 1)
+	interaction_area.collision_mask = 1 << (CollisionHelper.LAYER_PLAYER - 1)
+	if not interaction_area.body_entered.is_connected(_on_interaction_body_entered):
+		interaction_area.body_entered.connect(_on_interaction_body_entered)
+	if not interaction_area.body_exited.is_connected(_on_interaction_body_exited):
+		interaction_area.body_exited.connect(_on_interaction_body_exited)
+
+func _on_interaction_body_entered(body: Node3D) -> void:
+	if body and body.is_in_group("player") and body.has_method("register_nearby_interactable"):
+		body.register_nearby_interactable(self)
+
+func _on_interaction_body_exited(body: Node3D) -> void:
+	if body and body.is_in_group("player") and body.has_method("unregister_nearby_interactable"):
+		body.unregister_nearby_interactable(self)
 
 func interact() -> bool:
 	"""Called when player interacts with the well"""

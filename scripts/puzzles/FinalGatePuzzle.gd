@@ -58,7 +58,9 @@ func _on_game_started() -> void:
 func _setup_interaction_area() -> void:
 	"""Setup interaction area for gate"""
 	if not gate_area:
-		var gate_node: Node3D = get_node_or_null("Gate")
+		var gate_node: Node3D = get_node_or_null("gate")
+		if not gate_node:
+			gate_node = get_node_or_null("Gate")
 		if not gate_node:
 			push_error("FinalGatePuzzle: Gate node not found")
 			return
@@ -73,8 +75,20 @@ func _setup_interaction_area() -> void:
 		collision.shape = shape
 		gate_area.add_child(collision)
 	
-	gate_area.collision_layer = 8
-	gate_area.collision_mask = 1
+	gate_area.collision_layer = 1 << (CollisionHelper.LAYER_PUZZLE_OBJECTS - 1)
+	gate_area.collision_mask = 1 << (CollisionHelper.LAYER_PLAYER - 1)
+	if not gate_area.body_entered.is_connected(_on_interaction_body_entered):
+		gate_area.body_entered.connect(_on_interaction_body_entered)
+	if not gate_area.body_exited.is_connected(_on_interaction_body_exited):
+		gate_area.body_exited.connect(_on_interaction_body_exited)
+
+func _on_interaction_body_entered(body: Node3D) -> void:
+	if body and body.is_in_group("player") and body.has_method("register_nearby_interactable"):
+		body.register_nearby_interactable(self)
+
+func _on_interaction_body_exited(body: Node3D) -> void:
+	if body and body.is_in_group("player") and body.has_method("unregister_nearby_interactable"):
+		body.unregister_nearby_interactable(self)
 
 func _check_key_spawn() -> void:
 	"""Check if key should spawn on altar"""
@@ -159,7 +173,8 @@ func _play_ending_sequence() -> void:
 	
 	# THEN trigger game end to cleanup (after scene transition has started)
 	# Use call_deferred so it happens after the scene change begins
-	var game_director: Node = get_node_or_null("/root/GameDirector")
+	var root: Window = get_tree().root
+	var game_director: Node = root.get_node_or_null("GameDirector")
 	if game_director and game_director.has_method("end_game"):
 		game_director.call_deferred("end_game", "Victory", puzzle_data)
 
@@ -183,7 +198,8 @@ func _gather_puzzle_data() -> Dictionary:
 
 func _transition_to_ending() -> void:
 	"""Transition to the ending credits scene"""
-	var scene_manager: Node = get_node_or_null("/root/SceneManager")
+	var root: Window = get_tree().root
+	var scene_manager: Node = root.get_node_or_null("SceneManager")
 	if scene_manager and scene_manager.has_method("load_ending_credits"):
 		scene_manager.load_ending_credits()
 	else:
@@ -195,20 +211,20 @@ func _transition_to_ending() -> void:
 		else:
 			push_error("FinalGatePuzzle: Node is no longer in tree, cannot transition to ending")
 
-func _on_puzzle_completed(puzzle_id: String, tile_pos: Vector2i, reward: Dictionary) -> void:
+func _on_puzzle_completed(completed_puzzle_id: String, tile_pos: Vector2i, reward: Dictionary) -> void:
 	"""Handle when any puzzle is completed - check if key should spawn"""
 	_check_key_spawn()
 
-func _on_tile_entered(tile_node: Node3D, position: Vector2i, player: Node3D) -> void:
+func _on_tile_entered(tile_node: Node3D, tile_position: Vector2i, player: Node3D) -> void:
 	"""Handle when player enters this tile for the first time"""
 	if _first_tile_visit:
 		return
-	
+
 	# Check if this is the final gate tile (we are under Maze/Objects, so parent is Maze, grandparent is FinalGate)
 	var final_gate_tile: Node3D = get_parent().get_parent()
 	if tile_node != final_gate_tile:
 		return
-	
+
 	_first_tile_visit = true
 	_save_puzzle_state()
 	_show_message("A gate... this must be the way out!")

@@ -15,13 +15,14 @@ signal puzzle_closed
 var current_puzzle: Node3D = null
 var was_mouse_captured: bool = false
 var current_interaction_type: String = ""
+var _item_buttons: Array[Button] = []
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	process_mode = Node.PROCESS_MODE_WHEN_PAUSED as Node.ProcessMode
 	visible = false
 	
 	if close_button:
-		close_button.pressed.connect(_on_close_pressed)
+		close_button.focus_mode = Control.FOCUS_ALL as Control.FocusMode
 
 func show_well_puzzle(well_puzzle: Node3D) -> void:
 	"""Show UI for well puzzle interaction"""
@@ -42,6 +43,7 @@ func show_well_puzzle(well_puzzle: Node3D) -> void:
 	_populate_item_list()
 	
 	visible = true
+	call_deferred("_focus_default_control")
 	
 func show_watching_stones_puzzle(puzzle: Node3D, interaction_type: String) -> void:
 	"""Show UI for Watching Stones puzzle"""
@@ -57,6 +59,7 @@ func show_watching_stones_puzzle(puzzle: Node3D, interaction_type: String) -> vo
 	
 	_populate_item_list()
 	visible = true
+	call_deferred("_focus_default_control")
 
 func show_mirror_puzzle(puzzle: Node3D) -> void:
 	"""Show UI for Crows Parliament mirror puzzle"""
@@ -71,10 +74,12 @@ func show_mirror_puzzle(puzzle: Node3D) -> void:
 	
 	_populate_item_list()
 	visible = true
+	call_deferred("_focus_default_control")
 
 func _populate_item_list() -> void:
 	"""Populate the list of available puzzle pieces"""
 	# Clear existing items
+	_item_buttons.clear()
 	for child in item_list.get_children():
 		child.queue_free()
 	
@@ -86,24 +91,52 @@ func _populate_item_list() -> void:
 	if puzzle_pieces.is_empty():
 		var no_items_label: Label = Label.new()
 		no_items_label.text = "You don't have any items to drop in."
-		no_items_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		no_items_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER as HorizontalAlignment
 		item_list.add_child(no_items_label)
+		_configure_close_button_focus()
 		return
 	
 	# Create button for each puzzle piece
-	for piece in puzzle_pieces:
+	for index in range(puzzle_pieces.size()):
+		var piece: Dictionary = puzzle_pieces[index]
 		var item_id: String = piece.get("id", "")
 		var item_name: String = piece.get("name", item_id)
 		
 		var item_button: Button = Button.new()
 		item_button.text = item_name
 		item_button.custom_minimum_size = Vector2(0, 40)
+		item_button.focus_mode = Control.FOCUS_ALL as Control.FocusMode
 		
 		# Use callable for connection
 		var on_pressed: Callable = func(): _on_item_selected(item_id)
 		item_button.pressed.connect(on_pressed)
 		
 		item_list.add_child(item_button)
+		_item_buttons.append(item_button)
+
+		if index > 0:
+			var previous_button: Button = _item_buttons[index - 1]
+			previous_button.focus_neighbor_bottom = previous_button.get_path_to(item_button)
+			item_button.focus_neighbor_top = item_button.get_path_to(previous_button)
+
+	_configure_close_button_focus()
+
+func _configure_close_button_focus() -> void:
+	if not close_button:
+		return
+	if _item_buttons.is_empty():
+		close_button.focus_neighbor_top = NodePath()
+		return
+	var last_button: Button = _item_buttons[_item_buttons.size() - 1]
+	last_button.focus_neighbor_bottom = last_button.get_path_to(close_button)
+	close_button.focus_neighbor_top = close_button.get_path_to(last_button)
+
+func _focus_default_control() -> void:
+	if _item_buttons.is_empty():
+		if close_button:
+			close_button.grab_focus()
+		return
+	_item_buttons[0].grab_focus()
 
 func _on_item_selected(item_id: String) -> void:
 	"""Handle item selection"""
@@ -111,7 +144,11 @@ func _on_item_selected(item_id: String) -> void:
 		return
 	
 	# Try to place the item
-	var result: Dictionary = current_puzzle.try_place_item(item_id)
+	var result: Dictionary
+	if current_interaction_type.is_empty():
+		result = current_puzzle.try_place_item(item_id)
+	else:
+		result = current_puzzle.try_place_item(item_id, current_interaction_type)
 	
 	# Show result message
 	_show_result_message(result.get("message", ""))
@@ -119,6 +156,7 @@ func _on_item_selected(item_id: String) -> void:
 	if result.get("success", false):
 		# Refresh the item list
 		_populate_item_list()
+		call_deferred("_focus_default_control")
 		
 		# If puzzle completed, close UI
 		if result.get("completed", false):
@@ -146,6 +184,8 @@ func _close_ui() -> void:
 	
 	emit_signal("puzzle_closed")
 	current_puzzle = null
+	current_interaction_type = ""
+	_item_buttons.clear()
 
 func _input(event: InputEvent) -> void:
 	if not visible:

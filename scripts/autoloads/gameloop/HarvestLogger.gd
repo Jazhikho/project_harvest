@@ -2,6 +2,8 @@ extends BaseManager
 ## Manages run persistence and death location tracking
 ## Handles saving/loading run data for echo system
 
+const BuildInfoData = preload("res://scripts/utils/BuildInfo.gd")
+
 var _save_file_path: String = "user://harvest_runs.json"
 var _max_stored_runs: int = 10
 
@@ -74,7 +76,7 @@ func _save_run_log(run_data: Dictionary) -> void:
 		existing_runs = existing_runs.slice(-_max_stored_runs)
 	
 	var save_data: Dictionary = {
-		"version": "1.0",
+		"version": BuildInfoData.GAME_VERSION,
 		"runs": existing_runs,
 		"last_updated": Time.get_datetime_string_from_system()
 	}

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SFX" load_steps=22 format=3 uid="uid://b11pmr7ctvqqy"]
+[gd_resource type="Resource" script_class="SFX" load_steps=23 format=3 uid="uid://b11pmr7ctvqqy"]
 
 [ext_resource type="Script" uid="uid://ck6mfksth7lfi" path="res://data/SFX.gd" id="1_40wi3"]
 [ext_resource type="AudioStream" uid="uid://dk38i5nulmvpx" path="res://assets/audio/Corn.ogg" id="1_vcavf"]
@@ -21,7 +21,7 @@
 [ext_resource type="AudioStream" uid="uid://donucdt1axyo5" path="res://assets/audio/whispers3.ogg" id="19_7tva0"]
 [ext_resource type="AudioStream" uid="uid://oyp5ln71g5mx" path="res://assets/audio/whispers4.ogg" id="20_ukifc"]
 [ext_resource type="AudioStream" uid="uid://c8eb66vn6mnx4" path="res://assets/audio/whispers.ogg" id="21_tjbnc"]
-[ext_resource type="AudioStream" uid="uid://ciuv02omhshkq" path="res://assets/audio/crows_1.ogg" id="22_crows"]
+[ext_resource type="AudioStream" uid="uid://kyvr1xqfyeox" path="res://assets/audio/crows_1.ogg" id="22_crows"]
 
 [resource]
 script = ExtResource("1_40wi3")

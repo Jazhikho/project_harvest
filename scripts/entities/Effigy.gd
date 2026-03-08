@@ -45,6 +45,8 @@ var target_position: Vector3
 var is_following: bool = false
 var player_in_detection_range: bool = false
 var aggression_mode: bool = false
+var aggression_locked: bool = false
+var aggression_lock_reason: StringName = &""
 
 # Movement state
 var follow_speed: float
@@ -87,15 +89,19 @@ func _initialize_entity() -> void:
 	
 	# Get initial sanity level
 	current_sanity = get_current_sanity()
+	aggression_locked = bool(get_meta("aggression_locked", false))
+	if has_meta("aggression_lock_reason"):
+		aggression_lock_reason = StringName(str(get_meta("aggression_lock_reason", "")))
 	
 	if is_instance_valid(player):
 		last_player_position = player.global_position
 	else:
 		last_player_position = global_position
 		
-	var should_be_aggressive: bool = current_sanity < GameConstants.SANITY_THRESHOLD_CRITICAL
+	var should_be_aggressive: bool = aggression_locked or current_sanity < GameConstants.SANITY_THRESHOLD_CRITICAL
 	if should_be_aggressive:
-		set_aggression_mode(true, &"sanity_critical_boot")
+		var boot_reason: StringName = aggression_lock_reason if aggression_locked else &"sanity_critical_boot"
+		set_aggression_mode(true, boot_reason)
 	else:
 		_update_behavior_for_sanity()
 		
@@ -331,6 +337,14 @@ func _move_toward_player(delta: float) -> void:
 
 func _update_behavior_for_sanity() -> void:
 	"""Update behavior and appearance based on current sanity"""
+	if aggression_locked:
+		if not aggression_mode:
+			set_aggression_mode(true, aggression_lock_reason if aggression_lock_reason != &"" else &"aggression_locked")
+		else:
+			follow_speed = aggressive_speed
+			_change_stage(4)
+		return
+
 	var new_stage: int = _calculate_stage_for_sanity(current_sanity)
 	if new_stage != current_stage:
 		_change_stage(new_stage)
@@ -406,6 +420,14 @@ func _on_detection_area_exited(body: Node3D) -> void:
 func _on_sanity_changed(old_value: int, new_value: int, delta: int) -> void:
 	"""Handle sanity level changes"""
 	current_sanity = new_value
+
+	if aggression_locked:
+		if not aggression_mode:
+			set_aggression_mode(true, aggression_lock_reason if aggression_lock_reason != &"" else &"aggression_locked")
+		else:
+			follow_speed = aggressive_speed
+			_change_stage(4)
+		return
 	
 	# Flip aggression around the critical threshold
 	if current_sanity < GameConstants.SANITY_THRESHOLD_CRITICAL:
@@ -487,12 +509,36 @@ func get_current_stage() -> int:
 func get_stage() -> int:
 	return current_stage
 
+func configure_aggression_lock(active: bool, reason: StringName = &"") -> void:
+	aggression_locked = active
+	aggression_lock_reason = reason
+	set_meta("aggression_locked", active)
+	if reason != &"":
+		set_meta("aggression_lock_reason", String(reason))
+	elif has_meta("aggression_lock_reason"):
+		remove_meta("aggression_lock_reason")
+
+	if not _systems_initialized:
+		return
+
+	if aggression_locked:
+		set_aggression_mode(true, aggression_lock_reason if aggression_lock_reason != &"" else &"aggression_locked")
+	elif aggression_mode:
+		set_aggression_mode(false, reason if reason != &"" else &"aggression_unlocked")
+	else:
+		_update_behavior_for_sanity()
+
 ## set_aggression_mode
 ## Purpose: Toggle aggression. When active, Effigy ignores visibility gating and moves at aggressive_speed.
 ## @param active: Whether aggression is on.
 ## @param reason: Optional reason tag for telemetry/logging.
 ## @return void.
 func set_aggression_mode(active: bool, reason: StringName = &"") -> void:
+	if aggression_locked and not active:
+		active = true
+		if reason == &"":
+			reason = aggression_lock_reason if aggression_lock_reason != &"" else &"aggression_locked"
+
 	var old_aggression: bool = aggression_mode
 	aggression_mode = active
 

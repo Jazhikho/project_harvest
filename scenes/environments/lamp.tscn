@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://bohf30iutu5ns" path="res://scripts/tiles/InteractableTileObject.gd" id="2_4gxd2"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_lamp"]
-size = Vector3(0.5, 3.0, 0.5)
+size = Vector3(0.5, 3, 0.5)
 
 [node name="lamp" instance=ExtResource("1_hjsbj")]
 script = ExtResource("2_4gxd2")

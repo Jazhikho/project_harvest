@@ -1,6 +1,8 @@
 extends Control
 ## Ending Credits - Shows post-game dialogue and credit crawl
 
+const BuildInfoData = preload("res://scripts/utils/BuildInfo.gd")
+
 @export var music_playlist: MusicPlaylist
 
 @onready var dialogue_label: RichTextLabel = $DialogueLabel
@@ -9,7 +11,6 @@ extends Control
 @onready var fade_rect: ColorRect = $FadeRect
 @onready var audio_player: AudioStreamPlayer = $AudioPlayer
 
-var _dialogue_sequence: int = 0
 var _credits_started: bool = false
 var _architects_maze_finished: bool = false
 
@@ -67,9 +68,7 @@ func _show_dialogue_sequence() -> void:
 	await get_tree().create_timer(4.0).timeout
 	
 	# Add red text below
-	dialogue_label.text = "[center][color=#4169E1]Dr. Amundsen? You asked to be informed when one of the subject's iterations successfully finished phase 0 trials.[/color]
-
-[color=#DC143C]Ah, excellent. We are ahead of schedule! Harvest the subject and proceed to phase 1, and reset the maze for our next subject.[/color][/center]"
+	dialogue_label.text = "[center][color=#4169E1]Dr. Amundsen? You asked to be informed when one of the subject's iterations successfully finished phase 0 trials.[/color]\n\n[color=#DC143C]Ah, excellent. We are ahead of schedule! Harvest the subject and proceed to phase 1, and reset the maze for our next subject.[/color][/center]"
 	
 	await get_tree().create_timer(5.0).timeout
 	
@@ -101,16 +100,13 @@ func _start_credits() -> void:
 	dialogue_label.visible = false
 	credits_scroll.visible = true
 	
-	# Set credits text
 	credits_text.bbcode_enabled = true
-	credits_text.text = _get_credits_text()
+	credits_text.text = BuildInfoData.get_credits_text()
 	
-	# Fade in credits
 	var fade_in: Tween = create_tween()
 	fade_in.tween_property(credits_scroll, "modulate:a", 1.0, 1.0)
 	await fade_in.finished
 	
-	# Start scrolling
 	await _scroll_credits()
 
 func _scroll_credits() -> void:
@@ -118,14 +114,12 @@ func _scroll_credits() -> void:
 	var scroll_bar: VScrollBar = credits_scroll.get_v_scroll_bar()
 	scroll_bar.value = 0.0
 	
-	# Calculate scroll duration based on content height (about 1 minute total)
 	var scroll_duration: float = 60.0
 	
 	var scroll_tween: Tween = create_tween()
 	scroll_tween.tween_property(scroll_bar, "value", scroll_bar.max_value, scroll_duration)
 	await scroll_tween.finished
 	
-	# Credits finished - wait a moment then return to main menu
 	await get_tree().create_timer(3.0).timeout
 	_return_to_main_menu()
 
@@ -139,20 +133,17 @@ func _play_random_ending_music() -> void:
 	if not music_playlist or music_playlist.tracks.size() < 2:
 		return
 	
-	# Tracks to choose from: Main Theme (main_theme) and Who Am I 1-3 (indices 5, 6, 7)
 	var valid_tracks: Array[AudioStream] = []
 	
 	if music_playlist.main_theme:
 		valid_tracks.append(music_playlist.main_theme)
 	
-	# Who Am I tracks are at the end of the playlist
 	for i in range(5, min(8, music_playlist.tracks.size())):
 		valid_tracks.append(music_playlist.tracks[i])
 	
 	if valid_tracks.is_empty():
 		return
 	
-	# Pick random track
 	var random_track: AudioStream = valid_tracks[randi() % valid_tracks.size()]
 	audio_player.stream = random_track
 	audio_player.play()
@@ -160,219 +151,16 @@ func _play_random_ending_music() -> void:
 
 func _return_to_main_menu() -> void:
 	"""Fade out and return to main menu"""
-	# Fade to black
 	fade_rect.color.a = 0.0
 	var fade_tween: Tween = create_tween()
 	fade_tween.tween_property(fade_rect, "color:a", 1.0, 2.0)
 	await fade_tween.finished
 	
-	# Stop music
 	audio_player.stop()
-	
-	# Ensure mouse is visible for main menu
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	
-	# Return to main menu
 	var scene_manager: Node = get_node_or_null("/root/SceneManager")
 	if scene_manager:
 		scene_manager.load_main_menu()
 	else:
 		get_tree().change_scene_to_file("res://scenes/ui/Main.tscn")
-
-func _get_credits_text() -> String:
-	"""Get the full credits text"""
-	return "[center][b]PROJECT HARVEST[/b]
-[i]A Walking Nightmare[/i]
-
-[b]═══════════════════════════════════[/b]
-
-[b]CREATED BY[/b]
-jazhikho
-Chosen Gaming
-
-[b]═══════════════════════════════════[/b]
-
-[b]DEVELOPMENT[/b]
-
-[b]Lead Developer & Designer[/b]
-jazhikho
-
-[b]Programming[/b]
-jazhikho
-with assistance from Anthropic Claude-4 Sonnet
-
-[b]3D Art & Modeling[/b]
-jazhikho
-
-[b]Audio Design[/b]
-jazhikho
-
-[b]Narrative Design[/b]
-jazhikho
-
-[b]═══════════════════════════════════[/b]
-
-[b]TECHNOLOGY[/b]
-
-[b]Game Engine[/b]
-Godot Engine 4.4.1
-MIT License
-https://godotengine.org/
-
-[b]Programming Languages[/b]
-GDScript
-
-[b]3D Software[/b]
-Blender 4.5.2 - GNU GPL v3
-3DS Max 2026 - Student License
-Materialize v1.78 - Texture generation
-
-[b]═══════════════════════════════════[/b]
-
-[b]3D MODELS & ASSETS[/b]
-
-[b]Animpic POLY[/b]
-Farm Pack & Lite Halloween Pack
-Standard License (purchased 2025)
-Corn stalks, well, scarecrow, environmental props
-
-[b]Sketchfab Contributors (CC Attribution)[/b]
-
-[b]Samy Belaloui[/b] - Low Poly Skeleton
-[b]yomans[/b] - Key model
-[b]Bill Nguyen[/b] - Gargoyle
-[b]Cat O[/b] - Gargoyle
-[b]JacksonMGB[/b] - Photogrammetry Gargoyle Statue
-[b]BunQuest[/b] - Altar
-[b]Scary[/b] - Low Poly Brazier
-[b]ClintonAbbott Art[/b] - Low Poly Dead Tree
-[b]Sousinho[/b] - Paper debris
-[b]Kirrek[/b] - Broken Glass
-[b]AnishRoyalinc[/b] - Gate apocalyptic rusty
-[b]Psychopete696[/b] - CORN MAZE-01
-[b]kimmy.k[/b] - Low Poly Mobile Phone
-[b]donnichols[/b] - Flashlight
-[b]mohitnuslusion[/b] - Vintage Pocket Watch
-[b]SCANIMATE_IO[/b] - PB153 Notebook Low
-[b]Aoerchemix[/b] - Pirate Coin
-[b]TwilightFox[/b] - Old Soviet Backpack
-[b]3D History[/b] - 49 Star Flag
-[b]Errlatte[/b] - Anubis bible
-[b]Arsen Ismailov[/b] - Damaged Chainlink Fence
-[b]Excessmensch[/b] - wheelbarrow prop
-[b]Ret-ouchs[/b] - Rusty Lamp
-[b]snofaeratu[/b] - old railway container, lowpoly
-[b]MrUnity[/b] - Old Soviet Transformer Low-Poly
-[b]Artyooooom[/b] - Dirty Water Closet
-[b]syedraza[/b] - Road Sign
-[b]Berk Gedik[/b] - Abandoned Toilet Cabin (Low Poly)
-[b]sergeilihandristov[/b] - Abandoned children's slide
-
-[b]Virtual Museums of Malopolska[/b]
-Pocket watch - CC0 Public Domain
-
-[b]═══════════════════════════════════[/b]
-
-[b]TEXTURES & MATERIALS[/b]
-
-[b]AmbientCG[/b]
-Foliage003, Bark006, Lava002, Rock032, Wood035
-CC0 License - Public Domain
-https://ambientcg.com/
-
-[b]Poly Haven[/b]
-Mealie Road HDRI environment
-by Greg Zaal
-CC0 License - Public Domain
-https://polyhaven.com/
-
-[b]OpenAI GPT-5[/b]
-Corn textures
-Pumpkin, Flannel textures
-Effigy concept designs
-
-[b]IMGonline.com.ua[/b]
-Seamless texture processing
-https://www.imgonline.com.ua/
-
-[b]Materialize v1.78[/b]
-PBR texture generation
-by Bounding Box Software
-http://www.boundingboxsoftware.com/materialize/
-
-[b]═══════════════════════════════════[/b]
-
-[b]AUDIO[/b]
-
-[b]Original Compositions[/b]
-jazhikho
-with assistance from ElevenLabs
-- Project Harvest Main Theme
-- Architect's Maze
-- High Tension
-- Hymn of the Echoes
-- The Effigy's Theme
-- The Stalker's Theme
-- Who Am I (In the Cornfield) 1, 2, 3
-
-[b]Sound Effects[/b]
-jazhikho
-- Custom environmental audio
-- Gameplay sound effects
-
-[b]Freesound.org Contributors[/b]
-Scream sound effects:
-- Klangkobold - Panic-stricken screaming
-- missozzy - Female scream
-- Yin_Yang_Jake007 - Loud Female Scream
-- marc3122 - Male Screams
-All licensed under Creative Commons 0
-
-[b]═══════════════════════════════════[/b]
-
-[b]SPECIAL THANKS[/b]
-
-[b]Family & Support[/b]
-Sarrah - For unwavering support and belief
-Dawn - For encouragement and family support
-The Family - For believing in this project
-
-[b]Academic Support[/b]
-Lindenwood University
-Professor Ben Fulcher
-GAM56800: Game Development Course
-
-[b]Community[/b]
-The Godot community for excellent documentation
-Open source contributors who made this possible
-All the creators of the free assets used in this project
-
-[b]═══════════════════════════════════[/b]
-
-[b]DEDICATION[/b]
-
-This game is dedicated to Jeri
-You rat bastard.
-
-[b]═══════════════════════════════════[/b]
-
-[b]LICENSING[/b]
-
-[b]Code & Game Engine[/b]
-MIT License - jazhikho
-
-[b]Original Art & Assets[/b]
-CC BY 4.0 - jazhikho
-
-[b]Story & Writing[/b]
-All rights reserved - jazhikho
-
-[b]Third Party Assets[/b]
-Retain their original copyright
-
-[b]© 2025 jazhikho[/b]
-[b]Chosen Gaming[/b]
-
-Thank you for playing PROJECT HARVEST
-
-[b]═══════════════════════════════════[/b][/center]"

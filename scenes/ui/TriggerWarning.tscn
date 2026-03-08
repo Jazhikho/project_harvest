@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bq8h2k3m4n5o6"]
 
-[ext_resource type="Script" path="res://scripts/ui/TriggerWarning.gd" id="1_trigger"]
+[ext_resource type="Script" uid="uid://qix8ljok4o5" path="res://scripts/ui/TriggerWarning.gd" id="1_trigger"]
 
 [node name="TriggerWarning" type="Control"]
 layout_mode = 3
@@ -36,26 +36,28 @@ grow_vertical = 2
 
 [node name="WarningIcon" type="Label" parent="WarningContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 72
 text = "⚠️"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 72
 
 [node name="WarningTitle" type="Label" parent="WarningContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
+theme_override_font_sizes/font_size = 32
 text = "TRIGGER WARNING"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 32
-theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
 
 [node name="Spacer1" type="Control" parent="WarningContainer"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
 [node name="WarningText" type="RichTextLabel" parent="WarningContainer"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
 text = "[center]This game contains content that may be disturbing or triggering to some players, including:
 
 • Psychological horror themes
@@ -66,9 +68,7 @@ text = "[center]This game contains content that may be disturbing or triggering 
 • Supernatural elements
 
 Please consider your mental health and well-being before continuing. If you experience distress while playing, please take breaks and consider stopping if necessary.[/center]"
-bbcode_enabled = true
 fit_content = true
-theme_override_font_sizes/normal_font_size = 16
 
 [node name="Spacer2" type="Control" parent="WarningContainer"]
 custom_minimum_size = Vector2(0, 20)

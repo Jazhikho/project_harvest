@@ -48,6 +48,9 @@ func _setup_interaction_areas() -> void:
 	# Setup brazier interaction
 	if not brazier_area:
 		brazier_area = _create_interaction_area($brazier, "Brazier")
+	
+	_configure_interaction_area(altar_area, $altar, "altar")
+	_configure_interaction_area(brazier_area, $brazier, "brazier")
 
 func _create_interaction_area(parent: Node3D, area_name: String) -> Area3D:
 	"""Create an interaction area for a puzzle object"""
@@ -61,15 +64,33 @@ func _create_interaction_area(parent: Node3D, area_name: String) -> Area3D:
 	collision.shape = shape
 	area.add_child(collision)
 	
-	area.collision_layer = 8
-	area.collision_mask = 1
-	
 	# Add interaction metadata to parent
 	parent.set_meta("is_puzzle_part", true)
 	parent.set_meta("interaction_type", area_name.to_lower())
 	parent.set_meta("parent_puzzle", self)
 	
 	return area
+
+func _configure_interaction_area(area: Area3D, target_node: Node3D, interaction_type: String) -> void:
+	area.collision_layer = 1 << (CollisionHelper.LAYER_PUZZLE_OBJECTS - 1)
+	area.collision_mask = 1 << (CollisionHelper.LAYER_PLAYER - 1)
+	target_node.set_meta("is_puzzle_part", true)
+	target_node.set_meta("interaction_type", interaction_type)
+	target_node.set_meta("parent_puzzle", self)
+	var entered_callable: Callable = Callable(self, "_on_interaction_body_entered").bind(target_node)
+	if not area.body_entered.is_connected(entered_callable):
+		area.body_entered.connect(entered_callable)
+	var exited_callable: Callable = Callable(self, "_on_interaction_body_exited").bind(target_node)
+	if not area.body_exited.is_connected(exited_callable):
+		area.body_exited.connect(exited_callable)
+
+func _on_interaction_body_entered(body: Node3D, target_node: Node3D) -> void:
+	if body and body.is_in_group("player") and body.has_method("register_nearby_interactable"):
+		body.register_nearby_interactable(target_node)
+
+func _on_interaction_body_exited(body: Node3D, target_node: Node3D) -> void:
+	if body and body.is_in_group("player") and body.has_method("unregister_nearby_interactable"):
+		body.unregister_nearby_interactable(target_node)
 
 func interact_with_altar() -> bool:
 	"""Called when player interacts with altar"""

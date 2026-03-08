@@ -1,4 +1,4 @@
-extends BaseManager
+﻿extends BaseManager
 ## Audio Manager - Handles audio bus management and sound playback
 ## Simplified to focus only on audio functionality, settings delegated to SettingsManager
 
@@ -14,6 +14,7 @@ var _music_gap_min: float = 0.5
 var _music_gap_max: float = 2.0
 var _music_gap_timer: Timer = null
 var _music_fade_tween: Tween = null
+var _stream_cache: Dictionary = {}
 
 # Audio bus management
 var _audio_buses: Dictionary = {
@@ -96,64 +97,48 @@ func get_bus_volume(bus_name: String) -> float:
 func play_sound_2d(sound_path: String, bus: String = "SFX") -> AudioStreamPlayer2D:
 	"""
 	Play a 2D sound effect
-	
-	@param sound_path: Path to audio resource
-	@param bus: Audio bus to play on
-	@return: AudioStreamPlayer2D node or null if failed
 	"""
-	if not FileAccess.file_exists(sound_path):
-		push_warning("AudioManager: Sound file not found: %s" % sound_path)
-		return null
-	
-	var audio_stream = load(sound_path) as AudioStream
+	var audio_stream: AudioStream = _get_stream(sound_path)
 	if not audio_stream:
-		push_error("AudioManager: Failed to load audio stream: %s" % sound_path)
 		return null
-	
 	var player = AudioStreamPlayer2D.new()
 	player.stream = audio_stream
 	player.bus = bus
-	
-	# Add to scene tree
 	get_tree().current_scene.add_child(player)
 	player.play()
-	
-	# Auto-remove when finished
 	player.finished.connect(player.queue_free)
-	
 	return player
 
 func play_sound_3d(sound_path: String, position: Vector3, bus: String = "SFX") -> AudioStreamPlayer3D:
 	"""
 	Play a 3D positional sound effect
-	
-	@param sound_path: Path to audio resource
-	@param position: 3D world position
-	@param bus: Audio bus to play on
-	@return: AudioStreamPlayer3D node or null if failed
 	"""
+	var audio_stream: AudioStream = _get_stream(sound_path)
+	if not audio_stream:
+		return null
+	var player = AudioStreamPlayer3D.new()
+	player.stream = audio_stream
+	player.bus = bus
+	get_tree().current_scene.add_child(player)
+	player.global_position = position
+	player.play()
+	player.finished.connect(player.queue_free)
+	return player
+
+func _get_stream(sound_path: String) -> AudioStream:
+	if sound_path.is_empty():
+		return null
+	if _stream_cache.has(sound_path):
+		return _stream_cache[sound_path]
 	if not FileAccess.file_exists(sound_path):
 		push_warning("AudioManager: Sound file not found: %s" % sound_path)
 		return null
-	
 	var audio_stream = load(sound_path) as AudioStream
 	if not audio_stream:
 		push_error("AudioManager: Failed to load audio stream: %s" % sound_path)
 		return null
-	
-	var player = AudioStreamPlayer3D.new()
-	player.stream = audio_stream
-	player.bus = bus
-	player.global_position = position
-	
-	# Add to scene tree
-	get_tree().current_scene.add_child(player)
-	player.play()
-	
-	# Auto-remove when finished
-	player.finished.connect(player.queue_free)
-	
-	return player
+	_stream_cache[sound_path] = audio_stream
+	return audio_stream
 
 func stop_all_sounds_on_bus(bus_name: String) -> void:
 	"""
@@ -380,7 +365,12 @@ func _play_next_track(is_initial: bool) -> void:
 
 	if _music_fade_tween != null and is_instance_valid(_music_fade_tween):
 		_music_fade_tween.kill()
-	_music_fade_tween = create_tween()
+	_music_fade_tween = null
+	var needs_fade_tween: bool = not is_initial
+	if other != null and is_instance_valid(other) and other.playing and not is_initial:
+		needs_fade_tween = true
+	if needs_fade_tween:
+		_music_fade_tween = create_tween()
 
 	if is_initial:
 		target.volume_db = -6.0
@@ -577,15 +567,15 @@ func stop_all_game_audio_fade(seconds: float = 1.0) -> void:
 # ---------- Bus helpers ----------
 ## _ensure_bus
 ## Purpose: Create a bus if missing and set optional send target.
-## @param name: Bus name.
+## @param bus_name: Bus name.
 ## @param send_to: Upstream bus or "" to leave default.
 ## @return int: Bus index.
-func _ensure_bus(name: String, send_to: String) -> int:
-	var idx: int = AudioServer.get_bus_index(name)
+func _ensure_bus(bus_name: String, send_to: String) -> int:
+	var idx: int = AudioServer.get_bus_index(bus_name)
 	if idx == -1:
 		AudioServer.add_bus(AudioServer.get_bus_count())
 		idx = AudioServer.get_bus_count() - 1
-		AudioServer.set_bus_name(idx, name)
+		AudioServer.set_bus_name(idx, bus_name)
 		if send_to != "":
 			AudioServer.set_bus_send(idx, send_to)
 	return idx
@@ -630,3 +620,4 @@ func test_volume_persistence() -> void:
 	var settings_manager = get_node_or_null("/root/SettingsManager")
 	if settings_manager:
 		var _audio_settings = settings_manager.get_audio_settings()
+

@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://dw020sveanil8" path="res://scripts/tiles/RandomCrowSounds.gd" id="5_crowsounds"]
 [ext_resource type="PackedScene" uid="uid://y3n3yl83883f" path="res://scenes/environments/tree.tscn" id="5_hedg3"]
 [ext_resource type="PackedScene" uid="uid://vgktbniibi0f" path="res://scenes/environments/broken_mirror.tscn" id="6_1bjqq"]
-[ext_resource type="Script" uid="uid://b7hjr7r333dd1" path="res://scripts/puzzles/CrowsParliamentPuzzle.gd" id="7_gbpo1"]
+[ext_resource type="Script" uid="uid://cekbpc6ogo02q" path="res://scripts/puzzles/CrowsParliamentPuzzle.gd" id="7_gbpo1"]
 [ext_resource type="PackedScene" uid="uid://ccb76fmvab61v" path="res://scenes/notes/crows_parliament_note.tscn" id="8_crows"]
 [ext_resource type="Script" uid="uid://b48eca72a7a1" path="res://scripts/tiles/CrowFlock.gd" id="9_hedg3"]
 [ext_resource type="PackedScene" uid="uid://bo3d7bghd4qum" path="res://scenes/environments/crow.tscn" id="10_1bjqq"]

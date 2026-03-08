@@ -12,7 +12,7 @@ A survival horror game set in a shifting corn maze where the maze itself is aliv
 
 **Key Inspiration Sources:**
 - **Creepy Maze System:** Procedural shifting maze with pickups and jumpscares
-- **Forgotten in the Woods:** Branching narrative, sanity mechanics, and the Watcher entity
+- **Forgotten in the Woods:** Branching narrative and sanity mechanics
 
 ## 🎮 Key Features
 

@@ -48,8 +48,9 @@ static func setup_pickup_area(area: Area3D) -> void:
 
 static func setup_interaction_raycast(query: PhysicsRayQueryParameters3D) -> void:
 	"""Setup raycast for player interaction"""
-	# Layer 4 in editor = bit 3 = value 8
-	query.collision_mask = 8
+	query.collision_mask = (1 << (LAYER_OBJECTS - 1)) | (1 << (LAYER_PUZZLE_OBJECTS - 1))
+	query.collide_with_bodies = true
+	query.collide_with_areas = true
 
 static func setup_visibility_raycast(query: PhysicsRayQueryParameters3D) -> void:
 	"""Setup raycast for line-of-sight checks"""

@@ -10,7 +10,7 @@
 [ext_resource type="Shader" uid="uid://c71dha5rynbn0" path="res://assets/textures/sky.gdshader" id="4_gg4pt"]
 [ext_resource type="PackedScene" uid="uid://5m8oiae77mxv" path="res://scenes/ui/InventoryUI.tscn" id="5"]
 [ext_resource type="Texture2D" uid="uid://cobe1yg0mkran" path="res://assets/textures/mealie_road_4k.exr" id="5_qf6a8"]
-[ext_resource type="Texture2D" uid="uid://c0nsssaorny41" path="res://assets/textures/EveningSkyHDRI040A_16K-HDR.exr" id="6_56wml"]
+[ext_resource type="Texture2D" uid="uid://buwauhasegud1" path="res://assets/textures/EveningSkyHDRI040A_16K-HDR.exr" id="6_56wml"]
 [ext_resource type="PackedScene" uid="uid://c6e6seey11ofy" path="res://scenes/ui/JournalUI.tscn" id="10_56wml"]
 [ext_resource type="PackedScene" uid="uid://b63na1dnm38kk" path="res://scenes/ui/ControlsUI.tscn" id="11_aptqa"]
 [ext_resource type="PackedScene" uid="uid://jyqvje6vpkf" path="res://scenes/ui/NarrativeUI.tscn" id="14_5xhyk"]
@@ -46,29 +46,22 @@ uniform sampler2D hdr_day  : source_color;
 uniform sampler2D hdr_dusk : source_color;
 uniform float blend    : hint_range(0.0, 1.0) = 0.0; // 0=day, 1=dusk
 uniform float exposure = 1.0;
-uniform float rot_y    = 0.0; // radians around Y
-
-vec2 dir_to_equirect(vec3 d) {
-    float c = cos(rot_y), s = sin(rot_y);
-    vec3 r = vec3(c*d.x + s*d.z, d.y, -s*d.x + c*d.z);
-    float phi   = atan(r.z, r.x);                    // -pi..pi
-    float theta = acos(clamp(r.y, -1.0, 1.0));       // 0..pi
-    return vec2(phi / (2.0*PI) + 0.5, theta / PI);   // 0..1
-}
+uniform float rot_y    = 0.0; // 0..1 = full 360 horizontal wrap
 
 void sky() {
-    vec3 dir = normalize(SKY_COORDS);   // SKY_COORDS is vec3 in sky shaders
-    vec2 uv  = dir_to_equirect(dir);
-
+    vec2 uv = SKY_COORDS;  // equirect UV 0..1 in Godot 4
+    uv.x = fract(uv.x + rot_y);
     vec3 a = texture(hdr_day,  uv).rgb;
     vec3 b = texture(hdr_dusk, uv).rgb;
-
-    COLOR = vec4(mix(a, b, blend) * exposure, 1.0);
+    COLOR = mix(a, b, blend) * exposure;
 }
 "
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gg4pt"]
 shader = SubResource("Shader_gg4pt")
+shader_parameter/blend = 0.0
+shader_parameter/exposure = 1.0
+shader_parameter/rot_y = 0.0
 
 [node name="Game" type="Node3D"]
 script = ExtResource("3")

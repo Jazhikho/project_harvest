@@ -35,7 +35,7 @@ func pick_random_index(last_index: int, current_sanity: int = 100) -> int:
 		if avoid_immediate_repeat and i == last_index and count > 1:
 			continue
 		# Filter out low sanity tracks if sanity is above threshold
-		if current_sanity > 60 and low_sanity_tracks.has(i):
+		if current_sanity > GameConstants.SANITY_THRESHOLD_MEDIUM and low_sanity_tracks.has(i):
 			continue
 		candidates.append(i)
 	

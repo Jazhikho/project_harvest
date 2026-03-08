@@ -53,8 +53,6 @@ Tasks are ordered from quickest to longest effort.
 
 | Task | Effort | Notes |
 |------|--------|-------|
-| ~~Fix EnemyManager typo~~ | Done | Changed `get_collecte d_count` → `get_collected_count` in `EnemyManager.gd:417` |
-| Extend day/night transition | ~15 min | Increase `TimeOfDayController.duration_sec` (e.g., 90 → 180 or 240). Expose via GameSettings if desired. |
 | OS username easter egg | ~20 min | Use `OS.get_environment("USERNAME")` or `OS.get_environment("USER")` in one death quote or note; e.g., "Subject [username] terminated. Data archived." |
 | Add controller bindings | ~30 min | Add joypad events to Input Map in project.godot (move, sprint, interact, flashlight, inventory, journal, pause) |
 | Extend run time | ~1 hr | Increase session length via GameDirector/GameStateManager. Options: longer maze shift intervals (GameSettings), slower sanity decay (SanityManager), or extend time before difficulty ramps (GameDirector `session_time > 300` threshold). |
@@ -63,8 +61,7 @@ Tasks are ordered from quickest to longest effort.
 | Faux difficulty settings | ~2 hrs | Add difficulty options to Settings/Main Menu (e.g., "Easy", "Normal", "Hard"). Labels mock the player (e.g., "You think this changes anything?") but do not alter gameplay. Store in SettingsManager; optionally show different Dr. Amundsen line on death based on "selected" difficulty. |
 | The Stalker – fix & introduce | ~3 hrs | 1) Add `can_move(from_x, from_y, to_x, to_y)` to MazeManager (or delegate to TileManager) so Stalker pathfinding works. 2) Ensure Stalker is activated appropriately (sanity thresholds, spawn conditions). 3) Optional: first-encounter narrative cue ("Something is watching...") when Stalker activates. |
 | Reduce game file size | ~2–4 hrs | Audit assets: recompress textures (ETC2/ASTC), optimize models (LOD, decimation), remove unused assets, convert large DAE/FBX to GLB. Check ASSET_TRACKER.md for large files (e.g., paper_debris 13MB, crow 23MB, maize_corn_plant 7MB). Add `.gitattributes` for LFS if needed. |
-| Fix/add lore notes | ~2–4 hrs | 1) Fix typos/consistency in items.json. 2) Add new notes for Dr. Amundsen, prior subjects, experiment logs. 3) Ensure note subcategories align with journal filters. 4) Cross-check note IDs referenced in puzzles (crows_parliament_note, watching_stones_note, etc.). |
-| ~~Migrate managers to BaseManager~~ | Done | Completed: SpawnManager, ItemManager, TileManager, EnemyManager, EffigyManager, DeathHandler, EventManager, HarvestLogger, SanityManager, MazeManager, TileStateManager, SettingsManager, AudioManager extend BaseManager. MessageBus, GameStateManager, SaveManager stay as Node (foundation). |
+| Fix/add lore notes | ~2–4 hrs | 1) Fix typos/consistency in items.json. 2) Add new notes for Dr. Amundsen, prior subjects, experiment logs. 3) Ensure note subcategories align with journal filters. 4) Cross-check note IDs referenced in puzzles (crows_parliament_note, watching_stones_note, etc.). 
 
 ### Suggested Week Schedule
 
@@ -83,21 +80,6 @@ Tasks are ordered from quickest to longest effort.
 Before or during the above work, address:
 
 1. **Stalker `can_move` bug** — implement `can_move` in MazeManager (or TileManager) using connection data.
-2. **~~EnemyManager typo~~** — Done. Fixed `get_collecte d_count` → `get_collected_count`.
-3. **~~HUD robustness~~** — Done. GameDirector now has `get_weird_findings_count()` stub.
-4. **~~File naming~~** — Done. Tile.gd/Corn.gd PascalCase; CrowsParlimentPuzzle.gd removed.
-5. **~~Explicit typing~~** — Done. BaseManager `system_node`; Player `items_array`/`items_to_check`; Watcher/Stalker return types added.
-6. **~~SaveManager autoload access~~** — Done. SaveManager uses `get_node_or_null` and null check.
-7. **~~Remove debug prints~~** — Done. All `print()` calls removed from release scripts.
-8. **~~Remove commented code~~** — Done. Player flight-mode block removed.
-9. **~~Player.gd hearbeat typo~~** — Done. Fallback branch and comment removed; SFX uses `heartbeat`.
-10. **~~@export descriptions~~** — Done. Added `##` above exports in GameController, MainMenu, Watcher, Effigy, WatchingStonesPuzzle, WellPuzzle, FinalGatePuzzle, TimeOfDayController.
-11. **~~Player.gd indentation~~** — Done. Fixed extra indent in `_make_player3d`; sibling functions at same level.
-12. **~~Effigy `set_aggression_mode(active)`~~** — Done. Uses `active` parameter; branches on active for enter/exit behavior.
-13. **~~Watcher / SanityManager~~** — Done. Watcher connects to MessageBus `sanity_changed`; SanityManager has `get_sanity_spawn_rate()`.
-14. **~~MessageBus `entity_state_changed`~~** — Done. Effigy and BaseEntity emit 4-arg signature.
-15. **~~Dead code~~** — Done. Effigy helpers, Stalker transitions, BaseManager/BaseEntity log_info, MessageBus _format_args/debug_print_emission_stack removed; Player `_show_interaction_prompt` implemented.
-16. **~~NodePath caching~~** — Done. Watcher caches Camera3D; Player caches GameStateManager, SaveManager, GameController in `_initialize_systems()`.
 
 ---
 

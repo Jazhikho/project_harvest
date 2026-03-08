@@ -405,7 +405,7 @@ func _calculate_entity_spawn_chance(current_sanity: int, tiles_explored: int, we
 
 func _spawn_entities(tile_node: Node3D, context: Dictionary, spawn_points: Array[Vector3]) -> Array:
 	"""
-	Spawn entities on tile - only Stalker or Effigy in MVP
+	Spawn entities on tile - effigy-only in the shipping build
 	
 	@param tile_node: Tile node to spawn entities on
 	@param context: Spawning context

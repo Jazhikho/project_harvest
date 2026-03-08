@@ -6,14 +6,14 @@ extends RefCounted
 class_name GameConstants
 
 # === SANITY SYSTEM ===
-const MAX_SANITY: int = 100
+const MAX_SANITY: int = 200
 const MIN_SANITY: int = 0
 
 # Sanity thresholds
-const SANITY_THRESHOLD_HIGH: int = 80
-const SANITY_THRESHOLD_MEDIUM: int = 60
-const SANITY_THRESHOLD_LOW: int = 40
-const SANITY_THRESHOLD_CRITICAL: int = 20
+const SANITY_THRESHOLD_HIGH: int = 160
+const SANITY_THRESHOLD_MEDIUM: int = 120
+const SANITY_THRESHOLD_LOW: int = 80
+const SANITY_THRESHOLD_CRITICAL: int = 40
 
 # Sanity decay rates
 const SANITY_DECAY_NORMAL: float = 0.5
@@ -53,19 +53,17 @@ const PLAYER_WALK_SPEED: float = 3.0
 # Player interaction
 const INTERACTION_DISTANCE: float = 3.0
 const FLASHLIGHT_RANGE: float = 15.0
-const FLASHLIGHT_BATTERY_MIN: float = 120.0
-const FLASHLIGHT_BATTERY_MAX: float = 420.0
+const FLASHLIGHT_BATTERY_MIN: float = 240.0
+const FLASHLIGHT_BATTERY_MAX: float = 840.0
 const VISION_RANGE: float = 10.0
+const FLASHLIGHT_HINT_TIME: float = 360.0
+const DARKNESS_SANITY_GRACE_PERIOD: float = 480.0
 
 # === ENEMY SYSTEM ===
 # Enemy types
-const ENEMY_TYPE_STALKER: String = "stalker"
-const ENEMY_TYPE_WATCHER: String = "watcher"
 const ENEMY_TYPE_EFFIGY: String = "effigy"
 
 # Enemy spawn cooldowns (seconds)
-const ENEMY_SPAWN_COOLDOWN_STALKER: float = 30.0
-const ENEMY_SPAWN_COOLDOWN_WATCHER: float = 15.0
 const ENEMY_SPAWN_COOLDOWN_EFFIGY: float = 45.0
 
 # Enemy behavior
@@ -75,7 +73,7 @@ const ENEMY_PATROL_RADIUS: float = 8.0
 
 # Effigy stages
 const EFFIGY_STAGE_COUNT: int = 4
-const EFFIGY_STAGE_SANITY_THRESHOLDS: Array[int] = [80, 60, 40, 20]
+const EFFIGY_STAGE_SANITY_THRESHOLDS: Array[int] = [160, 120, 80, 40]
 
 # === AUDIO SYSTEM ===
 const AUDIO_BUS_MASTER: String = "Master"
@@ -133,10 +131,11 @@ const DIFFICULTY_HARD: String = "hard"
 const DIFFICULTY_NIGHTMARE: String = "nightmare"
 
 # Game timing
-const TIME_OF_DAY_DURATION_DEFAULT: float = 90.0
-const MAZE_SHIFT_INTERVAL_MIN: float = 30.0
-const MAZE_SHIFT_INTERVAL_MAX: float = 120.0
+const TIME_OF_DAY_DURATION_DEFAULT: float = 180.0
+const MAZE_SHIFT_INTERVAL_MIN: float = 60.0
+const MAZE_SHIFT_INTERVAL_MAX: float = 240.0
 const MAZE_SHIFT_DURATION: float = 3.0
+const SESSION_TIME_STRESSED_THRESHOLD: float = 600.0
 
 # === FILE PATHS ===
 const PATH_EVENTS_DATA: String = "res://data/events.json"

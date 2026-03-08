@@ -38,6 +38,10 @@ func _ready() -> void:
 	
 	# Connect immediately to avoid missing events
 	_connect_to_events()
+	if InputManager and InputManager.has_signal("control_scheme_changed"):
+		InputManager.control_scheme_changed.connect(_on_prompt_context_changed)
+	if InputManager and InputManager.has_signal("prompt_style_changed"):
+		InputManager.prompt_style_changed.connect(_on_prompt_context_changed)
 
 func _process(_delta: float) -> void:
 	"""Check for timer-based narrative triggers"""
@@ -61,6 +65,32 @@ func _advance_sequence() -> void:
 	if waiting_for_advance:
 		waiting_for_advance = false
 		_show_next_in_sequence()
+
+func _on_prompt_context_changed(_value = null) -> void:
+	_refresh_continue_prompt()
+
+func _refresh_continue_prompt() -> void:
+	if not continue_indicator or not continue_indicator.visible:
+		return
+	var prompt: String = InputManager.get_action_prompt("continue")
+	if InputManager.get_prompt_style() == InputManager.PROMPT_STYLE_KEYBOARD:
+		continue_indicator.text = "Click or press %s to continue..." % prompt
+	else:
+		continue_indicator.text = "Press %s to continue..." % prompt
+
+func _resolve_prompt_text(text: String) -> String:
+	if text.is_empty():
+		return text
+	var resolved_text: String = text
+	var prompt_tokens := {
+		"{continue}": InputManager.get_action_prompt("continue"),
+		"{toggle_flashlight}": InputManager.get_action_prompt("toggle_flashlight"),
+		"{interact}": InputManager.get_action_prompt("interact"),
+		"{sprint}": InputManager.get_action_prompt("sprint")
+	}
+	for token in prompt_tokens.keys():
+		resolved_text = resolved_text.replace(token, prompt_tokens[token])
+	return resolved_text
 
 func _load_narrative_data() -> void:
 	if not FileAccess.file_exists(NARRATIVE_PATH):
@@ -164,12 +194,12 @@ func _show_next_in_sequence() -> void:
 
 func _display_intro_message(text: String) -> void:
 	"""Display a message during intro sequence (waits for player input)"""
-	text_label.text = text
+	text_label.text = _resolve_prompt_text(text)
 	visible = true
 	
 	# Show continue indicator for intro
 	continue_indicator.visible = true
-	continue_indicator.text = "Click or press SPACE/E to continue..."
+	_refresh_continue_prompt()
 	waiting_for_advance = true
 	
 	modulate.a = 0.0
@@ -231,9 +261,10 @@ func _on_sanity_changed(old_value: int, new_value: int, delta: int) -> void:
 		
 	var thresholds = [90, 80, 70, 60, 50, 40, 30, 20, 10]
 	
-	for threshold in thresholds:
-		if old_value > threshold and new_value <= threshold:
-			var toast_key = "sanity_" + str(threshold)
+	for threshold_percent in thresholds:
+		var threshold_value: int = int(round(float(GameConstants.MAX_SANITY) * (float(threshold_percent) / 100.0)))
+		if old_value > threshold_value and new_value <= threshold_value:
+			var toast_key = "sanity_" + str(threshold_percent)
 			if narrative_data.has("toasts") and narrative_data.toasts.has(toast_key):
 				var toast = narrative_data.toasts[toast_key]
 				_queue_message(toast.text, toast.get("seconds", 3.0))
@@ -263,9 +294,11 @@ func _check_flashlight_timer() -> void:
 	
 	var session_duration: float = game_director.get_session_duration()
 	
-	# Check if 3 minutes (180 seconds) have passed
-	if session_duration >= 180.0:
+	if session_duration >= GameConstants.FLASHLIGHT_HINT_TIME:
 		flashlight_narrative_triggered = true
+		var player: Node = get_tree().get_first_node_in_group("player")
+		if player and player.has_method("is_flashlight_enabled") and player.is_flashlight_enabled():
+			return
 		
 		# Trigger the flashlight narrative
 		if narrative_data.has("toasts") and narrative_data.toasts.has("flashlight_after_3m"):
@@ -280,7 +313,7 @@ func _queue_message(text: String, duration: float) -> void:
 	if intro_completed and in_intro_sequence:
 		in_intro_sequence = false
 		
-	message_queue.append({"text": text, "duration": duration})
+	message_queue.append({"text": _resolve_prompt_text(text), "duration": duration})
 	
 	if not is_displaying:
 		_process_queue()

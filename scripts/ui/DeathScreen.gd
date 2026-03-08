@@ -19,6 +19,8 @@ var dr_amundsen_quotes: Array[String] = [
 @onready var collectibles_label = get_node_or_null("Panel/VBoxContainer/StatsContainer/CollectiblesLabel")
 @onready var fade_rect = get_node_or_null("FadeRect")
 @onready var quit_dialog = get_node_or_null("QuitConfirmDialog")
+@onready var continue_button = get_node_or_null("Panel/VBoxContainer/ButtonContainer/ContinueButton")
+@onready var quit_button = get_node_or_null("Panel/VBoxContainer/ButtonContainer/QuitButton")
 
 var death_type: String = ""
 
@@ -65,9 +67,50 @@ func _ready() -> void:
 	
 	# Display stats
 	_update_stats()
+	_setup_controller_focus()
 	
 	# Fade in
 	fade_in()
+
+func _setup_controller_focus() -> void:
+	if continue_button:
+		continue_button.focus_mode = Control.FOCUS_ALL as Control.FocusMode
+	if quit_button:
+		quit_button.focus_mode = Control.FOCUS_ALL as Control.FocusMode
+	if continue_button and quit_button:
+		continue_button.focus_neighbor_right = quit_button.get_path()
+		quit_button.focus_neighbor_left = continue_button.get_path()
+	if quit_dialog and not quit_dialog.about_to_popup.is_connected(_on_quit_dialog_about_to_popup):
+		quit_dialog.about_to_popup.connect(_on_quit_dialog_about_to_popup)
+	call_deferred("_focus_primary_button")
+
+func _focus_primary_button() -> void:
+	if continue_button:
+		continue_button.grab_focus()
+
+func _on_quit_dialog_about_to_popup() -> void:
+	call_deferred("_focus_quit_dialog")
+
+func _focus_quit_dialog() -> void:
+	if not quit_dialog:
+		return
+	var cancel_button: Button = quit_dialog.get_cancel_button()
+	if cancel_button:
+		cancel_button.grab_focus()
+		return
+	var ok_button: Button = quit_dialog.get_ok_button()
+	if ok_button:
+		ok_button.grab_focus()
+
+func _input(event: InputEvent) -> void:
+	if not event.is_action_pressed("ui_cancel"):
+		return
+	if quit_dialog and quit_dialog.visible:
+		quit_dialog.hide()
+		call_deferred("_focus_primary_button")
+	else:
+		_on_quit_pressed()
+	get_viewport().set_input_as_handled()
 
 func _update_stats():
 	"""Update the stats display"""

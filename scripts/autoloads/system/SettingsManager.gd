@@ -1,6 +1,8 @@
-extends BaseManager
+﻿extends BaseManager
 ## Settings Manager - Centralized game settings management
 ## Handles all game settings including audio, graphics, and controls
+
+const BuildInfoData = preload("res://scripts/utils/BuildInfo.gd")
 
 # Settings data
 var _settings: Dictionary = {
@@ -16,6 +18,9 @@ var _settings: Dictionary = {
 	},
 	"controls": {
 		"mouse_sensitivity": 0.003,
+		"invert_look_y": false,
+		"hold_to_sprint": false,
+		"prompt_style": "auto",
 		"control_scheme": "keyboard"
 	},
 	"gameplay": {
@@ -193,7 +198,10 @@ func _apply_controls_setting(key: String, value: Variant) -> void:
 	
 	match key:
 		"control_scheme":
-			input_manager.set_control_scheme(value)
+			input_manager.set_control_scheme(value, false)
+		"prompt_style":
+			if input_manager.has_method("refresh_prompt_style"):
+				input_manager.refresh_prompt_style()
 
 func _apply_gameplay_setting(key: String, value: Variant) -> void:
 	"""Apply gameplay setting changes"""
@@ -224,7 +232,7 @@ func _save_settings() -> void:
 		return
 	
 	var save_data = {
-		"version": "1.0",
+		"version": BuildInfoData.GAME_VERSION,
 		"settings": _settings,
 		"timestamp": Time.get_datetime_string_from_system()
 	}
@@ -283,6 +291,15 @@ func get_controls_settings() -> Dictionary:
 	"""Get all control settings"""
 	return _settings.controls.duplicate()
 
+func set_runtime_control_scheme(scheme: String) -> bool:
+	"""Update the active control scheme without persisting it to disk"""
+	if scheme != "keyboard" and scheme != "controller":
+		return false
+	if _settings.controls.control_scheme == scheme:
+		return false
+	_settings.controls.control_scheme = scheme
+	return true
+
 func get_gameplay_settings() -> Dictionary:
 	"""Get all gameplay settings"""
 	return _settings.gameplay.duplicate()
@@ -308,3 +325,4 @@ func _notify_audio_manager_settings_loaded() -> void:
 				audio_manager.set_bus_volume("Music", value)
 			"sfx_volume":
 				audio_manager.set_bus_volume("SFX", value)
+

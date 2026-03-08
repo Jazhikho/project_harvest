@@ -58,7 +58,7 @@ visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.6, 0.5, 1)
 theme_override_font_sizes/font_size = 14
-text = "Press SPACE or E to continue..."
+text = "Click or press the shown prompt to continue..."
 horizontal_alignment = 2
 
 [node name="ClickBlocker" type="Control" parent="."]

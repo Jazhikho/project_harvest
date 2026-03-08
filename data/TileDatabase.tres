@@ -26,4 +26,5 @@ three_door_tile_scenes = Array[PackedScene]([ExtResource("10_ibih3"), ExtResourc
 corner_tile_scenes = Array[PackedScene]([ExtResource("1_fpblb"), ExtResource("2_q1ixp")])
 straight_tile_scenes = Array[PackedScene]([ExtResource("8_kacjh"), ExtResource("9_wkob4")])
 permanent_tile_scenes = Array[PackedScene]([ExtResource("13_e0q3r"), ExtResource("14_qdhfu"), ExtResource("15_xdr4q"), ExtResource("16_y0qe8")])
+permanent_tile_puzzle_ids = Array[String](["crows_parliament", "final_gate", "watching_stones", "whispering_hollow"])
 metadata/_custom_type_script = "uid://h72gr45lnh34"
