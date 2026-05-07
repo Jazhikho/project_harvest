@@ -20,6 +20,12 @@ var _key_spawned: bool = false
 var _gate_unlocked: bool = false
 var _first_tile_visit: bool = false
 var _interaction_count: int = 0
+const PREREQUISITE_PUZZLES: Array[String] = [
+	"whispering_hollow",
+	"watching_stones",
+	"crows_parliament",
+]
+const KEY_SPAWN_OFFSET: Vector3 = Vector3(0.0, 1.25, 2.0)
 
 @onready var gate_area: Area3D = $gate/Area3D
 
@@ -32,11 +38,11 @@ func _ready() -> void:
 
 func _initialize_systems() -> void:
 	"""Initialize connections to game systems"""
-	_message_bus = get_node_or_null("/root/MessageBus")
-	_player_inventory = get_node_or_null("/root/PlayerInventory")
-	_save_manager = get_node_or_null("/root/SaveManager")
-	_item_manager = get_node_or_null("/root/ItemManager")
-	_audio_manager = get_node_or_null("/root/AudioManager")
+	_message_bus = _resolve_system_node("message_bus_override", "/root/MessageBus")
+	_player_inventory = _resolve_system_node("player_inventory_override", "/root/PlayerInventory")
+	_save_manager = _resolve_system_node("save_manager_override", "/root/SaveManager")
+	_item_manager = _resolve_system_node("item_manager_override", "/root/ItemManager")
+	_audio_manager = _resolve_system_node("audio_manager_override", "/root/AudioManager")
 	
 	if not _message_bus or not _player_inventory or not _save_manager or not _item_manager:
 		push_error("FinalGatePuzzle: Required systems not found")
@@ -91,18 +97,23 @@ func _on_interaction_body_exited(body: Node3D) -> void:
 		body.unregister_nearby_interactable(self)
 
 func _check_key_spawn() -> void:
-	"""Check if key should spawn on altar"""
+	"""Spawn the key at the gate once all prerequisite puzzles are complete."""
 	if _key_spawned or _gate_unlocked:
 		return
-	
-	# Check if all other puzzles are completed
-	var all_complete: bool = true
-	var puzzles_to_check: Array[String] = ["whispering_hollow", "watching_stones", "crows_parliament"]
-	
-	for puzzle in puzzles_to_check:
-		if not _save_manager.is_puzzle_completed(puzzle):
-			all_complete = false
-			break
+
+	if not _are_prerequisite_puzzles_complete():
+		return
+
+	if _player_has_gate_key() or _is_key_in_backpack() or _is_key_in_world():
+		_key_spawned = true
+		return
+
+	var key_instance: Node3D = _spawn_gate_key()
+	if key_instance:
+		_key_spawned = true
+		_show_message("An ornate key now hangs before the gate.")
+	else:
+		push_error("FinalGatePuzzle: Failed to spawn hollow_key at the gate")
 
 func interact() -> bool:
 	"""Called when player interacts with the gate"""
@@ -141,25 +152,29 @@ func _unlock_gate() -> void:
 	_save_puzzle_state()
 	
 	# Start the ending sequence with fade and sounds
-	await _play_ending_sequence()
+	_play_ending_sequence()
 
 func _play_ending_sequence() -> void:
 	"""Play the ending sequence with fade and sounds"""
 	# Play padlock sound immediately
-	_play_sfx_stream(sfx_library.padlock)
+	if sfx_library:
+		_play_sfx_stream(sfx_library.padlock)
 	
 	# Create timer for padlock sound
 	var padlock_timer: SceneTreeTimer = get_tree().create_timer(1.0)
 	await padlock_timer.timeout
 	
 	# Play gate open sound
-	_play_sfx_stream(sfx_library.gate_open)
+	if sfx_library:
+		_play_sfx_stream(sfx_library.gate_open)
 	
 	# Request screen fade to black through MessageBus (2.5 second fade)
-	_message_bus.emit_event("screen_effect_requested", ["fade_black", 2.5, 1.0])
+	if _message_bus:
+		_message_bus.emit_event("screen_effect_requested", ["fade_black", 2.5, 1.0])
 	
 	# Request audio fade out through MessageBus (runs in parallel)
-	_message_bus.emit_event("audio_fade_requested", [2.5])
+	if _message_bus:
+		_message_bus.emit_event("audio_fade_requested", [2.5])
 	
 	# Wait for fades to complete and gate sound to finish
 	var ending_timer: SceneTreeTimer = get_tree().create_timer(7.0)
@@ -167,16 +182,18 @@ func _play_ending_sequence() -> void:
 	
 	# Gather puzzle data before any cleanup happens
 	var puzzle_data: Dictionary = _gather_puzzle_data()
-	
-	# Transition to ending scene FIRST (before cleanup removes us from tree)
-	_transition_to_ending()
-	
-	# THEN trigger game end to cleanup (after scene transition has started)
-	# Use call_deferred so it happens after the scene change begins
-	var root: Window = get_tree().root
+
+	var tree: SceneTree = get_tree()
+	var root: Window = tree.root
+	var scene_manager: Node = root.get_node_or_null("SceneManager")
 	var game_director: Node = root.get_node_or_null("GameDirector")
+
+	# Trigger cleanup before changing scenes. The transition is handled by an autoload
+	# afterwards so it does not depend on this gate node surviving cleanup.
 	if game_director and game_director.has_method("end_game"):
-		game_director.call_deferred("end_game", "Victory", puzzle_data)
+		game_director.end_game("Victory", puzzle_data)
+	
+	_transition_to_ending(scene_manager, tree)
 
 func _gather_puzzle_data() -> Dictionary:
 	"""Gather data from all completed puzzles"""
@@ -196,16 +213,15 @@ func _gather_puzzle_data() -> Dictionary:
 	
 	return data
 
-func _transition_to_ending() -> void:
+func _transition_to_ending(scene_manager: Node = null, tree: SceneTree = null) -> void:
 	"""Transition to the ending credits scene"""
-	var root: Window = get_tree().root
-	var scene_manager: Node = root.get_node_or_null("SceneManager")
 	if scene_manager and scene_manager.has_method("load_ending_credits"):
 		scene_manager.load_ending_credits()
 	else:
 		push_error("FinalGatePuzzle: SceneManager not found or missing load_ending_credits method")
 		# Check if we're still in the tree before trying to change scenes
-		var tree: SceneTree = get_tree()
+		if tree == null and is_inside_tree():
+			tree = get_tree()
 		if tree:
 			tree.change_scene_to_file("res://scenes/ui/EndingCredits.tscn")
 		else:
@@ -240,6 +256,7 @@ func _load_puzzle_state() -> void:
 	# Reset these each run so the gate is always playable
 	_gate_unlocked = false
 	_interaction_count = 0
+	_key_spawned = _player_has_gate_key() or _is_key_in_backpack() or _is_key_in_world()
 
 func _save_puzzle_state() -> void:
 	"""Save current puzzle state - only save first visit to avoid duplicate message"""
@@ -263,3 +280,64 @@ func _play_sfx_stream(stream: AudioStream) -> void:
 	get_tree().current_scene.add_child(player)
 	player.play()
 	player.finished.connect(player.queue_free)
+
+func _are_prerequisite_puzzles_complete() -> bool:
+	for puzzle_id: String in PREREQUISITE_PUZZLES:
+		if not _save_manager.is_puzzle_completed(puzzle_id):
+			return false
+	return true
+
+func _player_has_gate_key() -> bool:
+	return _player_inventory != null \
+		and _player_inventory.has_method("has_item") \
+		and _player_inventory.has_item(required_item)
+
+func _is_key_in_backpack() -> bool:
+	if _save_manager == null or not _save_manager.has_method("get_backpack_inventory"):
+		return false
+	return required_item in _save_manager.get_backpack_inventory()
+
+func _is_key_in_world() -> bool:
+	if not is_inside_tree():
+		return false
+
+	for collectible in get_tree().get_nodes_in_group("collectibles"):
+		if not is_instance_valid(collectible):
+			continue
+
+		var collectible_item_id: String = ""
+		if collectible.has_meta("item_id"):
+			collectible_item_id = String(collectible.get_meta("item_id"))
+		elif collectible.has_method("get_item_id"):
+			collectible_item_id = String(collectible.get_item_id())
+		elif "item_id" in collectible:
+			collectible_item_id = String(collectible.item_id)
+
+		if collectible_item_id == required_item:
+			return true
+
+	return false
+
+func _spawn_gate_key() -> Node3D:
+	if _item_manager == null or not _item_manager.has_method("spawn_item_instance"):
+		return null
+
+	var parent_node: Node = get_parent()
+	if parent_node == null:
+		parent_node = self
+
+	var gate_node: Node3D = get_node_or_null("gate")
+	if gate_node == null:
+		gate_node = get_node_or_null("Gate")
+	if gate_node == null:
+		return null
+
+	var spawn_position: Vector3 = gate_node.global_position + gate_node.global_basis * KEY_SPAWN_OFFSET
+	return _item_manager.spawn_item_instance(required_item, spawn_position, parent_node)
+
+func _resolve_system_node(override_meta_key: String, fallback_path: String) -> Node:
+	if has_meta(override_meta_key):
+		return get_meta(override_meta_key) as Node
+	if not is_inside_tree():
+		return null
+	return get_node_or_null(fallback_path)

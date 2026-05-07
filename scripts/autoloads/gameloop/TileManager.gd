@@ -409,7 +409,27 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 		
 		# Skip if connection already established FROM THIS SOURCE
 		if _is_connection_established(source_pos, wrapped_connecting_pos):
-			continue
+			var expected_pos: Vector3 = _calculate_adjacent_position(source_tile.position, door_direction)
+			var established_tile_variant: Variant = _active_tiles.get(wrapped_connecting_pos)
+			if is_instance_valid(established_tile_variant):
+				var established_tile: Node3D = established_tile_variant as Node3D
+				if established_tile == null:
+					_purge_connection(source_pos, wrapped_connecting_pos)
+					if _active_tiles.has(wrapped_connecting_pos):
+						_active_tiles.erase(wrapped_connecting_pos)
+						_permanent_tiles.erase(wrapped_connecting_pos)
+						_puzzle_tiles.erase(wrapped_connecting_pos)
+						_tile_state_manager.cleanup_tile(wrapped_connecting_pos)
+					continue
+				var distance_to_expected: float = established_tile.position.distance_to(expected_pos)
+				if distance_to_expected < 1.0:
+					continue
+			_purge_connection(source_pos, wrapped_connecting_pos)
+			if _active_tiles.has(wrapped_connecting_pos):
+				_active_tiles.erase(wrapped_connecting_pos)
+				_permanent_tiles.erase(wrapped_connecting_pos)
+				_puzzle_tiles.erase(wrapped_connecting_pos)
+				_tile_state_manager.cleanup_tile(wrapped_connecting_pos)
 		
 		# Check if tile already exists at wrapped position AND is physically adjacent
 		if _active_tiles.has(wrapped_connecting_pos) and is_instance_valid(_active_tiles[wrapped_connecting_pos]):
@@ -434,6 +454,8 @@ func _spawn_tile_connections(source_tile: Node3D, source_pos: Vector2i) -> void:
 				pass
 		elif _active_tiles.has(wrapped_connecting_pos):
 			_active_tiles.erase(wrapped_connecting_pos)
+			_remove_connections_for_position(wrapped_connecting_pos)
+			_tile_state_manager.cleanup_tile(wrapped_connecting_pos)
 		
 		# Check for pre-assigned permanent tile at this position
 		var assignment_info: Dictionary = _get_permanent_assignment_info(wrapped_connecting_pos)
@@ -546,6 +568,13 @@ func _establish_connection(pos1: Vector2i, pos2: Vector2i) -> void:
 	"""
 	var key: String = str(pos1) + "_" + str(pos2)
 	_established_connections[key] = true
+
+func _purge_connection(pos1: Vector2i, pos2: Vector2i) -> void:
+	"""Remove both directional keys for a connection pair."""
+	var key1: String = str(pos1) + "_" + str(pos2)
+	var key2: String = str(pos2) + "_" + str(pos1)
+	_established_connections.erase(key1)
+	_established_connections.erase(key2)
 
 func _create_random_tile(grid_pos: Vector2i) -> Node3D:
 	"""Create a random normal (non-permanent) tile at position"""
@@ -731,8 +760,12 @@ func on_player_entered_tile(tile_position: Vector2i) -> void:
 	"""
 	
 	if not _active_tiles.has(tile_position):
-		push_error("TileManager: Player entered non-existent tile at " + str(tile_position))
-		return
+		var state_tile: Node3D = _tile_state_manager.get_tile_node(tile_position)
+		if state_tile and is_instance_valid(state_tile):
+			_register_tile(state_tile, tile_position)
+		else:
+			push_error("TileManager: Player entered non-existent tile at " + str(tile_position))
+			return
 	
 	var entered_tile: Node3D = _active_tiles[tile_position]
 	
@@ -1245,6 +1278,7 @@ func cleanup_invalid_tile_references() -> void:
 		_permanent_tiles.erase(pos)
 		_puzzle_tiles.erase(pos)
 		_remove_connections_for_position(pos)
+		_tile_state_manager.cleanup_tile(pos)
 	
 	if invalid_positions.size() > 0:
 		pass

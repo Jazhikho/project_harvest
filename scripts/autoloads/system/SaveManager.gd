@@ -1,6 +1,11 @@
 extends Node
 
 const SAVE_PATH = "user://save_data.sav"
+const PUZZLE_COMPLETION_ITEM_MAP: Dictionary = {
+	"whispering_hollow": ["symbol_watch", "symbol_coin", "symbol_ticket"],
+	"watching_stones": ["phone", "holy_book", "flag"],
+	"crows_parliament": ["broken_glass_1", "broken_glass_2", "broken_glass_3"],
+}
 
 # Track if save existed at scene load (before start_run creates it)
 var had_existing_save: bool = false
@@ -92,6 +97,8 @@ func load_game() -> void:
 				save_data.settings = {}
 			if not save_data.settings.has("audio"):
 				save_data.settings.audio = {}
+
+			_repair_puzzle_completion_flags()
 			
 			# Save the updated structure
 			save_game()
@@ -236,8 +243,42 @@ func get_puzzle_state(puzzle_id: String) -> Dictionary:
 
 func set_puzzle_state(puzzle_id: String, state: Dictionary) -> void:
 	"""Set the state of a puzzle"""
-	save_data.puzzles[puzzle_id] = state
+	_merge_puzzle_state(puzzle_id, state)
 	save_game()
+
+func _merge_puzzle_state(puzzle_id: String, state: Dictionary) -> void:
+	var existing_state: Dictionary = save_data.puzzles.get(puzzle_id, {}).duplicate(true)
+	for key in state.keys():
+		existing_state[key] = state[key]
+	save_data.puzzles[puzzle_id] = existing_state
+
+func _repair_puzzle_completion_flags() -> void:
+	if not save_data.has("puzzles"):
+		save_data.puzzles = {}
+	if not save_data.has("puzzle_items_used"):
+		save_data.puzzle_items_used = []
+
+	for puzzle_id: String in PUZZLE_COMPLETION_ITEM_MAP.keys():
+		var state: Dictionary = save_data.puzzles.get(puzzle_id, {}).duplicate(true)
+		if state.get("completed", false):
+			continue
+		if _has_used_all_required_puzzle_items(puzzle_id):
+			state["completed"] = true
+			if not state.has("completion_time"):
+				state["completion_time"] = Time.get_unix_time_from_system()
+			save_data.puzzles[puzzle_id] = state
+
+func _has_used_all_required_puzzle_items(puzzle_id: String) -> bool:
+	var required_items: Array = PUZZLE_COMPLETION_ITEM_MAP.get(puzzle_id, [])
+	if required_items.is_empty():
+		return false
+
+	for item_id_variant in required_items:
+		var item_id: String = String(item_id_variant)
+		if item_id not in save_data.puzzle_items_used:
+			return false
+
+	return true
 
 func transfer_inventory_to_backpack(current_inventory: Array) -> void:
 	"""

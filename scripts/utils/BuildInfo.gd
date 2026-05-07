@@ -2,7 +2,7 @@ extends RefCounted
 
 class_name BuildInfo
 
-const GAME_VERSION: String = "1.6"
+const GAME_VERSION: String = "1.6.0.4"
 const COPYRIGHT_YEAR: String = "2026"
 const STUDIO_NAME: String = "Chosen Gaming"
 const CREATOR_NAME: String = "Christopher B. Del Gesso"

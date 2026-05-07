@@ -19,6 +19,12 @@ const ITEM_DATA_PATH: String = "res://data/items.json"
 const MAX_UNLOCKED_NOTES: int = 10
 const PICKUP_ITEM_DB: float = -8.0
 const PICKUP_NOTE_DB: float = -12.0
+const HOLLOW_KEY_ITEM_ID: String = "hollow_key"
+const HOLLOW_KEY_REQUIRED_PUZZLES: Array[String] = [
+	"whispering_hollow",
+	"watching_stones",
+	"crows_parliament",
+]
 
 # NEW: Map item_id to PackedScene for spawning
 var _item_scene_map: Dictionary = {} # item_id -> PackedScene
@@ -210,6 +216,8 @@ func _process_item_data(data: Dictionary) -> void:
 ## @param context: Dictionary (tile_position, is_permanent, etc.)
 ## @return bool
 func can_item_spawn(item_id: String, context: Dictionary) -> bool:
+	var save_manager: Node = _get_save_manager()
+
 	# Treat "notes" as a special category only if JSON loaded them.
 	var notes_list: Array = _item_categories.get("notes", []) as Array
 	var is_note: bool = item_id in notes_list
@@ -243,27 +251,18 @@ func can_item_spawn(item_id: String, context: Dictionary) -> bool:
 	
 	# hollow_key can only spawn when all puzzles are completed
 	if item_id == "hollow_key":
-		if SaveManager != null and SaveManager.has_method("is_puzzle_completed"):
-			var required_puzzles: Array[String] = ["whispering_hollow", "watching_stones", "crows_parliament"]
-			var all_complete: bool = true
-			for puzzle in required_puzzles:
-				if not SaveManager.is_puzzle_completed(puzzle):
-					all_complete = false
-					break
-			if not all_complete:
-				return false
-		else:
+		if not _are_gate_puzzles_completed(save_manager):
 			return false
 
 	# Persistent save checks (optional).
-	if SaveManager != null and SaveManager.has_method("is_puzzle_item_used"):
-		if SaveManager.is_puzzle_item_used(item_id):
+	if save_manager != null and save_manager.has_method("is_puzzle_item_used"):
+		if save_manager.is_puzzle_item_used(item_id):
 			return false
 
 	var item_info: Dictionary = get_item_info(item_id)
-	if item_info.has("puzzle_id") and SaveManager != null and SaveManager.has_method("is_puzzle_completed"):
+	if item_info.has("puzzle_id") and save_manager != null and save_manager.has_method("is_puzzle_completed"):
 		var puzzle_id: String = String(item_info.get("puzzle_id", ""))
-		if not puzzle_id.is_empty() and SaveManager.is_puzzle_completed(puzzle_id):
+		if not puzzle_id.is_empty() and save_manager.is_puzzle_completed(puzzle_id):
 			return false
 
 	return true
@@ -283,14 +282,52 @@ func get_spawnable_items(context: Dictionary, already_listed) -> Array[Dictionar
 	else:
 		for k in _item_scene_map.keys():
 			candidate_ids.append(String(k))
+
+	var force_hollow_key: bool = can_item_spawn(HOLLOW_KEY_ITEM_ID, context) \
+		and not _is_item_already_listed(HOLLOW_KEY_ITEM_ID, already_listed)
 	
 	for id_str: String in candidate_ids:
 		if can_item_spawn(id_str, context):
+			if _is_item_already_listed(id_str, already_listed):
+				continue
+			if force_hollow_key and id_str != HOLLOW_KEY_ITEM_ID:
+				continue
 			var entry: Dictionary = {"item_id": id_str, "weight": 1.0}
-			if entry not in already_listed:
-				spawnable.append(entry)
+			spawnable.append(entry)
 
 	return spawnable
+
+func _get_save_manager() -> Node:
+	if has_meta("save_manager_override"):
+		return get_meta("save_manager_override") as Node
+	if not is_inside_tree():
+		return null
+	return get_node_or_null("/root/SaveManager")
+
+func _are_gate_puzzles_completed(save_manager: Node) -> bool:
+	if save_manager == null or not save_manager.has_method("is_puzzle_completed"):
+		return false
+
+	for puzzle_id: String in HOLLOW_KEY_REQUIRED_PUZZLES:
+		if not save_manager.is_puzzle_completed(puzzle_id):
+			return false
+
+	return true
+
+func _is_item_already_listed(item_id: String, already_listed: Array) -> bool:
+	for existing_entry in already_listed:
+		match typeof(existing_entry):
+			TYPE_STRING:
+				if String(existing_entry) == item_id:
+					return true
+			TYPE_STRING_NAME:
+				if String(existing_entry) == item_id:
+					return true
+			TYPE_DICTIONARY:
+				if String((existing_entry as Dictionary).get("item_id", "")) == item_id:
+					return true
+
+	return false
 
 ## select_random_item
 ## Purpose: Pick one entry from a weighted list.
